@@ -25,7 +25,7 @@ export const TaskList: React.FC = () => {
         <div className={styles.emptyIcon}>✨</div>
         <h3 className={styles.emptyTitle}>No tasks yet</h3>
         <p className={styles.emptyDescription}>
-          Create your first task to begin your mystical journey
+          Create your first task to begin your journey
         </p>
       </div>
     );

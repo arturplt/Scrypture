@@ -29,6 +29,12 @@ export const TaskForm: React.FC = () => {
     e.preventDefault();
   };
 
+  const priorityOptions = [
+    { value: 'low', label: 'LOW PRIORITY', color: 'var(--color-easy)' },
+    { value: 'medium', label: 'MEDIUM PRIORITY', color: 'var(--color-focus)' },
+    { value: 'high', label: 'HIGH PRIORITY', color: 'var(--color-urgent)' }
+  ];
+
   return (
     <form className={styles.form} onSubmit={handleSubmit} noValidate>
       <div className={styles.inputGroup}>
@@ -48,23 +54,6 @@ export const TaskForm: React.FC = () => {
             Please fill in this field.
           </div>
         </div>
-        
-        <div style={{ position: 'relative' }}>
-          <select
-            value={priority}
-            onChange={(e) => setPriority(e.target.value as 'low' | 'medium' | 'high')}
-            className={styles.prioritySelect}
-            required
-            onInvalid={handleInvalid}
-          >
-            <option value="low">Low Priority</option>
-            <option value="medium">Medium Priority</option>
-            <option value="high">High Priority</option>
-          </select>
-          <div className={styles.validationMessage}>
-            Please select a priority.
-          </div>
-        </div>
       </div>
       
       <div style={{ position: 'relative' }}>
@@ -79,6 +68,27 @@ export const TaskForm: React.FC = () => {
         />
         <div className={styles.validationMessage}>
           Description is too long.
+        </div>
+      </div>
+      
+      <div className={styles.prioritySelector}>
+        <label className={styles.priorityLabel}>Priority:</label>
+        <div className={styles.priorityButtons}>
+          {priorityOptions.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              className={`${styles.priorityButton} ${priority === option.value ? styles.priorityButtonActive : ''}`}
+              style={{ 
+                borderColor: option.color,
+                backgroundColor: priority === option.value ? option.color : 'transparent',
+                color: priority === option.value ? 'var(--color-bg-primary)' : 'var(--color-text-primary)'
+              }}
+              onClick={() => setPriority(option.value as 'low' | 'medium' | 'high')}
+            >
+              {option.label}
+            </button>
+          ))}
         </div>
       </div>
       

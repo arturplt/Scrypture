@@ -132,10 +132,10 @@ input, textarea, select, button {
   border-radius: 0px;
 }
 
-/* Focus styles for accessibility - 4px border */
+/* Focus styles for accessibility - 2px border */
 *:focus {
-  outline: 4px solid var(--color-accent-gold);
-  outline-offset: 2px;
+  outline: 2px solid var(--color-accent-gold);
+  outline-offset: 1px;
 }
 
 /* Scrollbar styling */
