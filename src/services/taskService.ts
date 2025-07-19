@@ -1,38 +1,16 @@
 import { Task } from '../types';
-
-const STORAGE_KEY = 'scrypture_tasks';
+import { storageService } from './storageService';
 
 export const taskService = {
   getTasks(): Task[] {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (!stored) return [];
-      
-      const tasks = JSON.parse(stored);
-      return tasks.map((task: any) => ({
-        ...task,
-        createdAt: new Date(task.createdAt),
-        updatedAt: new Date(task.updatedAt),
-      }));
-    } catch (error) {
-      console.error('Error loading tasks:', error);
-      return [];
-    }
+    return storageService.getTasks();
   },
 
-  saveTasks(tasks: Task[]): void {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
-    } catch (error) {
-      console.error('Error saving tasks:', error);
-    }
+  saveTasks(tasks: Task[]): boolean {
+    return storageService.saveTasks(tasks);
   },
 
-  clearTasks(): void {
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-    } catch (error) {
-      console.error('Error clearing tasks:', error);
-    }
+  clearTasks(): boolean {
+    return storageService.saveTasks([]);
   },
 }; 

@@ -3,7 +3,12 @@ import { Task, TaskContextType } from '../types';
 import { taskService } from '../services/taskService';
 import { generateUUID } from '../utils';
 
-const TaskContext = createContext<TaskContextType | undefined>(undefined);
+interface ExtendedTaskContextType extends TaskContextType {
+  isSaving: boolean;
+  lastSaved: Date | null;
+}
+
+const TaskContext = createContext<ExtendedTaskContextType | undefined>(undefined);
 
 export const useTasks = () => {
   const context = useContext(TaskContext);
@@ -19,12 +24,31 @@ interface TaskProviderProps {
 
 export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
   useEffect(() => {
     // Load tasks from local storage on mount
     const savedTasks = taskService.getTasks();
     setTasks(savedTasks);
   }, []);
+
+  const saveTasksWithFeedback = async (updatedTasks: Task[]) => {
+    setIsSaving(true);
+    try {
+      const success = taskService.saveTasks(updatedTasks);
+      if (success) {
+        setLastSaved(new Date());
+        console.log('Tasks auto-saved successfully');
+      } else {
+        console.error('Failed to auto-save tasks');
+      }
+    } catch (error) {
+      console.error('Auto-save error:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const addTask = (taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => {
     const newTask: Task = {
@@ -36,7 +60,7 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
     
     const updatedTasks = [...tasks, newTask];
     setTasks(updatedTasks);
-    taskService.saveTasks(updatedTasks);
+    saveTasksWithFeedback(updatedTasks);
   };
 
   const updateTask = (id: string, updates: Partial<Task>) => {
@@ -47,13 +71,13 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
     );
     
     setTasks(updatedTasks);
-    taskService.saveTasks(updatedTasks);
+    saveTasksWithFeedback(updatedTasks);
   };
 
   const deleteTask = (id: string) => {
     const updatedTasks = tasks.filter(task => task.id !== id);
     setTasks(updatedTasks);
-    taskService.saveTasks(updatedTasks);
+    saveTasksWithFeedback(updatedTasks);
   };
 
   const toggleTask = (id: string) => {
@@ -64,15 +88,17 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
     );
     
     setTasks(updatedTasks);
-    taskService.saveTasks(updatedTasks);
+    saveTasksWithFeedback(updatedTasks);
   };
 
-  const value: TaskContextType = {
+  const value: ExtendedTaskContextType = {
     tasks,
     addTask,
     updateTask,
     deleteTask,
     toggleTask,
+    isSaving,
+    lastSaved,
   };
 
   return (

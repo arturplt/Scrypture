@@ -1,0 +1,120 @@
+import { User, Achievement } from '../types';
+import { storageService } from './storageService';
+
+export const userService = {
+  getUser(): User | null {
+    return storageService.getUser();
+  },
+
+  saveUser(user: User): boolean {
+    return storageService.saveUser(user);
+  },
+
+  createUser(name: string): User {
+    const newUser: User = {
+      id: crypto.randomUUID(),
+      name,
+      level: 1,
+      experience: 0,
+      achievements: [],
+      createdAt: new Date(),
+    };
+    
+    this.saveUser(newUser);
+    return newUser;
+  },
+
+  updateUser(updates: Partial<User>): boolean {
+    const user = this.getUser();
+    if (!user) return false;
+    
+    const updatedUser = { ...user, ...updates };
+    return this.saveUser(updatedUser);
+  },
+
+  addExperience(amount: number): boolean {
+    const user = this.getUser();
+    if (!user) return false;
+
+    const newExperience = user.experience + amount;
+    const newLevel = Math.floor(newExperience / 100) + 1; // Simple level calculation
+    
+    const updates: Partial<User> = {
+      experience: newExperience,
+      level: newLevel,
+    };
+
+    return this.updateUser(updates);
+  },
+
+  unlockAchievement(achievementId: string): boolean {
+    const user = this.getUser();
+    if (!user) return false;
+
+    // Check if achievement is already unlocked
+    const alreadyUnlocked = user.achievements.some(a => a.id === achievementId);
+    if (alreadyUnlocked) return false;
+
+    // In a real app, you'd fetch achievement data from a database
+    // For now, we'll create a simple achievement
+    const newAchievement: Achievement = {
+      id: achievementId,
+      name: `Achievement ${achievementId}`,
+      description: 'An unlocked achievement',
+      unlocked: true,
+      unlockedAt: new Date(),
+      icon: '🏆',
+    };
+
+    const updatedAchievements = [...user.achievements, newAchievement];
+    return this.updateUser({ achievements: updatedAchievements });
+  },
+
+  getSettings(): Record<string, any> {
+    return storageService.getSettings();
+  },
+
+  saveSettings(settings: Record<string, any>): boolean {
+    return storageService.saveSettings(settings);
+  },
+
+  updateSetting(key: string, value: any): boolean {
+    const settings = this.getSettings();
+    const updatedSettings = { ...settings, [key]: value };
+    return this.saveSettings(updatedSettings);
+  },
+
+  // Data management
+  exportUserData(): string {
+    return storageService.exportData();
+  },
+
+  importUserData(jsonData: string): boolean {
+    return storageService.importData(jsonData);
+  },
+
+  createBackup(): Record<string, any> {
+    return storageService.createBackup();
+  },
+
+  restoreFromBackup(backup: Record<string, any>): boolean {
+    return storageService.restoreFromBackup(backup);
+  },
+
+  clearAllData(): boolean {
+    return storageService.clearAllData();
+  },
+
+  getStorageStats(): { used: number; available: number; percentage: number } {
+    return storageService.getStorageStats();
+  },
+
+  // Backup methods
+  saveBackup(backup: Record<string, any>): boolean {
+    return storageService.saveBackup(backup);
+  },
+
+  getBackup(): Record<string, any> | null {
+    return storageService.getBackup();
+  },
+}; 
