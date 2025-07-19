@@ -2,7 +2,7 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
-  moduleNameMapping: {
+  moduleNameMapper: {
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
     '^@/(.*)$': '<rootDir>/src/$1',
   },
@@ -22,9 +22,4 @@ module.exports = {
     '!src/main.tsx',
     '!src/setupTests.ts',
   ],
-  globals: {
-    'ts-jest': {
-      useESM: true,
-    },
-  },
 }; 
