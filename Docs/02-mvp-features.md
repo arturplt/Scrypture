@@ -35,6 +35,15 @@
 **User Flow**: Click "+" → Enter title → Select category → Create
 **Technical**: Modal form with validation and persistence
 
+**Validation System**: Custom pixel art validation messages with orange exclamation icons. Browser validation popups are prevented to maintain consistent UI. Validation messages appear with 8px spacing and use the Press Start 2P font for consistent pixel art styling.
+
+**Form Fields**:
+- **Title Input**: Required field with 1-100 character limit, 2px border
+- **Priority Select**: Required dropdown with low/medium/high options, 4px border  
+- **Description Textarea**: Optional field with 500 character limit, 4px border
+
+**Validation Messages**: Custom styled error messages with red background, orange exclamation icons, and pixel art typography. Messages appear below invalid fields with proper spacing and visual hierarchy.
+
 ### **2. Six Core Categories**
 **Purpose**: Organize tasks by life area
 **Categories**: Body, Mind, Soul, Career, Home, Skills

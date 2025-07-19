@@ -1,0 +1,51 @@
+.app {
+  min-height: 100vh;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: 'Press Start 2P', monospace;
+}
+
+.header {
+  text-align: center;
+  padding: var(--spacing-md);
+  background: var(--color-bg-secondary);
+  border-bottom: 4px solid var(--color-border-primary);
+  box-shadow: var(--shadow-button);
+}
+
+.title {
+  font-size: var(--font-size-xl);
+  font-weight: normal;
+  margin: 0;
+  color: var(--color-accent-gold);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  font-family: 'Press Start 2P', monospace;
+}
+
+.subtitle {
+  font-size: var(--font-size-sm);
+  margin: var(--spacing-xs) 0 0 0;
+  color: var(--color-text-secondary);
+  font-weight: normal;
+  font-family: 'Press Start 2P', monospace;
+}
+
+.main {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: var(--spacing-md);
+}
+
+.taskCounter {
+  margin-bottom: var(--spacing-md);
+}
+
+@media (max-width: 768px) {
+  .title {
+    font-size: var(--font-size-lg);
+  }
+  
+  .main {
+    padding: var(--spacing-md);
+  }
+} 

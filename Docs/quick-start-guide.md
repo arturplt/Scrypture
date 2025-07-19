@@ -52,7 +52,7 @@ npm install
 
 ### **1.3 Start Development Server**
 ```bash
-npm run dev
+npm run dev -- --host
 ```
 
 You should see something like:

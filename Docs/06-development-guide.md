@@ -2671,3 +2671,63 @@ export class AnalyticsService {
 ---
 
 *"In the realm of development, every line of code is a step toward mastery, every test a safeguard of quality, and every deployment a milestone of progress."* 🚀✨ 
+
+### **Form Validation System**
+
+#### **Custom Validation Implementation**
+```typescript
+// TaskForm.tsx - Custom validation with no browser popups
+export const TaskForm: React.FC = () => {
+  const handleInvalid = (e: React.FormEvent) => {
+    e.preventDefault(); // Prevent browser validation popups
+  };
+
+  return (
+    <form noValidate onSubmit={handleSubmit}>
+      <input
+        required
+        onInvalid={handleInvalid}
+        // ... other props
+      />
+      <div className={styles.validationMessage}>
+        Please fill in this field.
+      </div>
+    </form>
+  );
+};
+```
+
+#### **CSS Validation Styling**
+```css
+/* TaskForm.module.css - Custom pixel art validation messages */
+.titleInput:invalid + .validationMessage {
+  display: block;
+  background: var(--color-error);
+  color: var(--color-text-primary);
+  border: 2px solid var(--color-urgent-border);
+  margin-top: 8px;
+  font-size: var(--font-size-xl);
+  font-family: 'Press Start 2P', monospace;
+}
+
+.validationMessage::before {
+  content: "!";
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  background: var(--color-text-primary);
+  color: var(--color-error);
+  text-align: center;
+  line-height: 12px;
+  margin-right: var(--spacing-xs);
+}
+```
+
+#### **Key Implementation Details**
+- **Browser Validation Prevention**: Use `noValidate` on form and `onInvalid` handlers to prevent native browser validation popups
+- **Custom Styling**: CSS adjacent sibling selectors (`:invalid + .validationMessage`) to show/hide custom messages
+- **Pixel Art Consistency**: All validation messages use Press Start 2P font and pixel art styling
+- **Accessibility**: Custom messages maintain proper contrast and readability
+- **Spacing**: 8px margin-top for proper visual separation from form fields
+
+---
