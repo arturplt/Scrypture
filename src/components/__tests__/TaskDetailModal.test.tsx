@@ -632,4 +632,20 @@ describe('TaskDetailModal', () => {
     expect(screen.queryByText('Mind: +0')).not.toBeInTheDocument();
     expect(screen.queryByText('XP: +0')).not.toBeInTheDocument();
   });
+
+  test('calls onEdit when edit button is clicked', () => {
+    const onEdit = jest.fn();
+    render(<TaskDetailModal {...defaultProps} onEdit={onEdit} />);
+    
+    const editButton = screen.getByLabelText('Edit task');
+    fireEvent.click(editButton);
+    
+    expect(onEdit).toHaveBeenCalledTimes(1);
+  });
+
+  test('does not show edit button when onEdit prop is not provided', () => {
+    render(<TaskDetailModal {...defaultProps} onEdit={undefined} />);
+    
+    expect(screen.queryByLabelText('Edit task')).not.toBeInTheDocument();
+  });
 }); 

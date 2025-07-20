@@ -262,37 +262,8 @@ export const TaskForm: React.FC<TaskFormProps> = ({ taskToEdit, onCancel, onSave
                 >
                   + Add Category
                 </button>
-                <button
-                  type="button"
-                  className={styles.addCategoryButton}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const categories = categoryService.getCustomCategories();
-                    if (categories.length > 0) {
-                      const lastCategory = categories[categories.length - 1];
-                      const success = categoryService.removeCustomCategory(lastCategory.name);
-                      console.log('Removed category:', lastCategory.name, 'Success:', success);
-                      setCategoryRefreshTrigger(prev => prev + 1);
-                    }
-                  }}
-                  style={{ marginLeft: '8px' }}
-                >
-                  🗑️ Remove Last
-                </button>
-                <button
-                  type="button"
-                  className={styles.addCategoryButton}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    console.log('=== Category Storage Test ===');
-                    console.log('Current categories:', categoryService.getCustomCategories());
-                    console.log('localStorage raw:', localStorage.getItem('scrypture_custom_categories'));
-                    console.log('Backup data:', storageService.createBackup());
-                  }}
-                  style={{ marginLeft: '8px' }}
-                >
-                  🔍 Test Storage
-                </button>
+
+
               </div>
             </div>
             <div className={styles.categoryButtons}>
