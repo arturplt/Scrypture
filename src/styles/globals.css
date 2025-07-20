@@ -108,6 +108,11 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  /* Prevent text selection everywhere by default */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 html {
@@ -138,6 +143,14 @@ input, textarea, select, button {
   -moz-osx-font-smoothing: none;
   text-rendering: optimizeSpeed;
   border-radius: 0px;
+}
+
+/* Allow text selection in input fields and textareas */
+input, textarea {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
 }
 
 /* Focus styles for accessibility - 2px border */
