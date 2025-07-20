@@ -1,151 +1,288 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { TaskForm } from '../TaskForm';
-import { TaskProvider } from '../../hooks/useTasks';
-import { UserProvider } from '../../hooks/useUser';
+import { categoryService } from '../../services/categoryService';
+import { taskService } from '../../services/taskService';
 
-// Mock the storage service
-jest.mock('../../services/storageService', () => ({
-  storageService: {
-    getTasks: jest.fn(() => []),
-    saveTasks: jest.fn(() => true),
-    getUser: jest.fn(() => ({
-      id: 'test-user',
-      name: 'Test User',
-      level: 1,
-      experience: 0,
-      body: 0,
-      mind: 0,
-      soul: 0,
-      achievements: [],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    })),
-    saveUser: jest.fn(() => true),
-  },
+// Mock the services
+jest.mock('../../services/categoryService', () => ({
+  categoryService: {
+    getCustomCategories: jest.fn(),
+    addCustomCategory: jest.fn(),
+  }
 }));
 
-const renderWithProviders = (component: React.ReactNode) => {
-  return render(
-    <UserProvider>
-      <TaskProvider>
-        {component}
-      </TaskProvider>
-    </UserProvider>
-  );
-};
+jest.mock('../../services/taskService', () => ({
+  taskService: {
+    calculateStatRewards: jest.fn(),
+  }
+}));
+
+const mockCategoryService = categoryService as jest.Mocked<typeof categoryService>;
+const mockTaskService = taskService as jest.Mocked<typeof taskService>;
+
+// Mock the useTasks hook
+jest.mock('../../hooks/useTasks', () => ({
+  useTasks: () => ({
+    addTask: jest.fn(),
+  }),
+}));
 
 describe('TaskForm', () => {
-  it('renders task form with all elements', () => {
-    renderWithProviders(<TaskForm />);
-    
-    expect(screen.getByPlaceholderText('What needs to be done?')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Description (optional)')).toBeInTheDocument();
-    expect(screen.getByText('Category:')).toBeInTheDocument();
-    expect(screen.getByText('Rewards:')).toBeInTheDocument();
-    expect(screen.getByText('Priority:')).toBeInTheDocument();
-    expect(screen.getByText('Add Task')).toBeInTheDocument();
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockCategoryService.getCustomCategories.mockReturnValue([]);
+    mockTaskService.calculateStatRewards.mockReturnValue({
+      body: 1,
+      mind: 0,
+      soul: 0,
+      xp: 20
+    });
   });
 
-  it('displays category buttons with correct labels', () => {
-    renderWithProviders(<TaskForm />);
+  it('renders collapsed form initially', () => {
+    render(<TaskForm />);
+    
+    expect(screen.getByPlaceholderText('Intention')).toBeInTheDocument();
+    expect(screen.queryByText('Category:')).not.toBeInTheDocument();
+  });
+
+  it('expands when title is clicked', () => {
+    render(<TaskForm />);
+    
+    const titleInput = screen.getByPlaceholderText('Intention');
+    fireEvent.click(titleInput);
+    
+    expect(screen.getByText('Category:')).toBeInTheDocument();
+    expect(screen.getByText('Priority:')).toBeInTheDocument();
+    expect(screen.getByText('Rewards:')).toBeInTheDocument();
+  });
+
+  it('shows default categories when expanded', () => {
+    render(<TaskForm />);
+    
+    const titleInput = screen.getByPlaceholderText('Intention');
+    fireEvent.click(titleInput);
     
     expect(screen.getByText('💪 BODY')).toBeInTheDocument();
     expect(screen.getByText('🧠 MIND')).toBeInTheDocument();
     expect(screen.getByText('✨ SOUL')).toBeInTheDocument();
-    expect(screen.getByText('💼 CAREER')).toBeInTheDocument();
-    expect(screen.getByText('🏠 HOME')).toBeInTheDocument();
-    expect(screen.getByText('🎯 SKILLS')).toBeInTheDocument();
   });
 
-  it('shows stat rewards for selected category', () => {
-    renderWithProviders(<TaskForm />);
+  it('loads and displays custom categories', async () => {
+    const mockCustomCategories = [
+      { name: 'test', icon: '🎯', color: 'var(--color-skills)', points: { body: 1, mind: 1, soul: 1 } },
+      { name: 'workout', icon: '💪', color: 'var(--color-body)', points: { body: 2, mind: 0, soul: 1 } }
+    ];
     
-    // Default category is 'body', so should show body reward
-    expect(screen.getByText('BODY')).toBeInTheDocument();
-    expect(screen.getByText('+1')).toBeInTheDocument();
-    expect(screen.getByText('💪')).toBeInTheDocument();
+    mockCategoryService.getCustomCategories.mockReturnValue(mockCustomCategories);
+    
+    render(<TaskForm />);
+    
+    const titleInput = screen.getByPlaceholderText('Intention');
+    fireEvent.click(titleInput);
+    
+    await waitFor(() => {
+      expect(screen.getByText('🎯 TEST')).toBeInTheDocument();
+      expect(screen.getByText('💪 WORKOUT')).toBeInTheDocument();
+    });
   });
 
-  it('updates stat rewards when category changes', async () => {
-    renderWithProviders(<TaskForm />);
+  it('allows selecting categories', () => {
+    render(<TaskForm />);
     
-    // Click on mind category
+    const titleInput = screen.getByPlaceholderText('Intention');
+    fireEvent.click(titleInput);
+    
     const mindButton = screen.getByText('🧠 MIND');
     fireEvent.click(mindButton);
     
+    expect(mindButton).toHaveClass('categoryButtonActive');
+  });
+
+  it('allows selecting priority levels', () => {
+    render(<TaskForm />);
+    
+    const titleInput = screen.getByPlaceholderText('Intention');
+    fireEvent.click(titleInput);
+    
+    const highPriorityButton = screen.getByText('HIGH PRIORITY');
+    fireEvent.click(highPriorityButton);
+    
+    expect(highPriorityButton).toHaveClass('priorityButtonActive');
+  });
+
+  it('shows add category button when expanded', () => {
+    render(<TaskForm />);
+    
+    const titleInput = screen.getByPlaceholderText('Intention');
+    fireEvent.click(titleInput);
+    
+    expect(screen.getByText('+ Add Category')).toBeInTheDocument();
+  });
+
+  it('shows refresh and debug buttons when expanded', () => {
+    render(<TaskForm />);
+    
+    const titleInput = screen.getByPlaceholderText('Intention');
+    fireEvent.click(titleInput);
+    
+    expect(screen.getByText('🔄 Refresh')).toBeInTheDocument();
+    expect(screen.getByText('🔍 Debug')).toBeInTheDocument();
+  });
+
+  it('refreshes categories when refresh button is clicked', async () => {
+    const mockCustomCategories = [
+      { name: 'new-category', icon: '🌟', color: 'var(--color-accent-gold)', points: { body: 1, mind: 1, soul: 1 } }
+    ];
+    
+    mockCategoryService.getCustomCategories.mockReturnValue(mockCustomCategories);
+    
+    render(<TaskForm />);
+    
+    const titleInput = screen.getByPlaceholderText('Intention');
+    fireEvent.click(titleInput);
+    
+    const refreshButton = screen.getByText('🔄 Refresh');
+    fireEvent.click(refreshButton);
+    
     await waitFor(() => {
-      expect(screen.getByText('MIND')).toBeInTheDocument();
-      expect(screen.getByText('+1')).toBeInTheDocument();
-      expect(screen.getByText('🧠')).toBeInTheDocument();
+      expect(mockCategoryService.getCustomCategories).toHaveBeenCalled();
     });
   });
 
-  it('shows multiple stat rewards for mixed categories', async () => {
-    renderWithProviders(<TaskForm />);
-    
-    // Click on career category (should give mind + body)
-    const careerButton = screen.getByText('💼 CAREER');
-    fireEvent.click(careerButton);
-    
-    await waitFor(() => {
-      expect(screen.getByText('MIND')).toBeInTheDocument();
-      expect(screen.getByText('BODY')).toBeInTheDocument();
-      expect(screen.getAllByText('+1')).toHaveLength(2);
+  it('shows debug information when debug button is clicked', () => {
+    // Mock localStorage
+    const mockLocalStorage = {
+      getItem: jest.fn().mockReturnValue(JSON.stringify([
+        { name: 'test', icon: '🎯', color: 'var(--color-skills)', points: { body: 1, mind: 1, soul: 1 } }
+      ]))
+    };
+    Object.defineProperty(window, 'localStorage', {
+      value: mockLocalStorage,
+      writable: true
     });
+    
+    render(<TaskForm />);
+    
+    const titleInput = screen.getByPlaceholderText('Intention');
+    fireEvent.click(titleInput);
+    
+    const debugButton = screen.getByText('🔍 Debug');
+    fireEvent.click(debugButton);
+    
+    expect(mockLocalStorage.getItem).toHaveBeenCalledWith('scrypture_custom_categories');
   });
 
-  it('submits task with selected category', async () => {
-    renderWithProviders(<TaskForm />);
+  it('submits task with correct data', async () => {
+    const mockAddTask = jest.fn();
+    jest.doMock('../../hooks/useTasks', () => ({
+      useTasks: () => ({
+        addTask: mockAddTask,
+      }),
+    }));
     
-    const titleInput = screen.getByPlaceholderText('What needs to be done?');
-    const submitButton = screen.getByText('Add Task');
+    render(<TaskForm />);
     
+    const titleInput = screen.getByPlaceholderText('Intention');
+    fireEvent.click(titleInput);
+    
+    // Fill in the form
     fireEvent.change(titleInput, { target: { value: 'Test Task' } });
     
-    // Select mind category
-    const mindButton = screen.getByText('🧠 MIND');
-    fireEvent.click(mindButton);
-    
-    fireEvent.click(submitButton);
-    
-    await waitFor(() => {
-      expect(titleInput).toHaveValue('');
-    });
-  });
-
-  it('resets form after submission', async () => {
-    renderWithProviders(<TaskForm />);
-    
-    const titleInput = screen.getByPlaceholderText('What needs to be done?');
     const descriptionInput = screen.getByPlaceholderText('Description (optional)');
-    const submitButton = screen.getByText('Add Task');
-    
-    fireEvent.change(titleInput, { target: { value: 'Test Task' } });
     fireEvent.change(descriptionInput, { target: { value: 'Test Description' } });
     
-    // Change category
-    const soulButton = screen.getByText('✨ SOUL');
-    fireEvent.click(soulButton);
-    
-    fireEvent.click(submitButton);
-    
-    await waitFor(() => {
-      expect(titleInput).toHaveValue('');
-      expect(descriptionInput).toHaveValue('');
-      // Category should reset to body (default)
-      expect(screen.getByText('💪 BODY')).toBeInTheDocument();
-    });
-  });
-
-  it('validates required title field', async () => {
-    renderWithProviders(<TaskForm />);
-    
     const submitButton = screen.getByText('Add Task');
     fireEvent.click(submitButton);
     
-    // Form should not submit without title
-    const titleInput = screen.getByPlaceholderText('What needs to be done?');
-    expect(titleInput).toBeInTheDocument();
+    await waitFor(() => {
+      expect(mockAddTask).toHaveBeenCalledWith({
+        title: 'Test Task',
+        description: 'Test Description',
+        category: 'body',
+        completed: false,
+        priority: 'medium',
+      });
+    });
+  });
+
+  it('calculates rewards correctly for different categories', () => {
+    mockTaskService.calculateStatRewards.mockReturnValue({
+      body: 2,
+      mind: 1,
+      soul: 0,
+      xp: 10
+    });
+    
+    render(<TaskForm />);
+    
+    const titleInput = screen.getByPlaceholderText('Intention');
+    fireEvent.click(titleInput);
+    
+    expect(screen.getByText('+2')).toBeInTheDocument(); // Body
+    expect(screen.getByText('+1')).toBeInTheDocument(); // Mind
+    expect(screen.getByText('+0')).toBeInTheDocument(); // Soul
+    expect(screen.getByText('+10')).toBeInTheDocument(); // XP
+  });
+
+  it('prevents form from minimizing when clicking inside expanded form', () => {
+    render(<TaskForm />);
+    
+    const titleInput = screen.getByPlaceholderText('Intention');
+    fireEvent.click(titleInput);
+    
+    // Click on a category button
+    const mindButton = screen.getByText('🧠 MIND');
+    fireEvent.click(mindButton);
+    
+    // Form should still be expanded
+    expect(screen.getByText('Category:')).toBeInTheDocument();
+    expect(screen.getByText('Priority:')).toBeInTheDocument();
+  });
+
+  it('minimizes form when title is empty and clicking outside', () => {
+    render(<TaskForm />);
+    
+    const titleInput = screen.getByPlaceholderText('Intention');
+    fireEvent.click(titleInput);
+    
+    // Blur the input without entering any text
+    fireEvent.blur(titleInput);
+    
+    // Form should be minimized
+    expect(screen.queryByText('Category:')).not.toBeInTheDocument();
+  });
+
+  it('keeps form expanded when title has content and clicking outside', () => {
+    render(<TaskForm />);
+    
+    const titleInput = screen.getByPlaceholderText('Intention');
+    fireEvent.click(titleInput);
+    
+    // Enter some text
+    fireEvent.change(titleInput, { target: { value: 'Test Task' } });
+    
+    // Blur the input
+    fireEvent.blur(titleInput);
+    
+    // Form should still be expanded
+    expect(screen.getByText('Category:')).toBeInTheDocument();
+  });
+
+  it('handles category service errors gracefully', () => {
+    mockCategoryService.getCustomCategories.mockImplementation(() => {
+      throw new Error('Storage error');
+    });
+    
+    render(<TaskForm />);
+    
+    const titleInput = screen.getByPlaceholderText('Intention');
+    fireEvent.click(titleInput);
+    
+    // Should still show default categories even if custom categories fail to load
+    expect(screen.getByText('💪 BODY')).toBeInTheDocument();
+    expect(screen.getByText('🧠 MIND')).toBeInTheDocument();
+    expect(screen.getByText('✨ SOUL')).toBeInTheDocument();
   });
 }); 

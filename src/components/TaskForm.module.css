@@ -20,11 +20,35 @@
   cursor: default;
 }
 
+.form.expanded .inputGroup {
+  cursor: default;
+}
+
 .inputGroup {
   display: flex;
   gap: var(--spacing-md);
   margin-bottom: var(--spacing-md);
   width: 100%;
+}
+
+.titleContainer {
+  flex: 1;
+  position: relative;
+}
+
+.titleContainerExpanded {
+  flex: 1;
+  position: relative;
+  cursor: pointer;
+  padding: var(--spacing-sm);
+  border: 2px solid transparent;
+  border-radius: 0px;
+  transition: all var(--transition-normal);
+}
+
+.titleContainerExpanded:hover {
+  border-color: var(--color-accent-gold);
+  background: var(--color-bg-tertiary);
 }
 
 .titleInput {
@@ -43,6 +67,18 @@
   -moz-osx-font-smoothing: none;
   text-rendering: optimizeSpeed;
   cursor: text;
+}
+
+.titleContainerExpanded .titleInput {
+  border-color: transparent;
+  background: transparent;
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.titleContainerExpanded .titleInput:focus {
+  border-color: var(--color-accent-gold);
+  background: var(--color-bg-primary);
+  box-shadow: 0 0 0 2px var(--color-accent-gold);
 }
 
 .titleInput:focus {
@@ -463,4 +499,356 @@
 
 .cancelButton:active {
   transform: translateY(0);
+} 
+
+/* Category Modal Styles */
+.categoryModalForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.label {
+  font-size: var(--font-size-sm);
+  font-family: 'Press Start 2P', monospace;
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+}
+
+.input {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 2px solid var(--color-border-primary);
+  border-radius: 0px;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-family: 'Press Start 2P', monospace;
+  transition: all var(--transition-normal);
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+}
+
+.input:focus {
+  outline: none;
+  border: 2px solid var(--color-accent-gold);
+  box-shadow: 0 0 0 2px var(--color-accent-gold);
+}
+
+.error {
+  color: var(--color-error);
+  font-size: var(--font-size-xs);
+  font-family: 'Press Start 2P', monospace;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+}
+
+.iconGrid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: var(--spacing-xs);
+  max-height: 200px;
+  overflow-y: auto;
+  padding: var(--spacing-sm);
+  background: var(--color-bg-primary);
+  border: 2px solid var(--color-border-primary);
+  border-radius: 0px;
+}
+
+.iconButton {
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--color-border-primary);
+  border-radius: 0px;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-lg);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconButton:hover {
+  border-color: var(--color-accent-gold);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-button);
+}
+
+.iconButtonActive {
+  border-color: var(--color-accent-gold);
+  background: var(--color-accent-gold);
+  color: var(--color-bg-primary);
+}
+
+.colorGrid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm);
+  background: var(--color-bg-primary);
+  border: 2px solid var(--color-border-primary);
+  border-radius: 0px;
+}
+
+.colorButton {
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--color-border-primary);
+  border-radius: 0px;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.colorButton:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-button);
+}
+
+.colorButtonActive {
+  border-color: var(--color-accent-gold);
+  box-shadow: 0 0 0 2px var(--color-accent-gold);
+}
+
+.preview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.categoryPreview {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 2px solid;
+  border-radius: 0px;
+  font-size: var(--font-size-sm);
+  font-family: 'Press Start 2P', monospace;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+  text-align: center;
+}
+
+.modalActions {
+  display: flex;
+  gap: var(--spacing-sm);
+  justify-content: flex-end;
+  margin-top: var(--spacing-md);
+}
+
+.cancelButton {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  border: 2px solid var(--color-border-primary);
+  border-radius: 0px;
+  font-size: var(--font-size-sm);
+  font-family: 'Press Start 2P', monospace;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+}
+
+.cancelButton:hover {
+  border-color: var(--color-accent-gold);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-button);
+}
+
+.cancelButton:active {
+  transform: translateY(0);
+}
+
+/* Add Category Button Styles */
+.addCategoryButton {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
+  border: 2px solid var(--color-border-primary);
+  border-radius: 0px;
+  font-size: var(--font-size-xs);
+  font-family: 'Press Start 2P', monospace;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+  margin-left: var(--spacing-sm);
+}
+
+.addCategoryButton:hover {
+  border-color: var(--color-accent-gold);
+  color: var(--color-accent-gold);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-button);
+}
+
+.addCategoryButton:active {
+  transform: translateY(0);
+}
+
+.categoryHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-sm);
+}
+
+.categoryHeaderContent {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+/* Point Distribution Styles */
+.pointDistribution {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  background: var(--color-bg-primary);
+  border: 2px solid var(--color-border-primary);
+  border-radius: 0px;
+}
+
+.pointStat {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: 0px;
+  min-height: 48px;
+}
+
+.pointIcon {
+  font-size: var(--font-size-lg);
+  margin-right: var(--spacing-sm);
+}
+
+.pointLabel {
+  font-size: var(--font-size-sm);
+  font-family: 'Press Start 2P', monospace;
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+  flex: 1;
+}
+
+.pointControls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs);
+}
+
+.pointButton {
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--color-border-primary);
+  border-radius: 0px;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-family: 'Press Start 2P', monospace;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xs);
+  min-width: 32px;
+  min-height: 32px;
+}
+
+.pointButton:hover:not(:disabled) {
+  border-color: var(--color-accent-gold);
+  background: var(--color-accent-gold);
+  color: var(--color-bg-primary);
+}
+
+.pointButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pointValue {
+  font-size: var(--font-size-sm);
+  font-family: 'Press Start 2P', monospace;
+  color: var(--color-accent-gold);
+  font-weight: bold;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+  min-width: 32px;
+  text-align: center;
+  padding: var(--spacing-xs);
+}
+
+.pointTotal {
+  font-size: var(--font-size-sm);
+  font-family: 'Press Start 2P', monospace;
+  color: var(--color-text-secondary);
+  text-align: center;
+  margin-top: var(--spacing-sm);
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+}
+
+.rewardsPreview {
+  margin-top: var(--spacing-sm);
+}
+
+.rewardsDisplay {
+  display: flex;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+  margin-top: var(--spacing-xs);
+}
+
+.rewardItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: 0px;
+  font-size: var(--font-size-xs);
+  font-family: 'Press Start 2P', monospace;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+}
+
+.rewardIcon {
+  font-size: var(--font-size-sm);
+}
+
+.rewardStat {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+}
+
+.rewardValue {
+  color: var(--color-accent-gold);
+  font-weight: bold;
+  font-size: var(--font-size-xs);
 } 

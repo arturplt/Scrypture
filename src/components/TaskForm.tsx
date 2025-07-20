@@ -1,15 +1,30 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTasks } from '../hooks/useTasks';
 import { taskService } from '../services/taskService';
+import { categoryService } from '../services/categoryService';
+import { storageService } from '../services/storageService';
+import { CategoryModal } from './CategoryModal';
 import styles from './TaskForm.module.css';
 
 export const TaskForm: React.FC = () => {
-  const { addTask } = useTasks();
+  const { addTask, refreshTasks } = useTasks();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [category, setCategory] = useState<'body' | 'mind' | 'soul' | 'career' | 'home' | 'skills'>('body');
+  const [category, setCategory] = useState<string>('body');
   const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [customCategories, setCustomCategories] = useState<Array<{ 
+    name: string; 
+    icon: string; 
+    color: string;
+    points: {
+      body: number;
+      mind: number;
+      soul: number;
+    };
+  }>>([]);
+  const [categoryRefreshTrigger, setCategoryRefreshTrigger] = useState(0);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -39,8 +54,13 @@ export const TaskForm: React.FC = () => {
     setIsExpanded(true);
   };
 
-  const handleTitleBlur = () => {
-    if (!title.trim()) {
+  const handleTitleBlur = (e: React.FocusEvent) => {
+    // Only minimize if clicking outside the entire form
+    // Check if the related target is within the form
+    const formElement = e.currentTarget.closest('form');
+    const relatedTarget = e.relatedTarget as HTMLElement;
+    
+    if (!title.trim() && (!relatedTarget || !formElement?.contains(relatedTarget))) {
       setIsExpanded(false);
     }
   };
@@ -62,6 +82,14 @@ export const TaskForm: React.FC = () => {
     }
   };
 
+  // Load custom categories on mount and refresh when needed
+  useEffect(() => {
+    const categories = categoryService.getCustomCategories();
+    console.log('Loading custom categories:', categories);
+    console.log('Setting custom categories state:', categories);
+    setCustomCategories(categories);
+  }, [categoryRefreshTrigger]); // Refresh when trigger changes
+
   // Auto-resize textarea when description changes
   useEffect(() => {
     autoResizeTextarea();
@@ -73,14 +101,24 @@ export const TaskForm: React.FC = () => {
     { value: 'high', label: 'HIGH PRIORITY', color: 'var(--color-urgent)' }
   ];
 
-  const categoryOptions = [
+  const defaultCategoryOptions = [
     { value: 'body', label: '💪 BODY', icon: '💪', color: 'var(--color-body)' },
     { value: 'mind', label: '🧠 MIND', icon: '🧠', color: 'var(--color-mind)' },
-    { value: 'soul', label: '✨ SOUL', icon: '✨', color: 'var(--color-soul)' },
-    { value: 'career', label: '💼 CAREER', icon: '💼', color: 'var(--color-career)' },
-    { value: 'home', label: '🏠 HOME', icon: '🏠', color: 'var(--color-home)' },
-    { value: 'skills', label: '🎯 SKILLS', icon: '🎯', color: 'var(--color-skills)' }
+    { value: 'soul', label: '✨ SOUL', icon: '✨', color: 'var(--color-soul)' }
   ];
+
+  const customCategoryOptions = customCategories.map(cat => ({
+    value: cat.name,
+    label: `${cat.icon} ${cat.name.toUpperCase()}`,
+    icon: cat.icon,
+    color: cat.color
+  }));
+
+  console.log('Custom categories state:', customCategories);
+  console.log('Custom category options:', customCategoryOptions);
+  console.log('All category options:', [...defaultCategoryOptions, ...customCategoryOptions]);
+
+  const categoryOptions = [...defaultCategoryOptions, ...customCategoryOptions];
 
   const getStatRewards = () => {
     const rewards = taskService.calculateStatRewards(category);
@@ -89,15 +127,50 @@ export const TaskForm: React.FC = () => {
     return { statRewards, xp };
   };
 
+  const handleCategoryAdded = (newCategory: { 
+    name: string; 
+    icon: string; 
+    color: string;
+    points: {
+      body: number;
+      mind: number;
+      soul: number;
+    };
+  }) => {
+    console.log('Adding new category:', newCategory);
+    const success = categoryService.addCustomCategory(newCategory);
+    console.log('Category added successfully:', success);
+    setCategoryRefreshTrigger(prev => prev + 1); // Trigger refresh
+  };
+
+  const handleFormClick = (e: React.MouseEvent) => {
+    // If the form is not expanded, expand it when clicked
+    if (!isExpanded) {
+      setIsExpanded(true);
+    }
+    // If the form is expanded, prevent clicks from minimizing it
+    e.stopPropagation();
+  };
+
   return (
     <form 
       className={`${styles.form} ${isExpanded ? styles.expanded : ''}`} 
       onSubmit={handleSubmit} 
       noValidate
-      onClick={!isExpanded ? handleTitleClick : undefined}
+      onClick={handleFormClick}
     >
       <div className={styles.inputGroup}>
-        <div style={{ flex: 1, position: 'relative' }}>
+        <div 
+          className={isExpanded ? styles.titleContainerExpanded : styles.titleContainer}
+          onClick={(e) => {
+            if (isExpanded) {
+              e.stopPropagation();
+              handleTitleClick();
+            } else {
+              handleTitleClick();
+            }
+          }}
+        >
           <input
             type="text"
             value={title}
@@ -138,7 +211,52 @@ export const TaskForm: React.FC = () => {
       {isExpanded && (
         <>
           <div className={styles.categorySelector}>
-            <label className={styles.categoryLabel}>Category:</label>
+            <div className={styles.categoryHeader}>
+              <div className={styles.categoryHeaderContent}>
+                <label className={styles.categoryLabel}>Category:</label>
+                <button
+                  type="button"
+                  className={styles.addCategoryButton}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsCategoryModalOpen(true);
+                  }}
+                >
+                  + Add Category
+                </button>
+                <button
+                  type="button"
+                  className={styles.addCategoryButton}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const categories = categoryService.getCustomCategories();
+                    if (categories.length > 0) {
+                      const lastCategory = categories[categories.length - 1];
+                      const success = categoryService.removeCustomCategory(lastCategory.name);
+                      console.log('Removed category:', lastCategory.name, 'Success:', success);
+                      setCategoryRefreshTrigger(prev => prev + 1);
+                    }
+                  }}
+                  style={{ marginLeft: '8px' }}
+                >
+                  🗑️ Remove Last
+                </button>
+                <button
+                  type="button"
+                  className={styles.addCategoryButton}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    console.log('=== Category Storage Test ===');
+                    console.log('Current categories:', categoryService.getCustomCategories());
+                    console.log('localStorage raw:', localStorage.getItem('scrypture_custom_categories'));
+                    console.log('Backup data:', storageService.createBackup());
+                  }}
+                  style={{ marginLeft: '8px' }}
+                >
+                  🔍 Test Storage
+                </button>
+              </div>
+            </div>
             <div className={styles.categoryButtons}>
               {categoryOptions.map((option) => (
                 <button
@@ -150,7 +268,10 @@ export const TaskForm: React.FC = () => {
                     backgroundColor: category === option.value ? option.color : 'transparent',
                     color: category === option.value ? 'var(--color-bg-primary)' : 'var(--color-text-primary)'
                   }}
-                  onClick={() => setCategory(option.value as 'body' | 'mind' | 'soul' | 'career' | 'home' | 'skills')}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCategory(option.value);
+                  }}
                 >
                   {option.label}
                 </button>
@@ -171,7 +292,10 @@ export const TaskForm: React.FC = () => {
                     backgroundColor: priority === option.value ? option.color : 'transparent',
                     color: priority === option.value ? 'var(--color-bg-primary)' : 'var(--color-text-primary)'
                   }}
-                  onClick={() => setPriority(option.value as 'low' | 'medium' | 'high')}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setPriority(option.value as 'low' | 'medium' | 'high');
+                  }}
                 >
                   {option.label}
                 </button>
@@ -183,29 +307,44 @@ export const TaskForm: React.FC = () => {
             <label className={styles.statRewardsLabel}>Rewards:</label>
             <div className={styles.statRewardsDisplay}>
               {Object.entries(getStatRewards().statRewards).map(([stat, value]) => (
-                <div key={stat} className={styles.statReward}>
-                  <span className={styles.statIcon}>
-                    {stat === 'body' ? '💪' : stat === 'mind' ? '🧠' : '✨'}
-                  </span>
-                  <span className={styles.statName}>{stat.toUpperCase()}</span>
-                  <span className={styles.statValue}>+{value}</span>
-                </div>
+                value > 0 && (
+                  <div key={stat} className={styles.statReward}>
+                    <span className={styles.statIcon}>
+                      {stat === 'body' ? '💪' : stat === 'mind' ? '🧠' : '✨'}
+                    </span>
+                    <span className={styles.statName}>{stat.toUpperCase()}</span>
+                    <span className={styles.statValue}>+{value}</span>
+                  </div>
+                )
               ))}
-              {getStatRewards().xp && (
-                <div className={styles.statReward}>
-                  <span className={styles.statIcon}>⭐</span>
-                  <span className={styles.statName}>XP</span>
-                  <span className={styles.statValue}>+{getStatRewards().xp}</span>
-                </div>
-              )}
+              {(() => {
+                const xp = getStatRewards().xp;
+                return xp && xp > 0 ? (
+                  <div className={styles.statReward}>
+                    <span className={styles.statIcon}>⭐</span>
+                    <span className={styles.statName}>XP</span>
+                    <span className={styles.statValue}>+{xp}</span>
+                  </div>
+                ) : null;
+              })()}
             </div>
           </div>
           
-          <button type="submit" className={styles.submitButton}>
+          <button 
+            type="submit" 
+            className={styles.submitButton}
+            onClick={(e) => e.stopPropagation()}
+          >
             Add Task
           </button>
         </>
       )}
+      
+      <CategoryModal
+        isOpen={isCategoryModalOpen}
+        onClose={() => setIsCategoryModalOpen(false)}
+        onCategoryAdded={handleCategoryAdded}
+      />
     </form>
   );
 }; 

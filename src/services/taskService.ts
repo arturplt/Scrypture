@@ -1,5 +1,6 @@
 import { Task } from '../types';
 import { storageService } from './storageService';
+import { categoryService } from './categoryService';
 
 export const taskService = {
   getTasks(): Task[] {
@@ -16,14 +17,34 @@ export const taskService = {
 
   calculateStatRewards(category: string): { body?: number; mind?: number; soul?: number; xp?: number } {
     const rewards = {
-      body: { body: 1, xp: 10 },
-      mind: { mind: 1, xp: 10 },
-      soul: { soul: 1, xp: 10 },
+      body: { body: 1, xp: 20 },
+      mind: { mind: 1, xp: 20 },
+      soul: { soul: 1, xp: 20 },
       career: { mind: 1, body: 1, xp: 10 },
       home: { body: 1, soul: 1, xp: 10 },
       skills: { mind: 1, soul: 1, xp: 10 }
     };
-    return rewards[category as keyof typeof rewards] || { soul: 1, mind: 1, body: 1, xp: 10 };
+    
+    // For custom categories, get the category data and calculate rewards based on points
+    if (!rewards[category as keyof typeof rewards]) {
+      const customCategories = categoryService.getCustomCategories();
+      const customCategory = customCategories.find(cat => cat.name === category);
+      
+      if (customCategory) {
+        const totalPoints = customCategory.points.body + customCategory.points.mind + customCategory.points.soul;
+        return {
+          body: customCategory.points.body > 0 ? customCategory.points.body : undefined,
+          mind: customCategory.points.mind > 0 ? customCategory.points.mind : undefined,
+          soul: customCategory.points.soul > 0 ? customCategory.points.soul : undefined,
+          xp: 30 - (totalPoints * 10)
+        };
+      }
+      
+      // Fallback for unknown categories
+      return { body: 1, mind: 1, soul: 1, xp: 10 };
+    }
+    
+    return rewards[category as keyof typeof rewards];
   },
 
   createTask(taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>): Task {

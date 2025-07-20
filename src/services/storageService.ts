@@ -190,6 +190,19 @@ export class StorageService {
     return this.setItem(STORAGE_KEYS.SETTINGS, settings);
   }
 
+  // Generic storage methods
+  getGenericItem<T>(key: string): T | null {
+    return this.getItem<T>(key);
+  }
+
+  setGenericItem<T>(key: string, value: T): boolean {
+    return this.setItem(key, value);
+  }
+
+  removeGenericItem(key: string): boolean {
+    return this.removeItem(key);
+  }
+
   // Backup and restore functionality
   createBackup(): Record<string, any> {
     return {
@@ -197,6 +210,7 @@ export class StorageService {
       habits: this.getHabits(),
       user: this.getUser(),
       settings: this.getSettings(),
+      customCategories: this.getGenericItem('scrypture_custom_categories'),
       timestamp: new Date().toISOString(),
       version: '1.0.0',
     };
@@ -216,6 +230,7 @@ export class StorageService {
       if (backup.habits) this.saveHabits(backup.habits);
       if (backup.user) this.saveUser(backup.user);
       if (backup.settings) this.saveSettings(backup.settings);
+      if (backup.customCategories) this.setGenericItem('scrypture_custom_categories', backup.customCategories);
       return true;
     } catch (error) {
       console.error('Error restoring from backup:', error);

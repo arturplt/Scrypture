@@ -6,6 +6,7 @@ import { useUser } from './useUser';
 interface ExtendedTaskContextType extends TaskContextType {
   isSaving: boolean;
   lastSaved: Date | null;
+  refreshTasks: () => void;
 }
 
 const TaskContext = createContext<ExtendedTaskContextType | undefined>(undefined);
@@ -104,6 +105,11 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
     }
   };
 
+  const refreshTasks = () => {
+    const savedTasks = taskService.getTasks();
+    setTasks(savedTasks);
+  };
+
   const value: ExtendedTaskContextType = {
     tasks,
     addTask,
@@ -112,6 +118,7 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
     toggleTask,
     isSaving,
     lastSaved,
+    refreshTasks,
   };
 
   return (
