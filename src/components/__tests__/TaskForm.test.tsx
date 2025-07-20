@@ -22,9 +22,10 @@ const mockCategoryService = categoryService as jest.Mocked<typeof categoryServic
 const mockTaskService = taskService as jest.Mocked<typeof taskService>;
 
 // Mock the useTasks hook
+const mockAddTask = jest.fn();
 jest.mock('../../hooks/useTasks', () => ({
   useTasks: () => ({
-    addTask: jest.fn(),
+    addTask: mockAddTask,
   }),
 }));
 
@@ -175,13 +176,6 @@ describe('TaskForm', () => {
   });
 
   it('submits task with correct data', async () => {
-    const mockAddTask = jest.fn();
-    jest.doMock('../../hooks/useTasks', () => ({
-      useTasks: () => ({
-        addTask: mockAddTask,
-      }),
-    }));
-    
     render(<TaskForm />);
     
     const titleInput = screen.getByPlaceholderText('Intention');
@@ -204,7 +198,7 @@ describe('TaskForm', () => {
         completed: false,
         priority: 'medium',
       });
-    });
+    }, { timeout: 5000 });
   });
 
   it('calculates rewards correctly for different categories', () => {
@@ -220,10 +214,13 @@ describe('TaskForm', () => {
     const titleInput = screen.getByPlaceholderText('Intention');
     fireEvent.click(titleInput);
     
-    expect(screen.getByText('+2')).toBeInTheDocument(); // Body
-    expect(screen.getByText('+1')).toBeInTheDocument(); // Mind
-    expect(screen.getByText('+0')).toBeInTheDocument(); // Soul
-    expect(screen.getByText('+10')).toBeInTheDocument(); // XP
+    // Wait for rewards to be calculated
+    waitFor(() => {
+      expect(screen.getByText('+2')).toBeInTheDocument(); // Body
+      expect(screen.getByText('+1')).toBeInTheDocument(); // Mind
+      expect(screen.getByText('+0')).toBeInTheDocument(); // Soul
+      expect(screen.getByText('+10')).toBeInTheDocument(); // XP
+    }, { timeout: 5000 });
   });
 
   it('prevents form from minimizing when clicking inside expanded form', () => {

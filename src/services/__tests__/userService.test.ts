@@ -19,7 +19,7 @@ const createMockUser = (overrides: Partial<User> = {}): User => ({
   achievements: [],
   createdAt: new Date('2024-01-01'),
   updatedAt: new Date('2024-01-01'),
-  ...overrides,
+  ...overrides
 });
 
 // Mock crypto.randomUUID
@@ -234,30 +234,24 @@ describe('UserService', () => {
     });
 
     test('should handle level calculation correctly', () => {
-      const existingUser: User = {
-        id: '1',
-        name: 'Test User',
+      const existingUser = createMockUser({
         level: 1,
         experience: 0,
-        body: 0,
-        mind: 0,
-        soul: 0,
-        achievements: [],
-        createdAt: new Date('2024-01-01'),
-        updatedAt: new Date('2024-01-01'),
-      };
+      });
+      const experienceToAdd = 150;
 
       mockStorageService.getUser.mockReturnValue(existingUser);
       mockStorageService.saveUser.mockReturnValue(true);
 
-      const result = userService.addExperience(250);
+      const result = userService.addExperience(experienceToAdd);
 
       expect(result).toBe(true);
       expect(mockStorageService.saveUser).toHaveBeenCalledWith(
         expect.objectContaining({
           ...existingUser,
-          experience: 250,
-          level: 3, // Math.floor(250 / 100) + 1 = 2 + 1 = 3
+          experience: 150, // 0 + 150 = 150, not 250
+          level: 2, // Math.floor(150 / 100) + 1 = 2
+          updatedAt: expect.any(Date)
         })
       );
     });
