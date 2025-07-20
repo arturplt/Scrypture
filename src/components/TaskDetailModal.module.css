@@ -1,0 +1,198 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 2px solid var(--color-border-primary);
+}
+
+.titleSection {
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  font-size: var(--font-size-lg);
+  font-weight: normal;
+  margin: 0 0 var(--spacing-sm) 0;
+  color: var(--color-text-primary);
+  word-break: break-word;
+  line-height: 1.2;
+  font-family: 'Press Start 2P', monospace;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+}
+
+.title.completed {
+  text-decoration: line-through;
+  color: var(--color-text-secondary);
+}
+
+.category {
+  display: inline-block;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  font-family: 'Press Start 2P', monospace;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+}
+
+.status {
+  flex-shrink: 0;
+}
+
+.completedStatus {
+  display: inline-block;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--color-easy);
+  color: var(--color-text-primary);
+  border: 2px solid var(--color-easy-border);
+  border-radius: 0px;
+  font-size: var(--font-size-xs);
+  font-weight: normal;
+  font-family: 'Press Start 2P', monospace;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+}
+
+.pendingStatus {
+  display: inline-block;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--color-focus);
+  color: var(--color-text-primary);
+  border: 2px solid var(--color-focus-border);
+  border-radius: 0px;
+  font-size: var(--font-size-xs);
+  font-weight: normal;
+  font-family: 'Press Start 2P', monospace;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+}
+
+.descriptionSection {
+  padding-bottom: var(--spacing-md);
+  border-bottom: 2px solid var(--color-border-primary);
+}
+
+.sectionTitle {
+  font-size: var(--font-size-sm);
+  font-weight: normal;
+  margin: 0 0 var(--spacing-sm) 0;
+  color: var(--color-text-primary);
+  font-family: 'Press Start 2P', monospace;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+}
+
+.description {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+  word-break: break-word;
+  white-space: pre-wrap;
+  font-family: 'Press Start 2P', monospace;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+  padding: var(--spacing-sm);
+  background: var(--color-bg-primary);
+  border: 2px solid var(--color-border-primary);
+  border-radius: 0px;
+}
+
+.description.completed {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 2px solid var(--color-border-primary);
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.detailLabel {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  font-weight: normal;
+  font-family: 'Press Start 2P', monospace;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+  flex-shrink: 0;
+}
+
+.detailValue {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-primary);
+  font-weight: normal;
+  font-family: 'Press Start 2P', monospace;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+  text-align: right;
+  word-break: break-word;
+}
+
+.priorityHigh {
+  color: var(--color-urgent);
+  font-weight: bold;
+}
+
+.priorityMedium {
+  color: var(--color-focus);
+  font-weight: bold;
+}
+
+.priorityLow {
+  color: var(--color-easy);
+  font-weight: bold;
+}
+
+.rewardsSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.rewards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.reward {
+  display: inline-block;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--color-accent-gold);
+  color: var(--color-bg-primary);
+  border: 2px solid var(--color-accent-gold);
+  border-radius: 0px;
+  font-size: var(--font-size-xs);
+  font-weight: normal;
+  font-family: 'Press Start 2P', monospace;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+} 

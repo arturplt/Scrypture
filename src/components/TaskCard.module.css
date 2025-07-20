@@ -6,6 +6,7 @@
   transition: all var(--transition-normal);
   margin-bottom: var(--spacing-md);
   box-shadow: var(--shadow-button);
+  cursor: pointer;
 }
 
 .card:hover {
@@ -55,6 +56,7 @@
   -webkit-appearance: none;
   -moz-appearance: none;
   position: relative;
+  z-index: 1;
 }
 
 .checkbox:hover {
@@ -169,6 +171,8 @@
   transition: all var(--transition-normal);
   flex-shrink: 0;
   font-family: 'Press Start 2P', monospace;
+  position: relative;
+  z-index: 1;
 }
 
 .deleteButton:hover {
@@ -193,6 +197,8 @@
   border-radius: 0px;
   transition: all var(--transition-normal);
   font-family: 'Press Start 2P', monospace;
+  position: relative;
+  z-index: 1;
 }
 
 .editButton:hover {
