@@ -419,7 +419,20 @@ describe('StorageService', () => {
       const exportedData = storageService.exportData();
       
       expect(typeof exportedData).toBe('string');
-      expect(JSON.parse(exportedData)).toEqual(mockData);
+      const parsedData = JSON.parse(exportedData);
+      // Compare everything except timestamps which are serialized as strings
+      expect(parsedData.tasks).toEqual(mockData.tasks);
+      expect(parsedData.habits).toEqual(mockData.habits);
+      expect(parsedData.settings).toEqual(mockData.settings);
+      // For user, compare individual fields except timestamps
+      expect(parsedData.user.id).toBe(mockData.user.id);
+      expect(parsedData.user.name).toBe(mockData.user.name);
+      expect(parsedData.user.level).toBe(mockData.user.level);
+      expect(parsedData.user.experience).toBe(mockData.user.experience);
+      expect(parsedData.user.body).toBe(mockData.user.body);
+      expect(parsedData.user.mind).toBe(mockData.user.mind);
+      expect(parsedData.user.soul).toBe(mockData.user.soul);
+      expect(parsedData.user.achievements).toEqual(mockData.user.achievements);
     });
 
     test('should import valid JSON data', () => {
@@ -459,8 +472,14 @@ describe('StorageService', () => {
     test('should calculate storage usage', () => {
       // Mock localStorage to return substantial data
       localStorageMock.getItem.mockImplementation((key) => {
-        if (key === 'scrypture_tasks') return JSON.stringify([{ id: '1', title: 'Test Task' }]);
-        if (key === 'scrypture_habits') return JSON.stringify([{ id: '1', name: 'Test Habit' }]);
+        if (key === 'scrypture_tasks') return JSON.stringify([
+          { id: '1', title: 'Test Task', description: 'A test task', completed: false, createdAt: new Date(), updatedAt: new Date(), priority: 'medium', category: 'body' },
+          { id: '2', title: 'Another Task', description: 'Another test task', completed: true, createdAt: new Date(), updatedAt: new Date(), priority: 'high', category: 'mind' }
+        ]);
+        if (key === 'scrypture_habits') return JSON.stringify([
+          { id: '1', name: 'Test Habit', description: 'A test habit', streak: 5, targetFrequency: 'daily', createdAt: new Date() },
+          { id: '2', name: 'Another Habit', description: 'Another test habit', streak: 3, targetFrequency: 'weekly', createdAt: new Date() }
+        ]);
         if (key === 'scrypture_user') return JSON.stringify({ 
           id: '1', 
           name: 'Test User',
@@ -473,7 +492,7 @@ describe('StorageService', () => {
           createdAt: new Date('2024-01-01').toISOString(),
           updatedAt: new Date('2024-01-01').toISOString()
         });
-        if (key === 'scrypture_settings') return JSON.stringify({ theme: 'dark' });
+        if (key === 'scrypture_settings') return JSON.stringify({ theme: 'dark', notifications: true, autoSave: true });
         return null;
       });
 

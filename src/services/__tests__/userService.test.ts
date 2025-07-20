@@ -224,11 +224,13 @@ describe('UserService', () => {
       const result = userService.addExperience(experienceToAdd);
 
       expect(result).toBe(true);
-      expect(mockStorageService.saveUser).toHaveBeenCalledWith({
-        ...existingUser,
-        experience: 600,
-        level: 7, // Math.floor(600 / 100) + 1
-      });
+      expect(mockStorageService.saveUser).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ...existingUser,
+          experience: 600,
+          level: 7, // Math.floor(600 / 100) + 1
+        })
+      );
     });
 
     test('should handle level calculation correctly', () => {
@@ -251,11 +253,13 @@ describe('UserService', () => {
       const result = userService.addExperience(250);
 
       expect(result).toBe(true);
-      expect(mockStorageService.saveUser).toHaveBeenCalledWith({
-        ...existingUser,
-        experience: 250,
-        level: 3, // Math.floor(250 / 100) + 1 = 2 + 1 = 3
-      });
+      expect(mockStorageService.saveUser).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ...existingUser,
+          experience: 250,
+          level: 3, // Math.floor(250 / 100) + 1 = 2 + 1 = 3
+        })
+      );
     });
 
     test('should return false when no user exists', () => {

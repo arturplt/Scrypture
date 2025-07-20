@@ -11,7 +11,16 @@ jest.mock('../storageService', () => ({
   },
 }));
 
+const mockGetGenericItem = jest.fn();
+const mockSetGenericItem = jest.fn();
+
 const mockStorageService = StorageService.getInstance() as jest.Mocked<StorageService>;
+
+// Override the mock functions
+Object.assign(mockStorageService, {
+  getGenericItem: mockGetGenericItem,
+  setGenericItem: mockSetGenericItem,
+});
 
 describe('categoryService', () => {
   beforeEach(() => {
@@ -20,12 +29,12 @@ describe('categoryService', () => {
 
   describe('getCustomCategories', () => {
     it('returns empty array when no categories exist', () => {
-      mockStorageService.getGenericItem.mockReturnValue(null);
+      mockGetGenericItem.mockReturnValue(null);
       
       const result = categoryService.getCustomCategories();
       
       expect(result).toEqual([]);
-      expect(mockStorageService.getGenericItem).toHaveBeenCalledWith('scrypture_custom_categories');
+      expect(mockGetGenericItem).toHaveBeenCalledWith('scrypture_custom_categories');
     });
 
     it('returns existing categories from storage', () => {
@@ -34,7 +43,7 @@ describe('categoryService', () => {
         { name: 'workout', icon: '💪', color: 'var(--color-body)', points: { body: 2, mind: 0, soul: 1 } }
       ];
       
-      mockStorageService.getGenericItem.mockReturnValue(mockCategories);
+      mockGetGenericItem.mockReturnValue(mockCategories);
       
       const result = categoryService.getCustomCategories();
       
@@ -42,7 +51,7 @@ describe('categoryService', () => {
     });
 
     it('handles storage errors gracefully', () => {
-      mockStorageService.getGenericItem.mockImplementation(() => {
+      mockGetGenericItem.mockImplementation(() => {
         throw new Error('Storage error');
       });
       
@@ -58,12 +67,12 @@ describe('categoryService', () => {
         { name: 'test', icon: '🎯', color: 'var(--color-skills)', points: { body: 1, mind: 1, soul: 1 } }
       ];
       
-      mockStorageService.setGenericItem.mockReturnValue(true);
+      mockSetGenericItem.mockReturnValue(true);
       
       const result = categoryService.saveCustomCategories(categories);
       
       expect(result).toBe(true);
-      expect(mockStorageService.setGenericItem).toHaveBeenCalledWith('scrypture_custom_categories', categories);
+      expect(mockSetGenericItem).toHaveBeenCalledWith('scrypture_custom_categories', categories);
     });
 
     it('returns false when save fails', () => {
@@ -71,7 +80,7 @@ describe('categoryService', () => {
         { name: 'test', icon: '🎯', color: 'var(--color-skills)', points: { body: 1, mind: 1, soul: 1 } }
       ];
       
-      mockStorageService.setGenericItem.mockReturnValue(false);
+      mockSetGenericItem.mockReturnValue(false);
       
       const result = categoryService.saveCustomCategories(categories);
       
@@ -92,13 +101,13 @@ describe('categoryService', () => {
         points: { body: 2, mind: 0, soul: 1 }
       };
       
-      mockStorageService.getGenericItem.mockReturnValue(existingCategories);
-      mockStorageService.setGenericItem.mockReturnValue(true);
+      mockGetGenericItem.mockReturnValue(existingCategories);
+      mockSetGenericItem.mockReturnValue(true);
       
       const result = categoryService.addCustomCategory(newCategory);
       
       expect(result).toBe(true);
-      expect(mockStorageService.setGenericItem).toHaveBeenCalledWith('scrypture_custom_categories', [
+      expect(mockSetGenericItem).toHaveBeenCalledWith('scrypture_custom_categories', [
         ...existingCategories,
         newCategory
       ]);
@@ -116,16 +125,16 @@ describe('categoryService', () => {
         points: { body: 2, mind: 0, soul: 1 }
       };
       
-      mockStorageService.getGenericItem.mockReturnValue(existingCategories);
+      mockGetGenericItem.mockReturnValue(existingCategories);
       
       const result = categoryService.addCustomCategory(duplicateCategory);
       
       expect(result).toBe(false);
-      expect(mockStorageService.setGenericItem).not.toHaveBeenCalled();
+      expect(mockSetGenericItem).not.toHaveBeenCalled();
     });
 
     it('handles storage errors when adding category', () => {
-      mockStorageService.getGenericItem.mockImplementation(() => {
+      mockGetGenericItem.mockImplementation(() => {
         throw new Error('Storage error');
       });
       
@@ -149,13 +158,13 @@ describe('categoryService', () => {
         { name: 'workout', icon: '💪', color: 'var(--color-body)', points: { body: 2, mind: 0, soul: 1 } }
       ];
       
-      mockStorageService.getGenericItem.mockReturnValue(existingCategories);
-      mockStorageService.setGenericItem.mockReturnValue(true);
+      mockGetGenericItem.mockReturnValue(existingCategories);
+      mockSetGenericItem.mockReturnValue(true);
       
       const result = categoryService.removeCustomCategory('test');
       
       expect(result).toBe(true);
-      expect(mockStorageService.setGenericItem).toHaveBeenCalledWith('scrypture_custom_categories', [
+      expect(mockSetGenericItem).toHaveBeenCalledWith('scrypture_custom_categories', [
         { name: 'workout', icon: '💪', color: 'var(--color-body)', points: { body: 2, mind: 0, soul: 1 } }
       ]);
     });
@@ -165,12 +174,12 @@ describe('categoryService', () => {
         { name: 'test', icon: '🎯', color: 'var(--color-skills)', points: { body: 1, mind: 1, soul: 1 } }
       ];
       
-      mockStorageService.getGenericItem.mockReturnValue(existingCategories);
+      mockGetGenericItem.mockReturnValue(existingCategories);
       
       const result = categoryService.removeCustomCategory('nonexistent');
       
       expect(result).toBe(false);
-      expect(mockStorageService.setGenericItem).not.toHaveBeenCalled();
+      expect(mockSetGenericItem).not.toHaveBeenCalled();
     });
 
     it('handles case insensitive removal', () => {
@@ -178,19 +187,19 @@ describe('categoryService', () => {
         { name: 'Test', icon: '🎯', color: 'var(--color-skills)', points: { body: 1, mind: 1, soul: 1 } }
       ];
       
-      mockStorageService.getGenericItem.mockReturnValue(existingCategories);
-      mockStorageService.setGenericItem.mockReturnValue(true);
+      mockGetGenericItem.mockReturnValue(existingCategories);
+      mockSetGenericItem.mockReturnValue(true);
       
       const result = categoryService.removeCustomCategory('test'); // Lowercase
       
       expect(result).toBe(true);
-      expect(mockStorageService.setGenericItem).toHaveBeenCalledWith('scrypture_custom_categories', []);
+      expect(mockSetGenericItem).toHaveBeenCalledWith('scrypture_custom_categories', []);
     });
   });
 
   describe('getAllCategories', () => {
     it('returns default categories when no custom categories exist', () => {
-      mockStorageService.getGenericItem.mockReturnValue([]);
+      mockGetGenericItem.mockReturnValue([]);
       
       const result = categoryService.getAllCategories();
       
@@ -205,7 +214,7 @@ describe('categoryService', () => {
         { name: 'test', icon: '🎯', color: 'var(--color-skills)', points: { body: 1, mind: 1, soul: 1 } }
       ];
       
-      mockStorageService.getGenericItem.mockReturnValue(customCategories);
+      mockGetGenericItem.mockReturnValue(customCategories);
       
       const result = categoryService.getAllCategories();
       
@@ -219,7 +228,7 @@ describe('categoryService', () => {
 
   describe('getCategoryByName', () => {
     it('finds default category by name', () => {
-      mockStorageService.getGenericItem.mockReturnValue([]);
+      mockGetGenericItem.mockReturnValue([]);
       
       const result = categoryService.getCategoryByName('body');
       
@@ -232,7 +241,7 @@ describe('categoryService', () => {
         { name: 'test', icon: '🎯', color: 'var(--color-skills)', points: { body: 1, mind: 1, soul: 1 } }
       ];
       
-      mockStorageService.getGenericItem.mockReturnValue(customCategories);
+      mockGetGenericItem.mockReturnValue(customCategories);
       
       const result = categoryService.getCategoryByName('test');
       
@@ -241,7 +250,7 @@ describe('categoryService', () => {
     });
 
     it('returns null for non-existent category', () => {
-      mockStorageService.getGenericItem.mockReturnValue([]);
+      mockGetGenericItem.mockReturnValue([]);
       
       const result = categoryService.getCategoryByName('nonexistent');
       
@@ -253,7 +262,7 @@ describe('categoryService', () => {
         { name: 'Test', icon: '🎯', color: 'var(--color-skills)', points: { body: 1, mind: 1, soul: 1 } }
       ];
       
-      mockStorageService.getGenericItem.mockReturnValue(customCategories);
+      mockGetGenericItem.mockReturnValue(customCategories);
       
       const result = categoryService.getCategoryByName('test'); // Lowercase search
       
@@ -264,16 +273,16 @@ describe('categoryService', () => {
 
   describe('clearCustomCategories', () => {
     it('clears all custom categories', () => {
-      mockStorageService.setGenericItem.mockReturnValue(true);
+      mockSetGenericItem.mockReturnValue(true);
       
       const result = categoryService.clearCustomCategories();
       
       expect(result).toBe(true);
-      expect(mockStorageService.setGenericItem).toHaveBeenCalledWith('scrypture_custom_categories', []);
+      expect(mockSetGenericItem).toHaveBeenCalledWith('scrypture_custom_categories', []);
     });
 
     it('returns false when clear fails', () => {
-      mockStorageService.setGenericItem.mockReturnValue(false);
+      mockSetGenericItem.mockReturnValue(false);
       
       const result = categoryService.clearCustomCategories();
       

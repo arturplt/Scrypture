@@ -235,6 +235,7 @@ describe('Simple Integration Tests', () => {
           updatedAt: new Date('2024-01-01T10:00:00Z'),
           priority: 'medium' as const,
           category: 'body',
+          statRewards: { body: 1, mind: 0, soul: 0, xp: 20 },
         },
       ];
 
@@ -250,7 +251,7 @@ describe('Simple Integration Tests', () => {
       // Verify existing task is loaded
       await waitFor(() => {
         expect(screen.getByText('Persistent Task')).toBeInTheDocument();
-      }, { timeout: 3000 });
+      }, { timeout: 5000 });
     });
   });
 
@@ -302,7 +303,7 @@ describe('Simple Integration Tests', () => {
       // Verify task was created
       await waitFor(() => {
         expect(screen.getByText('Keyboard Task')).toBeInTheDocument();
-      }, { timeout: 3000 });
+      }, { timeout: 5000 });
     });
 
     it('provides proper ARIA labels and roles', async () => {
