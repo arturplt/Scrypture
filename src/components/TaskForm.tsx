@@ -4,15 +4,22 @@ import { taskService } from '../services/taskService';
 import { categoryService } from '../services/categoryService';
 import { storageService } from '../services/storageService';
 import { CategoryModal } from './CategoryModal';
+import { Task } from '../types';
 import styles from './TaskForm.module.css';
 
-export const TaskForm: React.FC = () => {
-  const { addTask, refreshTasks } = useTasks();
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [category, setCategory] = useState<string>('body');
-  const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
-  const [isExpanded, setIsExpanded] = useState(false);
+interface TaskFormProps {
+  taskToEdit?: Task;
+  onCancel?: () => void;
+  onSave?: () => void;
+}
+
+export const TaskForm: React.FC<TaskFormProps> = ({ taskToEdit, onCancel, onSave }) => {
+  const { addTask, updateTask, refreshTasks } = useTasks();
+  const [title, setTitle] = useState(taskToEdit?.title || '');
+  const [description, setDescription] = useState(taskToEdit?.description || '');
+  const [category, setCategory] = useState<string>(taskToEdit?.category || 'body');
+  const [priority, setPriority] = useState<'low' | 'medium' | 'high'>(taskToEdit?.priority || 'medium');
+  const [isExpanded, setIsExpanded] = useState(!!taskToEdit);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [customCategories, setCustomCategories] = useState<Array<{ 
     name: string; 
@@ -27,23 +34,40 @@ export const TaskForm: React.FC = () => {
   const [categoryRefreshTrigger, setCategoryRefreshTrigger] = useState(0);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  const isEditMode = !!taskToEdit;
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!title.trim()) return;
     
-    addTask({
-      title: title.trim(),
-      description: description.trim() || undefined,
-      category,
-      completed: false,
-      priority,
-    });
+    if (isEditMode && taskToEdit) {
+      // Update existing task
+      updateTask(taskToEdit.id, {
+        title: title.trim(),
+        description: description.trim() || undefined,
+        category,
+        priority,
+      });
+      onSave?.();
+    } else {
+      // Create new task
+      addTask({
+        title: title.trim(),
+        description: description.trim() || undefined,
+        category,
+        completed: false,
+        priority,
+      });
+    }
     
-    setTitle('');
-    setDescription('');
-    setCategory('body');
-    setPriority('medium');
+    // Reset form only if not in edit mode
+    if (!isEditMode) {
+      setTitle('');
+      setDescription('');
+      setCategory('body');
+      setPriority('medium');
+    }
   };
 
   const handleInvalid = (e: React.FormEvent) => {
@@ -55,12 +79,11 @@ export const TaskForm: React.FC = () => {
   };
 
   const handleTitleBlur = (e: React.FocusEvent) => {
-    // Only minimize if clicking outside the entire form
-    // Check if the related target is within the form
+    // Only minimize if clicking outside the entire form and not in edit mode
     const formElement = e.currentTarget.closest('form');
     const relatedTarget = e.relatedTarget as HTMLElement;
     
-    if (!title.trim() && (!relatedTarget || !formElement?.contains(relatedTarget))) {
+    if (!isEditMode && !title.trim() && (!relatedTarget || !formElement?.contains(relatedTarget))) {
       setIsExpanded(false);
     }
   };
@@ -98,33 +121,48 @@ export const TaskForm: React.FC = () => {
   const priorityOptions = [
     { value: 'low', label: 'LOW PRIORITY', color: 'var(--color-easy)' },
     { value: 'medium', label: 'MEDIUM PRIORITY', color: 'var(--color-focus)' },
-    { value: 'high', label: 'HIGH PRIORITY', color: 'var(--color-urgent)' }
+    { value: 'high', label: 'HIGH PRIORITY', color: 'var(--color-urgent)' },
   ];
 
-  const defaultCategoryOptions = [
-    { value: 'body', label: '💪 BODY', icon: '💪', color: 'var(--color-body)' },
-    { value: 'mind', label: '🧠 MIND', icon: '🧠', color: 'var(--color-mind)' },
-    { value: 'soul', label: '✨ SOUL', icon: '✨', color: 'var(--color-soul)' }
+  const defaultCategories = [
+    { name: 'body', icon: '💪', label: 'BODY', color: 'var(--color-body)' },
+    { name: 'mind', icon: '🧠', label: 'MIND', color: 'var(--color-mind)' },
+    { name: 'soul', icon: '✨', label: 'SOUL', color: 'var(--color-soul)' },
   ];
 
-  const customCategoryOptions = customCategories.map(cat => ({
-    value: cat.name,
-    label: `${cat.icon} ${cat.name.toUpperCase()}`,
+  const allCategories = [...defaultCategories, ...customCategories.map(cat => ({
+    name: cat.name.toLowerCase(),
     icon: cat.icon,
+    label: cat.name.toUpperCase(),
     color: cat.color
-  }));
-
-  console.log('Custom categories state:', customCategories);
-  console.log('Custom category options:', customCategoryOptions);
-  console.log('All category options:', [...defaultCategoryOptions, ...customCategoryOptions]);
-
-  const categoryOptions = [...defaultCategoryOptions, ...customCategoryOptions];
+  }))];
 
   const getStatRewards = () => {
-    const rewards = taskService.calculateStatRewards(category);
-    // Filter out XP from the display since it's handled separately
-    const { xp, ...statRewards } = rewards;
-    return { statRewards, xp };
+    const selectedCategory = allCategories.find(cat => cat.name === category);
+    if (!selectedCategory) return { body: 1, xp: 20 };
+
+    // Check if it's a custom category
+    const customCategory = customCategories.find(cat => cat.name.toLowerCase() === category);
+    if (customCategory) {
+      return {
+        body: customCategory.points.body,
+        mind: customCategory.points.mind,
+        soul: customCategory.points.soul,
+        xp: 20
+      };
+    }
+
+    // Default category rewards
+    switch (category) {
+      case 'body':
+        return { body: 1, xp: 20 };
+      case 'mind':
+        return { mind: 1, xp: 20 };
+      case 'soul':
+        return { soul: 1, xp: 20 };
+      default:
+        return { body: 1, xp: 20 };
+    }
   };
 
   const handleCategoryAdded = (newCategory: { 
@@ -258,22 +296,22 @@ export const TaskForm: React.FC = () => {
               </div>
             </div>
             <div className={styles.categoryButtons}>
-              {categoryOptions.map((option) => (
+              {allCategories.map((option) => (
                 <button
-                  key={option.value}
+                  key={option.name}
                   type="button"
-                  className={`${styles.categoryButton} ${category === option.value ? styles.categoryButtonActive : ''}`}
+                  className={`${styles.categoryButton} ${category === option.name ? styles.categoryButtonActive : ''}`}
                   style={{ 
                     borderColor: option.color,
-                    backgroundColor: category === option.value ? option.color : 'transparent',
-                    color: category === option.value ? 'var(--color-bg-primary)' : 'var(--color-text-primary)'
+                    backgroundColor: category === option.name ? option.color : 'transparent',
+                    color: category === option.name ? 'var(--color-bg-primary)' : 'var(--color-text-primary)'
                   }}
                   onClick={(e) => {
                     e.stopPropagation();
-                    setCategory(option.value);
+                    setCategory(option.name);
                   }}
                 >
-                  {option.label}
+                  {option.icon} {option.label}
                 </button>
               ))}
             </div>
@@ -306,7 +344,7 @@ export const TaskForm: React.FC = () => {
           <div className={styles.statRewards}>
             <label className={styles.statRewardsLabel}>Rewards:</label>
             <div className={styles.statRewardsDisplay}>
-              {Object.entries(getStatRewards().statRewards).map(([stat, value]) => (
+              {Object.entries(getStatRewards()).map(([stat, value]) => (
                 value > 0 && (
                   <div key={stat} className={styles.statReward}>
                     <span className={styles.statIcon}>
@@ -335,8 +373,17 @@ export const TaskForm: React.FC = () => {
             className={styles.submitButton}
             onClick={(e) => e.stopPropagation()}
           >
-            Add Task
+            {isEditMode ? 'Update Task' : 'Add Task'}
           </button>
+          {onCancel && (
+            <button 
+              type="button" 
+              className={styles.cancelButton}
+              onClick={onCancel}
+            >
+              Cancel
+            </button>
+          )}
         </>
       )}
       

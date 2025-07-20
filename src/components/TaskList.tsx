@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useTasks } from '../hooks/useTasks';
 import { TaskCard } from './TaskCard';
 import { TaskDetailModal } from './TaskDetailModal';
+import { TaskForm } from './TaskForm';
 import { Task } from '../types';
 import styles from './TaskList.module.css';
 
@@ -9,6 +10,8 @@ export const TaskList: React.FC = () => {
   const { tasks, deleteTask } = useTasks();
   const [selectedTaskIndex, setSelectedTaskIndex] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [taskToEdit, setTaskToEdit] = useState<Task | null>(null);
   const [sortBy, setSortBy] = useState<'category' | 'priority' | 'date'>('category');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -47,11 +50,14 @@ export const TaskList: React.FC = () => {
   const handleOpenModal = (taskIndex: number) => {
     setSelectedTaskIndex(taskIndex);
     setIsModalOpen(true);
+    setIsEditMode(false);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedTaskIndex(null);
+    setIsEditMode(false);
+    setTaskToEdit(null);
   };
 
   const handleNextTask = () => {
@@ -67,8 +73,10 @@ export const TaskList: React.FC = () => {
   };
 
   const handleEditTask = () => {
-    // For now, just close the modal - edit functionality can be added later
-    handleCloseModal();
+    if (selectedTask) {
+      setTaskToEdit(selectedTask);
+      setIsEditMode(true);
+    }
   };
 
   const handleDeleteTask = () => {
@@ -76,6 +84,17 @@ export const TaskList: React.FC = () => {
       deleteTask(selectedTask.id);
       handleCloseModal();
     }
+  };
+
+  const handleSaveEdit = () => {
+    setIsEditMode(false);
+    setTaskToEdit(null);
+    // Keep the modal open to show the updated task
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditMode(false);
+    setTaskToEdit(null);
   };
 
   const selectedTask = selectedTaskIndex !== null ? sortedTasks[selectedTaskIndex] : null;
@@ -169,17 +188,43 @@ export const TaskList: React.FC = () => {
         </div>
       )}
       
-      <TaskDetailModal
-        task={selectedTask}
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        onEdit={handleEditTask}
-        onDelete={handleDeleteTask}
-        onNext={handleNextTask}
-        onPrevious={handlePreviousTask}
-        hasNext={hasNext}
-        hasPrevious={hasPrevious}
-      />
+      {/* Task Detail Modal */}
+      {!isEditMode && (
+        <TaskDetailModal
+          task={selectedTask}
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          onEdit={handleEditTask}
+          onDelete={handleDeleteTask}
+          onNext={handleNextTask}
+          onPrevious={handlePreviousTask}
+          hasNext={hasNext}
+          hasPrevious={hasPrevious}
+        />
+      )}
+
+      {/* Edit Form Modal */}
+      {isEditMode && taskToEdit && (
+        <div className={styles.editModal}>
+          <div className={styles.editModalContent}>
+            <div className={styles.editModalHeader}>
+              <h2>Edit Task</h2>
+              <button 
+                onClick={handleCloseModal}
+                className={styles.closeButton}
+                aria-label="Close modal"
+              >
+                ×
+              </button>
+            </div>
+            <TaskForm 
+              taskToEdit={taskToEdit}
+              onSave={handleSaveEdit}
+              onCancel={handleCancelEdit}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }; 

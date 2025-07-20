@@ -130,4 +130,97 @@
   margin: 0;
   line-height: 1.2;
   font-family: 'Press Start 2P', monospace;
+}
+
+/* Edit Modal Styles */
+.editModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: var(--spacing-md);
+}
+
+.editModalContent {
+  background: var(--color-bg-primary);
+  border: 4px solid var(--color-border-primary);
+  border-radius: 0px;
+  box-shadow: var(--shadow-modal);
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.editModalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md);
+  border-bottom: 2px solid var(--color-border-primary);
+  background: var(--color-bg-secondary);
+}
+
+.editModalHeader h2 {
+  font-size: var(--font-size-md);
+  font-weight: normal;
+  margin: 0;
+  color: var(--color-text-primary);
+  font-family: 'Press Start 2P', monospace;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-lg);
+  cursor: pointer;
+  padding: var(--spacing-xs);
+  border-radius: 0px;
+  transition: all var(--transition-normal);
+  font-family: 'Press Start 2P', monospace;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.closeButton:hover {
+  color: var(--color-accent-gold);
+  background: var(--color-bg-primary);
+}
+
+/* Responsive design for mobile devices */
+@media (max-width: 768px) {
+  .editModal {
+    padding: var(--spacing-sm);
+  }
+  
+  .editModalContent {
+    max-width: 100%;
+    max-height: 95vh;
+  }
+  
+  .sectionHeader {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .controls {
+    justify-content: space-between;
+  }
 } 
