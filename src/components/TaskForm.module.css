@@ -82,15 +82,23 @@
   border-radius: 0px;
   background: var(--color-bg-primary);
   color: var(--color-text-primary);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-xl);
   font-family: 'Press Start 2P', monospace;
   resize: vertical;
   margin-bottom: var(--spacing-md);
   transition: all var(--transition-normal);
   min-height: 60px;
+  max-height: 200px;
+  overflow-y: auto;
   -webkit-font-smoothing: none;
   -moz-osx-font-smoothing: none;
   text-rendering: optimizeSpeed;
+}
+
+/* Auto-expanding textarea for edit mode */
+.descriptionInput[data-auto-expand="true"] {
+  max-height: none;
+  overflow-y: visible;
 }
 
 .descriptionInput:focus {
@@ -109,6 +117,25 @@
   font-family: 'Press Start 2P', monospace;
   -webkit-font-smoothing: none;
   -moz-osx-font-smoothing: none;
+}
+
+/* Custom scrollbar for description input */
+.descriptionInput::-webkit-scrollbar {
+  width: 8px;
+}
+
+.descriptionInput::-webkit-scrollbar-track {
+  background: var(--color-bg-tertiary);
+  border-radius: 0px;
+}
+
+.descriptionInput::-webkit-scrollbar-thumb {
+  background: var(--color-border-primary);
+  border-radius: 0px;
+}
+
+.descriptionInput::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-secondary);
 }
 
 .submitButton {
@@ -211,7 +238,7 @@
   border-radius: 0px;
   background: transparent;
   color: var(--color-text-primary);
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-sm);
   font-family: 'Press Start 2P', monospace;
   cursor: pointer;
   transition: all var(--transition-normal);
@@ -267,7 +294,7 @@
   background: var(--color-bg-secondary);
   border: 1px solid var(--color-border-primary);
   border-radius: 0px;
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-sm);
   font-family: 'Press Start 2P', monospace;
   -webkit-font-smoothing: none;
   -moz-osx-font-smoothing: none;

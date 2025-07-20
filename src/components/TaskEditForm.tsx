@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Task } from '../types';
 import { useTasks } from '../hooks/useTasks';
 import styles from './TaskForm.module.css';
@@ -14,6 +14,15 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({ task, onCancel }) =>
   const [description, setDescription] = useState(task.description || '');
   const [category, setCategory] = useState<'body' | 'mind' | 'soul' | 'career' | 'home' | 'skills'>((task.category as 'body' | 'mind' | 'soul' | 'career' | 'home' | 'skills') || 'body');
   const [priority, setPriority] = useState<'low' | 'medium' | 'high'>(task.priority);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Auto-resize textarea function
+  const autoResizeTextarea = () => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
+    }
+  };
 
   // Update form when task changes
   useEffect(() => {
@@ -22,6 +31,11 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({ task, onCancel }) =>
     setCategory((task.category as 'body' | 'mind' | 'soul' | 'career' | 'home' | 'skills') || 'body');
     setPriority(task.priority);
   }, [task]);
+
+  // Auto-resize textarea when description changes
+  useEffect(() => {
+    autoResizeTextarea();
+  }, [description]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,7 +84,7 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({ task, onCancel }) =>
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="What needs to be done?"
+            placeholder="Intention"
             className={styles.titleInput}
             required
             minLength={1}
@@ -81,11 +95,12 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({ task, onCancel }) =>
       
       <div style={{ position: 'relative' }}>
         <textarea
+          ref={textareaRef}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Description (optional)"
           className={styles.descriptionInput}
-          rows={3}
+          data-auto-expand="true"
           maxLength={500}
         />
       </div>

@@ -63,7 +63,7 @@ export const TaskForm: React.FC = () => {
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="What needs to be done?"
+            placeholder="Intention"
             className={styles.titleInput}
             required
             minLength={1}

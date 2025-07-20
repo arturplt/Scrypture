@@ -113,6 +113,10 @@
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+  /* Remove mobile tap highlight */
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-touch-action: manipulation;
 }
 
 html {
@@ -143,6 +147,10 @@ input, textarea, select, button {
   -moz-osx-font-smoothing: none;
   text-rendering: optimizeSpeed;
   border-radius: 0px;
+  /* Mobile touch improvements */
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-touch-action: manipulation;
 }
 
 /* Allow text selection in input fields and textareas */
@@ -157,6 +165,14 @@ input, textarea {
 *:focus {
   outline: 2px solid var(--color-accent-gold);
   outline-offset: 1px;
+}
+
+/* Mobile touch improvements for interactive elements */
+button, [role="button"], .card, .checkbox, input[type="checkbox"] {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-touch-action: manipulation;
+  touch-action: manipulation;
 }
 
 /* Scrollbar styling */
