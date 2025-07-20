@@ -67,6 +67,7 @@ This index serves as the master navigation guide for the Scrypture MVP documenta
 | **[05-database-schema.md](05-database-schema.md)** | Database design, relationships, indexes | Backend developers, DBAs | 03-technical-specs.md | ✅ Complete |
 | **[06-development-guide.md](06-development-guide.md)** | Setup, implementation, deployment | Developers, DevOps | 03-technical-specs.md | ✅ Complete |
 | **[07-mvp-checklist.md](07-mvp-checklist.md)** | Implementation tracking and status | Developers, QA, product managers | 02-mvp-features.md | ✅ Complete |
+| **[test-suite-improvements.md](test-suite-improvements.md)** | Test suite enhancements and current status | Developers, QA engineers | 06-development-guide.md | ✅ Complete |
 
 **Key Concepts**: MVP features, technical architecture, implementation guidance, deployment procedures
 
