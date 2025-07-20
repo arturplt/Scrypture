@@ -9,6 +9,7 @@ interface TaskDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   onEdit?: () => void;
+  onDelete?: () => void;
   onNext?: () => void;
   onPrevious?: () => void;
   hasNext?: boolean;
@@ -20,6 +21,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   isOpen, 
   onClose, 
   onEdit, 
+  onDelete,
   onNext, 
   onPrevious, 
   hasNext = false, 
@@ -150,6 +152,11 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
     }
   };
 
+  // Filter out zero rewards
+  const nonZeroRewards = task.statRewards 
+    ? Object.entries(task.statRewards).filter(([_, value]) => value && value > 0)
+    : [];
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Task Details">
       <div 
@@ -204,15 +211,26 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
               )}
             </div>
             
-            {onEdit && (
-              <button
-                onClick={onEdit}
-                className={styles.editButton}
-                aria-label="Edit task"
-              >
-                ✎
-              </button>
-            )}
+            <div className={styles.actionButtons}>
+              {onEdit && (
+                <button
+                  onClick={onEdit}
+                  className={styles.editButton}
+                  aria-label="Edit task"
+                >
+                  ✎
+                </button>
+              )}
+              {onDelete && (
+                <button
+                  onClick={onDelete}
+                  className={styles.deleteButton}
+                  aria-label="Delete task"
+                >
+                  🗑️
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -259,13 +277,13 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
           )}
         </div>
 
-        {task.statRewards && Object.keys(task.statRewards).length > 0 && (
+        {nonZeroRewards.length > 0 && (
           <div className={styles.rewardsSection}>
             <h4 className={styles.sectionTitle}>Rewards</h4>
             <div className={styles.rewards}>
-              {Object.entries(task.statRewards).map(([stat, value]) => (
+              {nonZeroRewards.map(([stat, value]) => (
                 <span key={stat} className={styles.reward}>
-                  {stat.charAt(0).toUpperCase() + stat.slice(1)}: +{value}
+                  {stat === 'xp' ? 'XP' : stat.charAt(0).toUpperCase() + stat.slice(1)}: +{value}
                 </span>
               ))}
             </div>

@@ -6,7 +6,7 @@ import { Task } from '../types';
 import styles from './TaskList.module.css';
 
 export const TaskList: React.FC = () => {
-  const { tasks } = useTasks();
+  const { tasks, deleteTask } = useTasks();
   const [selectedTaskIndex, setSelectedTaskIndex] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [sortBy, setSortBy] = useState<'category' | 'priority' | 'date'>('category');
@@ -63,6 +63,18 @@ export const TaskList: React.FC = () => {
   const handlePreviousTask = () => {
     if (selectedTaskIndex !== null && selectedTaskIndex > 0) {
       setSelectedTaskIndex(selectedTaskIndex - 1);
+    }
+  };
+
+  const handleEditTask = () => {
+    // For now, just close the modal - edit functionality can be added later
+    handleCloseModal();
+  };
+
+  const handleDeleteTask = () => {
+    if (selectedTask) {
+      deleteTask(selectedTask.id);
+      handleCloseModal();
     }
   };
 
@@ -161,6 +173,8 @@ export const TaskList: React.FC = () => {
         task={selectedTask}
         isOpen={isModalOpen}
         onClose={handleCloseModal}
+        onEdit={handleEditTask}
+        onDelete={handleDeleteTask}
         onNext={handleNextTask}
         onPrevious={handlePreviousTask}
         hasNext={hasNext}

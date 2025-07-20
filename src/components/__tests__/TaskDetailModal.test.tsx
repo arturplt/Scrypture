@@ -561,4 +561,75 @@ describe('TaskDetailModal', () => {
       expect(screen.getByText('Test Task')).toBeInTheDocument();
     });
   });
+
+  test('hides zero rewards', () => {
+    const taskWithZeroRewards: Task = {
+      id: '1',
+      title: 'Test Task',
+      description: 'Test description',
+      completed: false,
+      createdAt: new Date('2024-01-01'),
+      updatedAt: new Date('2024-01-01'),
+      priority: 'medium',
+      category: 'body',
+      statRewards: {
+        body: 0,
+        mind: 0,
+        soul: 0,
+        xp: 0
+      }
+    };
+
+    render(<TaskDetailModal {...defaultProps} task={taskWithZeroRewards} />);
+    
+    // Should not show rewards section when all rewards are zero
+    expect(screen.queryByText('Rewards')).not.toBeInTheDocument();
+  });
+
+  test('shows delete button when onDelete prop is provided', () => {
+    const onDelete = jest.fn();
+    render(<TaskDetailModal {...defaultProps} onDelete={onDelete} />);
+    
+    const deleteButton = screen.getByLabelText('Delete task');
+    expect(deleteButton).toBeInTheDocument();
+    expect(deleteButton).toHaveTextContent('🗑️');
+  });
+
+  test('does not show delete button when onDelete prop is not provided', () => {
+    render(<TaskDetailModal {...defaultProps} onDelete={undefined} />);
+    
+    expect(screen.queryByLabelText('Delete task')).not.toBeInTheDocument();
+  });
+
+  test('shows only non-zero rewards', () => {
+    const taskWithMixedRewards: Task = {
+      id: '1',
+      title: 'Test Task',
+      description: 'Test description',
+      completed: false,
+      createdAt: new Date('2024-01-01'),
+      updatedAt: new Date('2024-01-01'),
+      priority: 'medium',
+      category: 'body',
+      statRewards: {
+        body: 2,
+        mind: 0,
+        soul: 1,
+        xp: 0
+      }
+    };
+
+    render(<TaskDetailModal {...defaultProps} task={taskWithMixedRewards} />);
+    
+    // Should show rewards section
+    expect(screen.getByText('Rewards')).toBeInTheDocument();
+    
+    // Should show only non-zero rewards
+    expect(screen.getByText('Body: +2')).toBeInTheDocument();
+    expect(screen.getByText('Soul: +1')).toBeInTheDocument();
+    
+    // Should not show zero rewards
+    expect(screen.queryByText('Mind: +0')).not.toBeInTheDocument();
+    expect(screen.queryByText('XP: +0')).not.toBeInTheDocument();
+  });
 }); 
