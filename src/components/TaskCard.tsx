@@ -71,6 +71,25 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onOpenModal }) => {
     }
   };
 
+  const getCategoryIcon = (category?: string) => {
+    switch (category) {
+      case 'body':
+        return '💪';
+      case 'mind':
+        return '🧠';
+      case 'soul':
+        return '✨';
+      case 'career':
+        return '💼';
+      case 'home':
+        return '🏠';
+      case 'skills':
+        return '🎯';
+      default:
+        return '📝';
+    }
+  };
+
   if (isEditing) {
     return (
       <div className={`${styles.card} ${styles.editing}`}>
@@ -100,6 +119,11 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onOpenModal }) => {
             <span className={`${styles.priority} ${getPriorityColor(task.priority)}`}>
               {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)} Priority
             </span>
+            {task.category && (
+              <span className={styles.category}>
+                {getCategoryIcon(task.category)} {task.category.charAt(0).toUpperCase() + task.category.slice(1)}
+              </span>
+            )}
             <span className={styles.date}>
               {formatRelativeTime(new Date(task.createdAt))}
             </span>

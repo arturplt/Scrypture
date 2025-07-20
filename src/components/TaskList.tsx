@@ -9,14 +9,32 @@ export const TaskList: React.FC = () => {
   const { tasks } = useTasks();
   const [selectedTaskIndex, setSelectedTaskIndex] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [sortBy, setSortBy] = useState<'category' | 'priority' | 'date'>('category');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   
-  // Separate active and completed tasks
-  const activeTasks = tasks.filter(task => !task.completed).sort((a, b) => {
-    const priorityOrder = { high: 3, medium: 2, low: 1 };
-    const priorityDiff = priorityOrder[b.priority] - priorityOrder[a.priority];
-    if (priorityDiff !== 0) return priorityDiff;
+  // Filter and sort active tasks
+  const activeTasks = tasks.filter(task => !task.completed).filter(task => {
+    if (selectedCategory) {
+      return task.category === selectedCategory;
+    }
+    return true;
+  }).sort((a, b) => {
+    let comparison = 0;
     
-    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    if (sortBy === 'category') {
+      const categoryOrder: Record<string, number> = { body: 1, mind: 2, soul: 3, career: 4, home: 5, skills: 6 };
+      const categoryA = a.category || 'body';
+      const categoryB = b.category || 'body';
+      comparison = categoryOrder[categoryA] - categoryOrder[categoryB];
+    } else if (sortBy === 'priority') {
+      const priorityOrder = { high: 3, medium: 2, low: 1 };
+      comparison = priorityOrder[a.priority] - priorityOrder[b.priority];
+    } else if (sortBy === 'date') {
+      comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+    }
+    
+    return sortOrder === 'asc' ? comparison : -comparison;
   });
 
   const completedTasks = tasks.filter(task => task.completed).sort((a, b) => {
@@ -69,7 +87,48 @@ export const TaskList: React.FC = () => {
       {/* Active Tasks Section */}
       {activeTasks.length > 0 && (
         <div className={styles.section}>
-          <h2 className={styles.title}>Active Tasks</h2>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.title}>Active Tasks</h2>
+            <div className={styles.controls}>
+              {/* Category Filter */}
+              <div className={styles.categoryFilter}>
+                <select 
+                  value={selectedCategory || ''} 
+                  onChange={(e) => setSelectedCategory(e.target.value || null)}
+                  className={styles.categorySelect}
+                >
+                  <option value="">All Categories</option>
+                  <option value="body">💪 Body</option>
+                  <option value="mind">🧠 Mind</option>
+                  <option value="soul">✨ Soul</option>
+                  <option value="career">💼 Career</option>
+                  <option value="home">🏠 Home</option>
+                  <option value="skills">🎯 Skills</option>
+                </select>
+              </div>
+              
+              {/* Sort Controls */}
+              <div className={styles.sortControls}>
+                <select 
+                  value={sortBy} 
+                  onChange={(e) => setSortBy(e.target.value as 'category' | 'priority' | 'date')}
+                  className={styles.sortSelect}
+                >
+                  <option value="category">📂 Category</option>
+                  <option value="priority">⚡ Priority</option>
+                  <option value="date">📅 Date</option>
+                </select>
+                
+                <button 
+                  onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                  className={styles.sortButton}
+                  aria-label={`Sort ${sortOrder === 'asc' ? 'descending' : 'ascending'}`}
+                >
+                  {sortOrder === 'asc' ? '↑' : '↓'}
+                </button>
+              </div>
+            </div>
+          </div>
           <div className={styles.taskGrid}>
             {activeTasks.map((task, index) => (
               <TaskCard 

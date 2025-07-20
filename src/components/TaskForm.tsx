@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useTasks } from '../hooks/useTasks';
 import { taskService } from '../services/taskService';
 import styles from './TaskForm.module.css';
@@ -9,6 +9,8 @@ export const TaskForm: React.FC = () => {
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState<'body' | 'mind' | 'soul' | 'career' | 'home' | 'skills'>('body');
   const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
+  const [isExpanded, setIsExpanded] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,6 +35,38 @@ export const TaskForm: React.FC = () => {
     e.preventDefault();
   };
 
+  const handleTitleClick = () => {
+    setIsExpanded(true);
+  };
+
+  const handleTitleBlur = () => {
+    if (!title.trim()) {
+      setIsExpanded(false);
+    }
+  };
+
+  // Auto-resize textarea function
+  const autoResizeTextarea = () => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      const scrollHeight = textareaRef.current.scrollHeight;
+      const maxHeight = 300; // Match CSS max-height
+      
+      if (scrollHeight <= maxHeight) {
+        textareaRef.current.style.height = scrollHeight + 'px';
+        textareaRef.current.style.overflowY = 'hidden';
+      } else {
+        textareaRef.current.style.height = maxHeight + 'px';
+        textareaRef.current.style.overflowY = 'auto';
+      }
+    }
+  };
+
+  // Auto-resize textarea when description changes
+  useEffect(() => {
+    autoResizeTextarea();
+  }, [description]);
+
   const priorityOptions = [
     { value: 'low', label: 'LOW PRIORITY', color: 'var(--color-easy)' },
     { value: 'medium', label: 'MEDIUM PRIORITY', color: 'var(--color-focus)' },
@@ -56,7 +90,12 @@ export const TaskForm: React.FC = () => {
   };
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit} noValidate>
+    <form 
+      className={`${styles.form} ${isExpanded ? styles.expanded : ''}`} 
+      onSubmit={handleSubmit} 
+      noValidate
+      onClick={!isExpanded ? handleTitleClick : undefined}
+    >
       <div className={styles.inputGroup}>
         <div style={{ flex: 1, position: 'relative' }}>
           <input
@@ -69,6 +108,8 @@ export const TaskForm: React.FC = () => {
             minLength={1}
             maxLength={100}
             onInvalid={handleInvalid}
+            onBlur={handleTitleBlur}
+            onClick={handleTitleClick}
           />
           <div className={styles.validationMessage}>
             Please fill in this field.
@@ -76,88 +117,95 @@ export const TaskForm: React.FC = () => {
         </div>
       </div>
       
-      <div style={{ position: 'relative' }}>
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Description (optional)"
-          className={styles.descriptionInput}
-          rows={3}
-          maxLength={500}
-          onInvalid={handleInvalid}
-        />
-        <div className={styles.validationMessage}>
-          Description is too long.
+      {isExpanded && (
+        <div style={{ position: 'relative' }}>
+          <textarea
+            ref={textareaRef}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Description (optional)"
+            className={styles.descriptionInput}
+            rows={1}
+            maxLength={500}
+            onInvalid={handleInvalid}
+          />
+          <div className={styles.validationMessage}>
+            Description is too long.
+          </div>
         </div>
-      </div>
+      )}
       
-      <div className={styles.categorySelector}>
-        <label className={styles.categoryLabel}>Category:</label>
-        <div className={styles.categoryButtons}>
-          {categoryOptions.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              className={`${styles.categoryButton} ${category === option.value ? styles.categoryButtonActive : ''}`}
-              style={{ 
-                borderColor: option.color,
-                backgroundColor: category === option.value ? option.color : 'transparent',
-                color: category === option.value ? 'var(--color-bg-primary)' : 'var(--color-text-primary)'
-              }}
-              onClick={() => setCategory(option.value as 'body' | 'mind' | 'soul' | 'career' | 'home' | 'skills')}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
-      </div>
+      {isExpanded && (
+        <>
+          <div className={styles.categorySelector}>
+            <label className={styles.categoryLabel}>Category:</label>
+            <div className={styles.categoryButtons}>
+              {categoryOptions.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  className={`${styles.categoryButton} ${category === option.value ? styles.categoryButtonActive : ''}`}
+                  style={{ 
+                    borderColor: option.color,
+                    backgroundColor: category === option.value ? option.color : 'transparent',
+                    color: category === option.value ? 'var(--color-bg-primary)' : 'var(--color-text-primary)'
+                  }}
+                  onClick={() => setCategory(option.value as 'body' | 'mind' | 'soul' | 'career' | 'home' | 'skills')}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          <div className={styles.prioritySelector}>
+            <label className={styles.priorityLabel}>Priority:</label>
+            <div className={styles.priorityButtons}>
+              {priorityOptions.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  className={`${styles.priorityButton} ${priority === option.value ? styles.priorityButtonActive : ''}`}
+                  style={{ 
+                    borderColor: option.color,
+                    backgroundColor: priority === option.value ? option.color : 'transparent',
+                    color: priority === option.value ? 'var(--color-bg-primary)' : 'var(--color-text-primary)'
+                  }}
+                  onClick={() => setPriority(option.value as 'low' | 'medium' | 'high')}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
 
-      <div className={styles.statRewards}>
-        <label className={styles.statRewardsLabel}>Rewards:</label>
-        <div className={styles.statRewardsDisplay}>
-          {Object.entries(getStatRewards().statRewards).map(([stat, value]) => (
-            <div key={stat} className={styles.statReward}>
-              <span className={styles.statIcon}>
-                {stat === 'body' ? '💪' : stat === 'mind' ? '🧠' : '✨'}
-              </span>
-              <span className={styles.statName}>{stat.toUpperCase()}</span>
-              <span className={styles.statValue}>+{value}</span>
+          <div className={styles.statRewards}>
+            <label className={styles.statRewardsLabel}>Rewards:</label>
+            <div className={styles.statRewardsDisplay}>
+              {Object.entries(getStatRewards().statRewards).map(([stat, value]) => (
+                <div key={stat} className={styles.statReward}>
+                  <span className={styles.statIcon}>
+                    {stat === 'body' ? '💪' : stat === 'mind' ? '🧠' : '✨'}
+                  </span>
+                  <span className={styles.statName}>{stat.toUpperCase()}</span>
+                  <span className={styles.statValue}>+{value}</span>
+                </div>
+              ))}
+              {getStatRewards().xp && (
+                <div className={styles.statReward}>
+                  <span className={styles.statIcon}>⭐</span>
+                  <span className={styles.statName}>XP</span>
+                  <span className={styles.statValue}>+{getStatRewards().xp}</span>
+                </div>
+              )}
             </div>
-          ))}
-          {getStatRewards().xp && (
-            <div className={styles.statReward}>
-              <span className={styles.statIcon}>⭐</span>
-              <span className={styles.statName}>XP</span>
-              <span className={styles.statValue}>+{getStatRewards().xp}</span>
-            </div>
-          )}
-        </div>
-      </div>
-      
-      <div className={styles.prioritySelector}>
-        <label className={styles.priorityLabel}>Priority:</label>
-        <div className={styles.priorityButtons}>
-          {priorityOptions.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              className={`${styles.priorityButton} ${priority === option.value ? styles.priorityButtonActive : ''}`}
-              style={{ 
-                borderColor: option.color,
-                backgroundColor: priority === option.value ? option.color : 'transparent',
-                color: priority === option.value ? 'var(--color-bg-primary)' : 'var(--color-text-primary)'
-              }}
-              onClick={() => setPriority(option.value as 'low' | 'medium' | 'high')}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
-      </div>
-      
-      <button type="submit" className={styles.submitButton}>
-        Add Task
-      </button>
+          </div>
+          
+          <button type="submit" className={styles.submitButton}>
+            Add Task
+          </button>
+        </>
+      )}
     </form>
   );
 }; 
