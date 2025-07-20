@@ -128,4 +128,32 @@
 .deleteButton:hover {
   color: var(--color-error);
   background: var(--color-bg-tertiary);
+}
+
+.actions {
+  display: flex;
+  gap: var(--spacing-xs);
+  flex-shrink: 0;
+}
+
+.editButton {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  padding: var(--spacing-xs);
+  border-radius: 0px;
+  transition: all var(--transition-normal);
+  font-family: 'Press Start 2P', monospace;
+}
+
+.editButton:hover {
+  color: var(--color-accent-gold);
+  background: var(--color-bg-tertiary);
+}
+
+.card.editing {
+  border-color: var(--color-accent-gold);
+  box-shadow: 0 0 0 2px var(--color-accent-gold);
 } 

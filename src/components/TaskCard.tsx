@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Task } from '../types';
 import { useTasks } from '../hooks/useTasks';
+import { TaskEditForm } from './TaskEditForm';
 import styles from './TaskCard.module.css';
 
 interface TaskCardProps {
@@ -9,6 +10,7 @@ interface TaskCardProps {
 
 export const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
   const { toggleTask, deleteTask } = useTasks();
+  const [isEditing, setIsEditing] = useState(false);
 
   const handleToggle = () => {
     toggleTask(task.id);
@@ -16,6 +18,14 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
 
   const handleDelete = () => {
     deleteTask(task.id);
+  };
+
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
   };
 
   const getPriorityColor = (priority: Task['priority']) => {
@@ -30,6 +40,14 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
         return styles.priorityMedium;
     }
   };
+
+  if (isEditing) {
+    return (
+      <div className={`${styles.card} ${styles.editing}`}>
+        <TaskEditForm task={task} onCancel={handleCancelEdit} />
+      </div>
+    );
+  }
 
   return (
     <div className={`${styles.card} ${task.completed ? styles.completed : ''}`}>
@@ -64,13 +82,22 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
           </div>
         </div>
         
-        <button
-          onClick={handleDelete}
-          className={styles.deleteButton}
-          aria-label="Delete task"
-        >
-          ×
-        </button>
+        <div className={styles.actions}>
+          <button
+            onClick={handleEdit}
+            className={styles.editButton}
+            aria-label="Edit task"
+          >
+            ✎
+          </button>
+          <button
+            onClick={handleDelete}
+            className={styles.deleteButton}
+            aria-label="Delete task"
+          >
+            ×
+          </button>
+        </div>
       </div>
     </div>
   );

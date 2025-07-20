@@ -124,6 +124,18 @@
 
 **Migration Support**: Task model supports future fields (e.g., dueDate, priority) via flexible structure. Planned support for task schema migration ensures data integrity during updates.
 
+### **8.7. Task Editing System**
+**Purpose**: Allow users to modify existing tasks after creation
+**Implementation**: Inline editing form with pre-filled task data
+**User Flow**: Click edit button → Modify task → Save changes
+**Technical**: Edit form component with validation and state management
+
+**Edit Interface**: Task cards display edit button (✎) alongside delete button. Clicking edit transforms the card into an editable form with all current task data pre-filled. Users can modify title, description, and priority before saving or canceling changes.
+
+**Validation**: Edit form uses same validation rules as task creation with custom pixel art error messages and browser validation prevention.
+
+**State Management**: Edit mode is managed per task card with local state. Canceling edit resets form to original values and exits edit mode.
+
 ---
 
 ## 🎭 **Core Attributes System (6 Features)**

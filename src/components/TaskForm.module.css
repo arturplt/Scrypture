@@ -264,4 +264,38 @@
 
 .priorityButtonActive {
   box-shadow: var(--shadow-active);
+}
+
+.buttonGroup {
+  display: flex;
+  gap: var(--spacing-sm);
+  width: 100%;
+}
+
+.cancelButton {
+  flex: 1;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  border: 2px solid var(--color-border-primary);
+  border-radius: 0px;
+  font-size: var(--font-size-sm);
+  font-weight: normal;
+  font-family: 'Press Start 2P', monospace;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  box-shadow: var(--shadow-button);
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+}
+
+.cancelButton:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-active);
+  background: var(--color-bg-secondary);
+}
+
+.cancelButton:active {
+  transform: translateY(0);
 } 
