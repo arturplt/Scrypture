@@ -52,15 +52,6 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
   return (
     <div className={`${styles.card} ${task.completed ? styles.completed : ''}`}>
       <div className={styles.header}>
-        <div className={styles.checkboxContainer}>
-          <input
-            type="checkbox"
-            checked={task.completed}
-            onChange={handleToggle}
-            className={styles.checkbox}
-          />
-        </div>
-        
         <div className={styles.content}>
           <h3 className={`${styles.title} ${task.completed ? styles.titleCompleted : ''}`}>
             {task.title}
@@ -82,21 +73,32 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
           </div>
         </div>
         
-        <div className={styles.actions}>
-          <button
-            onClick={handleEdit}
-            className={styles.editButton}
-            aria-label="Edit task"
-          >
-            ✎
-          </button>
-          <button
-            onClick={handleDelete}
-            className={styles.deleteButton}
-            aria-label="Delete task"
-          >
-            ×
-          </button>
+        <div className={styles.rightSection}>
+          <div className={styles.checkboxContainer}>
+            <input
+              type="checkbox"
+              checked={task.completed}
+              onChange={handleToggle}
+              className={styles.checkbox}
+            />
+          </div>
+          
+          <div className={styles.actions}>
+            <button
+              onClick={handleDelete}
+              className={styles.deleteButton}
+              aria-label="Delete task"
+            >
+              ×
+            </button>
+            <button
+              onClick={handleEdit}
+              className={styles.editButton}
+              aria-label="Edit task"
+            >
+              ✎
+            </button>
+          </div>
         </div>
       </div>
     </div>
