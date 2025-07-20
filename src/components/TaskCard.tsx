@@ -121,6 +121,10 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
         task={task}
         isOpen={isModalOpen}
         onClose={handleCloseModal}
+        onEdit={() => {
+          handleCloseModal();
+          setIsEditing(true);
+        }}
       />
     </>
   );

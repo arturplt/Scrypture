@@ -7,9 +7,10 @@ interface TaskDetailModalProps {
   task: Task | null;
   isOpen: boolean;
   onClose: () => void;
+  onEdit?: () => void;
 }
 
-export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, isOpen, onClose }) => {
+export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, isOpen, onClose, onEdit }) => {
   if (!task) return null;
 
   const getPriorityColor = (priority: Task['priority']) => {
@@ -59,11 +60,23 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, isOpen, 
             )}
           </div>
           
-          <div className={styles.status}>
-            {task.completed ? (
-              <span className={styles.completedStatus}>✓ Completed</span>
-            ) : (
-              <span className={styles.pendingStatus}>⏳ Pending</span>
+          <div className={styles.headerActions}>
+            <div className={styles.status}>
+              {task.completed ? (
+                <span className={styles.completedStatus}>✓ Completed</span>
+              ) : (
+                <span className={styles.pendingStatus}>⏳ Pending</span>
+              )}
+            </div>
+            
+            {onEdit && (
+              <button
+                onClick={onEdit}
+                className={styles.editButton}
+                aria-label="Edit task"
+              >
+                ✎
+              </button>
             )}
           </div>
         </div>
