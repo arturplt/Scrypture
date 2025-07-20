@@ -319,23 +319,15 @@ export const TaskForm: React.FC<TaskFormProps> = ({ taskToEdit, onCancel, onSave
                 value > 0 && (
                   <div key={stat} className={styles.statReward}>
                     <span className={styles.statIcon}>
-                      {stat === 'body' ? '💪' : stat === 'mind' ? '🧠' : '✨'}
+                      {stat === 'body' ? '💪' : stat === 'mind' ? '🧠' : stat === 'soul' ? '✨' : '⭐'}
                     </span>
-                    <span className={styles.statName}>{stat.toUpperCase()}</span>
+                    <span className={styles.statName}>
+                      {stat === 'xp' ? 'XP' : stat.toUpperCase()}
+                    </span>
                     <span className={styles.statValue}>+{value}</span>
                   </div>
                 )
               ))}
-              {(() => {
-                const xp = getStatRewards().xp;
-                return xp && xp > 0 ? (
-                  <div className={styles.statReward}>
-                    <span className={styles.statIcon}>⭐</span>
-                    <span className={styles.statName}>XP</span>
-                    <span className={styles.statValue}>+{xp}</span>
-                  </div>
-                ) : null;
-              })()}
             </div>
           </div>
           

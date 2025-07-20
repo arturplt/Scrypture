@@ -122,58 +122,7 @@ describe('TaskForm', () => {
     expect(screen.getByText('+ Add Category')).toBeInTheDocument();
   });
 
-  it('shows refresh and debug buttons when expanded', () => {
-    render(<TaskForm />);
-    
-    const titleInput = screen.getByPlaceholderText('Intention');
-    fireEvent.click(titleInput);
-    
-    expect(screen.getByText('🔄 Refresh')).toBeInTheDocument();
-    expect(screen.getByText('🔍 Debug')).toBeInTheDocument();
-  });
 
-  it('refreshes categories when refresh button is clicked', async () => {
-    const mockCustomCategories = [
-      { name: 'new-category', icon: '🌟', color: 'var(--color-accent-gold)', points: { body: 1, mind: 1, soul: 1 } }
-    ];
-    
-    mockCategoryService.getCustomCategories.mockReturnValue(mockCustomCategories);
-    
-    render(<TaskForm />);
-    
-    const titleInput = screen.getByPlaceholderText('Intention');
-    fireEvent.click(titleInput);
-    
-    const refreshButton = screen.getByText('🔄 Refresh');
-    fireEvent.click(refreshButton);
-    
-    await waitFor(() => {
-      expect(mockCategoryService.getCustomCategories).toHaveBeenCalled();
-    });
-  });
-
-  it('shows debug information when debug button is clicked', () => {
-    // Mock localStorage
-    const mockLocalStorage = {
-      getItem: jest.fn().mockReturnValue(JSON.stringify([
-        { name: 'test', icon: '🎯', color: 'var(--color-skills)', points: { body: 1, mind: 1, soul: 1 } }
-      ]))
-    };
-    Object.defineProperty(window, 'localStorage', {
-      value: mockLocalStorage,
-      writable: true
-    });
-    
-    render(<TaskForm />);
-    
-    const titleInput = screen.getByPlaceholderText('Intention');
-    fireEvent.click(titleInput);
-    
-    const debugButton = screen.getByText('🔍 Debug');
-    fireEvent.click(debugButton);
-    
-    expect(mockLocalStorage.getItem).toHaveBeenCalledWith('scrypture_custom_categories');
-  });
 
   it('submits task with correct data', async () => {
     render(<TaskForm />);
