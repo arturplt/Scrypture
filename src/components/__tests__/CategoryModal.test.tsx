@@ -199,7 +199,7 @@ describe('CategoryModal', () => {
 
   it('shows validation error for existing custom category name', async () => {
     mockCategoryService.getCustomCategories.mockReturnValue([
-      { name: 'test', icon: '🎯', color: 'var(--color-skills)', points: { body: 1, mind: 1, soul: 1 } }
+      { name: 'test', icon: '🎯', color: 'var(--color-skills)', points: { body: 1, mind: 0, soul: 0 } }
     ]);
 
     render(
@@ -248,7 +248,7 @@ describe('CategoryModal', () => {
         name: 'test category',
         icon: '🧠',
         color: 'var(--color-body)', // Default color
-        points: { body: 1, mind: 1, soul: 1 } // Default points
+        points: { body: 1, mind: 0, soul: 0 } // Default points
       });
       expect(mockOnClose).toHaveBeenCalled();
     });
@@ -296,8 +296,8 @@ describe('CategoryModal', () => {
       />
     );
 
-    // With default 3 points (1 each), XP should be 0
-    expect(screen.getByText('+0')).toBeInTheDocument(); // XP should be 30 - (3 * 10) = 0
+    // With default 1 point (body: 1, mind: 0, soul: 0), XP should be 20
+    expect(screen.getByText('+20')).toBeInTheDocument(); // XP should be 30 - (1 * 10) = 20
   });
 
   it('closes modal when cancel is clicked', () => {

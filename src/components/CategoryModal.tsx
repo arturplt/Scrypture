@@ -38,7 +38,7 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
   const [categoryName, setCategoryName] = useState('');
   const [selectedIcon, setSelectedIcon] = useState('💪');
   const [selectedColor, setSelectedColor] = useState('var(--color-body)');
-  const [points, setPoints] = useState({ body: 1, mind: 1, soul: 1 });
+  const [points, setPoints] = useState({ body: 1, mind: 0, soul: 0 });
   const [error, setError] = useState('');
 
   const handleSubmit = () => {
@@ -288,6 +288,10 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
               <div className={styles.rewardItem}>
                 <span className={styles.rewardIcon}>⭐</span>
                 <span className={styles.rewardStat}>XP</span>
+                {/* XP Formula: 30 - (total_points * 10) 
+                    - 3 points = 0 XP
+                    - 2 points = 10 XP  
+                    - 1 point = 20 XP */}
                 <span className={styles.rewardValue}>+{30 - ((points.body + points.mind + points.soul) * 10)}</span>
               </div>
             </div>
