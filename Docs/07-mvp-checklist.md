@@ -49,7 +49,7 @@
 
 ---
 
-## 🎭 **Soul Attributes System (MVP CORE - 6 Features)**
+## 🎭 **Core Attributes System (MVP CORE - 6 Features)**
 
 ### **Core Stats & Progression**
 - [ ] **MVP CORE P1** Body, Mind, Soul attribute tracking
@@ -176,7 +176,7 @@
   - [ ] Experience points and stat rewards
 
 - [ ] **User Progression**
-  - [ ] Soul attributes tracking
+  - [ ] Core attributes tracking
   - [ ] Leveling system
   - [ ] Progress indicators
   - [ ] Level-up celebrations
@@ -266,7 +266,7 @@
 
 ### **Category Progress**
 - **Core Task System**: 0/8 features (0%)
-- **Soul Attributes**: 0/6 features (0%)
+- **Core Attributes**: 0/6 features (0%)
 - **Bóbr Companion**: 0/5 features (0%)
 - **Habit System**: 0/4 features (0%)
 - **Achievement System**: 0/3 features (0%)

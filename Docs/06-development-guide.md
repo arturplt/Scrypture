@@ -88,7 +88,7 @@ All code examples and documentation use **plain English terminology** by default
   - [ ] Experience points and stat rewards
 
 - [ ] **User Progression**
-  - [ ] Soul attributes tracking
+  - [ ] Core attributes tracking
   - [ ] Leveling system
   - [ ] Progress indicators
   - [ ] Level-up celebrations

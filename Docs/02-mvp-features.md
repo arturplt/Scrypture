@@ -19,7 +19,7 @@
 
 ### **MVP Scope**
 - **Core Task System**: Advanced task creation with priority, difficulty, due dates, tags, and duration tracking
-- **Soul Attributes**: Body, Mind, Soul progression with experience points and leveling
+- **Core Attributes**: Body, Mind, Soul progression with experience points and leveling
 - **Bóbr Companion**: Basic companion system with evolution stages
 - **Habit System**: Simple daily habit tracking and streaks
 - **Achievement System**: Basic achievements and milestone unlocks
@@ -126,7 +126,7 @@
 
 ---
 
-## 🎭 **Soul Attributes System (6 Features)**
+## 🎭 **Core Attributes System (6 Features)**
 
 ### **9. Core Stats Tracking**
 **Purpose**: Track Body, Mind, Soul progression

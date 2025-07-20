@@ -72,7 +72,7 @@ This folder contains **MVP-focused documentation** for the Scrypture project. It
 - Completion tracking
 - (Includes advanced features: priority, difficulty, due dates, tagging, duration tracking, model scalability)
 
-### **Soul Attributes System (6 features)**
+### **Core Attributes System (6 features)**
 - Core stats tracking (Body, Mind, Soul)
 - Experience point calculation
 - Leveling system (1-10)

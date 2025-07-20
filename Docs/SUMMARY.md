@@ -65,7 +65,7 @@
 
 ### **30 Core Features (Only)**
 - **Core Task System**: 13 features (creation, completion, tracking, advanced properties)
-- **Soul Attributes**: 6 features (stats, leveling, progression)
+- **Core Attributes**: 6 features (stats, leveling, progression)
 - **Bóbr Companion**: 5 features (introduction, evolution, motivation)
 - **Habit System**: 4 features (creation, tracking, streaks)
 - **Achievement System**: 3 features (unlocks, display, celebrations)

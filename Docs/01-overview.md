@@ -62,7 +62,7 @@ A specific action or activity that users can undertake to progress in their inte
 - **Experience Reward**: Points gained upon completion
 - **Stat Rewards**: Core attribute bonuses (Body, Mind, Soul)
 
-### **Soul Attributes (Stats)**
+### **Core Attributes (Stats)**
 Three core attributes that represent different aspects of personal development:
 - **Body**: Physical strength, health, vitality (physical tasks, exercise)
 - **Mind**: Intelligence, wisdom, knowledge (learning, problem-solving)
