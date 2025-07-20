@@ -12,7 +12,7 @@ export const userService = {
 
   createUser(name: string): User {
     const newUser: User = {
-      id: crypto.randomUUID(),
+      id: this.generateId(),
       name,
       level: 1,
       experience: 0,
@@ -28,8 +28,18 @@ export const userService = {
     return newUser;
   },
 
+  generateId(): string {
+    // Use crypto.randomUUID if available, otherwise fallback to a simple UUID generation
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+      return crypto.randomUUID();
+    }
+    // Fallback for test environments
+    return 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+  },
+
   updateUser(updates: Partial<User>): boolean {
     const user = this.getUser();
+    
     if (!user) return false;
     
     const updatedUser = { ...user, ...updates };
@@ -38,6 +48,7 @@ export const userService = {
 
   addExperience(amount: number): boolean {
     const user = this.getUser();
+    
     if (!user) return false;
 
     const newExperience = user.experience + amount;
@@ -52,7 +63,7 @@ export const userService = {
     return this.updateUser(updates);
   },
 
-  addStatRewards(rewards: { body?: number; mind?: number; soul?: number }): boolean {
+  addStatRewards(rewards: { body?: number; mind?: number; soul?: number; xp?: number }): boolean {
     const user = this.getUser();
     if (!user) return false;
 

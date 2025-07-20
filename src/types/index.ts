@@ -11,6 +11,7 @@ export interface Task {
     body?: number;
     mind?: number;
     soul?: number;
+    xp?: number;
   };
 }
 
@@ -66,6 +67,7 @@ export interface UserContextType {
   user: User | null;
   updateUser: (updates: Partial<User>) => void;
   addExperience: (amount: number) => void;
-  addStatRewards: (rewards: { body?: number; mind?: number; soul?: number }) => void;
+  addStatRewards: (rewards: { body?: number; mind?: number; soul?: number; xp?: number }) => void;
   unlockAchievement: (achievementId: string) => void;
+  createUser: (name: string) => User;
 } 

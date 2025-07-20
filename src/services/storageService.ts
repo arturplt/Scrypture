@@ -38,8 +38,12 @@ const validateUser = (user: any): user is User => {
     typeof user.name === 'string' &&
     typeof user.level === 'number' &&
     typeof user.experience === 'number' &&
+    typeof user.body === 'number' &&
+    typeof user.mind === 'number' &&
+    typeof user.soul === 'number' &&
     Array.isArray(user.achievements) &&
-    user.createdAt instanceof Date
+    user.createdAt instanceof Date &&
+    user.updatedAt instanceof Date
   );
 };
 
@@ -157,17 +161,19 @@ export class StorageService {
   // User-specific methods
   getUser(): User | null {
     const user = this.getItem<any>(STORAGE_KEYS.USER);
+    
     if (!user) return null;
 
     const processedUser = {
       ...user,
       createdAt: new Date(user.createdAt),
+      updatedAt: new Date(user.updatedAt),
       achievements: user.achievements.map((achievement: any) => ({
         ...achievement,
         unlockedAt: achievement.unlockedAt ? new Date(achievement.unlockedAt) : undefined,
       })),
     };
-
+    
     return validateUser(processedUser) ? processedUser : null;
   }
 

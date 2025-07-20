@@ -14,22 +14,22 @@ export const taskService = {
     return storageService.saveTasks([]);
   },
 
-  calculateStatRewards(category: string): { body?: number; mind?: number; soul?: number } {
+  calculateStatRewards(category: string): { body?: number; mind?: number; soul?: number; xp?: number } {
     const rewards = {
-      body: { body: 10 },
-      mind: { mind: 10 },
-      soul: { soul: 10 },
-      career: { mind: 5, body: 5 },
-      home: { body: 5, soul: 5 },
-      skills: { mind: 8, soul: 2 }
+      body: { body: 1, xp: 10 },
+      mind: { mind: 1, xp: 10 },
+      soul: { soul: 1, xp: 10 },
+      career: { mind: 1, body: 1, xp: 10 },
+      home: { body: 1, soul: 1, xp: 10 },
+      skills: { mind: 1, soul: 1, xp: 10 }
     };
-    return rewards[category as keyof typeof rewards] || { soul: 5, mind: 3, body: 2 };
+    return rewards[category as keyof typeof rewards] || { soul: 1, mind: 1, body: 1, xp: 10 };
   },
 
   createTask(taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>): Task {
     const newTask: Task = {
       ...taskData,
-      id: crypto.randomUUID(),
+      id: this.generateId(),
       createdAt: new Date(),
       updatedAt: new Date(),
       statRewards: taskData.category ? this.calculateStatRewards(taskData.category) : undefined,
@@ -40,5 +40,14 @@ export const taskService = {
     this.saveTasks(tasks);
     
     return newTask;
+  },
+
+  generateId(): string {
+    // Use crypto.randomUUID if available, otherwise fallback to a simple UUID generation
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+      return crypto.randomUUID();
+    }
+    // Fallback for test environments
+    return 'task_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
   },
 }; 

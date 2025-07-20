@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Task, TaskContextType } from '../types';
 import { taskService } from '../services/taskService';
-import { generateUUID } from '../utils';
 import { useUser } from './useUser';
 
 interface ExtendedTaskContextType extends TaskContextType {
@@ -53,12 +52,8 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
   };
 
   const addTask = (taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => {
-    const newTask: Task = {
-      ...taskData,
-      id: generateUUID(),
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    // Use taskService.createTask to ensure statRewards are calculated
+    const newTask = taskService.createTask(taskData);
     
     const updatedTasks = [...tasks, newTask];
     setTasks(updatedTasks);
@@ -87,6 +82,7 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
     if (!task) return;
 
     const isCompleting = !task.completed;
+    
     const updatedTasks = tasks.map(t =>
       t.id === id
         ? { ...t, completed: !t.completed, updatedAt: new Date() }
@@ -98,12 +94,12 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
 
     // Award experience and stat rewards when completing a task
     if (isCompleting) {
-      // Add experience points (base 10 XP)
-      addExperience(10);
-      
-      // Add stat rewards if available
+      // Add stat rewards if available (includes XP)
       if (task.statRewards) {
         addStatRewards(task.statRewards);
+      } else {
+        // Fallback to base 10 XP if no stat rewards
+        addExperience(10);
       }
     }
   };

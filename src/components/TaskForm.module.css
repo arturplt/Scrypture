@@ -181,6 +181,114 @@
   display: none;
 }
 
+/* Category Selector Styles */
+.categorySelector {
+  margin-bottom: var(--spacing-md);
+}
+
+.categoryLabel {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-family: 'Press Start 2P', monospace;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-sm);
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+}
+
+.categoryButtons {
+  display: flex;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.categoryButton {
+  flex: 1;
+  min-width: 100px;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 2px solid;
+  border-radius: 0px;
+  background: transparent;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-xs);
+  font-family: 'Press Start 2P', monospace;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+}
+
+.categoryButton:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-button);
+}
+
+.categoryButton:active {
+  transform: translateY(0);
+}
+
+.categoryButtonActive {
+  font-weight: bold;
+}
+
+/* Stat Rewards Styles */
+.statRewards {
+  margin-bottom: var(--spacing-md);
+}
+
+.statRewardsLabel {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-family: 'Press Start 2P', monospace;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-sm);
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+}
+
+.statRewardsDisplay {
+  display: flex;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+  background: var(--color-bg-primary);
+  border: 2px solid var(--color-border-primary);
+  border-radius: 0px;
+  padding: var(--spacing-sm);
+}
+
+.statReward {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: 0px;
+  font-size: var(--font-size-xs);
+  font-family: 'Press Start 2P', monospace;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+}
+
+.statIcon {
+  font-size: var(--font-size-sm);
+}
+
+.statName {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+}
+
+.statValue {
+  color: var(--color-accent-gold);
+  font-weight: bold;
+  font-size: var(--font-size-xs);
+}
+
 /* Responsive design for mobile devices */
 @media (max-width: 768px) {
   .inputGroup {
@@ -195,6 +303,18 @@
   
   .form {
     padding: var(--spacing-sm);
+  }
+  
+  .categoryButtons {
+    flex-direction: column;
+  }
+  
+  .categoryButton {
+    min-width: unset;
+  }
+  
+  .statRewardsDisplay {
+    flex-direction: column;
   }
 }
 

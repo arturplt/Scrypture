@@ -38,6 +38,14 @@
   --color-waiting: #6b3b5c;           /* Dark purple */
   --color-waiting-border: #8a4a75;    /* Lighter purple border */
   
+  /* Category Colors */
+  --color-body: #8B4513;              /* Brown for body/physical */
+  --color-mind: #4A90E2;              /* Blue for mind/intellectual */
+  --color-soul: #9B59B6;              /* Purple for soul/spiritual */
+  --color-career: #F39C12;            /* Orange for career/work */
+  --color-home: #27AE60;              /* Green for home/life */
+  --color-skills: #E74C3C;            /* Red for skills/development */
+  
   /* Difficulty Level Colors */
   --difficulty-1: #2d6b3b;    /* Very Easy - Dark Green */
   --difficulty-2: #3a8a4a;    /* Easy - Medium Green */
