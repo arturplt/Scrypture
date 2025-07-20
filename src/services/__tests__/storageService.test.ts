@@ -304,7 +304,18 @@ describe('StorageService', () => {
     test('should create backup with all data', () => {
       const mockTasks = [{ id: '1', title: 'Test Task' } as Task];
       const mockHabits = [{ id: '1', name: 'Test Habit' } as Habit];
-      const mockUser = { id: '1', name: 'Test User' } as User;
+      const mockUser = { 
+        id: '1', 
+        name: 'Test User',
+        level: 1,
+        experience: 0,
+        body: 0,
+        mind: 0,
+        soul: 0,
+        achievements: [],
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01')
+      } as User;
       const mockSettings = { theme: 'dark' };
 
       // Mock the getter methods
@@ -350,7 +361,18 @@ describe('StorageService', () => {
       const backup = {
         tasks: [{ id: '1', title: 'Test Task' } as Task],
         habits: [{ id: '1', name: 'Test Habit' } as Habit],
-        user: { id: '1', name: 'Test User' } as User,
+        user: { 
+          id: '1', 
+          name: 'Test User',
+          level: 1,
+          experience: 0,
+          body: 0,
+          mind: 0,
+          soul: 0,
+          achievements: [],
+          createdAt: new Date('2024-01-01'),
+          updatedAt: new Date('2024-01-01')
+        } as User,
         settings: { theme: 'dark' },
       };
 
@@ -377,7 +399,18 @@ describe('StorageService', () => {
       const mockData = {
         tasks: [{ id: '1', title: 'Test Task' } as Task],
         habits: [{ id: '1', name: 'Test Habit' } as Habit],
-        user: { id: '1', name: 'Test User' } as User,
+        user: { 
+          id: '1', 
+          name: 'Test User',
+          level: 1,
+          experience: 0,
+          body: 0,
+          mind: 0,
+          soul: 0,
+          achievements: [],
+          createdAt: new Date('2024-01-01'),
+          updatedAt: new Date('2024-01-01')
+        } as User,
         settings: { theme: 'dark' },
       };
 
@@ -393,7 +426,18 @@ describe('StorageService', () => {
       const mockData = {
         tasks: [{ id: '1', title: 'Test Task' } as Task],
         habits: [{ id: '1', name: 'Test Habit' } as Habit],
-        user: { id: '1', name: 'Test User' } as User,
+        user: { 
+          id: '1', 
+          name: 'Test User',
+          level: 1,
+          experience: 0,
+          body: 0,
+          mind: 0,
+          soul: 0,
+          achievements: [],
+          createdAt: new Date('2024-01-01'),
+          updatedAt: new Date('2024-01-01')
+        } as User,
         settings: { theme: 'dark' },
       };
 
@@ -413,12 +457,23 @@ describe('StorageService', () => {
 
   describe('Storage Statistics', () => {
     test('should calculate storage usage', () => {
-      // Mock localStorage to return some data
+      // Mock localStorage to return substantial data
       localStorageMock.getItem.mockImplementation((key) => {
-        if (key === 'scrypture_tasks') return 'test data';
-        if (key === 'scrypture_habits') return 'test data';
-        if (key === 'scrypture_user') return 'test data';
-        if (key === 'scrypture_settings') return 'test data';
+        if (key === 'scrypture_tasks') return JSON.stringify([{ id: '1', title: 'Test Task' }]);
+        if (key === 'scrypture_habits') return JSON.stringify([{ id: '1', name: 'Test Habit' }]);
+        if (key === 'scrypture_user') return JSON.stringify({ 
+          id: '1', 
+          name: 'Test User',
+          level: 1,
+          experience: 0,
+          body: 0,
+          mind: 0,
+          soul: 0,
+          achievements: [],
+          createdAt: new Date('2024-01-01').toISOString(),
+          updatedAt: new Date('2024-01-01').toISOString()
+        });
+        if (key === 'scrypture_settings') return JSON.stringify({ theme: 'dark' });
         return null;
       });
 

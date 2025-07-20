@@ -7,6 +7,21 @@ jest.mock('../storageService');
 
 const mockStorageService = storageService as jest.Mocked<typeof storageService>;
 
+// Helper function to create a complete User object
+const createMockUser = (overrides: Partial<User> = {}): User => ({
+  id: '1',
+  name: 'Test User',
+  level: 1,
+  experience: 0,
+  body: 0,
+  mind: 0,
+  soul: 0,
+  achievements: [],
+  createdAt: new Date('2024-01-01'),
+  updatedAt: new Date('2024-01-01'),
+  ...overrides,
+});
+
 // Mock crypto.randomUUID
 Object.defineProperty(global, 'crypto', {
   value: {
@@ -31,14 +46,10 @@ describe('UserService', () => {
 
   describe('getUser', () => {
     test('should return user from storage service', () => {
-      const mockUser: User = {
-        id: '1',
-        name: 'Test User',
+      const mockUser = createMockUser({
         level: 5,
         experience: 500,
-        achievements: [],
-        createdAt: new Date('2024-01-01'),
-      };
+      });
 
       mockStorageService.getUser.mockReturnValue(mockUser);
 
@@ -226,8 +237,12 @@ describe('UserService', () => {
         name: 'Test User',
         level: 1,
         experience: 0,
+        body: 0,
+        mind: 0,
+        soul: 0,
         achievements: [],
         createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01'),
       };
 
       mockStorageService.getUser.mockReturnValue(existingUser);
