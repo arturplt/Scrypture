@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Task, TaskContextType } from '../types';
 import { taskService } from '../services/taskService';
 import { generateUUID } from '../utils';
+import { useUser } from './useUser';
 
 interface ExtendedTaskContextType extends TaskContextType {
   isSaving: boolean;
@@ -26,6 +27,7 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const { addExperience, addStatRewards } = useUser();
 
   useEffect(() => {
     // Load tasks from local storage on mount
@@ -81,14 +83,29 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
   };
 
   const toggleTask = (id: string) => {
-    const updatedTasks = tasks.map(task =>
-      task.id === id
-        ? { ...task, completed: !task.completed, updatedAt: new Date() }
-        : task
+    const task = tasks.find(t => t.id === id);
+    if (!task) return;
+
+    const isCompleting = !task.completed;
+    const updatedTasks = tasks.map(t =>
+      t.id === id
+        ? { ...t, completed: !t.completed, updatedAt: new Date() }
+        : t
     );
     
     setTasks(updatedTasks);
     saveTasksWithFeedback(updatedTasks);
+
+    // Award experience and stat rewards when completing a task
+    if (isCompleting) {
+      // Add experience points (base 10 XP)
+      addExperience(10);
+      
+      // Add stat rewards if available
+      if (task.statRewards) {
+        addStatRewards(task.statRewards);
+      }
+    }
   };
 
   const value: ExtendedTaskContextType = {

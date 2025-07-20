@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { TaskEditForm } from '../TaskEditForm';
 import { TaskProvider } from '../../hooks/useTasks';
+import { UserProvider } from '../../hooks/useUser';
 import { Task } from '../../types';
 
 // Mock the task service
@@ -24,9 +25,11 @@ const mockTask: Task = {
 
 const renderWithProvider = (component: React.ReactElement) => {
   return render(
-    <TaskProvider>
-      {component}
-    </TaskProvider>
+    <UserProvider>
+      <TaskProvider>
+        {component}
+      </TaskProvider>
+    </UserProvider>
   );
 };
 

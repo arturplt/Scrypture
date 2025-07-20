@@ -4,6 +4,7 @@ import { HabitProvider } from './hooks/useHabits';
 import { TaskList } from './components/TaskList';
 import { TaskForm } from './components/TaskForm';
 import { TaskCounter } from './components/TaskCounter';
+import { StatsDisplay } from './components/StatsDisplay';
 import { DataManager } from './components/DataManager';
 import { AutoSaveIndicator } from './components/AutoSaveIndicator';
 import styles from './App.module.css';
@@ -20,6 +21,7 @@ function AppContent() {
       
       <main className={styles.main}>
         <TaskCounter className={styles.taskCounter} />
+        <StatsDisplay />
         <TaskForm />
         <TaskList />
         <DataManager />

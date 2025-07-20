@@ -16,8 +16,12 @@ export const userService = {
       name,
       level: 1,
       experience: 0,
+      body: 0,
+      mind: 0,
+      soul: 0,
       achievements: [],
       createdAt: new Date(),
+      updatedAt: new Date(),
     };
     
     this.saveUser(newUser);
@@ -42,6 +46,21 @@ export const userService = {
     const updates: Partial<User> = {
       experience: newExperience,
       level: newLevel,
+      updatedAt: new Date(),
+    };
+
+    return this.updateUser(updates);
+  },
+
+  addStatRewards(rewards: { body?: number; mind?: number; soul?: number }): boolean {
+    const user = this.getUser();
+    if (!user) return false;
+
+    const updates: Partial<User> = {
+      body: user.body + (rewards.body || 0),
+      mind: user.mind + (rewards.mind || 0),
+      soul: user.soul + (rewards.soul || 0),
+      updatedAt: new Date(),
     };
 
     return this.updateUser(updates);

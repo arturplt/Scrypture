@@ -56,10 +56,31 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     if (success && user) {
       const newExperience = user.experience + amount;
       const newLevel = Math.floor(newExperience / 100) + 1;
-      const updatedUser = { ...user, experience: newExperience, level: newLevel };
+      const updatedUser = { 
+        ...user, 
+        experience: newExperience, 
+        level: newLevel,
+        updatedAt: new Date()
+      };
       setUser(updatedUser);
       saveUserWithFeedback(updatedUser);
       console.log('Experience added and auto-saved');
+    }
+  };
+
+  const addStatRewards = (rewards: { body?: number; mind?: number; soul?: number }) => {
+    const success = userService.addStatRewards(rewards);
+    if (success && user) {
+      const updatedUser = {
+        ...user,
+        body: user.body + (rewards.body || 0),
+        mind: user.mind + (rewards.mind || 0),
+        soul: user.soul + (rewards.soul || 0),
+        updatedAt: new Date(),
+      };
+      setUser(updatedUser);
+      saveUserWithFeedback(updatedUser);
+      console.log('Stat rewards added and auto-saved');
     }
   };
 
@@ -97,6 +118,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     user,
     updateUser,
     addExperience,
+    addStatRewards,
     unlockAchievement,
   };
 

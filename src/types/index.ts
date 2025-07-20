@@ -7,6 +7,11 @@ export interface Task {
   updatedAt: Date;
   priority: 'low' | 'medium' | 'high';
   category?: string;
+  statRewards?: {
+    body?: number;
+    mind?: number;
+    soul?: number;
+  };
 }
 
 export interface Habit {
@@ -24,8 +29,12 @@ export interface User {
   name: string;
   level: number;
   experience: number;
+  body: number;
+  mind: number;
+  soul: number;
   achievements: Achievement[];
   createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface Achievement {
@@ -57,5 +66,6 @@ export interface UserContextType {
   user: User | null;
   updateUser: (updates: Partial<User>) => void;
   addExperience: (amount: number) => void;
+  addStatRewards: (rewards: { body?: number; mind?: number; soul?: number }) => void;
   unlockAchievement: (achievementId: string) => void;
 } 
