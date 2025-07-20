@@ -12,12 +12,14 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({ task, onCancel }) =>
   const { updateTask } = useTasks();
   const [title, setTitle] = useState(task.title);
   const [description, setDescription] = useState(task.description || '');
+  const [category, setCategory] = useState<'body' | 'mind' | 'soul' | 'career' | 'home' | 'skills'>((task.category as 'body' | 'mind' | 'soul' | 'career' | 'home' | 'skills') || 'body');
   const [priority, setPriority] = useState<'low' | 'medium' | 'high'>(task.priority);
 
   // Update form when task changes
   useEffect(() => {
     setTitle(task.title);
     setDescription(task.description || '');
+    setCategory((task.category as 'body' | 'mind' | 'soul' | 'career' | 'home' | 'skills') || 'body');
     setPriority(task.priority);
   }, [task]);
 
@@ -29,6 +31,7 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({ task, onCancel }) =>
     updateTask(task.id, {
       title: title.trim(),
       description: description.trim() || undefined,
+      category,
       priority,
     });
     
@@ -39,6 +42,7 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({ task, onCancel }) =>
     // Reset form to original values
     setTitle(task.title);
     setDescription(task.description || '');
+    setCategory((task.category as 'body' | 'mind' | 'soul' | 'career' | 'home' | 'skills') || 'body');
     setPriority(task.priority);
     onCancel();
   };
@@ -47,6 +51,15 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({ task, onCancel }) =>
     { value: 'low', label: 'LOW PRIORITY', color: 'var(--color-easy)' },
     { value: 'medium', label: 'MEDIUM PRIORITY', color: 'var(--color-focus)' },
     { value: 'high', label: 'HIGH PRIORITY', color: 'var(--color-urgent)' }
+  ];
+
+  const categoryOptions = [
+    { value: 'body', label: '💪 BODY', icon: '💪', color: 'var(--color-body)' },
+    { value: 'mind', label: '🧠 MIND', icon: '🧠', color: 'var(--color-mind)' },
+    { value: 'soul', label: '✨ SOUL', icon: '✨', color: 'var(--color-soul)' },
+    { value: 'career', label: '💼 CAREER', icon: '💼', color: 'var(--color-career)' },
+    { value: 'home', label: '🏠 HOME', icon: '🏠', color: 'var(--color-home)' },
+    { value: 'skills', label: '🎯 SKILLS', icon: '🎯', color: 'var(--color-skills)' }
   ];
 
   return (
@@ -75,6 +88,27 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({ task, onCancel }) =>
           rows={3}
           maxLength={500}
         />
+      </div>
+      
+      <div className={styles.categorySelector}>
+        <label className={styles.categoryLabel}>Category:</label>
+        <div className={styles.categoryButtons}>
+          {categoryOptions.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              className={`${styles.categoryButton} ${category === option.value ? styles.categoryButtonActive : ''}`}
+              style={{ 
+                borderColor: option.color,
+                backgroundColor: category === option.value ? option.color : 'transparent',
+                color: category === option.value ? 'var(--color-bg-primary)' : 'var(--color-text-primary)'
+              }}
+              onClick={() => setCategory(option.value as 'body' | 'mind' | 'soul' | 'career' | 'home' | 'skills')}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
       </div>
       
       <div className={styles.prioritySelector}>

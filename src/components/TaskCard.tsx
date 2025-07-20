@@ -3,6 +3,7 @@ import { Task } from '../types';
 import { useTasks } from '../hooks/useTasks';
 import { TaskEditForm } from './TaskEditForm';
 import { TaskDetailModal } from './TaskDetailModal';
+import { formatRelativeTime } from '../utils/dateUtils';
 import styles from './TaskCard.module.css';
 
 interface TaskCardProps {
@@ -82,7 +83,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
                 {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)} Priority
               </span>
               <span className={styles.date}>
-                {new Date(task.createdAt).toLocaleDateString()}
+                {formatRelativeTime(new Date(task.createdAt))}
               </span>
             </div>
           </div>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Task } from '../types';
 import { Modal } from './Modal';
+import { formatRelativeTime } from '../utils/dateUtils';
 import styles from './TaskDetailModal.module.css';
 
 interface TaskDetailModalProps {
@@ -101,7 +102,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, isOpen, 
           <div className={styles.detailRow}>
             <span className={styles.detailLabel}>Created:</span>
             <span className={styles.detailValue}>
-              {new Date(task.createdAt).toLocaleDateString()} at {new Date(task.createdAt).toLocaleTimeString()}
+              {formatRelativeTime(new Date(task.createdAt))}
             </span>
           </div>
 
@@ -118,7 +119,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, isOpen, 
             <div className={styles.detailRow}>
               <span className={styles.detailLabel}>Last Updated:</span>
               <span className={styles.detailValue}>
-                {new Date(task.updatedAt).toLocaleDateString()} at {new Date(task.updatedAt).toLocaleTimeString()}
+                {formatRelativeTime(new Date(task.updatedAt))}
               </span>
             </div>
           )}
