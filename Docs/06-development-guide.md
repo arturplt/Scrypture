@@ -2336,104 +2336,317 @@ describe('DebugService', () => {
 
 ## 🧪 **Testing Strategy**
 
-### **Unit Tests**
-```typescript
-// tests/services/taskService.test.ts
-describe('TaskService', () => {
-  let taskService: TaskService;
+### **Comprehensive Test Suite Overview**
 
-  beforeEach(() => {
-    taskService = new TaskService();
-  });
+The Scrypture app includes a comprehensive test suite covering all critical user workflows and edge cases. The test suite consists of:
 
-  test('should create a new task', async () => {
-    const taskData = {
-      title: 'Test Task',
-      category: 'body' as const,
-      description: 'Test description'
-    };
-
-    const task = await taskService.createTask(taskData);
-
-    expect(task.title).toBe('Test Task');
-    expect(task.category).toBe('body');
-    expect(task.completed).toBe(false);
-    expect(task.experienceReward).toBeGreaterThan(0);
-  });
-
-  test('should complete a task and return rewards', async () => {
-    const task = await taskService.createTask({
-      title: 'Test Task',
-      category: 'body'
-    });
-
-    const completion = await taskService.completeTask(task.id);
-
-    expect(completion.experiencePointsGained).toBe(task.experienceReward);
-    expect(completion.statGains).toEqual(task.statRewards);
-  });
-});
+#### **📁 Test Structure**
+```
+src/
+├── __tests__/                    # Integration tests
+│   ├── integration.test.tsx      # Complete user workflows
+│   └── integration-simple.test.tsx # Core functionality tests
+├── components/__tests__/         # Component tests
+│   ├── TaskCard.test.tsx         # Task display & interactions
+│   ├── TaskList.test.tsx         # Filtering, sorting, modals
+│   ├── TaskDetailModal.test.tsx  # Navigation, gestures, styling
+│   ├── DataManager.test.tsx      # Import/export, backup/restore
+│   └── AutoSaveIndicator.test.tsx # Status display, transitions
+└── hooks/__tests__/             # Hook tests
+    └── useHabits.test.tsx       # CRUD operations, statistics
 ```
 
-### **Integration Tests**
+### **🧩 Component Tests**
+
+#### **TaskCard Component**
 ```typescript
-// tests/integration/taskCompletion.test.ts
-describe('Task Completion Flow', () => {
-  test('should complete task and update user stats', async () => {
-    const taskService = new TaskService();
-    const statsService = new StatsService();
-
-    // Create task
-    const task = await taskService.createTask({
-      title: 'Morning Exercise',
-      category: 'body'
-    });
-
-    // Complete task
-    const completion = await taskService.completeTask(task.id);
-
-    // Check user stats updated
-    const stats = await statsService.getStats();
-    expect(stats.body).toBe(task.statRewards.body);
-    expect(stats.totalExperiencePoints).toBe(task.experienceReward);
-  });
-});
-```
-
-### **Component Tests**
-```typescript
-// tests/components/TaskCard.test.tsx
-import { render, screen, fireEvent } from '@testing-library/react';
-import { TaskCard } from '../TaskCard';
-
+// src/components/__tests__/TaskCard.test.tsx
 describe('TaskCard', () => {
-  const mockTask = {
-    id: '1',
-    title: 'Test Task',
-    category: 'body' as const,
-    completed: false,
-    experienceReward: 25,
-    statRewards: { body: 10 }
-  };
-
-  test('should display task information', () => {
-    render(<TaskCard task={mockTask} onComplete={jest.fn()} />);
-    
-    expect(screen.getByText('Test Task')).toBeInTheDocument();
-    expect(screen.getByText('Experience Points: 25')).toBeInTheDocument();
-    expect(screen.getByText('body: +10')).toBeInTheDocument();
+  // Rendering tests
+  test('renders task information correctly', () => {
+    // Tests title, description, category, priority display
   });
 
-  test('should call onComplete when complete button clicked', () => {
-    const onComplete = jest.fn();
-    render(<TaskCard task={mockTask} onComplete={onComplete} />);
-    
-    fireEvent.click(screen.getByText('Complete'));
-    
-    expect(onComplete).toHaveBeenCalledWith('1');
+  // Interaction tests
+  test('handles completion checkbox clicks', () => {
+    // Tests task completion workflow
+  });
+
+  // Styling tests
+  test('applies correct styling for different states', () => {
+    // Tests completed, pending, priority styling
+  });
+
+  // Edge cases
+  test('handles missing optional fields gracefully', () => {
+    // Tests robustness with incomplete data
   });
 });
 ```
+
+#### **TaskList Component**
+```typescript
+// src/components/__tests__/TaskList.test.tsx
+describe('TaskList', () => {
+  // Filtering tests
+  test('filters tasks by category correctly', () => {
+    // Tests body, mind, soul category filtering
+  });
+
+  // Sorting tests
+  test('sorts tasks by different criteria', () => {
+    // Tests priority, date, category sorting
+  });
+
+  // Modal integration
+  test('opens task detail modal on click', () => {
+    // Tests modal interaction workflow
+  });
+
+  // Accessibility
+  test('supports keyboard navigation', () => {
+    // Tests ARIA labels and keyboard support
+  });
+});
+```
+
+#### **TaskDetailModal Component**
+```typescript
+// src/components/__tests__/TaskDetailModal.test.tsx
+describe('TaskDetailModal', () => {
+  // Navigation tests
+  test('navigates between tasks correctly', () => {
+    // Tests next/previous task navigation
+  });
+
+  // Gesture tests
+  test('handles swipe gestures', () => {
+    // Tests touch/swipe interactions
+  });
+
+  // Styling tests
+  test('applies priority-based styling', () => {
+    // Tests high/medium/low priority visual indicators
+  });
+});
+```
+
+#### **DataManager Component**
+```typescript
+// src/components/__tests__/DataManager.test.tsx
+describe('DataManager', () => {
+  // Import/Export tests
+  test('exports data in correct format', () => {
+    // Tests JSON export functionality
+  });
+
+  // Backup/Restore tests
+  test('creates and restores backups successfully', () => {
+    // Tests data backup and recovery
+  });
+
+  // Error handling
+  test('handles storage errors gracefully', () => {
+    // Tests error scenarios and user feedback
+  });
+});
+```
+
+#### **AutoSaveIndicator Component**
+```typescript
+// src/components/__tests__/AutoSaveIndicator.test.tsx
+describe('AutoSaveIndicator', () => {
+  // Status display tests
+  test('shows correct saving status', () => {
+    // Tests saving, saved, error states
+  });
+
+  // Visual indicator tests
+  test('displays appropriate visual feedback', () => {
+    // Tests loading animations and status icons
+  });
+
+  // State transition tests
+  test('transitions between states smoothly', () => {
+    // Tests state change animations
+  });
+});
+```
+
+### **🎣 Hook Tests**
+
+#### **useHabits Hook**
+```typescript
+// src/hooks/__tests__/useHabits.test.tsx
+describe('useHabits', () => {
+  // CRUD operations
+  test('creates, reads, updates, deletes habits', () => {
+    // Tests all basic operations
+  });
+
+  // Statistics calculation
+  test('calculates habit statistics correctly', () => {
+    // Tests streak counting, completion rates
+  });
+
+  // Error handling
+  test('handles storage errors gracefully', () => {
+    // Tests error scenarios
+  });
+});
+```
+
+### **🔗 Integration Tests**
+
+#### **Core User Workflows**
+```typescript
+// src/__tests__/integration-simple.test.tsx
+describe('Simple Integration Tests', () => {
+  // Task creation workflow
+  test('allows user to create a task successfully', async () => {
+    // 1. Verify app loads with empty state
+    // 2. Click on title input to expand form
+    // 3. Fill in task title
+    // 4. Submit the task
+    // 5. Verify task appears in the list
+  });
+
+  // Form validation
+  test('handles form validation correctly', async () => {
+    // Tests required field validation
+    // Tests error message display
+  });
+
+  // Category and priority selection
+  test('allows user to select different categories', async () => {
+    // Tests body, mind, soul category selection
+  });
+
+  // Task completion
+  test('allows user to complete a task', async () => {
+    // Tests checkbox interaction and state changes
+  });
+});
+```
+
+#### **Advanced Integration Scenarios**
+```typescript
+// src/__tests__/integration.test.tsx
+describe('Integration Tests', () => {
+  // Data persistence
+  test('persists task data across app reloads', async () => {
+    // Tests localStorage integration
+    // Tests data recovery on app restart
+  });
+
+  // Error handling
+  test('handles storage errors gracefully', async () => {
+    // Tests graceful degradation
+    // Tests user feedback for errors
+  });
+
+  // Performance
+  test('handles large number of tasks efficiently', async () => {
+    // Tests performance with many tasks
+    // Tests UI responsiveness
+  });
+
+  // Accessibility
+  test('supports keyboard navigation throughout the app', async () => {
+    // Tests keyboard accessibility
+    // Tests ARIA compliance
+  });
+});
+```
+
+### **🧪 Test Categories**
+
+#### **1. Unit Tests**
+- **Service Layer**: Task, user, storage service functionality
+- **Utility Functions**: Date formatting, calculations, validations
+- **Hook Logic**: Custom React hooks behavior
+
+#### **2. Component Tests**
+- **Rendering**: Component displays correctly
+- **Interactions**: User interactions work as expected
+- **Styling**: Visual states and CSS classes applied correctly
+- **Accessibility**: ARIA labels, keyboard navigation, screen reader support
+
+#### **3. Integration Tests**
+- **User Workflows**: Complete end-to-end user scenarios
+- **Data Flow**: How data moves between components
+- **Error Handling**: Graceful degradation and user feedback
+- **Performance**: App responsiveness under load
+
+#### **4. Edge Case Tests**
+- **Empty States**: App behavior with no data
+- **Invalid Data**: Handling of corrupted or invalid data
+- **Network Errors**: Offline scenarios and error recovery
+- **Storage Limits**: Behavior when storage is full
+
+### **🚀 Running Tests**
+
+```bash
+# Run all tests
+npm test
+
+# Run specific test categories
+npm test -- --testPathPattern="components"    # Component tests
+npm test -- --testPathPattern="hooks"         # Hook tests
+npm test -- --testPathPattern="integration"   # Integration tests
+
+# Run with coverage
+npm test -- --coverage
+
+# Run in watch mode
+npm test -- --watch
+```
+
+### **📊 Test Coverage Goals**
+
+- **Statements**: 90%+
+- **Branches**: 85%+
+- **Functions**: 90%+
+- **Lines**: 90%+
+
+### **🔧 Test Utilities**
+
+#### **Mock Setup**
+```typescript
+// Common mocks for testing
+jest.mock('../services/storageService', () => ({
+  storageService: {
+    saveTasks: jest.fn(() => true),
+    getTasks: jest.fn(() => []),
+    // ... other methods
+  },
+}));
+```
+
+#### **Test Data Factories**
+```typescript
+// test-utils/taskTestData.ts
+export const createTestTask = (overrides: Partial<Task> = {}): Task => ({
+  id: 'test-id',
+  title: 'Test Task',
+  description: 'Test description',
+  category: 'body',
+  priority: 'medium',
+  completed: false,
+  createdAt: new Date('2024-01-01'),
+  updatedAt: new Date('2024-01-01'),
+  ...overrides,
+});
+```
+
+### **✅ Testing Best Practices**
+
+1. **Test User Behavior**: Focus on what users actually do
+2. **Test Edge Cases**: Cover error scenarios and boundary conditions
+3. **Keep Tests Fast**: Use mocks for external dependencies
+4. **Maintain Test Data**: Use factories for consistent test data
+5. **Test Accessibility**: Ensure keyboard navigation and screen reader support
+6. **Test Performance**: Verify app remains responsive under load
 
 ---
 
