@@ -10,18 +10,21 @@ export const TaskList: React.FC = () => {
   const [selectedTaskIndex, setSelectedTaskIndex] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   
-  const sortedTasks = [...tasks].sort((a, b) => {
-    // Sort by completion status first, then by priority, then by creation date
-    if (a.completed !== b.completed) {
-      return a.completed ? 1 : -1;
-    }
-    
+  // Separate active and completed tasks
+  const activeTasks = tasks.filter(task => !task.completed).sort((a, b) => {
     const priorityOrder = { high: 3, medium: 2, low: 1 };
     const priorityDiff = priorityOrder[b.priority] - priorityOrder[a.priority];
     if (priorityDiff !== 0) return priorityDiff;
     
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
+
+  const completedTasks = tasks.filter(task => task.completed).sort((a, b) => {
+    return new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime();
+  });
+
+  // Combined tasks for modal navigation
+  const sortedTasks = [...activeTasks, ...completedTasks];
 
   const handleOpenModal = (taskIndex: number) => {
     setSelectedTaskIndex(taskIndex);
@@ -63,16 +66,37 @@ export const TaskList: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      <h2 className={styles.title}>Your Tasks</h2>
-      <div className={styles.taskGrid}>
-        {sortedTasks.map((task, index) => (
-          <TaskCard 
-            key={task.id} 
-            task={task} 
-            onOpenModal={() => handleOpenModal(index)}
-          />
-        ))}
-      </div>
+      {/* Active Tasks Section */}
+      {activeTasks.length > 0 && (
+        <div className={styles.section}>
+          <h2 className={styles.title}>Active Tasks</h2>
+          <div className={styles.taskGrid}>
+            {activeTasks.map((task, index) => (
+              <TaskCard 
+                key={task.id} 
+                task={task} 
+                onOpenModal={() => handleOpenModal(index)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Completed Tasks Section */}
+      {completedTasks.length > 0 && (
+        <div className={styles.section}>
+          <h2 className={styles.title}>Completed Tasks</h2>
+          <div className={styles.taskGrid}>
+            {completedTasks.map((task, index) => (
+              <TaskCard 
+                key={task.id} 
+                task={task} 
+                onOpenModal={() => handleOpenModal(activeTasks.length + index)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
       
       <TaskDetailModal
         task={selectedTask}

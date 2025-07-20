@@ -16,6 +16,14 @@
   gap: var(--spacing-md);
 }
 
+.section {
+  margin-bottom: var(--spacing-lg);
+}
+
+.section:last-child {
+  margin-bottom: 0;
+}
+
 .emptyState {
   text-align: center;
   padding: var(--spacing-md);

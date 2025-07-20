@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Task } from '../types';
 import { useTasks } from '../hooks/useTasks';
 import { TaskEditForm } from './TaskEditForm';
@@ -13,10 +13,22 @@ interface TaskCardProps {
 export const TaskCard: React.FC<TaskCardProps> = ({ task, onOpenModal }) => {
   const { toggleTask, deleteTask } = useTasks();
   const [isEditing, setIsEditing] = useState(false);
+  const [isCompleting, setIsCompleting] = useState(false);
+  const [wasCompleted, setWasCompleted] = useState(task.completed);
 
   const handleToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.stopPropagation();
-    toggleTask(task.id);
+    
+    if (!task.completed && !isCompleting) {
+      setIsCompleting(true);
+      // Add a small delay for the animation
+      setTimeout(() => {
+        toggleTask(task.id);
+        setIsCompleting(false);
+      }, 300);
+    } else {
+      toggleTask(task.id);
+    }
   };
 
   const handleDelete = (e: React.MouseEvent) => {
@@ -36,6 +48,15 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onOpenModal }) => {
   const handleCardClick = () => {
     onOpenModal?.();
   };
+
+  // Track completion state changes for animation
+  useEffect(() => {
+    if (task.completed && !wasCompleted) {
+      setWasCompleted(true);
+    } else if (!task.completed && wasCompleted) {
+      setWasCompleted(false);
+    }
+  }, [task.completed, wasCompleted]);
 
   const getPriorityColor = (priority: Task['priority']) => {
     switch (priority) {
@@ -59,7 +80,10 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onOpenModal }) => {
   }
 
   return (
-    <div className={`${styles.card} ${task.completed ? styles.completed : ''}`} onClick={handleCardClick}>
+    <div 
+      className={`${styles.card} ${task.completed ? styles.completed : ''} ${isCompleting ? styles.completing : ''}`} 
+      onClick={handleCardClick}
+    >
       <div className={styles.header}>
         <div className={styles.content}>
           <h3 className={`${styles.title} ${task.completed ? styles.titleCompleted : ''}`}>
