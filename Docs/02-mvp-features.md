@@ -136,6 +136,41 @@
 
 **State Management**: Edit mode is managed per task card with local state. Canceling edit resets form to original values and exits edit mode.
 
+### **8.8. Task Detail Viewing System**
+**Purpose**: Allow users to view full task details in a modal interface
+**Implementation**: Modal dialog with complete task information and navigation
+**User Flow**: Click task card → View details → Navigate between tasks
+**Technical**: Modal component with swipe/drag navigation and clickable buttons
+
+**Detail Modal Features**:
+- **Full Task Information**: Title, description, category, priority, creation date, completion status
+- **Navigation System**: Swipe left/right or click buttons to navigate between tasks
+- **Cross-Platform Support**: Touch swipe on mobile, mouse drag on desktop, clickable buttons
+- **Visual Indicators**: Navigation buttons show when previous/next tasks are available
+- **Edit Integration**: Edit button in modal to modify task directly from detail view
+- **Relative Time Display**: Shows "x ago" format for timestamps instead of absolute dates
+
+**Navigation Implementation**:
+- **Swipe/Drag**: 50px minimum distance threshold for navigation
+- **Touch Events**: Mobile-friendly swipe gestures with touch event handling
+- **Mouse Events**: Desktop drag support with global mouse tracking
+- **Button Navigation**: Clickable "← Previous" and "Next →" buttons
+- **Boundary Handling**: Prevents navigation beyond first/last task
+- **Visual Feedback**: Cursor changes to grab/grabbing during drag interaction
+
+**Accessibility Features**:
+- **Keyboard Navigation**: Tab to focus navigation buttons, Enter to activate
+- **Screen Reader Support**: ARIA labels for navigation buttons
+- **Focus Management**: Proper focus handling for modal interactions
+- **Visual Indicators**: Clear navigation cues with hover and active states
+
+**Technical Implementation**:
+- **Unified Drag Handling**: Single logic for both touch and mouse events
+- **Global Mouse Tracking**: Seamless drag experience even when cursor leaves modal
+- **State Management**: Centralized modal state in TaskList component
+- **Event Prevention**: Prevents text selection and unwanted interactions during drag
+- **Pixel Art Styling**: Consistent with app's aesthetic design
+
 ---
 
 ## 🎭 **Core Attributes System (6 Features)**
@@ -311,6 +346,13 @@ Selects category → Clicks "Create" → Task appears in list
 ```
 User clicks "Complete" → Animation plays → Experience points awarded → 
 Stats updated → Bóbr celebrates → Progress saved
+```
+
+#### **Task Detail Viewing Flow**
+```
+User clicks task card → Modal opens with full details → 
+User can swipe/drag or click buttons to navigate → 
+User can edit task directly from modal → Close modal
 ```
 
 #### **Level Up Flow**

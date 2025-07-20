@@ -1,10 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTasks } from '../hooks/useTasks';
 import { TaskCard } from './TaskCard';
+import { TaskDetailModal } from './TaskDetailModal';
+import { Task } from '../types';
 import styles from './TaskList.module.css';
 
 export const TaskList: React.FC = () => {
   const { tasks } = useTasks();
+  const [selectedTaskIndex, setSelectedTaskIndex] = useState<number | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   
   const sortedTasks = [...tasks].sort((a, b) => {
     // Sort by completion status first, then by priority, then by creation date
@@ -18,6 +22,32 @@ export const TaskList: React.FC = () => {
     
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
+
+  const handleOpenModal = (taskIndex: number) => {
+    setSelectedTaskIndex(taskIndex);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedTaskIndex(null);
+  };
+
+  const handleNextTask = () => {
+    if (selectedTaskIndex !== null && selectedTaskIndex < sortedTasks.length - 1) {
+      setSelectedTaskIndex(selectedTaskIndex + 1);
+    }
+  };
+
+  const handlePreviousTask = () => {
+    if (selectedTaskIndex !== null && selectedTaskIndex > 0) {
+      setSelectedTaskIndex(selectedTaskIndex - 1);
+    }
+  };
+
+  const selectedTask = selectedTaskIndex !== null ? sortedTasks[selectedTaskIndex] : null;
+  const hasNext = selectedTaskIndex !== null && selectedTaskIndex < sortedTasks.length - 1;
+  const hasPrevious = selectedTaskIndex !== null && selectedTaskIndex > 0;
 
   if (tasks.length === 0) {
     return (
@@ -35,10 +65,24 @@ export const TaskList: React.FC = () => {
     <div className={styles.container}>
       <h2 className={styles.title}>Your Tasks</h2>
       <div className={styles.taskGrid}>
-        {sortedTasks.map(task => (
-          <TaskCard key={task.id} task={task} />
+        {sortedTasks.map((task, index) => (
+          <TaskCard 
+            key={task.id} 
+            task={task} 
+            onOpenModal={() => handleOpenModal(index)}
+          />
         ))}
       </div>
+      
+      <TaskDetailModal
+        task={selectedTask}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onNext={handleNextTask}
+        onPrevious={handlePreviousTask}
+        hasNext={hasNext}
+        hasPrevious={hasPrevious}
+      />
     </div>
   );
 }; 

@@ -718,6 +718,252 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onComplete }) => {
 };
 ```
 
+### **Task Detail Modal with Swipe Navigation**
+
+#### **TaskDetailModal Component**
+```typescript
+// components/features/tasks/TaskDetailModal.tsx
+import React, { useState, useRef, useEffect } from 'react';
+import { Task } from '../types';
+import { Modal } from './Modal';
+import { formatRelativeTime } from '../utils/dateUtils';
+
+interface TaskDetailModalProps {
+  task: Task | null;
+  isOpen: boolean;
+  onClose: () => void;
+  onEdit?: () => void;
+  onNext?: () => void;
+  onPrevious?: () => void;
+  hasNext?: boolean;
+  hasPrevious?: boolean;
+}
+
+export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ 
+  task, 
+  isOpen, 
+  onClose, 
+  onEdit, 
+  onNext, 
+  onPrevious, 
+  hasNext = false, 
+  hasPrevious = false 
+}) => {
+  // Navigation state for swipe/drag functionality
+  const [dragStart, setDragStart] = useState<number | null>(null);
+  const [dragEnd, setDragEnd] = useState<number | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Minimum swipe distance required to trigger navigation (in px)
+  const minSwipeDistance = 50;
+
+  // Unified drag handling for both touch and mouse events
+  const handleDragStart = (clientX: number) => {
+    setDragEnd(null);
+    setDragStart(clientX);
+    setIsDragging(true);
+  };
+
+  const handleDragMove = (clientX: number) => {
+    if (isDragging) {
+      setDragEnd(clientX);
+    }
+  };
+
+  const handleDragEnd = () => {
+    if (!dragStart || !dragEnd || !isDragging) return;
+    
+    // Calculate swipe distance and direction
+    const distance = dragStart - dragEnd;
+    const isLeftSwipe = distance > minSwipeDistance;  // Swipe left = next task
+    const isRightSwipe = distance < -minSwipeDistance; // Swipe right = previous task
+
+    // Navigate based on swipe direction and availability
+    if (isLeftSwipe && hasNext && onNext) {
+      onNext();
+    } else if (isRightSwipe && hasPrevious && onPrevious) {
+      onPrevious();
+    }
+
+    setIsDragging(false);
+  };
+
+  // Touch event handlers for mobile devices
+  const onTouchStart = (e: React.TouchEvent) => {
+    handleDragStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    handleDragMove(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    handleDragEnd();
+  };
+
+  // Mouse event handlers for desktop devices
+  const onMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    handleDragStart(e.clientX);
+  };
+
+  const onMouseMove = (e: React.MouseEvent) => {
+    if (isDragging) {
+      handleDragMove(e.clientX);
+    }
+  };
+
+  const onMouseUp = () => {
+    handleDragEnd();
+  };
+
+  // Global mouse event listeners for seamless drag tracking
+  useEffect(() => {
+    if (isDragging) {
+      const handleGlobalMouseMove = (e: MouseEvent) => {
+        handleDragMove(e.clientX);
+      };
+
+      const handleGlobalMouseUp = () => {
+        handleDragEnd();
+      };
+
+      // Add global listeners to track mouse even when cursor leaves the modal
+      document.addEventListener('mousemove', handleGlobalMouseMove);
+      document.addEventListener('mouseup', handleGlobalMouseUp);
+
+      return () => {
+        document.removeEventListener('mousemove', handleGlobalMouseMove);
+        document.removeEventListener('mouseup', handleGlobalMouseUp);
+      };
+    }
+  }, [isDragging, dragStart, dragEnd]);
+
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} title="Task Details">
+      <div 
+        className={styles.container}
+        ref={containerRef}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        onMouseDown={onMouseDown}
+        onMouseMove={onMouseMove}
+        onMouseUp={onMouseUp}
+      >
+        {/* Navigation bar with clickable buttons and swipe indicators */}
+        <div className={styles.navigationBar}>
+          {hasPrevious && (
+            <button 
+              className={`${styles.navIndicator} ${styles.navPrevious}`}
+              onClick={onPrevious}
+              aria-label="Go to previous task"
+            >
+              ← Previous
+            </button>
+          )}
+          {hasNext && (
+            <button 
+              className={`${styles.navIndicator} ${styles.navNext}`}
+              onClick={onNext}
+              aria-label="Go to next task"
+            >
+              Next →
+            </button>
+          )}
+        </div>
+        
+        {/* Task details content */}
+        <div className={styles.header}>
+          <h3 className={styles.title}>{task?.title}</h3>
+          <div className={styles.meta}>
+            <span className={styles.category}>{task?.category}</span>
+            <span className={styles.priority}>{task?.priority}</span>
+            <span className={styles.date}>
+              {task?.createdAt && formatRelativeTime(new Date(task.createdAt))}
+            </span>
+          </div>
+        </div>
+        
+        {task?.description && (
+          <div className={styles.description}>
+            <h4>Description</h4>
+            <p>{task.description}</p>
+          </div>
+        )}
+      </div>
+    </Modal>
+  );
+};
+```
+
+#### **Key Implementation Features**
+
+**Cross-Platform Navigation**:
+- **Touch Support**: Mobile swipe gestures with touch event handling
+- **Mouse Support**: Desktop drag functionality with global mouse tracking
+- **Button Navigation**: Clickable "Previous" and "Next" buttons for accessibility
+- **Unified Logic**: Single drag handling for both input methods
+
+**Accessibility Features**:
+- **Keyboard Navigation**: Tab to focus buttons, Enter to activate
+- **Screen Reader Support**: ARIA labels for navigation buttons
+- **Visual Feedback**: Cursor changes and hover states
+- **Boundary Handling**: Prevents navigation beyond first/last task
+
+**Technical Implementation**:
+- **50px Threshold**: Minimum distance required for navigation
+- **Global Mouse Tracking**: Seamless drag even when cursor leaves modal
+- **State Management**: Centralized modal state in TaskList component
+- **Event Prevention**: Prevents text selection during drag interactions
+
+#### **CSS Styling for Navigation**
+```css
+/* Navigation bar styling */
+.navigationBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm) 0;
+  border-bottom: 2px solid var(--color-border-primary);
+  margin-bottom: var(--spacing-md);
+}
+
+.navIndicator {
+  background: var(--color-bg-primary);
+  color: var(--color-text-secondary);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 2px solid var(--color-border-primary);
+  border-radius: 0px;
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.navIndicator:hover {
+  background: var(--color-accent-gold);
+  color: var(--color-bg-primary);
+  border-color: var(--color-accent-gold);
+}
+
+.navIndicator:active {
+  transform: translateY(1px);
+  box-shadow: inset 2px 2px 0px rgba(0, 0, 0, 0.2);
+}
+
+/* Container styling for drag interaction */
+.container {
+  user-select: none;
+  cursor: grab;
+  position: relative;
+}
+
+.container:active {
+  cursor: grabbing;
+}
+```
+
 ### **User Progression System**
 
 #### **Level Service**

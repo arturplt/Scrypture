@@ -2,6 +2,13 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
+  user-select: none;
+  cursor: grab;
+  position: relative;
+}
+
+.container:active {
+  cursor: grabbing;
 }
 
 .header {
@@ -227,4 +234,55 @@
 .editButton:hover {
   color: var(--color-accent-gold);
   background: var(--color-bg-primary);
+}
+
+/* Navigation bar */
+.navigationBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm) 0;
+  border-bottom: 2px solid var(--color-border-primary);
+  margin-bottom: var(--spacing-md);
+}
+
+.navIndicator {
+  background: var(--color-bg-primary);
+  color: var(--color-text-secondary);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 2px solid var(--color-border-primary);
+  border-radius: 0px;
+  font-size: var(--font-size-xs);
+  font-family: 'Press Start 2P', monospace;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+  transition: all var(--transition-normal);
+  cursor: pointer;
+  background: none;
+  outline: none;
+}
+
+.navIndicator:hover {
+  background: var(--color-accent-gold);
+  color: var(--color-bg-primary);
+  border-color: var(--color-accent-gold);
+}
+
+.navIndicator:active {
+  transform: translateY(1px);
+  box-shadow: inset 2px 2px 0px rgba(0, 0, 0, 0.2);
+}
+
+.navIndicator:focus {
+  outline: 2px solid var(--color-accent-gold);
+  outline-offset: 2px;
+}
+
+.navPrevious {
+  margin-right: auto;
+}
+
+.navNext {
+  margin-left: auto;
 } 
