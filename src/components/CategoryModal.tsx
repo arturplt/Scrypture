@@ -288,11 +288,12 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
               <div className={styles.rewardItem}>
                 <span className={styles.rewardIcon}>⭐</span>
                 <span className={styles.rewardStat}>XP</span>
-                {/* XP Formula: 30 - (total_points * 10) 
-                    - 3 points = 0 XP
-                    - 2 points = 10 XP  
-                    - 1 point = 20 XP */}
-                <span className={styles.rewardValue}>+{30 - ((points.body + points.mind + points.soul) * 10)}</span>
+                {/* XP Formula: 30 - (max_single_stat * 10) 
+                    - 3 points in one stat = 0 XP
+                    - 2 points in one stat = 10 XP  
+                    - 1 point in one stat = 20 XP
+                    - 0 points = 30 XP */}
+                <span className={styles.rewardValue}>+{30 - (Math.max(points.body, points.mind, points.soul) * 10)}</span>
               </div>
             </div>
           </div>

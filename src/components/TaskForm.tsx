@@ -144,11 +144,12 @@ export const TaskForm: React.FC<TaskFormProps> = ({ taskToEdit, onCancel, onSave
     // Check if it's a custom category
     const customCategory = customCategories.find(cat => cat.name.toLowerCase() === category);
     if (customCategory) {
+      const maxStat = Math.max(customCategory.points.body, customCategory.points.mind, customCategory.points.soul);
       return {
         body: customCategory.points.body,
         mind: customCategory.points.mind,
         soul: customCategory.points.soul,
-        xp: 20
+        xp: 30 - (maxStat * 10)
       };
     }
 
