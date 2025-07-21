@@ -10,13 +10,14 @@ export const habitService = {
     return storageService.saveHabits(habits);
   },
 
-  addHabit(habit: Omit<Habit, 'id' | 'createdAt' | 'streak'>): Habit {
+  addHabit(habit: Omit<Habit, 'id' | 'createdAt' | 'streak'> & { statRewards?: { body?: number; mind?: number; soul?: number; xp?: number } }): Habit {
     const habits = this.getHabits();
     const newHabit: Habit = {
       ...habit,
       id: crypto.randomUUID(),
       createdAt: new Date(),
       streak: 0,
+      statRewards: habit.statRewards,
     };
     
     const updatedHabits = [...habits, newHabit];

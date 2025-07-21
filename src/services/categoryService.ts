@@ -77,9 +77,9 @@ export const categoryService = {
 
   getAllCategories(): (CustomCategory | { name: string; icon: string; color: string })[] {
     const defaultCategories = [
-      { name: 'body', icon: '💪', color: 'var(--color-body)' },
-      { name: 'mind', icon: '🧠', color: 'var(--color-mind)' },
-      { name: 'soul', icon: '✨', color: 'var(--color-soul)' }
+      { name: 'home', icon: '🏠', color: 'var(--color-home)' },
+      { name: 'free time', icon: '🎲', color: 'var(--color-freetime)' },
+      { name: 'garden', icon: '🌱', color: 'var(--color-garden)' }
     ];
     
     const customCategories = this.getCustomCategories();

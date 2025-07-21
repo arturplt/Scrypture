@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { userService } from '../services/userService';
 import { categoryService } from '../services/categoryService';
+import { taskService } from '../services/taskService';
 import styles from './DataManager.module.css';
 
 interface DataManagerProps {
@@ -110,6 +111,59 @@ export const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
 
   const stats = getStorageStats();
 
+  // DEBUG: Add tasks for each priority with explicit statRewards
+  const handleAddDebugTasks = () => {
+    const taskTemplates = [
+      { 
+        title: 'Go for a Run', 
+        description: 'Jog for 20 minutes in the park to boost your energy.',
+        category: 'home',
+        statRewards: { body: 1, xp: 5 }
+      },
+      { 
+        title: 'Read a Book Chapter', 
+        description: 'Read a chapter from a non-fiction book to stimulate your mind.',
+        category: 'free time',
+        statRewards: { mind: 1, xp: 5 }
+      },
+      { 
+        title: 'Meditate', 
+        description: 'Spend 10 minutes meditating to find inner peace.',
+        category: 'garden',
+        statRewards: { soul: 1, xp: 5 }
+      },
+    ];
+    const priorities = [
+      { value: 'low', label: 'Low', xp: 5 },
+      { value: 'medium', label: 'Medium', xp: 10 },
+      { value: 'high', label: 'High', xp: 15 },
+    ];
+    taskTemplates.forEach(template => {
+      priorities.forEach(priority => {
+        let title = template.title;
+        let description = template.description;
+        // Make titles/descriptions unique for each priority
+        if (priority.value === 'medium') {
+          title += ' (Focus)';
+          description += ' Focus on quality and consistency.';
+        } else if (priority.value === 'high') {
+          title += ' (Urgent)';
+          description += ' Make this your top priority today!';
+        }
+        taskService.createTask({
+          title,
+          description,
+          category: template.category,
+          completed: false,
+          priority: priority.value as 'low' | 'medium' | 'high',
+          statRewards: { ...template.statRewards, xp: priority.xp }
+        });
+      });
+    });
+    showMessage('Debug tasks added!', 'success');
+    onDataChange?.();
+  };
+
   return (
     <div className={styles.container}>
       <button
@@ -173,6 +227,13 @@ export const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
               className={`${styles.button} ${styles.danger}`}
             >
               Clear All
+            </button>
+          </div>
+
+          <div className={styles.section}>
+            <h3>Debug</h3>
+            <button onClick={handleAddDebugTasks} className={styles.button}>
+              Add Example Tasks
             </button>
           </div>
         </div>

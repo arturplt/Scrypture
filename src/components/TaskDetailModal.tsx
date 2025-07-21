@@ -152,10 +152,13 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
     }
   };
 
-  // Filter out zero rewards
+  // Filter out zero rewards, but keep XP first if present
   const nonZeroRewards = task.statRewards 
-    ? Object.entries(task.statRewards).filter(([_, value]) => value && value > 0)
+    ? Object.entries(task.statRewards)
+        .filter(([_, value]) => value && value > 0)
     : [];
+  const xpReward = nonZeroRewards.find(([stat]) => stat === 'xp');
+  const otherRewards = nonZeroRewards.filter(([stat]) => stat !== 'xp');
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Task Details">
@@ -281,9 +284,14 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
           <div className={styles.rewardsSection}>
             <h4 className={styles.sectionTitle}>Rewards</h4>
             <div className={styles.rewards}>
-              {nonZeroRewards.map(([stat, value]) => (
+              {xpReward && (
+                <span key="xp" className={styles.reward} style={{ color: 'var(--color-accent-gold)', fontWeight: 'bold' }}>
+                  XP: +{xpReward[1]}
+                </span>
+              )}
+              {otherRewards.map(([stat, value]) => (
                 <span key={stat} className={styles.reward}>
-                  {stat === 'xp' ? 'XP' : stat.charAt(0).toUpperCase() + stat.slice(1)}: +{value}
+                  {stat.charAt(0).toUpperCase() + stat.slice(1)}: +{value}
                 </span>
               ))}
             </div>

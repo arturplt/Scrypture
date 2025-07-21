@@ -55,7 +55,7 @@ describe('DataManager', () => {
         createdAt: new Date('2024-01-01'),
         updatedAt: new Date('2024-01-01'),
         priority: 'high' as const,
-        category: 'mind',
+        category: 'home',
       },
     ],
     habits: [

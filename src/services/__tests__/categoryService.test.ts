@@ -183,9 +183,9 @@ describe('categoryService', () => {
       const result = categoryService.getAllCategories();
 
       expect(result).toHaveLength(4); // 3 default + 1 custom
-      expect(result[0].name).toBe('body');
-      expect(result[1].name).toBe('mind');
-      expect(result[2].name).toBe('soul');
+      expect(result[0].name).toBe('home');
+      expect(result[1].name).toBe('free time');
+      expect(result[2].name).toBe('garden');
       expect(result[3].name).toBe('test');
     });
 
@@ -195,9 +195,9 @@ describe('categoryService', () => {
       const result = categoryService.getAllCategories();
 
       expect(result).toHaveLength(3);
-      expect(result[0].name).toBe('body');
-      expect(result[1].name).toBe('mind');
-      expect(result[2].name).toBe('soul');
+      expect(result[0].name).toBe('home');
+      expect(result[1].name).toBe('free time');
+      expect(result[2].name).toBe('garden');
     });
   });
 
@@ -217,10 +217,10 @@ describe('categoryService', () => {
     it('finds default category by name', () => {
       mockGetGenericItem.mockReturnValue([]);
 
-      const result = categoryService.getCategoryByName('body');
+      const result = categoryService.getCategoryByName('home');
 
       expect(result).toBeDefined();
-      expect(result?.name).toBe('body');
+      expect(result?.name).toBe('home');
     });
 
     it('handles case insensitive search', () => {

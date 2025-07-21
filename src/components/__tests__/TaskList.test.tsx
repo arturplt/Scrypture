@@ -37,7 +37,7 @@ describe('TaskList', () => {
       createdAt: new Date('2024-01-01'),
       updatedAt: new Date('2024-01-01'),
       priority: 'high' as const,
-      category: 'body',
+      category: 'home',
     },
     {
       id: '2',
@@ -47,7 +47,7 @@ describe('TaskList', () => {
       createdAt: new Date('2024-01-02'),
       updatedAt: new Date('2024-01-02'),
       priority: 'medium' as const,
-      category: 'mind',
+      category: 'free time',
     },
     {
       id: '3',
@@ -57,7 +57,7 @@ describe('TaskList', () => {
       createdAt: new Date('2024-01-03'),
       updatedAt: new Date('2024-01-03'),
       priority: 'low' as const,
-      category: 'soul',
+      category: 'garden',
     },
     {
       id: '4',
@@ -67,7 +67,7 @@ describe('TaskList', () => {
       createdAt: new Date('2024-01-04'),
       updatedAt: new Date('2024-01-04'),
       priority: 'high' as const,
-      category: 'body',
+      category: 'home',
     },
   ];
 
@@ -120,18 +120,18 @@ describe('TaskList', () => {
       render(<TaskList />);
 
       const categorySelect = screen.getByDisplayValue('All Categories');
-      fireEvent.change(categorySelect, { target: { value: 'body' } });
+      fireEvent.change(categorySelect, { target: { value: 'home' } });
 
       expect(screen.getByText('Workout')).toBeInTheDocument();
+      expect(screen.getByText('Study Programming')).toBeInTheDocument();
       expect(screen.queryByText('Read Book')).not.toBeInTheDocument();
-      expect(screen.queryByText('Study Programming')).not.toBeInTheDocument();
     });
 
     it('shows all tasks when "All Categories" is selected', () => {
       render(<TaskList />);
 
       const categorySelect = screen.getByDisplayValue('All Categories');
-      fireEvent.change(categorySelect, { target: { value: 'body' } });
+      fireEvent.change(categorySelect, { target: { value: 'home' } });
       fireEvent.change(categorySelect, { target: { value: '' } });
 
       expect(screen.getByText('Workout')).toBeInTheDocument();
@@ -139,11 +139,11 @@ describe('TaskList', () => {
       expect(screen.getByText('Study Programming')).toBeInTheDocument();
     });
 
-    it('filters by mind category', () => {
+    it('filters by free time category', () => {
       render(<TaskList />);
 
       const categorySelect = screen.getByDisplayValue('All Categories');
-      fireEvent.change(categorySelect, { target: { value: 'mind' } });
+      fireEvent.change(categorySelect, { target: { value: 'free time' } });
 
       expect(screen.getByText('Read Book')).toBeInTheDocument();
       expect(screen.queryByText('Workout')).not.toBeInTheDocument();
@@ -151,17 +151,17 @@ describe('TaskList', () => {
   });
 
   describe('Sorting', () => {
-    it('sorts by category by default', () => {
+    it('sorts by priority by default', () => {
       render(<TaskList />);
 
-      const sortSelect = screen.getByDisplayValue('📂 Category');
+      const sortSelect = screen.getByDisplayValue('⚡ Priority');
       expect(sortSelect).toBeInTheDocument();
     });
 
     it('changes sort method to priority', () => {
       render(<TaskList />);
 
-      const sortSelect = screen.getByDisplayValue('📂 Category');
+      const sortSelect = screen.getByDisplayValue('⚡ Priority');
       fireEvent.change(sortSelect, { target: { value: 'priority' } });
 
       expect(sortSelect).toHaveValue('priority');
@@ -170,7 +170,7 @@ describe('TaskList', () => {
     it('changes sort method to date', () => {
       render(<TaskList />);
 
-      const sortSelect = screen.getByDisplayValue('📂 Category');
+      const sortSelect = screen.getByDisplayValue('⚡ Priority');
       fireEvent.change(sortSelect, { target: { value: 'date' } });
 
       expect(sortSelect).toHaveValue('date');
@@ -190,7 +190,7 @@ describe('TaskList', () => {
     it('maintains sort order when changing sort method', () => {
       render(<TaskList />);
 
-      const sortSelect = screen.getByDisplayValue('📂 Category');
+      const sortSelect = screen.getByDisplayValue('⚡ Priority');
       const sortButton = screen.getByLabelText('Sort descending');
 
       fireEvent.click(sortButton); // Change to ascending
@@ -356,7 +356,7 @@ describe('TaskList', () => {
       const categorySelect = screen.getByDisplayValue('All Categories');
       expect(categorySelect).toBeInTheDocument();
 
-      const sortSelect = screen.getByDisplayValue('📂 Category');
+      const sortSelect = screen.getByDisplayValue('⚡ Priority');
       expect(sortSelect).toBeInTheDocument();
     });
 
@@ -394,14 +394,14 @@ describe('TaskList', () => {
       expect(screen.getByText('Read Book')).toBeInTheDocument();
       expect(screen.getByText('Study Programming')).toBeInTheDocument();
 
-      // Filter by body category
-      fireEvent.change(categorySelect, { target: { value: 'body' } });
+      // Filter by home category
+      fireEvent.change(categorySelect, { target: { value: 'home' } });
       expect(screen.getByText('Workout')).toBeInTheDocument();
+      expect(screen.getByText('Study Programming')).toBeInTheDocument();
       expect(screen.queryByText('Read Book')).not.toBeInTheDocument();
-      expect(screen.queryByText('Study Programming')).not.toBeInTheDocument();
 
-      // Filter by mind category
-      fireEvent.change(categorySelect, { target: { value: 'mind' } });
+      // Filter by free time category
+      fireEvent.change(categorySelect, { target: { value: 'free time' } });
       expect(screen.queryByText('Workout')).not.toBeInTheDocument();
       expect(screen.getByText('Read Book')).toBeInTheDocument();
       expect(screen.queryByText('Study Programming')).not.toBeInTheDocument();
@@ -419,9 +419,9 @@ describe('TaskList', () => {
       const categorySelect = screen.getByDisplayValue('All Categories');
       
       // Filter by a category that has no active tasks (only completed tasks)
-      fireEvent.change(categorySelect, { target: { value: 'soul' } });
+      fireEvent.change(categorySelect, { target: { value: 'garden' } });
 
-      // Active tasks section should not be visible since no active tasks match 'soul'
+      // Active tasks section should not be visible since no active tasks match 'garden'
       expect(screen.queryByText('Active Tasks')).not.toBeInTheDocument();
       expect(screen.queryByText('Workout')).not.toBeInTheDocument();
       expect(screen.queryByText('Read Book')).not.toBeInTheDocument();

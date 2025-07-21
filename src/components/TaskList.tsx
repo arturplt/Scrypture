@@ -17,17 +17,13 @@ export const TaskList: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   
-  const coreCategories = [
-    { value: 'body', label: '💪 Body' },
-    { value: 'mind', label: '🧠 Mind' },
-    { value: 'soul', label: '✨ Soul' },
-  ];
-  const [customCategories, setCustomCategories] = useState<{ name: string; icon: string }[]>([]);
+  // Core attributes are now separate from categories - no filtering needed
+  const [allCategories, setAllCategories] = useState<{ name: string; icon: string }[]>([]);
   useEffect(() => {
-    setCustomCategories(categoryService.getCustomCategories());
+    setAllCategories(categoryService.getAllCategories());
     // Listen for custom event to refresh categories
     const handler = () => {
-      setCustomCategories(categoryService.getCustomCategories());
+      setAllCategories(categoryService.getAllCategories());
       refreshTasks(); // Auto-save/refresh tasks after new category
     };
     window.addEventListener('customCategoryAdded', handler);
@@ -105,7 +101,16 @@ export const TaskList: React.FC = () => {
   const handleSaveEdit = () => {
     setIsEditMode(false);
     setTaskToEdit(null);
-    // Keep the modal open to show the updated task
+    // Refresh tasks from storage to ensure latest data
+    refreshTasks();
+    // Always find the updated task by ID in the current sortedTasks
+    if (selectedTaskIndex !== null) {
+      const prevTaskId = sortedTasks[selectedTaskIndex]?.id;
+      // Find the updated task's new index by ID
+      const newIndex = sortedTasks.findIndex(t => t.id === prevTaskId);
+      setSelectedTaskIndex(newIndex !== -1 ? newIndex : null);
+    }
+    // Modal remains open to show the updated task
   };
 
   const handleCancelEdit = () => {
@@ -145,10 +150,7 @@ export const TaskList: React.FC = () => {
                   className={styles.categorySelect}
                 >
                   <option value="">All Categories</option>
-                  {coreCategories.map(cat => (
-                    <option key={cat.value} value={cat.value}>{cat.label}</option>
-                  ))}
-                  {customCategories.map(cat => (
+                  {allCategories.map(cat => (
                     <option key={cat.name} value={cat.name}>
                       {cat.icon} {cat.name.charAt(0).toUpperCase() + cat.name.slice(1)}
                     </option>

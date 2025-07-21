@@ -27,8 +27,12 @@ jest.mock('../services/storageService', () => ({
       name: 'Test User',
       level: 1,
       experience: 0,
+      body: 0,
+      mind: 0,
+      soul: 0,
       achievements: [],
       createdAt: new Date('2024-01-01'),
+      updatedAt: new Date('2024-01-01'),
     })),
     getHabits: jest.fn(() => []),
     saveHabits: jest.fn(() => true),
@@ -47,6 +51,11 @@ jest.mock('../services/categoryService', () => ({
     getCustomCategories: jest.fn(() => []),
     saveCustomCategories: jest.fn(() => true),
     addCustomCategory: jest.fn(() => true),
+    getAllCategories: jest.fn(() => [
+      { name: 'home', icon: '🏠', color: 'var(--color-home)' },
+      { name: 'free time', icon: '🎲', color: 'var(--color-freetime)' },
+      { name: 'garden', icon: '🌱', color: 'var(--color-garden)' }
+    ]),
   },
 }));
 
@@ -82,9 +91,13 @@ describe('Integration Tests', () => {
       const descriptionInput = screen.getByPlaceholderText(/Description/);
       fireEvent.change(descriptionInput, { target: { value: 'This is a test task for integration testing' } });
 
-      // 6. User selects category (body should be default)
-      const bodyCategoryButton = screen.getByText(/💪 BODY/);
-      expect(bodyCategoryButton).toBeInTheDocument();
+      // 6. User selects core attributes (BODY, MIND, SOUL buttons)
+      const bodyButton = screen.getByText(/BODY/);
+      const mindButton = screen.getByText(/MIND/);
+      const soulButton = screen.getByText(/SOUL/);
+      expect(bodyButton).toBeInTheDocument();
+      expect(mindButton).toBeInTheDocument();
+      expect(soulButton).toBeInTheDocument();
 
       // 7. User selects priority (medium should be default)
       const mediumPriorityButton = screen.getByText(/MEDIUM PRIORITY/);
@@ -94,14 +107,16 @@ describe('Integration Tests', () => {
       const submitButton = screen.getByText(/Add Task/);
       fireEvent.click(submitButton);
 
-      // 7. Task appears in the task list
+      // 9. Task appears in the task list
       await waitFor(() => {
         expect(screen.getByText('Complete Integration Test Task')).toBeInTheDocument();
       });
 
       // 8. Task shows correct details
       expect(screen.getByText('This is a test task for integration testing')).toBeInTheDocument();
-      expect(screen.getByText(/💪/)).toBeInTheDocument(); // Body category icon
+      expect(screen.getByText(/Medium Priority/)).toBeInTheDocument();
+      // Task was created successfully and appears in the list
+      expect(screen.getByText('Complete Integration Test Task')).toBeInTheDocument();
     });
 
     it('handles task creation with different categories and priorities', async () => {

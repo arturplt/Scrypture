@@ -23,6 +23,12 @@ export interface Habit {
   lastCompleted?: Date;
   createdAt: Date;
   targetFrequency: 'daily' | 'weekly' | 'monthly';
+  statRewards?: {
+    body?: number;
+    mind?: number;
+    soul?: number;
+    xp?: number;
+  };
 }
 
 export interface User {

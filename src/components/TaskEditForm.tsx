@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Task } from '../types';
 import { useTasks } from '../hooks/useTasks';
+import { taskService } from '../services/taskService';
+import { categoryService } from '../services/categoryService';
 import styles from './TaskForm.module.css';
 
 interface TaskEditFormProps {
@@ -12,7 +14,7 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({ task, onCancel }) =>
   const { updateTask } = useTasks();
   const [title, setTitle] = useState(task.title);
   const [description, setDescription] = useState(task.description || '');
-  const [category, setCategory] = useState<'body' | 'mind' | 'soul' | 'career' | 'home' | 'skills'>((task.category as 'body' | 'mind' | 'soul' | 'career' | 'home' | 'skills') || 'body');
+  const [category, setCategory] = useState<string>(task.category || 'home');
   const [priority, setPriority] = useState<'low' | 'medium' | 'high'>(task.priority);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -28,7 +30,7 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({ task, onCancel }) =>
   useEffect(() => {
     setTitle(task.title);
     setDescription(task.description || '');
-    setCategory((task.category as 'body' | 'mind' | 'soul' | 'career' | 'home' | 'skills') || 'body');
+    setCategory(task.category || 'home');
     setPriority(task.priority);
   }, [task]);
 
@@ -37,18 +39,31 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({ task, onCancel }) =>
     autoResizeTextarea();
   }, [description]);
 
+  // Remove statRewards calculation from handleSubmit
+  const [bodyReward, setBodyReward] = useState<number>(task.statRewards?.body || 0);
+  const [mindReward, setMindReward] = useState<number>(task.statRewards?.mind || 0);
+  const [soulReward, setSoulReward] = useState<number>(task.statRewards?.soul || 0);
+  const [xpReward, setXpReward] = useState<number>(task.statRewards?.xp || 0);
+
+  // Calculate XP based on priority
+  const priorityXp = priority === 'high' ? 15 : priority === 'medium' ? 10 : 5;
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!title.trim()) return;
-    
+    const statRewards = {
+      body: bodyReward || undefined,
+      mind: mindReward || undefined,
+      soul: soulReward || undefined,
+      xp: xpReward || undefined,
+    };
     updateTask(task.id, {
       title: title.trim(),
       description: description.trim() || undefined,
       category,
       priority,
+      statRewards,
     });
-    
     onCancel();
   };
 
@@ -56,7 +71,7 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({ task, onCancel }) =>
     // Reset form to original values
     setTitle(task.title);
     setDescription(task.description || '');
-    setCategory((task.category as 'body' | 'mind' | 'soul' | 'career' | 'home' | 'skills') || 'body');
+    setCategory(task.category || 'home');
     setPriority(task.priority);
     onCancel();
   };
@@ -67,14 +82,7 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({ task, onCancel }) =>
     { value: 'high', label: 'HIGH PRIORITY', color: 'var(--color-urgent)' }
   ];
 
-  const categoryOptions = [
-    { value: 'body', label: '💪 BODY', icon: '💪', color: 'var(--color-body)' },
-    { value: 'mind', label: '🧠 MIND', icon: '🧠', color: 'var(--color-mind)' },
-    { value: 'soul', label: '✨ SOUL', icon: '✨', color: 'var(--color-soul)' },
-    { value: 'career', label: '💼 CAREER', icon: '💼', color: 'var(--color-career)' },
-    { value: 'home', label: '🏠 HOME', icon: '🏠', color: 'var(--color-home)' },
-    { value: 'skills', label: '🎯 SKILLS', icon: '🎯', color: 'var(--color-skills)' }
-  ];
+  const allCategories = categoryService.getAllCategories();
 
   return (
     <form className={styles.form} onSubmit={handleSubmit} noValidate>
@@ -108,19 +116,14 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({ task, onCancel }) =>
       <div className={styles.categorySelector}>
         <label className={styles.categoryLabel}>Category:</label>
         <div className={styles.categoryButtons}>
-          {categoryOptions.map((option) => (
+          {allCategories.map(option => (
             <button
-              key={option.value}
+              key={option.name}
               type="button"
-              className={`${styles.categoryButton} ${category === option.value ? styles.categoryButtonActive : ''}`}
-              style={{ 
-                borderColor: option.color,
-                backgroundColor: category === option.value ? option.color : 'transparent',
-                color: category === option.value ? 'var(--color-bg-primary)' : 'var(--color-text-primary)'
-              }}
-              onClick={() => setCategory(option.value as 'body' | 'mind' | 'soul' | 'career' | 'home' | 'skills')}
+              className={`${styles.categoryButton} ${category === option.name ? styles.categoryButtonActive : ''}`}
+              onClick={() => setCategory(option.name)}
             >
-              {option.label}
+              {option.icon} {option.name.charAt(0).toUpperCase() + option.name.slice(1)}
             </button>
           ))}
         </div>
@@ -134,16 +137,58 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({ task, onCancel }) =>
               key={option.value}
               type="button"
               className={`${styles.priorityButton} ${priority === option.value ? styles.priorityButtonActive : ''}`}
-              style={{ 
-                borderColor: option.color,
-                backgroundColor: priority === option.value ? option.color : 'transparent',
-                color: priority === option.value ? 'var(--color-bg-primary)' : 'var(--color-text-primary)'
-              }}
               onClick={() => setPriority(option.value as 'low' | 'medium' | 'high')}
             >
               {option.label}
             </button>
           ))}
+        </div>
+      </div>
+      
+      <div className={styles.coreAttributesSection}>
+        <label className={styles.coreAttributesLabel}>Core Attributes:</label>
+        <div className={styles.coreAttributesInputs}>
+          {bodyReward > 0 && (
+            <span className={styles.coreAttributeActiveLabel}>
+              BODY <span className={styles.coreAttributePlusOne}>+1</span>
+            </span>
+          )}
+          {mindReward > 0 && (
+            <span className={styles.coreAttributeActiveLabel}>
+              MIND <span className={styles.coreAttributePlusOne}>+1</span>
+            </span>
+          )}
+          {soulReward > 0 && (
+            <span className={styles.coreAttributeActiveLabel}>
+              SOUL <span className={styles.coreAttributePlusOne}>+1</span>
+            </span>
+          )}
+        </div>
+        <div className={styles.coreAttributesButtons}>
+          <button
+            type="button"
+            className={`${styles.coreAttributeButton} ${bodyReward > 0 ? styles.coreAttributeButtonActive : ''}`}
+            onClick={() => setBodyReward(bodyReward > 0 ? 0 : 1)}
+          >
+            BODY
+          </button>
+          <button
+            type="button"
+            className={`${styles.coreAttributeButton} ${mindReward > 0 ? styles.coreAttributeButtonActive : ''}`}
+            onClick={() => setMindReward(mindReward > 0 ? 0 : 1)}
+          >
+            MIND
+          </button>
+          <button
+            type="button"
+            className={`${styles.coreAttributeButton} ${soulReward > 0 ? styles.coreAttributeButtonActive : ''}`}
+            onClick={() => setSoulReward(soulReward > 0 ? 0 : 1)}
+          >
+            SOUL
+          </button>
+        </div>
+        <div className={styles.coreAttributeXpLabelWrapper}>
+          <span className={styles.coreAttributeXpLabel}>+{priorityXp} XP</span>
         </div>
       </div>
       

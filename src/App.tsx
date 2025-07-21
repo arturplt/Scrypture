@@ -11,7 +11,7 @@ import { AutoSaveIndicator } from './components/AutoSaveIndicator';
 import styles from './App.module.css';
 
 function AppContent() {
-  const { isSaving, lastSaved } = useTasks();
+  const { isSaving, lastSaved, refreshTasks } = useTasks();
   const { user } = useUser();
 
   // Show user creation if no user exists
@@ -35,7 +35,7 @@ function AppContent() {
         <StatsDisplay />
         <TaskForm />
         <TaskList />
-        <DataManager />
+        <DataManager onDataChange={refreshTasks} />
       </main>
       
       <AutoSaveIndicator 

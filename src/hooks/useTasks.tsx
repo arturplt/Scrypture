@@ -95,11 +95,12 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
 
     // Award experience and stat rewards when completing a task
     if (isCompleting) {
-      // Add stat rewards if available (includes XP)
-      if (task.statRewards) {
-        addStatRewards(task.statRewards);
+      // Fetch the latest task from storage to ensure up-to-date statRewards
+      const latestTasks = taskService.getTasks();
+      const updatedTask = latestTasks.find(t => t.id === id);
+      if (updatedTask && updatedTask.statRewards) {
+        addStatRewards(updatedTask.statRewards);
       } else {
-        // Fallback to base 10 XP if no stat rewards
         addExperience(10);
       }
     }

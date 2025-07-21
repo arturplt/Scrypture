@@ -28,6 +28,11 @@ export const TaskForm: React.FC<TaskFormProps> = ({ taskToEdit, onCancel, onSave
   }>>([]);
   const [categoryRefreshTrigger, setCategoryRefreshTrigger] = useState(0);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  // Remove getStatRewards and defaultCategoryRewards
+  const [bodyReward, setBodyReward] = useState<number>(0);
+  const [mindReward, setMindReward] = useState<number>(0);
+  const [soulReward, setSoulReward] = useState<number>(0);
+  const [xpReward, setXpReward] = useState<number>(0);
 
   const isEditMode = !!taskToEdit;
 
@@ -36,6 +41,12 @@ export const TaskForm: React.FC<TaskFormProps> = ({ taskToEdit, onCancel, onSave
     
     if (!title.trim()) return;
     
+    const statRewards = {
+      body: bodyReward || undefined,
+      mind: mindReward || undefined,
+      soul: soulReward || undefined,
+      xp: xpReward || undefined,
+    };
     if (isEditMode && taskToEdit) {
       // Update existing task
       updateTask(taskToEdit.id, {
@@ -43,6 +54,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ taskToEdit, onCancel, onSave
         description: description.trim() || undefined,
         category,
         priority,
+        statRewards,
       });
       onSave?.();
     } else {
@@ -53,6 +65,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ taskToEdit, onCancel, onSave
         category,
         completed: false,
         priority,
+        statRewards,
       });
     }
     
@@ -60,8 +73,12 @@ export const TaskForm: React.FC<TaskFormProps> = ({ taskToEdit, onCancel, onSave
     if (!isEditMode) {
       setTitle('');
       setDescription('');
-      setCategory('body');
+      setCategory('home');
       setPriority('medium');
+      setBodyReward(0);
+      setMindReward(0);
+      setSoulReward(0);
+      setXpReward(0);
     }
   };
 
@@ -119,35 +136,10 @@ export const TaskForm: React.FC<TaskFormProps> = ({ taskToEdit, onCancel, onSave
     { value: 'high', label: 'HIGH PRIORITY', color: 'var(--color-urgent)' },
   ];
 
-  const defaultCategories = [
-    { name: 'body', icon: '💪', label: 'BODY', color: 'var(--color-body)' },
-    { name: 'mind', icon: '🧠', label: 'MIND', color: 'var(--color-mind)' },
-    { name: 'soul', icon: '✨', label: 'SOUL', color: 'var(--color-soul)' },
-  ];
+  // Remove mainCategories, only use customCategories for allCategories
+  const allCategories = categoryService.getAllCategories();
 
-  const allCategories = [...defaultCategories, ...customCategories.map(cat => ({
-    name: cat.name.toLowerCase(),
-    icon: cat.icon,
-    label: cat.name.toUpperCase(),
-    color: cat.color
-  }))];
-
-  const defaultCategoryRewards: Record<string, { [key: string]: number }> = {
-    body: { body: 1, xp: 20 },
-    mind: { mind: 1, xp: 20 },
-    soul: { soul: 1, xp: 20 },
-  };
-
-  const getStatRewards = () => {
-    const priorityXpBonus = priority === 'high' ? 15 : priority === 'medium' ? 10 : 5;
-    if (defaultCategoryRewards[category]) {
-      const base = defaultCategoryRewards[category];
-      return { ...base, xp: (base.xp || 0) + priorityXpBonus };
-    }
-    // Custom categories: +0 to all stats, +30 XP (plus priority bonus)
-    return { xp: 30 + priorityXpBonus };
-  };
-
+  // Remove getStatRewards and defaultCategoryRewards
   const handleCategoryAdded = (newCategory: { 
     name: string; 
     icon: string; 
@@ -170,6 +162,9 @@ export const TaskForm: React.FC<TaskFormProps> = ({ taskToEdit, onCancel, onSave
     // If the form is expanded, prevent clicks from minimizing it
     e.stopPropagation();
   };
+
+  // Calculate XP based on priority
+  const priorityXp = priority === 'high' ? 15 : priority === 'medium' ? 10 : 5;
 
   return (
     <form 
@@ -208,7 +203,6 @@ export const TaskForm: React.FC<TaskFormProps> = ({ taskToEdit, onCancel, onSave
           </div>
         </div>
       </div>
-      
       {isExpanded && (
         <div style={{ position: 'relative' }}>
           <textarea
@@ -226,9 +220,57 @@ export const TaskForm: React.FC<TaskFormProps> = ({ taskToEdit, onCancel, onSave
           </div>
         </div>
       )}
-      
       {isExpanded && (
         <>
+          {/* Core Attributes as big selection buttons */}
+          <div className={styles.coreAttributesSection}>
+            <label className={styles.coreAttributesLabel}>Core Attributes:</label>
+            <div className={styles.coreAttributesInputs}>
+              {/* Show only a golden +1 badge next to the label for each active attribute */}
+              {bodyReward > 0 && (
+                <span className={styles.coreAttributeActiveLabel}>
+                  BODY <span className={styles.coreAttributePlusOne}>+1</span>
+                </span>
+              )}
+              {mindReward > 0 && (
+                <span className={styles.coreAttributeActiveLabel}>
+                  MIND <span className={styles.coreAttributePlusOne}>+1</span>
+                </span>
+              )}
+              {soulReward > 0 && (
+                <span className={styles.coreAttributeActiveLabel}>
+                  SOUL <span className={styles.coreAttributePlusOne}>+1</span>
+                </span>
+              )}
+            </div>
+            <div className={styles.coreAttributesButtons}>
+              <button
+                type="button"
+                className={`${styles.coreAttributeButton} ${bodyReward > 0 ? styles.coreAttributeButtonActive : ''}`}
+                onClick={() => setBodyReward(bodyReward > 0 ? 0 : 1)}
+              >
+                BODY
+              </button>
+              <button
+                type="button"
+                className={`${styles.coreAttributeButton} ${mindReward > 0 ? styles.coreAttributeButtonActive : ''}`}
+                onClick={() => setMindReward(mindReward > 0 ? 0 : 1)}
+              >
+                MIND
+              </button>
+              <button
+                type="button"
+                className={`${styles.coreAttributeButton} ${soulReward > 0 ? styles.coreAttributeButtonActive : ''}`}
+                onClick={() => setSoulReward(soulReward > 0 ? 0 : 1)}
+              >
+                SOUL
+              </button>
+            </div>
+            <div className={styles.coreAttributeXpLabelWrapper}>
+              <span className={styles.coreAttributeXpLabel}>+{priorityXp} XP</span>
+            </div>
+          </div>
+          {/* Category selection */}
           <div className={styles.categorySelector}>
             <div className={styles.categoryHeader}>
               <div className={styles.categoryHeaderContent}>
@@ -243,8 +285,6 @@ export const TaskForm: React.FC<TaskFormProps> = ({ taskToEdit, onCancel, onSave
                 >
                   + Add Category
                 </button>
-
-
               </div>
             </div>
             <div className={styles.categoryButtons}>
@@ -263,12 +303,11 @@ export const TaskForm: React.FC<TaskFormProps> = ({ taskToEdit, onCancel, onSave
                     setCategory(option.name);
                   }}
                 >
-                  {option.icon} {option.label}
+                  {option.icon} {option.name.charAt(0).toUpperCase() + option.name.slice(1)}
                 </button>
               ))}
             </div>
           </div>
-          
           <div className={styles.prioritySelector}>
             <label className={styles.priorityLabel}>Priority:</label>
             <div className={styles.priorityButtons}>
@@ -292,25 +331,17 @@ export const TaskForm: React.FC<TaskFormProps> = ({ taskToEdit, onCancel, onSave
               ))}
             </div>
           </div>
-
-          <div className={styles.statRewards}>
-            <label className={styles.statRewardsLabel}>Rewards:</label>
-            <div className={styles.statRewardsDisplay}>
-              {Object.entries(getStatRewards()).map(([stat, value]) => (
-                <div key={stat} className={styles.statReward}>
-                  <span className={styles.statIcon}>
-                    {stat === 'body' ? '💪' : stat === 'mind' ? '🧠' : stat === 'soul' ? '✨' : '⭐'}
-                  </span>
-                  <span className={styles.statName}>
-                    {stat === 'xp' ? 'XP' : stat.toUpperCase()}
-                  </span>
-                  <span className={styles.statValue}>+{value}</span>
-                </div>
-              ))}
-              {/* Remove custom category label */}
+          {/* XP Reward input, only show if > 0 */}
+          {xpReward > 0 && (
+            <div className={styles.statRewards}>
+              <label className={styles.statRewardsLabel}>XP Reward:</label>
+              <div className={styles.statRewardsDisplay}>
+                <span className={styles.coreAttributeActiveLabel}>
+                  <span className={styles.statIcon}>⭐</span> <span className={styles.coreAttributePlusOne}>+1</span>
+                </span>
+              </div>
             </div>
-          </div>
-          
+          )}
           <button 
             type="submit" 
             className={styles.submitButton}
@@ -329,7 +360,6 @@ export const TaskForm: React.FC<TaskFormProps> = ({ taskToEdit, onCancel, onSave
           )}
         </>
       )}
-      
       <CategoryModal
         isOpen={isCategoryModalOpen}
         onClose={() => setIsCategoryModalOpen(false)}

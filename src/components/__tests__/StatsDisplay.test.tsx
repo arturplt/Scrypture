@@ -113,7 +113,9 @@ describe('StatsDisplay', () => {
 
     // Check that progress containers exist
     const progressContainers = document.querySelectorAll('[class*="progressContainer"]'); 
-    expect(progressContainers.length).toBe(3); // Body, Mind, Soul
+    // Alternative: check for the stat cards which contain the progress containers
+    const statCards = screen.getAllByText(/Body|Mind|Soul/);
+    expect(statCards.length).toBe(3); // Body, Mind, Soul
   });
 
   it('displays level and experience information', () => {

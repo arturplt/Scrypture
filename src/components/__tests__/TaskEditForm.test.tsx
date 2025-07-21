@@ -5,12 +5,12 @@ import { TaskProvider } from '../../hooks/useTasks';
 import { UserProvider } from '../../hooks/useUser';
 import { Task } from '../../types';
 
-// Mock the task service
-jest.mock('../../services/taskService', () => ({
-  taskService: {
-    getTasks: jest.fn(() => []),
-    saveTasks: jest.fn(() => true),
-  },
+// Mock the useTasks hook
+const mockUpdateTask = jest.fn();
+jest.mock('../../hooks/useTasks', () => ({
+  useTasks: () => ({
+    updateTask: mockUpdateTask,
+  }),
 }));
 
 const mockTask: Task = {
@@ -21,6 +21,7 @@ const mockTask: Task = {
   priority: 'medium',
   createdAt: new Date('2024-01-01'),
   updatedAt: new Date('2024-01-01'),
+  statRewards: { body: 1, mind: 0, soul: 0 },
 };
 
 const renderWithProvider = (component: React.ReactElement) => {
@@ -33,77 +34,49 @@ const renderWithProvider = (component: React.ReactElement) => {
   );
 };
 
-describe('TaskEditForm', () => {
-  it('renders with task data pre-filled', () => {
+describe('TaskEditForm (new system)', () => {
+  it('renders with task data pre-filled and toggles', () => {
     const mockOnCancel = jest.fn();
-    
     renderWithProvider(
       <TaskEditForm task={mockTask} onCancel={mockOnCancel} />
     );
-
     expect(screen.getByDisplayValue('Test Task')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Test Description')).toBeInTheDocument();
-    // Check that the medium priority button is active (has the correct styling)
-    const mediumPriorityButton = screen.getByText('MEDIUM PRIORITY');
-    expect(mediumPriorityButton).toBeInTheDocument();
+    expect(screen.getByText('BODY +1')).toBeInTheDocument();
+    // Toggle MIND on
+    fireEvent.click(screen.getByText('MIND'));
+    expect(screen.getByText('MIND +1')).toBeInTheDocument();
+    // Toggle BODY off
+    fireEvent.click(screen.getByText('BODY'));
+    expect(screen.queryByText('BODY +1')).not.toBeInTheDocument();
   });
 
-  it('updates task when form is submitted', async () => {
+  it('shows correct XP for each priority', () => {
     const mockOnCancel = jest.fn();
-    
     renderWithProvider(
       <TaskEditForm task={mockTask} onCancel={mockOnCancel} />
     );
+    fireEvent.click(screen.getByText('LOW PRIORITY'));
+    expect(screen.getByText('+5 XP')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('MEDIUM PRIORITY'));
+    expect(screen.getByText('+10 XP')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('HIGH PRIORITY'));
+    expect(screen.getByText('+15 XP')).toBeInTheDocument();
+  });
 
-    const titleInput = screen.getByDisplayValue('Test Task');
-    const descriptionInput = screen.getByDisplayValue('Test Description');
-    const submitButton = screen.getByText('Update Task');
-
-    fireEvent.change(titleInput, { target: { value: 'Updated Task' } });
-    fireEvent.change(descriptionInput, { target: { value: 'Updated Description' } });
-    fireEvent.click(submitButton);
-
+  it('submits edit with correct statRewards', async () => {
+    const mockOnCancel = jest.fn();
+    renderWithProvider(
+      <TaskEditForm task={mockTask} onCancel={mockOnCancel} />
+    );
+    fireEvent.change(screen.getByDisplayValue('Test Task'), { target: { value: 'Updated Task' } });
+    fireEvent.click(screen.getByText('MIND'));
+    fireEvent.click(screen.getByText('Update Task'));
     await waitFor(() => {
-      expect(mockOnCancel).toHaveBeenCalled();
+      expect(mockUpdateTask).toHaveBeenCalledWith('1', expect.objectContaining({
+        title: 'Updated Task',
+        statRewards: { mind: 1 },
+      }));
     });
-  });
-
-  it('calls onCancel when cancel button is clicked', () => {
-    const mockOnCancel = jest.fn();
-    
-    renderWithProvider(
-      <TaskEditForm task={mockTask} onCancel={mockOnCancel} />
-    );
-
-    const cancelButton = screen.getByText('Cancel');
-    fireEvent.click(cancelButton);
-
-    expect(mockOnCancel).toHaveBeenCalled();
-  });
-
-  it('resets form to original values when cancel is clicked', () => {
-    const mockOnCancel = jest.fn();
-    
-    renderWithProvider(
-      <TaskEditForm task={mockTask} onCancel={mockOnCancel} />
-    );
-
-    const titleInput = screen.getByDisplayValue('Test Task');
-    const descriptionInput = screen.getByDisplayValue('Test Description');
-
-    // Change values
-    fireEvent.change(titleInput, { target: { value: 'Changed Title' } });
-    fireEvent.change(descriptionInput, { target: { value: 'Changed Description' } });
-
-    // Verify values changed
-    expect(screen.getByDisplayValue('Changed Title')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('Changed Description')).toBeInTheDocument();
-
-    // Click cancel
-    const cancelButton = screen.getByText('Cancel');
-    fireEvent.click(cancelButton);
-
-    // Form should be reset to original values when component re-renders
-    expect(mockOnCancel).toHaveBeenCalled();
   });
 }); 

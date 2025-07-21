@@ -52,7 +52,7 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
     }
 
     // Check if category name already exists (case insensitive)
-    const existingCategories = ['body', 'mind', 'soul'];
+    const existingCategories = ['home', 'free time', 'garden'];
     if (existingCategories.some(cat => cat.toLowerCase() === categoryName.trim().toLowerCase())) {
       setError('This category name already exists');
       return;
