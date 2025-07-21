@@ -25,11 +25,6 @@ export const TaskForm: React.FC<TaskFormProps> = ({ taskToEdit, onCancel, onSave
     name: string; 
     icon: string; 
     color: string;
-    points: {
-      body: number;
-      mind: number;
-      soul: number;
-    };
   }>>([]);
   const [categoryRefreshTrigger, setCategoryRefreshTrigger] = useState(0);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -137,49 +132,34 @@ export const TaskForm: React.FC<TaskFormProps> = ({ taskToEdit, onCancel, onSave
     color: cat.color
   }))];
 
+  const defaultCategoryRewards: Record<string, { [key: string]: number }> = {
+    body: { body: 1, xp: 20 },
+    mind: { mind: 1, xp: 20 },
+    soul: { soul: 1, xp: 20 },
+  };
+
   const getStatRewards = () => {
-    const selectedCategory = allCategories.find(cat => cat.name === category);
-    if (!selectedCategory) return { body: 1, xp: 20 };
-
-    // Check if it's a custom category
-    const customCategory = customCategories.find(cat => cat.name.toLowerCase() === category);
-    if (customCategory) {
-      const maxStat = Math.max(customCategory.points.body, customCategory.points.mind, customCategory.points.soul);
-      return {
-        body: customCategory.points.body,
-        mind: customCategory.points.mind,
-        soul: customCategory.points.soul,
-        xp: 30 - (maxStat * 10)
-      };
+    const priorityXpBonus = priority === 'high' ? 15 : priority === 'medium' ? 10 : 5;
+    if (defaultCategoryRewards[category]) {
+      const base = defaultCategoryRewards[category];
+      return { ...base, xp: (base.xp || 0) + priorityXpBonus };
     }
-
-    // Default category rewards
-    switch (category) {
-      case 'body':
-        return { body: 1, xp: 20 };
-      case 'mind':
-        return { mind: 1, xp: 20 };
-      case 'soul':
-        return { soul: 1, xp: 20 };
-      default:
-        return { body: 1, xp: 20 };
-    }
+    // Custom categories: +0 to all stats, +30 XP (plus priority bonus)
+    return { xp: 30 + priorityXpBonus };
   };
 
   const handleCategoryAdded = (newCategory: { 
     name: string; 
     icon: string; 
     color: string;
-    points: {
-      body: number;
-      mind: number;
-      soul: number;
-    };
   }) => {
     console.log('Adding new category:', newCategory);
     const success = categoryService.addCustomCategory(newCategory);
     console.log('Category added successfully:', success);
     setCategoryRefreshTrigger(prev => prev + 1); // Trigger refresh
+    if (success) {
+      window.dispatchEvent(new Event('customCategoryAdded'));
+    }
   };
 
   const handleFormClick = (e: React.MouseEvent) => {
@@ -317,18 +297,17 @@ export const TaskForm: React.FC<TaskFormProps> = ({ taskToEdit, onCancel, onSave
             <label className={styles.statRewardsLabel}>Rewards:</label>
             <div className={styles.statRewardsDisplay}>
               {Object.entries(getStatRewards()).map(([stat, value]) => (
-                value > 0 && (
-                  <div key={stat} className={styles.statReward}>
-                    <span className={styles.statIcon}>
-                      {stat === 'body' ? '💪' : stat === 'mind' ? '🧠' : stat === 'soul' ? '✨' : '⭐'}
-                    </span>
-                    <span className={styles.statName}>
-                      {stat === 'xp' ? 'XP' : stat.toUpperCase()}
-                    </span>
-                    <span className={styles.statValue}>+{value}</span>
-                  </div>
-                )
+                <div key={stat} className={styles.statReward}>
+                  <span className={styles.statIcon}>
+                    {stat === 'body' ? '💪' : stat === 'mind' ? '🧠' : stat === 'soul' ? '✨' : '⭐'}
+                  </span>
+                  <span className={styles.statName}>
+                    {stat === 'xp' ? 'XP' : stat.toUpperCase()}
+                  </span>
+                  <span className={styles.statValue}>+{value}</span>
+                </div>
               ))}
+              {/* Remove custom category label */}
             </div>
           </div>
           

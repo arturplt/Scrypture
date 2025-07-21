@@ -172,6 +172,46 @@ describe('TaskForm', () => {
     }, { timeout: 5000 });
   });
 
+  it('shows correct XP for each priority and category', () => {
+    render(<TaskForm />);
+    const titleInput = screen.getByPlaceholderText('Intention');
+    fireEvent.click(titleInput);
+
+    // Default: body + medium = 20 + 10
+    expect(screen.getByText('+30')).toBeInTheDocument();
+
+    // Change to high priority
+    const highPriorityButton = screen.getByText('HIGH PRIORITY');
+    fireEvent.click(highPriorityButton);
+    expect(screen.getByText('+35')).toBeInTheDocument();
+
+    // Change to low priority
+    const lowPriorityButton = screen.getByText('LOW PRIORITY');
+    fireEvent.click(lowPriorityButton);
+    expect(screen.getByText('+25')).toBeInTheDocument();
+  });
+
+  it('shows correct XP for custom category and priority', () => {
+    mockCategoryService.getCustomCategories.mockReturnValue([
+      { name: 'test', icon: '🎯', color: 'var(--color-skills)' }
+    ]);
+    render(<TaskForm />);
+    const titleInput = screen.getByPlaceholderText('Intention');
+    fireEvent.click(titleInput);
+    const customButton = screen.getByText('🎯 TEST');
+    fireEvent.click(customButton);
+    // Default: custom + medium = 30 + 10
+    expect(screen.getByText('+40')).toBeInTheDocument();
+    // High priority
+    const highPriorityButton = screen.getByText('HIGH PRIORITY');
+    fireEvent.click(highPriorityButton);
+    expect(screen.getByText('+45')).toBeInTheDocument();
+    // Low priority
+    const lowPriorityButton = screen.getByText('LOW PRIORITY');
+    fireEvent.click(lowPriorityButton);
+    expect(screen.getByText('+35')).toBeInTheDocument();
+  });
+
   it('prevents form from minimizing when clicking inside expanded form', () => {
     render(<TaskForm />);
     

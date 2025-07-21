@@ -1,21 +1,41 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTasks } from '../hooks/useTasks';
 import { TaskCard } from './TaskCard';
 import { TaskDetailModal } from './TaskDetailModal';
 import { TaskForm } from './TaskForm';
 import { Task } from '../types';
 import styles from './TaskList.module.css';
+import { categoryService } from '../services/categoryService';
 
 export const TaskList: React.FC = () => {
-  const { tasks, deleteTask } = useTasks();
+  const { tasks, deleteTask, refreshTasks } = useTasks();
   const [selectedTaskIndex, setSelectedTaskIndex] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [taskToEdit, setTaskToEdit] = useState<Task | null>(null);
-  const [sortBy, setSortBy] = useState<'category' | 'priority' | 'date'>('category');
+  const [sortBy, setSortBy] = useState<'priority' | 'date'>('priority');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   
+  const coreCategories = [
+    { value: 'body', label: '💪 Body' },
+    { value: 'mind', label: '🧠 Mind' },
+    { value: 'soul', label: '✨ Soul' },
+  ];
+  const [customCategories, setCustomCategories] = useState<{ name: string; icon: string }[]>([]);
+  useEffect(() => {
+    setCustomCategories(categoryService.getCustomCategories());
+    // Listen for custom event to refresh categories
+    const handler = () => {
+      setCustomCategories(categoryService.getCustomCategories());
+      refreshTasks(); // Auto-save/refresh tasks after new category
+    };
+    window.addEventListener('customCategoryAdded', handler);
+    return () => {
+      window.removeEventListener('customCategoryAdded', handler);
+    };
+  }, []);
+
   // Filter and sort active tasks
   const activeTasks = tasks.filter(task => !task.completed).filter(task => {
     if (selectedCategory) {
@@ -25,12 +45,8 @@ export const TaskList: React.FC = () => {
   }).sort((a, b) => {
     let comparison = 0;
     
-    if (sortBy === 'category') {
-      const categoryOrder: Record<string, number> = { body: 1, mind: 2, soul: 3, career: 4, home: 5, skills: 6 };
-      const categoryA = a.category || 'body';
-      const categoryB = b.category || 'body';
-      comparison = categoryOrder[categoryA] - categoryOrder[categoryB];
-    } else if (sortBy === 'priority') {
+    // Remove category sort logic
+    if (sortBy === 'priority') {
       const priorityOrder = { high: 3, medium: 2, low: 1 };
       comparison = priorityOrder[a.priority] - priorityOrder[b.priority];
     } else if (sortBy === 'date') {
@@ -129,12 +145,14 @@ export const TaskList: React.FC = () => {
                   className={styles.categorySelect}
                 >
                   <option value="">All Categories</option>
-                  <option value="body">💪 Body</option>
-                  <option value="mind">🧠 Mind</option>
-                  <option value="soul">✨ Soul</option>
-                  <option value="career">💼 Career</option>
-                  <option value="home">🏠 Home</option>
-                  <option value="skills">🎯 Skills</option>
+                  {coreCategories.map(cat => (
+                    <option key={cat.value} value={cat.value}>{cat.label}</option>
+                  ))}
+                  {customCategories.map(cat => (
+                    <option key={cat.name} value={cat.name}>
+                      {cat.icon} {cat.name.charAt(0).toUpperCase() + cat.name.slice(1)}
+                    </option>
+                  ))}
                 </select>
               </div>
               
@@ -142,10 +160,10 @@ export const TaskList: React.FC = () => {
               <div className={styles.sortControls}>
                 <select 
                   value={sortBy} 
-                  onChange={(e) => setSortBy(e.target.value as 'category' | 'priority' | 'date')}
+                  onChange={(e) => setSortBy(e.target.value as 'priority' | 'date')}
                   className={styles.sortSelect}
                 >
-                  <option value="category">📂 Category</option>
+                  {/* <option value="category">📂 Category</option> */}
                   <option value="priority">⚡ Priority</option>
                   <option value="date">📅 Date</option>
                 </select>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { userService } from '../services/userService';
+import { categoryService } from '../services/categoryService';
 import styles from './DataManager.module.css';
 
 interface DataManagerProps {
@@ -89,6 +90,7 @@ export const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
   const handleClearData = () => {
     if (window.confirm('Clear all data? This cannot be undone.')) {
       const success = userService.clearAllData();
+      categoryService.clearCustomCategories();
       if (success) {
         showMessage('Data cleared!', 'success');
         onDataChange?.();

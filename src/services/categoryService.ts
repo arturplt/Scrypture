@@ -4,11 +4,6 @@ export interface CustomCategory {
   name: string;
   icon: string;
   color: string;
-  points: {
-    body: number;
-    mind: number;
-    soul: number;
-  };
 }
 
 const STORAGE_KEY = 'scrypture_custom_categories';
@@ -80,18 +75,18 @@ export const categoryService = {
     return this.saveCustomCategories(filteredCategories);
   },
 
-  getAllCategories(): (CustomCategory | { name: string; icon: string; color: string; points: { body: number; mind: number; soul: number } })[] {
+  getAllCategories(): (CustomCategory | { name: string; icon: string; color: string })[] {
     const defaultCategories = [
-      { name: 'body', icon: '💪', color: 'var(--color-body)', points: { body: 1, mind: 0, soul: 0 } },
-      { name: 'mind', icon: '🧠', color: 'var(--color-mind)', points: { body: 0, mind: 1, soul: 0 } },
-      { name: 'soul', icon: '✨', color: 'var(--color-soul)', points: { body: 0, mind: 0, soul: 1 } }
+      { name: 'body', icon: '💪', color: 'var(--color-body)' },
+      { name: 'mind', icon: '🧠', color: 'var(--color-mind)' },
+      { name: 'soul', icon: '✨', color: 'var(--color-soul)' }
     ];
     
     const customCategories = this.getCustomCategories();
     return [...defaultCategories, ...customCategories];
   },
 
-  getCategoryByName(name: string): CustomCategory | { name: string; icon: string; color: string; points: { body: number; mind: number; soul: number } } | null {
+  getCategoryByName(name: string): CustomCategory | { name: string; icon: string; color: string } | null {
     const allCategories = this.getAllCategories();
     return allCategories.find(cat => cat.name.toLowerCase() === name.toLowerCase()) || null;
   },

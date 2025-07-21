@@ -15,36 +15,19 @@ export const taskService = {
     return storageService.saveTasks([]);
   },
 
-  calculateStatRewards(category: string): { body?: number; mind?: number; soul?: number; xp?: number } {
-    const rewards = {
+  calculateStatRewards(category: string, priority: 'low' | 'medium' | 'high'): { body?: number; mind?: number; soul?: number; xp?: number } {
+    const defaultRewards = {
       body: { body: 1, xp: 20 },
       mind: { mind: 1, xp: 20 },
-      soul: { soul: 1, xp: 20 },
-      career: { mind: 1, body: 1, xp: 10 },
-      home: { body: 1, soul: 1, xp: 10 },
-      skills: { mind: 1, soul: 1, xp: 10 }
+      soul: { soul: 1, xp: 20 }
     };
-    
-    // For custom categories, get the category data and calculate rewards based on points
-    if (!rewards[category as keyof typeof rewards]) {
-      const customCategories = categoryService.getCustomCategories();
-      const customCategory = customCategories.find(cat => cat.name === category);
-      
-      if (customCategory) {
-        const totalPoints = customCategory.points.body + customCategory.points.mind + customCategory.points.soul;
-        return {
-          body: customCategory.points.body > 0 ? customCategory.points.body : undefined,
-          mind: customCategory.points.mind > 0 ? customCategory.points.mind : undefined,
-          soul: customCategory.points.soul > 0 ? customCategory.points.soul : undefined,
-          xp: 30 - (totalPoints * 10)
-        };
-      }
-      
-      // Fallback for unknown categories
-      return { body: 1, mind: 1, soul: 1, xp: 10 };
+    const priorityXpBonus = priority === 'high' ? 15 : priority === 'medium' ? 10 : 5;
+    if (defaultRewards[category as keyof typeof defaultRewards]) {
+      const base = defaultRewards[category as keyof typeof defaultRewards];
+      return { ...base, xp: (base.xp || 0) + priorityXpBonus };
     }
-    
-    return rewards[category as keyof typeof rewards];
+    // Custom categories: +0 to all stats, +30 XP (plus priority bonus)
+    return { xp: 30 + priorityXpBonus };
   },
 
   createTask(taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>): Task {
@@ -53,7 +36,7 @@ export const taskService = {
       id: this.generateId(),
       createdAt: new Date(),
       updatedAt: new Date(),
-      statRewards: taskData.category ? this.calculateStatRewards(taskData.category) : undefined,
+      statRewards: taskData.category && taskData.priority ? this.calculateStatRewards(taskData.category, taskData.priority) : undefined,
     };
     
     const tasks = this.getTasks();

@@ -1,7 +1,4 @@
-import { categoryService } from '../categoryService';
-import { StorageService } from '../storageService';
-
-// Mock the StorageService singleton
+// Move these lines to the very top of the file, before any jest.mock or imports that use them
 const mockGetGenericItem = jest.fn();
 const mockSetGenericItem = jest.fn();
 
@@ -16,6 +13,10 @@ jest.mock('../storageService', () => ({
     getInstance: jest.fn(() => mockStorageService)
   }
 }));
+
+import { categoryService } from '../categoryService';
+import { StorageService } from '../storageService';
+
 
 describe('categoryService', () => {
   beforeEach(() => {
@@ -35,8 +36,8 @@ describe('categoryService', () => {
 
     it('returns existing categories from storage', () => {
       const mockCategories = [
-        { name: 'test', icon: '🧪', color: 'var(--color-skills)', points: { body: 1, mind: 1, soul: 1 } },
-        { name: 'workout', icon: '💪', color: 'var(--color-body)', points: { body: 2, mind: 0, soul: 1 } }
+        { name: 'test', icon: '🧪', color: 'var(--color-skills)' },
+        { name: 'workout', icon: '💪', color: 'var(--color-body)' }
       ];
       mockGetGenericItem.mockReturnValue(mockCategories);
 
@@ -59,7 +60,7 @@ describe('categoryService', () => {
   describe('saveCustomCategories', () => {
     it('saves categories successfully', () => {
       const categories = [
-        { name: 'test', icon: '🧪', color: 'var(--color-skills)', points: { body: 1, mind: 1, soul: 1 } }
+        { name: 'test', icon: '🧪', color: 'var(--color-skills)' }
       ];
       mockSetGenericItem.mockReturnValue(true);
 
@@ -71,7 +72,7 @@ describe('categoryService', () => {
 
     it('returns false when save fails', () => {
       const categories = [
-        { name: 'test', icon: '🧪', color: 'var(--color-skills)', points: { body: 1, mind: 1, soul: 1 } }
+        { name: 'test', icon: '🧪', color: 'var(--color-skills)' }
       ];
       mockSetGenericItem.mockReturnValue(false);
 
@@ -84,9 +85,9 @@ describe('categoryService', () => {
   describe('addCustomCategory', () => {
     it('adds new category successfully', () => {
       const existingCategories = [
-        { name: 'workout', icon: '💪', color: 'var(--color-body)', points: { body: 2, mind: 0, soul: 1 } }
+        { name: 'workout', icon: '💪', color: 'var(--color-body)' }
       ];
-      const newCategory = { name: 'test', icon: '🧪', color: 'var(--color-skills)', points: { body: 1, mind: 1, soul: 1 } };
+      const newCategory = { name: 'test', icon: '🧪', color: 'var(--color-skills)' };
       
       mockGetGenericItem.mockReturnValue(existingCategories);
       mockSetGenericItem.mockReturnValue(true);
@@ -102,9 +103,9 @@ describe('categoryService', () => {
 
     it('prevents adding duplicate category names (case insensitive)', () => {
       const existingCategories = [
-        { name: 'Test', icon: '🧪', color: 'var(--color-skills)', points: { body: 1, mind: 1, soul: 1 } }
+        { name: 'Test', icon: '🧪', color: 'var(--color-skills)' }
       ];
-      const duplicateCategory = { name: 'test', icon: '🧪', color: 'var(--color-skills)', points: { body: 1, mind: 1, soul: 1 } };
+      const duplicateCategory = { name: 'test', icon: '🧪', color: 'var(--color-skills)' };
       
       mockGetGenericItem.mockReturnValue(existingCategories);
 
@@ -119,7 +120,7 @@ describe('categoryService', () => {
         throw new Error('Storage error');
       });
       
-      const newCategory = { name: 'test', icon: '🧪', color: 'var(--color-skills)', points: { body: 1, mind: 1, soul: 1 } };
+      const newCategory = { name: 'test', icon: '🧪', color: 'var(--color-skills)' };
 
       const result = categoryService.addCustomCategory(newCategory);
 
@@ -130,8 +131,8 @@ describe('categoryService', () => {
   describe('removeCustomCategory', () => {
     it('removes category successfully', () => {
       const existingCategories = [
-        { name: 'test', icon: '🧪', color: 'var(--color-skills)', points: { body: 1, mind: 1, soul: 1 } },
-        { name: 'workout', icon: '💪', color: 'var(--color-body)', points: { body: 2, mind: 0, soul: 1 } }
+        { name: 'test', icon: '🧪', color: 'var(--color-skills)' },
+        { name: 'workout', icon: '💪', color: 'var(--color-body)' }
       ];
       
       mockGetGenericItem.mockReturnValue(existingCategories);
@@ -141,13 +142,13 @@ describe('categoryService', () => {
 
       expect(result).toBe(true);
       expect(mockSetGenericItem).toHaveBeenCalledWith('scrypture_custom_categories', [
-        { name: 'workout', icon: '💪', color: 'var(--color-body)', points: { body: 2, mind: 0, soul: 1 } }
+        { name: 'workout', icon: '💪', color: 'var(--color-body)' }
       ]);
     });
 
     it('returns false when category not found', () => {
       const existingCategories = [
-        { name: 'workout', icon: '💪', color: 'var(--color-body)', points: { body: 2, mind: 0, soul: 1 } }
+        { name: 'workout', icon: '💪', color: 'var(--color-body)' }
       ];
       
       mockGetGenericItem.mockReturnValue(existingCategories);
@@ -160,7 +161,7 @@ describe('categoryService', () => {
 
     it('handles case insensitive removal', () => {
       const existingCategories = [
-        { name: 'Test', icon: '🧪', color: 'var(--color-skills)', points: { body: 1, mind: 1, soul: 1 } }
+        { name: 'Test', icon: '🧪', color: 'var(--color-skills)' }
       ];
       
       mockGetGenericItem.mockReturnValue(existingCategories);
@@ -175,7 +176,7 @@ describe('categoryService', () => {
   describe('getAllCategories', () => {
     it('combines default and custom categories', () => {
       const customCategories = [
-        { name: 'test', icon: '🧪', color: 'var(--color-skills)', points: { body: 1, mind: 1, soul: 1 } }
+        { name: 'test', icon: '🧪', color: 'var(--color-skills)' }
       ];
       mockGetGenericItem.mockReturnValue(customCategories);
 
@@ -203,7 +204,7 @@ describe('categoryService', () => {
   describe('getCategoryByName', () => {
     it('finds custom category by name', () => {
       const customCategories = [
-        { name: 'test', icon: '🧪', color: 'var(--color-skills)', points: { body: 1, mind: 1, soul: 1 } }
+        { name: 'test', icon: '🧪', color: 'var(--color-skills)' }
       ];
       mockGetGenericItem.mockReturnValue(customCategories);
 
@@ -224,7 +225,7 @@ describe('categoryService', () => {
 
     it('handles case insensitive search', () => {
       const customCategories = [
-        { name: 'Test', icon: '🧪', color: 'var(--color-skills)', points: { body: 1, mind: 1, soul: 1 } }
+        { name: 'Test', icon: '🧪', color: 'var(--color-skills)' }
       ];
       mockGetGenericItem.mockReturnValue(customCategories);
 

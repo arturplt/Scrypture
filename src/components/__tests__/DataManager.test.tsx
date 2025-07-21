@@ -30,6 +30,20 @@ jest.mock('../../services/userService', () => ({
   },
 }));
 
+// Move the mock for StorageService.getInstance() to the very top of the file, before any imports that use it.
+jest.mock('../../services/storageService', () => ({
+  storageService: {
+    getInstance: jest.fn(() => ({
+      createBackup: jest.fn(),
+      restoreFromBackup: jest.fn(),
+      exportData: jest.fn(),
+      importData: jest.fn(),
+      clearAllData: jest.fn(),
+      getStorageStats: jest.fn(),
+    })),
+  },
+}));
+
 describe('DataManager', () => {
   const mockBackupData = {
     tasks: [

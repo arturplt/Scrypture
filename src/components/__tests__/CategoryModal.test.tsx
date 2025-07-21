@@ -35,7 +35,6 @@ describe('CategoryModal', () => {
     expect(screen.getByLabelText('Category Name *')).toBeInTheDocument();
     expect(screen.getByText('Icon')).toBeInTheDocument();
     expect(screen.getByText('Color')).toBeInTheDocument();
-    expect(screen.getByText('Point Distribution (3 points total)')).toBeInTheDocument();
   });
 
   it('does not render when closed', () => {
@@ -97,27 +96,6 @@ describe('CategoryModal', () => {
       fireEvent.click(colorButtons[0]);
       expect(colorButtons[0]).toHaveClass('colorButtonActive');
     }
-  });
-
-  it('allows adjusting point distribution', () => {
-    render(
-      <CategoryModal
-        isOpen={true}
-        onClose={mockOnClose}
-        onCategoryAdded={mockOnCategoryAdded}
-      />
-    );
-
-    const bodyPlusButton = screen.getAllByText('+')[0];
-    const bodyMinusButton = screen.getAllByText('-')[0];
-
-    // Test adding points
-    fireEvent.click(bodyPlusButton);
-    expect(screen.getByText('2')).toBeInTheDocument(); // Body should now have 2 points
-
-    // Test removing points
-    fireEvent.click(bodyMinusButton);
-    expect(screen.getByText('1')).toBeInTheDocument(); // Body should be back to 1 point
   });
 
   it('shows validation error for empty name', async () => {
@@ -199,7 +177,7 @@ describe('CategoryModal', () => {
 
   it('shows validation error for existing custom category name', async () => {
     mockCategoryService.getCustomCategories.mockReturnValue([
-      { name: 'test', icon: '🎯', color: 'var(--color-skills)', points: { body: 1, mind: 0, soul: 0 } }
+      { name: 'test', icon: '🎯', color: 'var(--color-skills)' }
     ]);
 
     render(
@@ -247,8 +225,7 @@ describe('CategoryModal', () => {
       expect(mockOnCategoryAdded).toHaveBeenCalledWith({
         name: 'test category',
         icon: '🧠',
-        color: 'var(--color-body)', // Default color
-        points: { body: 1, mind: 0, soul: 0 } // Default points
+        color: 'var(--color-body)' // Default color
       });
       expect(mockOnClose).toHaveBeenCalled();
     });
@@ -268,36 +245,6 @@ describe('CategoryModal', () => {
 
     // Check if preview shows the category name - use more flexible matching
     expect(screen.getByText(/test category/i)).toBeInTheDocument();
-  });
-
-  it('shows rewards preview', () => {
-    render(
-      <CategoryModal
-        isOpen={true}
-        onClose={mockOnClose}
-        onCategoryAdded={mockOnCategoryAdded}
-      />
-    );
-
-    // Check if rewards section is present
-    expect(screen.getByText('Rewards:')).toBeInTheDocument();
-    expect(screen.getByText('BODY')).toBeInTheDocument();
-    expect(screen.getByText('MIND')).toBeInTheDocument();
-    expect(screen.getByText('SOUL')).toBeInTheDocument();
-    expect(screen.getByText('XP')).toBeInTheDocument();
-  });
-
-  it('calculates XP correctly based on points', () => {
-    render(
-      <CategoryModal
-        isOpen={true}
-        onClose={mockOnClose}
-        onCategoryAdded={mockOnCategoryAdded}
-      />
-    );
-
-    // With default 1 point (body: 1, mind: 0, soul: 0), XP should be 20
-    expect(screen.getByText('+20')).toBeInTheDocument(); // XP should be 30 - (1 * 10) = 20
   });
 
   it('closes modal when cancel is clicked', () => {

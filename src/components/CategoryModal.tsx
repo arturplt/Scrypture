@@ -10,11 +10,6 @@ interface CategoryModalProps {
     name: string; 
     icon: string; 
     color: string;
-    points: {
-      body: number;
-      mind: number;
-      soul: number;
-    };
   }) => void;
 }
 
@@ -38,7 +33,6 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
   const [categoryName, setCategoryName] = useState('');
   const [selectedIcon, setSelectedIcon] = useState('💪');
   const [selectedColor, setSelectedColor] = useState('var(--color-body)');
-  const [points, setPoints] = useState({ body: 1, mind: 0, soul: 0 });
   const [error, setError] = useState('');
 
   const handleSubmit = () => {
@@ -74,8 +68,7 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
     onCategoryAdded({
       name: categoryName.trim().toLowerCase(),
       icon: selectedIcon,
-      color: selectedColor,
-      points
+      color: selectedColor
     });
 
     // Reset form
@@ -142,112 +135,7 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
           </div>
         </div>
 
-        <div className={styles.formGroup}>
-          <label className={styles.label}>Point Distribution (3 points total)</label>
-          <div className={styles.pointDistribution}>
-            <div className={styles.pointStat}>
-              <span className={styles.pointIcon}>💪</span>
-              <span className={styles.pointLabel}>Body</span>
-              <div className={styles.pointControls}>
-                <button
-                  type="button"
-                  className={styles.pointButton}
-                  onClick={() => {
-                    const total = points.body + points.mind + points.soul;
-                    if (total < 3 && points.body < 3) {
-                      setPoints(prev => ({ ...prev, body: prev.body + 1 }));
-                    }
-                  }}
-                  disabled={points.body + points.mind + points.soul >= 3 || points.body >= 3}
-                >
-                  +
-                </button>
-                <span className={styles.pointValue}>{points.body}</span>
-                <button
-                  type="button"
-                  className={styles.pointButton}
-                  onClick={() => {
-                    if (points.body > 0) {
-                      setPoints(prev => ({ ...prev, body: prev.body - 1 }));
-                    }
-                  }}
-                  disabled={points.body <= 0}
-                >
-                  -
-                </button>
-              </div>
-            </div>
-            
-            <div className={styles.pointStat}>
-              <span className={styles.pointIcon}>🧠</span>
-              <span className={styles.pointLabel}>Mind</span>
-              <div className={styles.pointControls}>
-                <button
-                  type="button"
-                  className={styles.pointButton}
-                  onClick={() => {
-                    const total = points.body + points.mind + points.soul;
-                    if (total < 3 && points.mind < 3) {
-                      setPoints(prev => ({ ...prev, mind: prev.mind + 1 }));
-                    }
-                  }}
-                  disabled={points.body + points.mind + points.soul >= 3 || points.mind >= 3}
-                >
-                  +
-                </button>
-                <span className={styles.pointValue}>{points.mind}</span>
-                <button
-                  type="button"
-                  className={styles.pointButton}
-                  onClick={() => {
-                    if (points.mind > 0) {
-                      setPoints(prev => ({ ...prev, mind: prev.mind - 1 }));
-                    }
-                  }}
-                  disabled={points.mind <= 0}
-                >
-                  -
-                </button>
-              </div>
-            </div>
-            
-            <div className={styles.pointStat}>
-              <span className={styles.pointIcon}>✨</span>
-              <span className={styles.pointLabel}>Soul</span>
-              <div className={styles.pointControls}>
-                <button
-                  type="button"
-                  className={styles.pointButton}
-                  onClick={() => {
-                    const total = points.body + points.mind + points.soul;
-                    if (total < 3 && points.soul < 3) {
-                      setPoints(prev => ({ ...prev, soul: prev.soul + 1 }));
-                    }
-                  }}
-                  disabled={points.body + points.mind + points.soul >= 3 || points.soul >= 3}
-                >
-                  +
-                </button>
-                <span className={styles.pointValue}>{points.soul}</span>
-                <button
-                  type="button"
-                  className={styles.pointButton}
-                  onClick={() => {
-                    if (points.soul > 0) {
-                      setPoints(prev => ({ ...prev, soul: prev.soul - 1 }));
-                    }
-                  }}
-                  disabled={points.soul <= 0}
-                >
-                  -
-                </button>
-              </div>
-            </div>
-          </div>
-          <div className={styles.pointTotal}>
-            Total: {points.body + points.mind + points.soul}/3 points
-          </div>
-        </div>
+        {/* Remove point distribution UI and rewards preview */}
 
         <div className={styles.preview}>
           <label className={styles.label}>Preview:</label>
@@ -260,42 +148,6 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
             }}
           >
             {selectedIcon} {categoryName || 'CATEGORY NAME'}
-          </div>
-          <div className={styles.rewardsPreview}>
-            <label className={styles.label}>Rewards:</label>
-            <div className={styles.rewardsDisplay}>
-              {points.body > 0 && (
-                <div className={styles.rewardItem}>
-                  <span className={styles.rewardIcon}>💪</span>
-                  <span className={styles.rewardStat}>BODY</span>
-                  <span className={styles.rewardValue}>+{points.body}</span>
-                </div>
-              )}
-              {points.mind > 0 && (
-                <div className={styles.rewardItem}>
-                  <span className={styles.rewardIcon}>🧠</span>
-                  <span className={styles.rewardStat}>MIND</span>
-                  <span className={styles.rewardValue}>+{points.mind}</span>
-                </div>
-              )}
-              {points.soul > 0 && (
-                <div className={styles.rewardItem}>
-                  <span className={styles.rewardIcon}>✨</span>
-                  <span className={styles.rewardStat}>SOUL</span>
-                  <span className={styles.rewardValue}>+{points.soul}</span>
-                </div>
-              )}
-              <div className={styles.rewardItem}>
-                <span className={styles.rewardIcon}>⭐</span>
-                <span className={styles.rewardStat}>XP</span>
-                {/* XP Formula: 30 - (max_single_stat * 10) 
-                    - 3 points in one stat = 0 XP
-                    - 2 points in one stat = 10 XP  
-                    - 1 point in one stat = 20 XP
-                    - 0 points = 30 XP */}
-                <span className={styles.rewardValue}>+{30 - (Math.max(points.body, points.mind, points.soul) * 10)}</span>
-              </div>
-            </div>
           </div>
         </div>
 
