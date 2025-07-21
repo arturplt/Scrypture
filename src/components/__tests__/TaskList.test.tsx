@@ -67,7 +67,7 @@ describe('TaskList', () => {
       createdAt: new Date('2024-01-04'),
       updatedAt: new Date('2024-01-04'),
       priority: 'high' as const,
-      category: 'skills',
+      category: 'body',
     },
   ];
 
@@ -146,16 +146,6 @@ describe('TaskList', () => {
       fireEvent.change(categorySelect, { target: { value: 'mind' } });
 
       expect(screen.getByText('Read Book')).toBeInTheDocument();
-      expect(screen.queryByText('Workout')).not.toBeInTheDocument();
-    });
-
-    it('filters by skills category', () => {
-      render(<TaskList />);
-
-      const categorySelect = screen.getByDisplayValue('All Categories');
-      fireEvent.change(categorySelect, { target: { value: 'skills' } });
-
-      expect(screen.getByText('Study Programming')).toBeInTheDocument();
       expect(screen.queryByText('Workout')).not.toBeInTheDocument();
     });
   });
@@ -462,7 +452,7 @@ describe('TaskList', () => {
           createdAt: new Date('2024-01-05'),
           updatedAt: new Date('2024-01-05'),
           priority: 'medium' as const,
-          category: 'career',
+          category: 'body',
         },
       ];
       mockUseTasks.mockReturnValue({ tasks: newTasks });
