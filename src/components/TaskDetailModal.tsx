@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Task } from '../types';
 import { Modal } from './Modal';
+
+import { TaskEditForm } from './TaskEditForm';
 import { formatRelativeTime } from '../utils/dateUtils';
 import styles from './TaskDetailModal.module.css';
 
@@ -31,6 +33,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   const [dragStart, setDragStart] = useState<number | null>(null);
   const [dragEnd, setDragEnd] = useState<number | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Minimum swipe distance required to trigger navigation (in px)
@@ -152,6 +155,16 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
     }
   };
 
+  const handleEdit = () => {
+    setShowEditForm(true);
+  };
+
+
+
+  const handleEditCancel = () => {
+    setShowEditForm(false);
+  };
+
   // Filter out zero rewards, but keep XP first if present
   const nonZeroRewards = task.statRewards 
     ? Object.entries(task.statRewards)
@@ -161,7 +174,8 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   const otherRewards = nonZeroRewards.filter(([stat]) => stat !== 'xp');
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Task Details">
+    <>
+      <Modal isOpen={isOpen} onClose={onClose} title="Task Details">
       <div 
         className={styles.container}
         ref={containerRef}
@@ -214,26 +228,15 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
               )}
             </div>
             
-            <div className={styles.actionButtons}>
-              {onEdit && (
-                <button
-                  onClick={onEdit}
-                  className={styles.editButton}
-                  aria-label="Edit task"
-                >
-                  ✎
-                </button>
-              )}
-              {onDelete && (
-                <button
-                  onClick={onDelete}
-                  className={styles.deleteButton}
-                  aria-label="Delete task"
-                >
-                  🗑️
-                </button>
-              )}
-            </div>
+                  <div className={styles.actionButtons}>
+        <button
+          onClick={handleEdit}
+          className={styles.editButton}
+          aria-label="Edit task"
+        >
+          🖍
+        </button>
+      </div>
           </div>
         </div>
 
@@ -312,5 +315,21 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
         </div>
       </div>
     </Modal>
+
+    {/* Custom Confirmation Modal for Delete */}
+    
+
+    {/* Separate Edit Modal */}
+    {showEditForm && task && (
+      <Modal isOpen={showEditForm} onClose={handleEditCancel} title="Edit Task">
+        <div className={styles.editModalContent}>
+          <TaskEditForm
+            task={task}
+            onCancel={handleEditCancel}
+          />
+        </div>
+      </Modal>
+    )}
+  </>
   );
 }; 

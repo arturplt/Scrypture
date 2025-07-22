@@ -96,6 +96,51 @@ describe('TaskCard', () => {
       const checkbox = screen.getByRole('checkbox');
       expect(checkbox).toBeChecked();
     });
+
+    it('renders XP strip with category colors when stat rewards are present', () => {
+      const taskWithRewards = {
+        ...mockTask,
+        statRewards: {
+          xp: 25,
+          body: 2,
+          mind: 1,
+          soul: 1,
+        },
+      };
+
+      render(
+        <TaskCard
+          task={taskWithRewards}
+          onOpenModal={mockOnOpenModal}
+        />
+      );
+
+      // Check that XP strip is rendered
+      const xpStrip = document.querySelector('[class*="xpStrip"]');
+      expect(xpStrip).toBeInTheDocument();
+
+      // Check that category strips are rendered
+      const categoryStrips = document.querySelectorAll('[class*="categoryStrip"]');
+      expect(categoryStrips).toHaveLength(3); // body, mind, soul
+    });
+
+    it('does not render XP strip when no stat rewards are present', () => {
+      const taskWithoutRewards = {
+        ...mockTask,
+        statRewards: undefined,
+      };
+
+      render(
+        <TaskCard
+          task={taskWithoutRewards}
+          onOpenModal={mockOnOpenModal}
+        />
+      );
+
+      // Check that XP strip is not rendered
+      const xpStrip = document.querySelector('[class*="xpStrip"]');
+      expect(xpStrip).not.toBeInTheDocument();
+    });
   });
 
   describe('Interactions', () => {

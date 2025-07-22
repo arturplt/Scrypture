@@ -509,6 +509,35 @@
 
 .cancelButton:active {
   transform: translateY(0);
+}
+
+.deleteButton {
+  flex: 1;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-error);
+  color: var(--color-bg-primary);
+  border: 2px solid var(--color-error);
+  border-radius: 0px;
+  font-size: var(--font-size-sm);
+  font-weight: normal;
+  font-family: 'Press Start 2P', monospace;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  box-shadow: var(--shadow-button);
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+}
+
+.deleteButton:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-active);
+  background: var(--color-error);
+  border-color: var(--color-error);
+}
+
+.deleteButton:active {
+  transform: translateY(0);
 } 
 
 /* Category Modal Styles */

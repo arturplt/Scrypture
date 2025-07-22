@@ -3,6 +3,7 @@ import { Task } from '../types';
 import { useTasks } from '../hooks/useTasks';
 import { taskService } from '../services/taskService';
 import { categoryService } from '../services/categoryService';
+import { ConfirmationModal } from './ConfirmationModal';
 import styles from './TaskForm.module.css';
 
 interface TaskEditFormProps {
@@ -11,11 +12,12 @@ interface TaskEditFormProps {
 }
 
 export const TaskEditForm: React.FC<TaskEditFormProps> = ({ task, onCancel }) => {
-  const { updateTask } = useTasks();
+  const { updateTask, deleteTask } = useTasks();
   const [title, setTitle] = useState(task.title);
   const [description, setDescription] = useState(task.description || '');
   const [category, setCategory] = useState<string>(task.category || 'home');
   const [priority, setPriority] = useState<'low' | 'medium' | 'high'>(task.priority);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Auto-resize textarea function
@@ -80,6 +82,19 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({ task, onCancel }) =>
     onCancel();
   };
 
+  const handleDelete = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = () => {
+    deleteTask(task.id);
+    onCancel();
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteConfirm(false);
+  };
+
   const priorityOptions = [
     { value: 'low', label: 'LOW PRIORITY', color: 'var(--color-easy)' },
     { value: 'medium', label: 'MEDIUM PRIORITY', color: 'var(--color-focus)' },
@@ -89,7 +104,8 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({ task, onCancel }) =>
   const allCategories = categoryService.getAllCategories();
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit} noValidate>
+    <>
+      <form className={styles.form} onSubmit={handleSubmit} noValidate>
       <div className={styles.inputGroup}>
         <div style={{ flex: 1, position: 'relative' }}>
           <input
@@ -225,7 +241,26 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({ task, onCancel }) =>
         >
           Cancel
         </button>
+        <button 
+          type="button" 
+          className={styles.deleteButton}
+          onClick={handleDelete}
+        >
+          Delete Task
+        </button>
       </div>
     </form>
+    
+    <ConfirmationModal
+      isOpen={showDeleteConfirm}
+      title="Delete Task"
+      message="Are you sure you want to delete this task? This action cannot be undone."
+      onConfirm={confirmDelete}
+      onCancel={cancelDelete}
+      confirmText="Delete"
+      cancelText="Cancel"
+      confirmButtonStyle="danger"
+    />
+    </>
   );
 }; 
