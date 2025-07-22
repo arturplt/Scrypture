@@ -89,12 +89,16 @@ describe('categoryService', () => {
       ];
       const newCategory = { name: 'test', icon: '🧪', color: 'var(--color-skills)' };
       
-      mockGetGenericItem.mockReturnValue(existingCategories);
+      // Mock the getGenericItem calls - first for existing categories, second for verification
+      mockGetGenericItem
+        .mockReturnValueOnce(existingCategories)
+        .mockReturnValueOnce([...existingCategories, newCategory]);
       mockSetGenericItem.mockReturnValue(true);
 
       const result = categoryService.addCustomCategory(newCategory);
 
       expect(result).toBe(true);
+      // Verify that setGenericItem was called with the correct parameters
       expect(mockSetGenericItem).toHaveBeenCalledWith('scrypture_custom_categories', [
         ...existingCategories,
         newCategory
@@ -116,9 +120,13 @@ describe('categoryService', () => {
     });
 
     it('handles storage errors when adding category', () => {
-      mockGetGenericItem.mockImplementation(() => {
-        throw new Error('Storage error');
-      });
+      // Mock the first call to succeed, second call to fail (verification step)
+      mockGetGenericItem
+        .mockReturnValueOnce([]) // First call returns empty array
+        .mockImplementation(() => {
+          throw new Error('Storage error');
+        }); // Second call throws error
+      mockSetGenericItem.mockReturnValue(true);
       
       const newCategory = { name: 'test', icon: '🧪', color: 'var(--color-skills)' };
 

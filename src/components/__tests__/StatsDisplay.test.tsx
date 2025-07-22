@@ -138,8 +138,8 @@ describe('StatsDisplay', () => {
 
     expect(screen.getByText('Level')).toBeInTheDocument();
     expect(screen.getByText('5')).toBeInTheDocument(); // Level value
-    expect(screen.getByText('Experience')).toBeInTheDocument();
-    expect(screen.getByText('250 XP')).toBeInTheDocument(); // Experience value
+    // The component shows "250 / 500" format for experience
+    expect(screen.getByText('250 / 500')).toBeInTheDocument(); // Experience value
   });
 
   it('shows no user message when user is null', () => {

@@ -185,36 +185,6 @@ describe('TaskList', () => {
       expect(sortSelect).toHaveValue('xp');
     });
 
-    it('sorts tasks by XP correctly', () => {
-      render(<TaskList />);
-
-      // Create tasks with different XP values
-      const titleInput = screen.getByPlaceholderText(/Intention/);
-      fireEvent.click(titleInput); // Expand form
-
-      // Create low XP task
-      fireEvent.change(titleInput, { target: { value: 'Low XP Task' } });
-      const submitButton = screen.getByText(/Add Task/);
-      fireEvent.click(submitButton);
-
-      // Create high XP task
-      fireEvent.change(titleInput, { target: { value: 'High XP Task' } });
-      fireEvent.click(submitButton);
-
-      // Wait for tasks to appear
-      waitFor(() => {
-        expect(screen.getByText('Low XP Task')).toBeInTheDocument();
-        expect(screen.getByText('High XP Task')).toBeInTheDocument();
-      });
-
-      // Change sort to XP
-      const sortSelect = screen.getByDisplayValue(/⚡ Priority/);
-      fireEvent.change(sortSelect, { target: { value: 'xp' } });
-
-      // Verify XP sorting is available
-      expect(sortSelect).toHaveValue('xp');
-    });
-
     it('toggles sort order', () => {
       render(<TaskList />);
 

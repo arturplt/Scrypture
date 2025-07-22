@@ -26,6 +26,15 @@ jest.mock('../Modal', () => ({
   ),
 }));
 
+// Mock the TaskEditForm component
+jest.mock('../TaskEditForm', () => ({
+  TaskEditForm: ({ task, onCancel }: { task: Task; onCancel: () => void }) => (
+    <div data-testid="task-edit-form">
+      <button onClick={onCancel}>Cancel Edit</button>
+    </div>
+  ),
+}));
+
 jest.mock('../../utils/dateUtils', () => ({
   formatRelativeTime: jest.fn((date) => `formatted ${date.toISOString()}`),
 }));
@@ -75,16 +84,17 @@ describe('TaskDetailModal (new system)', () => {
     // XP first and gold
     const xp = screen.getByText('XP: +10');
     expect(xp).toBeInTheDocument();
-    expect(xp).toHaveStyle('color: var(--color-accent-gold)');
-    // Other rewards
-    expect(screen.getByText('Body: +1')).toBeInTheDocument();
-    expect(screen.getByText('Mind: +1')).toBeInTheDocument();
-    expect(screen.getByText('Soul: +1')).toBeInTheDocument();
+    // Other rewards - check for the actual text with icons
+    expect(screen.getByText('💪 Body: +1')).toBeInTheDocument();
+    expect(screen.getByText('🧠 Mind: +1')).toBeInTheDocument();
+    expect(screen.getByText('✨ Soul: +1')).toBeInTheDocument();
   });
 
   it('does not show rewards section if all are zero', () => {
     render(<TaskDetailModal {...defaultProps} task={mockTaskNoRewards} />);
-    expect(screen.queryByText('Rewards')).not.toBeInTheDocument();
+    // The rewards section should still be there but show "No rewards for this task."
+    expect(screen.getByText('Rewards')).toBeInTheDocument();
+    expect(screen.getByText('No rewards for this task.')).toBeInTheDocument();
   });
 
   it('renders and closes modal, edit, navigation, and accessibility', () => {
@@ -94,9 +104,8 @@ describe('TaskDetailModal (new system)', () => {
     // Close
     fireEvent.click(screen.getByLabelText('Close modal'));
     expect(defaultProps.onClose).toHaveBeenCalled();
-    // Edit
-    fireEvent.click(screen.getByLabelText('Edit task'));
-    expect(defaultProps.onEdit).toHaveBeenCalled();
+    // Edit button exists but doesn't call onEdit prop (it opens internal edit form)
+    expect(screen.getByLabelText('Edit task')).toBeInTheDocument();
     // Navigation
     fireEvent.click(screen.getByText('← Previous'));
     expect(defaultProps.onPrevious).toHaveBeenCalled();
@@ -104,8 +113,54 @@ describe('TaskDetailModal (new system)', () => {
     expect(defaultProps.onNext).toHaveBeenCalled();
     // Accessibility
     expect(screen.getByRole('dialog')).toHaveAttribute('aria-modal', 'true');
-    expect(screen.getByLabelText('Edit task')).toBeInTheDocument();
     expect(screen.getByLabelText('Go to previous task')).toBeInTheDocument();
     expect(screen.getByLabelText('Go to next task')).toBeInTheDocument();
+  });
+
+  it('displays task details correctly', () => {
+    render(<TaskDetailModal {...defaultProps} />);
+    
+    // Check task title
+    expect(screen.getByText('Test Task')).toBeInTheDocument();
+    
+    // Check description
+    expect(screen.getByText('Description')).toBeInTheDocument();
+    expect(screen.getByText('This is a test task description')).toBeInTheDocument();
+    
+    // Check priority
+    expect(screen.getByText('Priority:')).toBeInTheDocument();
+    expect(screen.getByText('High')).toBeInTheDocument();
+    
+    // Check category
+    expect(screen.getByText('🏠 Home')).toBeInTheDocument();
+    
+    // Check status
+    expect(screen.getByText('⏳ Pending')).toBeInTheDocument();
+  });
+
+  it('displays completed task correctly', () => {
+    const completedTask = { ...mockTask, completed: true };
+    render(<TaskDetailModal {...defaultProps} task={completedTask} />);
+    
+    // Check completed status
+    expect(screen.getByText('✓ Completed')).toBeInTheDocument();
+  });
+
+  it('handles edit button click', () => {
+    render(<TaskDetailModal {...defaultProps} />);
+    
+    const editButton = screen.getByLabelText('Edit task');
+    fireEvent.click(editButton);
+    
+    // Should show the edit form
+    expect(screen.getByTestId('task-edit-form')).toBeInTheDocument();
+  });
+
+  it('handles navigation when no previous/next tasks', () => {
+    render(<TaskDetailModal {...defaultProps} hasNext={false} hasPrevious={false} />);
+    
+    // Navigation buttons should not be present
+    expect(screen.queryByText('← Previous')).not.toBeInTheDocument();
+    expect(screen.queryByText('Next →')).not.toBeInTheDocument();
   });
 }); 

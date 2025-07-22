@@ -32,11 +32,24 @@ describe('UserCreation', () => {
   it('shows error for empty name', async () => {
     renderWithProvider(<UserCreation />);
     
+    const input = screen.getByLabelText('Character Name');
     const submitButton = screen.getByText('Begin Your Journey');
+    
+    // Enter a single character to enable the button
+    fireEvent.change(input, { target: { value: 'A' } });
+    
+    // Clear the input to trigger validation
+    fireEvent.change(input, { target: { value: '' } });
+    
+    // The button should be disabled when input is empty
+    expect(submitButton).toBeDisabled();
+    
+    // Enter a character to enable the button, then submit
+    fireEvent.change(input, { target: { value: 'A' } });
     fireEvent.click(submitButton);
     
     await waitFor(() => {
-      expect(screen.getByText('Please enter a name for your character')).toBeInTheDocument();
+      expect(screen.getByText('Name must be at least 2 characters long')).toBeInTheDocument();
     });
   });
 
