@@ -36,6 +36,9 @@ export const TaskForm: React.FC<TaskFormProps> = ({ taskToEdit, onCancel, onSave
 
   const isEditMode = !!taskToEdit;
 
+  const fibonacciXp = [0, 1, 2, 3, 5, 8, 13, 21, 34, 55];
+  const [difficulty, setDifficulty] = useState<number>(taskToEdit?.difficulty ?? 0);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -45,7 +48,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ taskToEdit, onCancel, onSave
       body: bodyReward || undefined,
       mind: mindReward || undefined,
       soul: soulReward || undefined,
-      xp: xpReward || undefined,
+      xp: priorityXp + fibonacciXp[difficulty],
     };
     if (isEditMode && taskToEdit) {
       // Update existing task
@@ -55,6 +58,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ taskToEdit, onCancel, onSave
         category,
         priority,
         statRewards,
+        difficulty,
       });
       onSave?.();
     } else {
@@ -66,6 +70,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ taskToEdit, onCancel, onSave
         completed: false,
         priority,
         statRewards,
+        difficulty,
       });
     }
     
@@ -79,6 +84,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ taskToEdit, onCancel, onSave
       setMindReward(0);
       setSoulReward(0);
       setXpReward(0);
+      setDifficulty(0);
     }
   };
 
@@ -267,7 +273,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ taskToEdit, onCancel, onSave
               </button>
             </div>
             <div className={styles.coreAttributeXpLabelWrapper}>
-              <span className={styles.coreAttributeXpLabel}>+{priorityXp} XP</span>
+              <span className={styles.coreAttributeXpLabel}>+{priorityXp + fibonacciXp[difficulty]} XP</span>
             </div>
           </div>
           {/* Category selection */}
@@ -339,6 +345,26 @@ export const TaskForm: React.FC<TaskFormProps> = ({ taskToEdit, onCancel, onSave
                 <span className={styles.coreAttributeActiveLabel}>
                   <span className={styles.statIcon}>⭐</span> <span className={styles.coreAttributePlusOne}>+1</span>
                 </span>
+              </div>
+            </div>
+          )}
+          {isExpanded && (
+            <div className={styles.difficultySelector}>
+              <label className={styles.difficultyLabel}>Difficulty:</label>
+              <div className={styles.difficultyButtons}>
+                {fibonacciXp.map((_, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    className={`${styles.difficultyButton} ${difficulty === idx ? styles.difficultyButtonActive : ''}`}
+                    style={{
+                      background: difficulty === idx ? `var(--difficulty-${idx + 1})` : undefined
+                    }}
+                    onClick={() => setDifficulty(idx)}
+                  >
+                    {idx}
+                  </button>
+                ))}
               </div>
             </div>
           )}

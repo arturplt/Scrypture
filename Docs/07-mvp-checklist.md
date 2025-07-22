@@ -54,9 +54,9 @@
 - [x] **MVP CORE P1** Quick task creation (title + category only)
 - [x] **MVP CORE P1** Task completion with basic animations
 - [x] **MVP CORE P1** Basic task properties (title, description, category)
-- [x] **MVP CORE P1** XP reward calculation (base 10 XP)
+- [x] **MVP CORE P1** XP reward calculation (priority XP + difficulty XP, Fibonacci scale)
 - [x] **MVP CORE P1** Stat rewards (Body, Mind, Soul)
-  - ✅ 1 point per task completion
+  - ✅ XP rewards are the sum of priority and difficulty (Fibonacci) XP, and are awarded on task completion
   - ✅ Category-based stat rewards
   - ✅ Visual stat rewards display in task creation
   - ✅ Real-time stat rewards preview

@@ -995,3 +995,105 @@
   justify-content: center;
   margin: var(--spacing-sm) 0 var(--spacing-md) 0;
 } 
+
+.totalXpLabelWrapper {
+  margin-top: var(--spacing-xs);
+  text-align: left;
+}
+
+.totalXpLabel {
+  font-size: var(--font-size-sm);
+  color: var(--color-accent-gold);
+  font-family: 'Press Start 2P', monospace;
+  font-weight: bold;
+} 
+
+.difficultySelector {
+  margin-bottom: var(--spacing-md);
+  width: 100%;
+}
+
+.difficultyLabel {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-family: 'Press Start 2P', monospace;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-sm);
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+}
+
+.difficultyButtons {
+  display: flex;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+  max-width: 220px;
+  justify-content: center;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.difficultyButton {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--color-border-primary);
+  border-radius: 0px;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-md);
+  font-family: 'Press Start 2P', monospace;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.difficultyButton:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-button);
+  border-color: var(--color-accent-gold);
+}
+
+.difficultyButton:active {
+  transform: translateY(0);
+}
+
+.difficultyButtonActive {
+  font-weight: bold;
+  border-color: var(--color-accent-gold);
+  color: var(--color-bg-primary);
+  box-shadow: var(--shadow-active);
+}
+
+.difficultyButton.diff-0 { background: var(--difficulty-1); }
+.difficultyButton.diff-1 { background: var(--difficulty-2); }
+.difficultyButton.diff-2 { background: var(--difficulty-3); }
+.difficultyButton.diff-3 { background: var(--difficulty-4); }
+.difficultyButton.diff-4 { background: var(--difficulty-5); }
+.difficultyButton.diff-5 { background: var(--difficulty-6); }
+.difficultyButton.diff-6 { background: var(--difficulty-7); }
+.difficultyButton.diff-7 { background: var(--difficulty-8); }
+.difficultyButton.diff-8 { background: var(--difficulty-9); }
+.difficultyButton.diff-9 { background: var(--difficulty-10); }
+
+.difficultyButton.diff-0.difficultyButtonActive { background: var(--difficulty-1); color: var(--color-bg-primary); }
+.difficultyButton.diff-1.difficultyButtonActive { background: var(--difficulty-2); color: var(--color-bg-primary); }
+.difficultyButton.diff-2.difficultyButtonActive { background: var(--difficulty-3); color: var(--color-bg-primary); }
+.difficultyButton.diff-3.difficultyButtonActive { background: var(--difficulty-4); color: var(--color-bg-primary); }
+.difficultyButton.diff-4.difficultyButtonActive { background: var(--difficulty-5); color: var(--color-bg-primary); }
+.difficultyButton.diff-5.difficultyButtonActive { background: var(--difficulty-6); color: var(--color-bg-primary); }
+.difficultyButton.diff-6.difficultyButtonActive { background: var(--difficulty-7); color: var(--color-bg-primary); }
+.difficultyButton.diff-7.difficultyButtonActive { background: var(--difficulty-8); color: var(--color-bg-primary); }
+.difficultyButton.diff-8.difficultyButtonActive { background: var(--difficulty-9); color: var(--color-bg-primary); }
+.difficultyButton.diff-9.difficultyButtonActive { background: var(--difficulty-10); color: var(--color-bg-primary); }
+
+.difficultySelectedXp {
+  display: none;
+} 

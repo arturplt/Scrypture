@@ -67,7 +67,7 @@ This folder contains **MVP-focused documentation** for the Scrypture project. It
 - Quick task creation
 - Task completion system
 - Basic task properties
-- Experience point calculation
+- Experience point calculation (priority XP + difficulty XP, Fibonacci scale)
 - Stat rewards system
 - Completion tracking
 - (Includes advanced features: priority, difficulty, due dates, tagging, duration tracking, model scalability)

@@ -70,9 +70,12 @@
 
 ### **6. Experience Point Calculation**
 **Purpose**: Provide experience points for completed tasks
-**Implementation**: Base 10 experience points with category bonuses
-**User Flow**: Complete task → See experience points gained → Update level
-**Technical**: Simple calculation based on difficulty and category
+**Implementation**: XP is now calculated as the sum of:
+- **Priority XP**: 5 (low), 10 (medium), 15 (high)
+- **Difficulty XP**: Fibonacci scale (0, 1, 2, 3, 5, 8, 13, 21, 34, 55 for difficulty 0-9)
+
+**User Flow**: Complete task → See total XP gained (priority + difficulty) → Update level
+**Technical**: The total XP is stored in the task's statRewards.xp and awarded to the user on completion. The UI always shows the total XP for the task.
 
 ### **7. Stat Rewards System**
 **Purpose**: Award Body, Mind, Soul points for completed tasks

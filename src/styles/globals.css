@@ -45,6 +45,8 @@
   --color-career: #F39C12;            /* Orange for career/work */
   --color-home: #27AE60;              /* Green for home/life */
   --color-skills: #E74C3C;            /* Red for skills/development */
+  --color-freetime: #00B8D9;          /* Teal for free time */
+  --color-garden: #6FCF97;            /* Light green for garden */
   
   /* Difficulty Level Colors */
   --difficulty-1: #2d6b3b;    /* Very Easy - Dark Green */

@@ -13,6 +13,7 @@ export interface Task {
     soul?: number;
     xp?: number;
   };
+  difficulty?: number; // 0-9, Fibonacci scale
 }
 
 export interface Habit {

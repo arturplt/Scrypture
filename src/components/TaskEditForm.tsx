@@ -48,6 +48,9 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({ task, onCancel }) =>
   // Calculate XP based on priority
   const priorityXp = priority === 'high' ? 15 : priority === 'medium' ? 10 : 5;
 
+  const fibonacciXp = [0, 1, 2, 3, 5, 8, 13, 21, 34, 55];
+  const [difficulty, setDifficulty] = useState<number>(task.difficulty ?? 0);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
@@ -55,7 +58,7 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({ task, onCancel }) =>
       body: bodyReward || undefined,
       mind: mindReward || undefined,
       soul: soulReward || undefined,
-      xp: xpReward || undefined,
+      xp: priorityXp + fibonacciXp[difficulty],
     };
     updateTask(task.id, {
       title: title.trim(),
@@ -63,6 +66,7 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({ task, onCancel }) =>
       category,
       priority,
       statRewards,
+      difficulty,
     });
     onCancel();
   };
@@ -144,6 +148,24 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({ task, onCancel }) =>
           ))}
         </div>
       </div>
+      <div className={styles.difficultySelector}>
+        <label className={styles.difficultyLabel}>Difficulty:</label>
+        <div className={styles.difficultyButtons}>
+          {fibonacciXp.map((_, idx) => (
+            <button
+              key={idx}
+              type="button"
+              className={`${styles.difficultyButton} ${difficulty === idx ? styles.difficultyButtonActive : ''}`}
+              style={{
+                background: difficulty === idx ? `var(--difficulty-${idx + 1})` : undefined
+              }}
+              onClick={() => setDifficulty(idx)}
+            >
+              {idx}
+            </button>
+          ))}
+        </div>
+      </div>
       
       <div className={styles.coreAttributesSection}>
         <label className={styles.coreAttributesLabel}>Core Attributes:</label>
@@ -188,7 +210,7 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({ task, onCancel }) =>
           </button>
         </div>
         <div className={styles.coreAttributeXpLabelWrapper}>
-          <span className={styles.coreAttributeXpLabel}>+{priorityXp} XP</span>
+          <span className={styles.coreAttributeXpLabel}>+{priorityXp + fibonacciXp[difficulty]} XP</span>
         </div>
       </div>
       
