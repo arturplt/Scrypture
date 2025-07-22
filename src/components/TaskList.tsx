@@ -13,7 +13,7 @@ export const TaskList: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [taskToEdit, setTaskToEdit] = useState<Task | null>(null);
-  const [sortBy, setSortBy] = useState<'priority' | 'date'>('priority');
+  const [sortBy, setSortBy] = useState<'priority' | 'date' | 'xp'>('priority');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   
@@ -41,12 +41,15 @@ export const TaskList: React.FC = () => {
   }).sort((a, b) => {
     let comparison = 0;
     
-    // Remove category sort logic
     if (sortBy === 'priority') {
       const priorityOrder = { high: 3, medium: 2, low: 1 };
       comparison = priorityOrder[a.priority] - priorityOrder[b.priority];
     } else if (sortBy === 'date') {
       comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+    } else if (sortBy === 'xp') {
+      const aXp = a.statRewards?.xp || 0;
+      const bXp = b.statRewards?.xp || 0;
+      comparison = aXp - bXp;
     }
     
     return sortOrder === 'asc' ? comparison : -comparison;
@@ -162,12 +165,13 @@ export const TaskList: React.FC = () => {
               <div className={styles.sortControls}>
                 <select 
                   value={sortBy} 
-                  onChange={(e) => setSortBy(e.target.value as 'priority' | 'date')}
+                  onChange={(e) => setSortBy(e.target.value as 'priority' | 'date' | 'xp')}
                   className={styles.sortSelect}
                 >
                   {/* <option value="category">📂 Category</option> */}
                   <option value="priority">⚡ Priority</option>
                   <option value="date">📅 Date</option>
+                  <option value="xp">⭐ XP</option>
                 </select>
                 
                 <button 

@@ -280,23 +280,36 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
           )}
         </div>
 
-        {nonZeroRewards.length > 0 && (
-          <div className={styles.rewardsSection}>
-            <h4 className={styles.sectionTitle}>Rewards</h4>
-            <div className={styles.rewards}>
-              {xpReward && (
-                <span key="xp" className={styles.reward} style={{ color: 'var(--color-accent-gold)', fontWeight: 'bold' }}>
-                  XP: +{xpReward[1]}
-                </span>
-              )}
-              {otherRewards.map(([stat, value]) => (
-                <span key={stat} className={styles.reward}>
-                  {stat.charAt(0).toUpperCase() + stat.slice(1)}: +{value}
-                </span>
-              ))}
-            </div>
+        <div className={styles.rewardsSection}>
+          <h4 className={styles.sectionTitle}>Rewards</h4>
+          <div className={styles.rewards}>
+            {task.statRewards?.xp > 0 && (
+              <span className={styles.reward} style={{ color: 'var(--color-bg-primary)', background: 'var(--color-accent-gold)', borderColor: 'var(--color-accent-gold)', fontWeight: 'bold' }}>
+                XP: +{task.statRewards?.xp}
+              </span>
+            )}
+            {task.statRewards?.body > 0 && (
+              <span className={styles.reward} style={{ color: 'var(--color-bg-primary)', background: 'var(--color-easy)', borderColor: 'var(--color-easy-border)' }}>
+                💪 Body: +{task.statRewards?.body}
+              </span>
+            )}
+            {task.statRewards?.mind > 0 && (
+              <span className={styles.reward} style={{ color: 'var(--color-bg-primary)', background: 'var(--color-focus)', borderColor: 'var(--color-focus-border)' }}>
+                🧠 Mind: +{task.statRewards?.mind}
+              </span>
+            )}
+            {task.statRewards?.soul > 0 && (
+              <span className={styles.reward} style={{ color: 'var(--color-bg-primary)', background: 'var(--color-urgent)', borderColor: 'var(--color-urgent-border)' }}>
+                ✨ Soul: +{task.statRewards?.soul}
+              </span>
+            )}
+            {(!task.statRewards || (!task.statRewards.xp && !task.statRewards.body && !task.statRewards.mind && !task.statRewards.soul)) && (
+              <span className={styles.reward} style={{ background: 'var(--color-bg-secondary)', color: 'var(--color-text-secondary)' }}>
+                No rewards for this task.
+              </span>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </Modal>
   );

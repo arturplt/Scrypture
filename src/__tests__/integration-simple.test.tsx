@@ -2,6 +2,9 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import App from '../App';
+import { TaskProvider } from '../hooks/useTasks';
+import { UserProvider } from '../hooks/useUser';
+import { TaskList } from '../components/TaskList';
 
 // Mock localStorage
 const mockLocalStorage = {
@@ -45,7 +48,12 @@ jest.mock('../services/categoryService', () => ({
     getCustomCategories: jest.fn(() => []),
     saveCustomCategories: jest.fn(() => true),
     addCustomCategory: jest.fn(() => true),
-  },
+    getAllCategories: jest.fn(() => [
+      { name: 'body', icon: '💪' },
+      { name: 'mind', icon: '🧠' },
+      { name: 'soul', icon: '✨' }
+    ])
+  }
 }));
 
 describe('Simple Integration Tests', () => {
@@ -317,5 +325,52 @@ describe('Simple Integration Tests', () => {
       // Verify input worked
       expect(titleInput).toHaveValue('Keyboard Test');
     }, 15000); // Increased timeout
+  });
+}); 
+
+const renderAppXP = () => {
+  return render(
+    <UserProvider>
+      <TaskProvider>
+        <TaskList />
+      </TaskProvider>
+    </UserProvider>
+  );
+};
+
+describe('XP Sorting Integration', () => {
+  it('allows sorting by XP', async () => {
+    renderAppXP();
+
+    // Create a task first
+    const titleInput = screen.getByPlaceholderText(/Intention/);
+    fireEvent.click(titleInput); // Expand form
+    fireEvent.change(titleInput, { target: { value: 'Test Task' } });
+    const submitButton = screen.getByText(/Add Task/);
+    fireEvent.click(submitButton);
+
+    // Wait for task to appear
+    await waitFor(() => {
+      expect(screen.getByText('Test Task')).toBeInTheDocument();
+    });
+
+    // Find the sort dropdown and change to XP
+    const sortSelect = screen.getByDisplayValue('⚡ Priority');
+    fireEvent.change(sortSelect, { target: { value: 'xp' } });
+
+    // Verify XP sorting is selected
+    expect(sortSelect).toHaveValue('xp');
+  });
+
+  it('displays XP option in sort dropdown', () => {
+    renderAppXP();
+
+    const sortSelect = screen.getByDisplayValue('⚡ Priority');
+    const options = Array.from(sortSelect.querySelectorAll('option'));
+    
+    // Check that XP option exists
+    const xpOption = options.find(option => option.value === 'xp');
+    expect(xpOption).toBeInTheDocument();
+    expect(xpOption).toHaveTextContent('⭐ XP');
   });
 }); 
