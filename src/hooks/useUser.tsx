@@ -94,6 +94,49 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
   };
 
+  const removeStatRewards = (rewards: { body?: number; mind?: number; soul?: number; xp?: number }) => {
+    const success = userService.removeStatRewards(rewards);
+    
+    if (success && user) {
+      // Calculate new experience and level if XP is included
+      let newExperience = user.experience;
+      let newLevel = user.level;
+      if (rewards.xp) {
+        newExperience = Math.max(0, user.experience - rewards.xp);
+        newLevel = Math.floor(newExperience / 100) + 1;
+      }
+      
+      const updatedUser = {
+        ...user,
+        body: Math.max(0, user.body - (rewards.body || 0)),
+        mind: Math.max(0, user.mind - (rewards.mind || 0)),
+        soul: Math.max(0, user.soul - (rewards.soul || 0)),
+        experience: newExperience,
+        level: newLevel,
+        updatedAt: new Date(),
+      };
+      setUser(updatedUser);
+      saveUserWithFeedback(updatedUser);
+    }
+  };
+
+  const removeExperience = (amount: number) => {
+    const success = userService.removeExperience(amount);
+    
+    if (success && user) {
+      const newExperience = Math.max(0, user.experience - amount);
+      const newLevel = Math.floor(newExperience / 100) + 1;
+      const updatedUser = { 
+        ...user, 
+        experience: newExperience, 
+        level: newLevel,
+        updatedAt: new Date()
+      };
+      setUser(updatedUser);
+      saveUserWithFeedback(updatedUser);
+    }
+  };
+
   const unlockAchievement = (achievementId: string) => {
     const success = userService.unlockAchievement(achievementId);
     if (success && user) {
@@ -129,6 +172,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     updateUser,
     addExperience,
     addStatRewards,
+    removeExperience,
+    removeStatRewards,
     unlockAchievement,
     createUser,
   };

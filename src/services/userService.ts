@@ -77,6 +77,37 @@ export const userService = {
     return this.updateUser(updates);
   },
 
+  removeStatRewards(rewards: { body?: number; mind?: number; soul?: number; xp?: number }): boolean {
+    const user = this.getUser();
+    if (!user) return false;
+
+    const updates: Partial<User> = {
+      body: Math.max(0, user.body - (rewards.body || 0)),
+      mind: Math.max(0, user.mind - (rewards.mind || 0)),
+      soul: Math.max(0, user.soul - (rewards.soul || 0)),
+      updatedAt: new Date(),
+    };
+
+    return this.updateUser(updates);
+  },
+
+  removeExperience(amount: number): boolean {
+    const user = this.getUser();
+    
+    if (!user) return false;
+
+    const newExperience = Math.max(0, user.experience - amount);
+    const newLevel = Math.floor(newExperience / 100) + 1; // Simple level calculation
+    
+    const updates: Partial<User> = {
+      experience: newExperience,
+      level: newLevel,
+      updatedAt: new Date(),
+    };
+
+    return this.updateUser(updates);
+  },
+
   unlockAchievement(achievementId: string): boolean {
     const user = this.getUser();
     if (!user) return false;

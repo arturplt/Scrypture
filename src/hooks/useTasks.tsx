@@ -27,7 +27,7 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
-  const { addExperience, addStatRewards } = useUser();
+  const { addExperience, addStatRewards, removeExperience, removeStatRewards } = useUser();
 
   useEffect(() => {
     // Load tasks from local storage on mount
@@ -73,9 +73,17 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
   };
 
   const deleteTask = (id: string) => {
+    // Find the task before deleting it to check if it was completed
+    const taskToDelete = tasks.find(task => task.id === id);
+    
     const updatedTasks = tasks.filter(task => task.id !== id);
     setTasks(updatedTasks);
     saveTasksWithFeedback(updatedTasks);
+
+    // If the task was completed, remove the rewards that were given
+    if (taskToDelete && taskToDelete.completed && taskToDelete.statRewards) {
+      removeStatRewards(taskToDelete.statRewards);
+    }
   };
 
   const toggleTask = (id: string) => {
