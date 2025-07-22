@@ -9,10 +9,40 @@ import { UserCreation } from './components/UserCreation';
 import { DataManager } from './components/DataManager';
 import { AutoSaveIndicator } from './components/AutoSaveIndicator';
 import styles from './App.module.css';
+import React, { useRef, useEffect, useState } from 'react';
+
+function LevelUpModal({ level, onClose }: { level: number; onClose: () => void }) {
+  return (
+    <div style={{
+      position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+      background: 'rgba(0,0,0,0.7)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center',
+      flexDirection: 'column', color: 'var(--color-accent-gold)', fontFamily: 'Press Start 2P, monospace',
+      fontSize: 32, textAlign: 'center', animation: 'fadeIn 0.5s'
+    }}>
+      <div style={{ background: 'var(--color-bg-primary)', border: '4px solid var(--color-accent-gold)', padding: 32, borderRadius: 0 }}>
+        <div style={{ fontSize: 48, marginBottom: 16 }}>🎉</div>
+        <div>Level Up!</div>
+        <div style={{ fontSize: 40, margin: '16px 0' }}>Level {level}</div>
+        <button style={{ marginTop: 24, fontSize: 18, padding: '8px 24px', background: 'var(--color-accent-gold)', color: 'var(--color-bg-primary)', border: 'none', fontFamily: 'Press Start 2P, monospace', cursor: 'pointer' }} onClick={onClose}>Close</button>
+      </div>
+    </div>
+  );
+}
 
 function AppContent() {
   const { isSaving, lastSaved, refreshTasks } = useTasks();
   const { user } = useUser();
+  const [showLevelUp, setShowLevelUp] = useState(false);
+  const lastLevel = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (user) {
+      if (lastLevel.current !== null && user.level > lastLevel.current) {
+        setShowLevelUp(true);
+      }
+      lastLevel.current = user.level;
+    }
+  }, [user]);
 
   // Show user creation if no user exists
   if (!user) {
@@ -21,6 +51,7 @@ function AppContent() {
 
   return (
     <div className={styles.app}>
+      {showLevelUp && <LevelUpModal level={user.level} onClose={() => setShowLevelUp(false)} />}
       <header className={styles.header}>
         <h1 className={styles.title}>Scrypture</h1>
         <p className={styles.subtitle}>Grimorium Vivendi</p>

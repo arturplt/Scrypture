@@ -59,6 +59,15 @@ export const StatsDisplay: React.FC = () => {
     return Math.min((value / 100) * 100, 100);
   };
 
+  // Leveling logic
+  const xpPerLevel = 100;
+  const currentLevel = user.level;
+  const currentXp = user.experience;
+  const currentLevelBaseXp = (currentLevel - 1) * xpPerLevel;
+  const nextLevelBaseXp = currentLevel * xpPerLevel;
+  const xpToNextLevel = nextLevelBaseXp - currentXp;
+  const xpProgress = Math.max(0, Math.min(1, (currentXp - currentLevelBaseXp) / xpPerLevel));
+
   return (
     <div className={styles.container}>
       <h3 className={styles.title}>Core Attributes</h3>
@@ -113,8 +122,10 @@ export const StatsDisplay: React.FC = () => {
           <span className={styles.levelValue}>{user.level}</span>
         </div>
         <div className={styles.experienceDisplay}>
-          <span className={styles.experienceLabel}>Experience</span>
-          <span className={styles.experienceValue}>{user.experience} XP</span>
+          <span className={styles.experienceValue}>{currentXp} / {nextLevelBaseXp} </span>
+          <div className={styles.progressContainer} style={{ marginTop: 4 }}>
+            <div className={styles.progressBar} style={{ width: `${xpProgress * 100}%`, background: 'var(--color-accent-gold)' }} />
+          </div>
         </div>
       </div>
     </div>
