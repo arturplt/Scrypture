@@ -108,12 +108,6 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onOpenModal }) => {
           '--xp-strip-color1': task.statRewards.xp >= 50 ? '#ffe066' : '#90EE90',
           '--xp-strip-color2': task.statRewards.xp >= 50 ? '#ffd700' : '#32CD32',
           '--xp-strip-color3': task.statRewards.xp >= 50 ? '#fffbe6' : '#98FB98',
-          '--xp-strip-glow': task.statRewards.xp >= 50 ? '#ffe066' : '#90EE90',
-          '--xp-strip-glow2': task.statRewards.xp >= 50 ? '#ffd700' : '#32CD32',
-          '--xp-strip-bright': `${1 + Math.min(task.statRewards.xp, 100) / 80}`,
-          '--xp-strip-speed': `${2 - Math.min(task.statRewards.xp, 100) / 100 * 1.5}s`,
-          '--xp-strip-easing': task.statRewards.xp >= 70 ? 'cubic-bezier(0.68, -0.55, 0.265, 1.55)' : 'ease-in-out',
-          '--xp-strip-hue': task.statRewards.xp >= 50 ? '0deg' : '120deg',
         } : {})
       } as React.CSSProperties}
     >

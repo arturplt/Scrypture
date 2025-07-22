@@ -297,21 +297,21 @@
 }
 
 .rewardBody {
-  background: var(--color-easy);
+  background: var(--color-body);
   color: var(--color-bg-primary);
-  border-color: var(--color-easy-border);
+  border-color: var(--color-body);
 }
 
 .rewardMind {
-  background: var(--color-focus);
+  background: var(--color-mind);
   color: var(--color-bg-primary);
-  border-color: var(--color-focus-border);
+  border-color: var(--color-mind);
 }
 
 .rewardSoul {
-  background: var(--color-urgent);
+  background: var(--color-soul);
   color: var(--color-bg-primary);
-  border-color: var(--color-urgent-border);
+  border-color: var(--color-soul);
 } 
 
 .xpStrip {
@@ -323,31 +323,6 @@
   margin: 0;
   border-radius: 0px;
   background: linear-gradient(180deg, var(--xp-strip-color1, #ffe066), var(--xp-strip-color2, #ffd700), var(--xp-strip-color3, #fffbe6));
-  box-shadow: 0 0 4px 1px var(--xp-strip-glow, #ffe066), 0 0 8px 2px var(--xp-strip-glow2, #ffd700);
-  animation: xpGlow var(--xp-strip-speed, 2s) var(--xp-strip-easing, ease-in-out) infinite;
-  transition: box-shadow 0.2s, background 0.2s;
+  transition: background 0.2s;
   z-index: 1;
-}
-
-@keyframes xpGlow {
-  0% {
-    box-shadow: 0 0 2px 0px var(--xp-strip-glow, #ffe066), 0 0 4px 1px var(--xp-strip-glow2, #ffd700);
-    filter: brightness(1) hue-rotate(var(--xp-strip-hue, 0deg));
-  }
-  25% {
-    box-shadow: 0 0 3px 1px var(--xp-strip-glow, #fffbe6), 0 0 6px 2px var(--xp-strip-glow2, #ffd700);
-    filter: brightness(var(--xp-strip-bright, 1.1)) hue-rotate(var(--xp-strip-hue, 0deg));
-  }
-  50% {
-    box-shadow: 0 0 4px 2px var(--xp-strip-glow, #fffbe6), 0 0 8px 3px var(--xp-strip-glow2, #ffd700);
-    filter: brightness(var(--xp-strip-bright, 1.15)) hue-rotate(var(--xp-strip-hue, 0deg));
-  }
-  75% {
-    box-shadow: 0 0 3px 1px var(--xp-strip-glow, #fffbe6), 0 0 6px 2px var(--xp-strip-glow2, #ffd700);
-    filter: brightness(var(--xp-strip-bright, 1.1)) hue-rotate(var(--xp-strip-hue, 0deg));
-  }
-  100% {
-    box-shadow: 0 0 2px 0px var(--xp-strip-glow, #ffe066), 0 0 4px 1px var(--xp-strip-glow2, #ffd700);
-    filter: brightness(1) hue-rotate(var(--xp-strip-hue, 0deg));
-  }
 } 

@@ -62,7 +62,7 @@
 
 .statName {
   flex: 1;
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-md);
   font-weight: normal;
   color: var(--color-text-primary);
   font-family: 'Press Start 2P', monospace;
@@ -97,18 +97,18 @@
 }
 
 .bodyColor {
-  background: var(--color-easy);
-  border: 1px solid var(--color-easy-border);
+  background: var(--color-body);
+  border: 1px solid var(--color-body);
 }
 
 .mindColor {
-  background: var(--color-focus);
-  border: 1px solid var(--color-focus-border);
+  background: var(--color-mind);
+  border: 1px solid var(--color-mind);
 }
 
 .soulColor {
-  background: var(--color-urgent);
-  border: 1px solid var(--color-urgent-border);
+  background: var(--color-soul);
+  border: 1px solid var(--color-soul);
 }
 
 .levelInfo {

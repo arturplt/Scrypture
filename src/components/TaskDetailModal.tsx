@@ -289,17 +289,17 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
               </span>
             )}
             {task.statRewards?.body > 0 && (
-              <span className={styles.reward} style={{ color: 'var(--color-bg-primary)', background: 'var(--color-easy)', borderColor: 'var(--color-easy-border)' }}>
+              <span className={styles.reward} style={{ color: 'var(--color-bg-primary)', background: 'var(--color-body)', borderColor: 'var(--color-body)' }}>
                 💪 Body: +{task.statRewards?.body}
               </span>
             )}
             {task.statRewards?.mind > 0 && (
-              <span className={styles.reward} style={{ color: 'var(--color-bg-primary)', background: 'var(--color-focus)', borderColor: 'var(--color-focus-border)' }}>
+              <span className={styles.reward} style={{ color: 'var(--color-bg-primary)', background: 'var(--color-mind)', borderColor: 'var(--color-mind)' }}>
                 🧠 Mind: +{task.statRewards?.mind}
               </span>
             )}
             {task.statRewards?.soul > 0 && (
-              <span className={styles.reward} style={{ color: 'var(--color-bg-primary)', background: 'var(--color-urgent)', borderColor: 'var(--color-urgent-border)' }}>
+              <span className={styles.reward} style={{ color: 'var(--color-bg-primary)', background: 'var(--color-soul)', borderColor: 'var(--color-soul)' }}>
                 ✨ Soul: +{task.statRewards?.soul}
               </span>
             )}
