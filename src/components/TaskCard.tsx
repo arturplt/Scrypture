@@ -119,15 +119,37 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onOpenModal }) => {
             <span className={`${styles.priority} ${getPriorityColor(task.priority)}`}>
               {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)} Priority
             </span>
-            {task.category && (
-              <span className={styles.category}>
-                {getCategoryIcon(task.category)} {task.category.charAt(0).toUpperCase() + task.category.slice(1)}
-              </span>
-            )}
+            {/* Removed old attribute label (category with icon and name) */}
             <span className={styles.date}>
               {formatRelativeTime(new Date(task.createdAt))}
             </span>
           </div>
+
+          {/* Rewards section: show all active stat rewards */}
+          {(task.statRewards && (task.statRewards?.xp > 0 || task.statRewards?.body > 0 || task.statRewards?.mind > 0 || task.statRewards?.soul > 0)) && (
+            <div className={styles.rewards}>
+              {task.statRewards?.xp > 0 && (
+                <span className={`${styles.reward} ${styles.rewardXP}`}>
+                  XP: +{task.statRewards?.xp}
+                </span>
+              )}
+              {task.statRewards?.body > 0 && (
+                <span className={`${styles.reward} ${styles.rewardBody}`}>
+                  💪 Body: +{task.statRewards?.body}
+                </span>
+              )}
+              {task.statRewards?.mind > 0 && (
+                <span className={`${styles.reward} ${styles.rewardMind}`}>
+                  🧠 Mind: +{task.statRewards?.mind}
+                </span>
+              )}
+              {task.statRewards?.soul > 0 && (
+                <span className={`${styles.reward} ${styles.rewardSoul}`}>
+                  ✨ Soul: +{task.statRewards?.soul}
+                </span>
+              )}
+            </div>
+          )}
         </div>
         
         <div className={styles.rightSection} onClick={(e) => e.stopPropagation()}>

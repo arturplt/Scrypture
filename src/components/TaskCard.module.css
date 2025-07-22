@@ -265,3 +265,49 @@
     border-color: var(--color-border-primary);
   }
 } 
+
+.rewards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-xs);
+}
+
+.reward {
+  display: inline-block;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--font-size-xs);
+  font-family: 'Press Start 2P', monospace;
+  font-weight: bold;
+  background: var(--color-bg-secondary);
+  border: 2px solid var(--color-border-primary);
+  border-radius: 0px;
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+}
+
+.rewardXP {
+  background: var(--color-accent-gold);
+  color: var(--color-bg-primary);
+  border-color: var(--color-accent-gold);
+}
+
+.rewardBody {
+  background: var(--color-easy);
+  color: var(--color-bg-primary);
+  border-color: var(--color-easy-border);
+}
+
+.rewardMind {
+  background: var(--color-focus);
+  color: var(--color-bg-primary);
+  border-color: var(--color-focus-border);
+}
+
+.rewardSoul {
+  background: var(--color-urgent);
+  color: var(--color-bg-primary);
+  border-color: var(--color-urgent-border);
+} 
