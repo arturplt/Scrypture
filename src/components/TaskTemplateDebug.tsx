@@ -542,8 +542,11 @@ export const TaskTemplateDebug: React.FC = () => {
   const { addTask } = useTasks();
   const [isVisible, setIsVisible] = useState(false);
 
-  const addAllTemplates = () => {
-    taskTemplates.forEach((template) => {
+  const addAllTemplates = async () => {
+    console.log(`Adding ${taskTemplates.length} templates...`);
+    for (let i = 0; i < taskTemplates.length; i++) {
+      const template = taskTemplates[i];
+      console.log(`Adding template ${i + 1}: ${template.title}`);
       addTask({
         title: template.title,
         description: template.description,
@@ -553,7 +556,10 @@ export const TaskTemplateDebug: React.FC = () => {
         statRewards: template.statRewards,
         difficulty: template.difficulty,
       });
-    });
+      // Add a small delay to prevent race conditions
+      await new Promise(resolve => setTimeout(resolve, 10));
+    }
+    console.log('Finished adding all templates');
   };
 
   const addRandomTemplate = () => {
