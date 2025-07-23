@@ -25,8 +25,8 @@ export const taskService = {
     };
 
     const tasks = this.getTasks();
-    tasks.push(newTask);
-    this.saveTasks(tasks);
+    const updatedTasks = [...tasks, newTask]; // Create new array instead of pushing
+    this.saveTasks(updatedTasks);
 
     return newTask;
   },

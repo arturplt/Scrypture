@@ -551,7 +551,7 @@ export const TaskTemplateDebug: React.FC = () => {
         completed: false,
         priority: template.priority,
         category: template.category,
-        statRewards: template.statRewards,
+        statRewards: { ...template.statRewards }, // Create a copy of statRewards
         difficulty: template.difficulty,
       });
       // Add a small delay to prevent race conditions
@@ -567,7 +567,7 @@ export const TaskTemplateDebug: React.FC = () => {
       completed: false,
       priority: randomTemplate.priority,
       category: randomTemplate.category,
-      statRewards: randomTemplate.statRewards,
+      statRewards: { ...randomTemplate.statRewards }, // Create a copy of statRewards
       difficulty: randomTemplate.difficulty,
     });
   };
