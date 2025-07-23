@@ -2,7 +2,6 @@ import React from 'react';
 import { render, act } from '@testing-library/react';
 import { useTasks, TaskProvider } from '../useTasks';
 import { useUser, UserProvider } from '../useUser';
-import { taskService } from '../../services/taskService';
 
 // Mock the services
 jest.mock('../../services/taskService', () => ({

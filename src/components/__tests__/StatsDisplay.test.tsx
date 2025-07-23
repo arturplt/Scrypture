@@ -1,7 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { StatsDisplay } from '../StatsDisplay';
-import { UserProvider } from '../../hooks/useUser';
 
 // Mock the useUser hook
 jest.mock('../../hooks/useUser', () => ({
@@ -113,11 +112,7 @@ describe('StatsDisplay', () => {
 
     renderWithProvider(<StatsDisplay />);
 
-    // Check that progress containers exist
-    const progressContainers = document.querySelectorAll(
-      '[class*="progressContainer"]'
-    );
-    // Alternative: check for the stat cards which contain the progress containers
+    // Check that stat cards exist
     const statCards = screen.getAllByText(/Body|Mind|Soul/);
     expect(statCards.length).toBe(3); // Body, Mind, Soul
   });

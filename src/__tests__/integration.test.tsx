@@ -489,8 +489,7 @@ describe('Integration Tests', () => {
   describe('Error Handling Workflow', () => {
     it('handles storage errors gracefully', async () => {
       // Mock storage service to return false instead of throwing
-      const mockStorageService =
-        require('../services/storageService').storageService;
+      const mockStorageService = require('../services/storageService').storageService;
       mockStorageService.saveTasks.mockReturnValue(false);
 
       renderApp();
@@ -512,8 +511,7 @@ describe('Integration Tests', () => {
 
     it('handles network errors during data operations', async () => {
       // Mock services to simulate network errors
-      const mockStorageService =
-        require('../services/storageService').storageService;
+      const mockStorageService = require('../services/storageService').storageService;
       mockStorageService.getTasks.mockReturnValue([]);
 
       renderApp();

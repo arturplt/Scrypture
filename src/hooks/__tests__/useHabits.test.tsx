@@ -1,4 +1,3 @@
-import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useHabits } from '../useHabits';
 import { habitService } from '../../services/habitService';

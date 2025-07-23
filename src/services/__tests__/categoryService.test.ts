@@ -15,7 +15,6 @@ jest.mock('../storageService', () => ({
 }));
 
 import { categoryService } from '../categoryService';
-import { StorageService } from '../storageService';
 
 describe('categoryService', () => {
   beforeEach(() => {

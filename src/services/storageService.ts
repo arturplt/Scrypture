@@ -136,8 +136,8 @@ export class StorageService {
     return tasks
       .map((task) => ({
         ...(task as Record<string, unknown>),
-        createdAt: new Date((task as any).createdAt),
-        updatedAt: new Date((task as any).updatedAt),
+        createdAt: new Date((task as Record<string, unknown>).createdAt as string),
+        updatedAt: new Date((task as Record<string, unknown>).updatedAt as string),
       }))
       .filter(validateTask);
   }
@@ -154,9 +154,9 @@ export class StorageService {
     return habits
       .map((habit) => ({
         ...(habit as Record<string, unknown>),
-        createdAt: new Date((habit as any).createdAt),
-        lastCompleted: (habit as any).lastCompleted
-          ? new Date((habit as any).lastCompleted)
+        createdAt: new Date((habit as Record<string, unknown>).createdAt as string),
+        lastCompleted: (habit as Record<string, unknown>).lastCompleted
+          ? new Date((habit as Record<string, unknown>).lastCompleted as string)
           : undefined,
       }))
       .filter(validateHabit);
@@ -174,12 +174,12 @@ export class StorageService {
 
     const processedUser = {
       ...(user as Record<string, unknown>),
-      createdAt: new Date((user as any).createdAt),
-      updatedAt: new Date((user as any).updatedAt),
-      achievements: (user as any).achievements.map((achievement: any) => ({
+      createdAt: new Date((user as Record<string, unknown>).createdAt as string),
+      updatedAt: new Date((user as Record<string, unknown>).updatedAt as string),
+      achievements: (user as Record<string, unknown>).achievements.map((achievement: Record<string, unknown>) => ({
         ...achievement,
         unlockedAt: achievement.unlockedAt
-          ? new Date(achievement.unlockedAt)
+          ? new Date(achievement.unlockedAt as string)
           : undefined,
       })),
     };

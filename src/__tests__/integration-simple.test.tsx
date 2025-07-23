@@ -2,9 +2,6 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import App from '../App';
-import { TaskProvider } from '../hooks/useTasks';
-import { UserProvider } from '../hooks/useUser';
-import { TaskList } from '../components/TaskList';
 
 // Mock localStorage
 const mockLocalStorage = {
