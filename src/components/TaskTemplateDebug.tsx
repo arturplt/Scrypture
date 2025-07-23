@@ -543,10 +543,8 @@ export const TaskTemplateDebug: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
 
   const addAllTemplates = async () => {
-    console.log(`Starting to add ${taskTemplates.length} templates...`);
     for (let i = 0; i < taskTemplates.length; i++) {
       const template = taskTemplates[i];
-      console.log(`Adding template ${i + 1}/${taskTemplates.length}: ${template.title}`);
       addTask({
         title: template.title,
         description: template.description,
@@ -559,7 +557,6 @@ export const TaskTemplateDebug: React.FC = () => {
       // Add a small delay to prevent race conditions
       await new Promise(resolve => setTimeout(resolve, 10));
     }
-    console.log('Finished adding all templates');
     // Refresh the task list to show the new tasks
     setTimeout(() => {
       refreshTasks();
@@ -568,7 +565,6 @@ export const TaskTemplateDebug: React.FC = () => {
 
   const addMindTemplates = async () => {
     const mindTemplates = taskTemplates.filter(t => t.category === 'mind');
-    console.log(`Adding ${mindTemplates.length} mind templates...`);
     for (let i = 0; i < mindTemplates.length; i++) {
       const template = mindTemplates[i];
       addTask({
@@ -589,7 +585,6 @@ export const TaskTemplateDebug: React.FC = () => {
 
   const addBodyTemplates = async () => {
     const bodyTemplates = taskTemplates.filter(t => t.category === 'body');
-    console.log(`Adding ${bodyTemplates.length} body templates...`);
     for (let i = 0; i < bodyTemplates.length; i++) {
       const template = bodyTemplates[i];
       addTask({
@@ -610,7 +605,6 @@ export const TaskTemplateDebug: React.FC = () => {
 
   const addSoulTemplates = async () => {
     const soulTemplates = taskTemplates.filter(t => t.category === 'soul');
-    console.log(`Adding ${soulTemplates.length} soul templates...`);
     for (let i = 0; i < soulTemplates.length; i++) {
       const template = soulTemplates[i];
       addTask({
