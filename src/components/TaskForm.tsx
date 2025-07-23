@@ -197,16 +197,11 @@ export const TaskForm: React.FC<TaskFormProps> = ({ taskToEdit, onCancel, onSave
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Intention"
             className={styles.titleInput}
-            required
-            minLength={1}
             maxLength={100}
             onInvalid={handleInvalid}
             onBlur={handleTitleBlur}
             onClick={handleTitleClick}
           />
-          <div className={styles.validationMessage}>
-            Please fill in this field.
-          </div>
         </div>
       </div>
       {isExpanded && (
@@ -221,9 +216,6 @@ export const TaskForm: React.FC<TaskFormProps> = ({ taskToEdit, onCancel, onSave
             maxLength={500}
             onInvalid={handleInvalid}
           />
-          <div className={styles.validationMessage}>
-            Description is too long.
-          </div>
         </div>
       )}
       {isExpanded && (

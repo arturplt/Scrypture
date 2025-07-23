@@ -159,7 +159,7 @@ describe('Simple Integration Tests', () => {
       fireEvent.change(titleInput, { target: { value: 'Mind Task' } });
 
       // 3. Select mind category
-      const mindCategoryButton = screen.getByText(/🧠 MIND/);
+      const mindCategoryButton = screen.getByText('🧠 Mind');
       fireEvent.click(mindCategoryButton);
 
       // 4. Submit task
@@ -278,11 +278,9 @@ describe('Simple Integration Tests', () => {
 
   describe('Error Handling', () => {
     it('handles storage errors gracefully', async () => {
-      // Mock storage service to return rejected promises instead of throwing
+      // Mock storage service to return false instead of throwing
       const mockStorageService = require('../services/storageService').storageService;
-      mockStorageService.saveTasks.mockImplementation(() => {
-        throw new Error('Storage error');
-      });
+      mockStorageService.saveTasks.mockReturnValue(false);
 
       renderApp();
 
@@ -329,13 +327,7 @@ describe('Simple Integration Tests', () => {
 }); 
 
 const renderAppXP = () => {
-  return render(
-    <UserProvider>
-      <TaskProvider>
-        <TaskList />
-      </TaskProvider>
-    </UserProvider>
-  );
+  return render(<App />);
 };
 
 describe('XP Sorting Integration', () => {

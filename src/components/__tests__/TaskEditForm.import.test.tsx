@@ -1,4 +1,4 @@
-import TaskEditForm from '../TaskEditForm';
+import { TaskEditForm } from '../TaskEditForm';
 
 test('TaskEditForm import', () => {
   expect(TaskEditForm).toBeDefined();

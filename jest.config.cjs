@@ -22,4 +22,5 @@ module.exports = {
     '!src/main.tsx',
     '!src/setupTests.ts',
   ],
+  maxWorkers: '50%',
 }; 

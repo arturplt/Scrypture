@@ -13,6 +13,17 @@ jest.mock('../../hooks/useTasks', () => ({
   useTasks: () => ({
     updateTask: mockUpdateTask,
   }),
+  TaskProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>
+}));
+
+// Mock the useUser hook
+jest.mock('../../hooks/useUser', () => ({
+  useUser: () => ({
+    addExperience: jest.fn(),
+    addStatRewards: jest.fn(),
+    removeStatRewards: jest.fn(),
+  }),
+  UserProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>
 }));
 
 const mockTask: Task = {
