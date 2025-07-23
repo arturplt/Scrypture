@@ -623,16 +623,18 @@ export const TaskTemplateDebug: React.FC = () => {
     }, 100);
   };
 
-  const addRandomTemplate = () => {
-    const randomTemplate = taskTemplates[Math.floor(Math.random() * taskTemplates.length)];
+  const addEasyTemplate = () => {
+    // Sort by difficulty (lowest first) and pick the first one
+    const sortedTemplates = [...taskTemplates].sort((a, b) => a.difficulty - b.difficulty);
+    const easyTemplate = sortedTemplates[0];
     addTask({
-      title: randomTemplate.title,
-      description: randomTemplate.description,
+      title: easyTemplate.title,
+      description: easyTemplate.description,
       completed: false,
-      priority: randomTemplate.priority,
-      category: randomTemplate.category,
-      statRewards: { ...randomTemplate.statRewards }, // Create a copy of statRewards
-      difficulty: randomTemplate.difficulty,
+      priority: easyTemplate.priority,
+      category: easyTemplate.category,
+      statRewards: { ...easyTemplate.statRewards }, // Create a copy of statRewards
+      difficulty: easyTemplate.difficulty,
     });
   };
 
@@ -717,10 +719,10 @@ export const TaskTemplateDebug: React.FC = () => {
               flex: 1,
             }}
           >
-            Add All ({taskTemplates.length})
+            Add All
           </button>
           <button
-            onClick={addRandomTemplate}
+            onClick={addEasyTemplate}
             style={{
               padding: '8px 12px',
               backgroundColor: 'var(--color-bg-secondary)',
@@ -733,7 +735,7 @@ export const TaskTemplateDebug: React.FC = () => {
               flex: 1,
             }}
           >
-            Add Random
+            Add Easy
           </button>
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
@@ -751,7 +753,7 @@ export const TaskTemplateDebug: React.FC = () => {
               flex: 1,
             }}
           >
-            🧠 Mind ({taskTemplates.filter(t => t.category === 'mind').length})
+            🧠 Mind
           </button>
           <button
             onClick={addBodyTemplates}
@@ -767,7 +769,7 @@ export const TaskTemplateDebug: React.FC = () => {
               flex: 1,
             }}
           >
-            💪 Body ({taskTemplates.filter(t => t.category === 'body').length})
+            💪 Body
           </button>
           <button
             onClick={addSoulTemplates}
@@ -783,7 +785,7 @@ export const TaskTemplateDebug: React.FC = () => {
               flex: 1,
             }}
           >
-            ✨ Soul ({taskTemplates.filter(t => t.category === 'soul').length})
+            ✨ Soul
           </button>
         </div>
       </div>

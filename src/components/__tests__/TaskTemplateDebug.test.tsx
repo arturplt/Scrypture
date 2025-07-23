@@ -38,10 +38,10 @@ describe('TaskTemplateDebug', () => {
     expect(screen.getByText(/Add All/)).toBeInTheDocument();
   });
 
-  it('has add random template button', () => {
+  it('has add easy template button', () => {
     render(<TaskTemplateDebug />);
     fireEvent.click(screen.getByText('🎲 Start Here'));
-    expect(screen.getByText('Add Random')).toBeInTheDocument();
+    expect(screen.getByText('Add Easy')).toBeInTheDocument();
   });
 
   it('can close modal', () => {
