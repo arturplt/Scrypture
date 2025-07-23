@@ -1,4 +1,4 @@
-import { storageService } from '../storageService';
+import { storageService, StorageService, STORAGE_KEYS } from '../storageService';
 import { Task, Habit, User } from '../../types';
 
 // Mock localStorage
@@ -53,7 +53,7 @@ describe('StorageService', () => {
       localStorageMock.removeItem.mockImplementation(() => {});
 
       // Recreate service to test availability check
-      const service = (storageService as any).constructor.getInstance();
+      const service = (storageService as unknown as { constructor: { getInstance(): StorageService } }).constructor.getInstance();
       expect(service).toBeDefined();
     });
 
@@ -63,7 +63,7 @@ describe('StorageService', () => {
       });
 
       // Recreate service to test unavailability
-      const service = (storageService as any).constructor.getInstance();
+      const service = (storageService as unknown as { constructor: { getInstance(): StorageService } }).constructor.getInstance();
       expect(service).toBeDefined();
     });
   });
@@ -553,7 +553,7 @@ describe('StorageService', () => {
 
     test('should call getItem for every storage key', () => {
       jest.clearAllMocks();
-      const keys = Object.values(require('../storageService').STORAGE_KEYS);
+      const keys = Object.values(STORAGE_KEYS);
       localStorageMock.getItem.mockReturnValue('some data');
       storageService.getStorageStats();
       keys.forEach((key) => {
