@@ -226,4 +226,39 @@ describe('TaskForm (new system)', () => {
     fireEvent.blur(titleInput);
     expect(screen.getByText('Category:')).toBeInTheDocument();
   });
+
+  it('shows validation message when submitting empty title', async () => {
+    render(<TaskForm />);
+    const titleInput = screen.getByPlaceholderText('Intention');
+    fireEvent.click(titleInput);
+    
+    // Try to submit with empty title
+    const submitButton = screen.getByText('Add Task');
+    fireEvent.click(submitButton);
+    
+    // Check that validation message appears
+    expect(screen.getByText('Please fill this field')).toBeInTheDocument();
+    
+    // Verify that the task was not added
+    expect(mockAddTask).not.toHaveBeenCalled();
+  });
+
+  it('clears validation message when user starts typing', () => {
+    render(<TaskForm />);
+    const titleInput = screen.getByPlaceholderText('Intention');
+    fireEvent.click(titleInput);
+    
+    // Try to submit with empty title to trigger validation
+    const submitButton = screen.getByText('Add Task');
+    fireEvent.click(submitButton);
+    
+    // Check that validation message appears
+    expect(screen.getByText('Please fill this field')).toBeInTheDocument();
+    
+    // Start typing to clear validation
+    fireEvent.change(titleInput, { target: { value: 'Test Task' } });
+    
+    // Validation message should be hidden (not visible in DOM)
+    expect(screen.queryByText('Please fill this field')).not.toBeInTheDocument();
+  });
 });

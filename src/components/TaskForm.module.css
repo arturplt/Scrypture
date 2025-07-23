@@ -217,9 +217,7 @@
 }
 
 /* Pixel Art Validation Messages */
-.titleInput:invalid + .validationMessage,
-.prioritySelect:invalid + .validationMessage,
-.descriptionInput:invalid + .validationMessage {
+.validationMessage {
   display: block;
   background: #2a3a7b; /* royal blue */
   color: var(--color-text-primary);
@@ -235,9 +233,7 @@
   position: relative;
 }
 
-.titleInput:invalid + .validationMessage::before,
-.prioritySelect:invalid + .validationMessage::before,
-.descriptionInput:invalid + .validationMessage::before {
+.validationMessage::before {
   content: 'ℹ️';
   display: inline-block;
   width: 16px;
@@ -251,11 +247,6 @@
   font-family: 'Press Start 2P', monospace;
   -webkit-font-smoothing: none;
   -moz-osx-font-smoothing: none;
-}
-
-/* Hide validation messages by default */
-.validationMessage {
-  display: none;
 }
 
 /* Category Selector Styles */

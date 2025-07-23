@@ -27,6 +27,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   );
   const [isExpanded, setIsExpanded] = useState(!!taskToEdit);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [showValidation, setShowValidation] = useState(false);
 
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -46,7 +47,10 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!title.trim()) return;
+    if (!title.trim()) {
+      setShowValidation(true);
+      return;
+    }
 
     const statRewards = {
       body: bodyReward || undefined,
@@ -198,14 +202,26 @@ export const TaskForm: React.FC<TaskFormProps> = ({
           <input
             type="text"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => {
+              setTitle(e.target.value);
+              // Clear validation message when user starts typing
+              if (e.target.value.trim()) {
+                setShowValidation(false);
+              }
+            }}
             placeholder="Intention"
             className={styles.titleInput}
             maxLength={100}
+
             onInvalid={handleInvalid}
             onBlur={handleTitleBlur}
             onClick={handleTitleClick}
           />
+          {showValidation && (
+            <div className={styles.validationMessage}>
+              Please fill this field
+            </div>
+          )}
         </div>
       </div>
       {isExpanded && (
