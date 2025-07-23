@@ -117,182 +117,191 @@ export const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
   const stats = getStorageStats();
 
   // DEBUG: Add tasks for each priority with explicit statRewards
-  const handleAddDebugTasks = () => {
-    const taskTemplates = [
-      {
-        title: 'Reflect on Profound Wisdom',
-        description:
-          'Contemplate a meaningful quote or teaching. Write down your insights.',
-        category: 'mind',
-        statRewards: { mind: 2, xp: 5 },
-      },
-      {
-        title: 'Practice Good Habit',
-        description:
-          'Identify and practice a positive habit today. Note your progress.',
-        category: 'body',
-        statRewards: { body: 1, mind: 1, xp: 5 },
-      },
-      {
-        title: 'Guided Breathing Exercise',
-        description:
-          'Follow a 5-minute guided breathing session to relax and center yourself.',
-        category: 'soul',
-        statRewards: { soul: 2, xp: 5 },
-      },
-      {
-        title: 'Mindful Meditation',
-        description:
-          'Spend 10 minutes in mindful meditation. Focus on your breath and let thoughts pass.',
-        category: 'soul',
-        statRewards: { soul: 2, mind: 1, xp: 5 },
-      },
-      {
-        title: 'Physical Exercise Routine',
-        description:
-          'Complete a specific exercise routine (e.g., yoga, stretching, or a workout).',
-        category: 'body',
-        statRewards: { body: 2, xp: 5 },
-      },
-      {
-        title: 'Gratitude Practice',
-        description: 'Write down three things you are grateful for today.',
-        category: 'mind',
-        statRewards: { mind: 1, soul: 1, xp: 5 },
-      },
-    ];
-    const priorities = [
-      { value: 'low', label: 'Low', xp: 5 },
-      { value: 'medium', label: 'Medium', xp: 10 },
-      { value: 'high', label: 'High', xp: 15 },
-    ];
-    taskTemplates.forEach((template) => {
-      priorities.forEach((priority) => {
-        let title = template.title;
-        let description = template.description;
-        // Make titles/descriptions unique for each priority
-        if (priority.value === 'medium') {
-          title += ' (Focus)';
-          description += ' Focus on quality and consistency.';
-        } else if (priority.value === 'high') {
-          title += ' (Urgent)';
-          description += ' Make this your top priority today!';
-        }
-        taskService.createTask({
-          title,
-          description,
-          category: template.category,
-          completed: false,
-          priority: priority.value as 'low' | 'medium' | 'high',
-          statRewards: { ...template.statRewards, xp: priority.xp },
-        });
-      });
-    });
-    showMessage('Debug tasks added!', 'success');
-    onDataChange?.();
-  };
 
-  // Add Difficulty sample tasks for general well-being and exercise
+
+  // Add Difficulty sample tasks demonstrating full difficulty range
   const handleAddDifficultyTasks = () => {
     const difficultyTasks = [
+      // Difficulty 0-1: Very Easy
       {
-        title: 'Morning Stretch Routine',
-        description: 'Start your day with a 10-minute full-body stretch.',
-        category: 'body',
-        statRewards: { body: 2 },
-        difficulty: 2,
-        baseXp: 10,
-      },
-      {
-        title: 'XP Strip Demo - Body Only',
-        description: 'Task with only body stat reward to show red strip.',
-        category: 'body',
-        statRewards: { body: 3, xp: 15 },
-        difficulty: 3,
-        baseXp: 15,
-      },
-      {
-        title: 'XP Strip Demo - Mind Only',
-        description: 'Task with only mind stat reward to show blue strip.',
-        category: 'mind',
-        statRewards: { mind: 2, xp: 20 },
-        difficulty: 4,
-        baseXp: 20,
-      },
-      {
-        title: 'XP Strip Demo - Soul Only',
-        description: 'Task with only soul stat reward to show yellow strip.',
+        title: 'Take 5 deep breaths',
+        description: 'Pause and take exactly 5 slow, deep breaths.',
         category: 'soul',
-        statRewards: { soul: 2, xp: 25 },
-        difficulty: 5,
-        baseXp: 25,
-      },
-      {
-        title: 'XP Strip Demo - All Stats',
-        description: 'Task with all stat rewards to show all three strips.',
-        category: 'body',
-        statRewards: { body: 2, mind: 1, soul: 1, xp: 30 },
-        difficulty: 6,
-        baseXp: 30,
-      },
-      {
-        title: 'Hydration Check',
-        description: 'Drink at least 2 liters of water today.',
-        category: 'body',
-        statRewards: { body: 1 },
-        difficulty: 1,
+        statRewards: { soul: 1 },
+        difficulty: 0,
         baseXp: 5,
       },
       {
-        title: 'Mindful Walk',
-        description:
-          'Take a 20-minute walk outdoors, focusing on your breath and surroundings.',
-        category: 'mind',
-        statRewards: { mind: 2, body: 1 },
-        difficulty: 3,
-        baseXp: 20,
+        title: 'Drink 1 glass of water',
+        description: 'Drink exactly 1 full glass of water.',
+        category: 'body',
+        statRewards: { body: 1 },
+        difficulty: 0,
+        baseXp: 5,
       },
       {
-        title: 'Gratitude Journal',
-        description: 'Write down three things you are grateful for.',
+        title: 'Learn 1 new word',
+        description: 'Look up and learn the meaning of 1 new word.',
         category: 'mind',
-        statRewards: { mind: 2, soul: 1 },
+        statRewards: { mind: 1 },
+        difficulty: 1,
+        baseXp: 10,
+      },
+
+      // Difficulty 2-3: Easy
+      {
+        title: 'Do 5 push-ups',
+        description: 'Complete exactly 5 push-ups (modify form as needed).',
+        category: 'body',
+        statRewards: { body: 1 },
         difficulty: 2,
         baseXp: 15,
       },
       {
-        title: 'Evening Relaxation',
-        description:
-          'Spend 15 minutes doing a relaxing activity (reading, music, etc.).',
+        title: 'Write 1 gratitude',
+        description: 'Write down exactly 1 thing you are grateful for.',
         category: 'soul',
-        statRewards: { soul: 2, mind: 1 },
+        statRewards: { soul: 1 },
         difficulty: 2,
-        baseXp: 8,
+        baseXp: 15,
       },
       {
-        title: 'Cardio Exercise',
-        description:
-          'Complete 30 minutes of moderate cardio (jogging, cycling, etc.).',
+        title: 'Read 2 pages',
+        description: 'Read exactly 2 pages of any book or article.',
+        category: 'mind',
+        statRewards: { mind: 1 },
+        difficulty: 3,
+        baseXp: 20,
+      },
+
+      // Difficulty 4-5: Medium
+      {
+        title: 'Do 20 push-ups',
+        description: 'Complete exactly 20 push-ups in sets of 5.',
+        category: 'body',
+        statRewards: { body: 2 },
+        difficulty: 4,
+        baseXp: 30,
+      },
+      {
+        title: 'Meditate for 10 minutes',
+        description: 'Sit in meditation for exactly 10 minutes.',
+        category: 'soul',
+        statRewards: { soul: 2 },
+        difficulty: 4,
+        baseXp: 35,
+      },
+      {
+        title: 'Write 200 words',
+        description: 'Write exactly 200 words on any topic.',
+        category: 'mind',
+        statRewards: { mind: 2 },
+        difficulty: 5,
+        baseXp: 40,
+      },
+
+      // Difficulty 6-7: Hard
+      {
+        title: 'Do 50 push-ups',
+        description: 'Complete exactly 50 push-ups in sets of 10.',
         category: 'body',
         statRewards: { body: 3 },
-        difficulty: 5,
-        baseXp: 50,
+        difficulty: 6,
+        baseXp: 60,
       },
       {
-        title: 'Digital Detox',
-        description: 'Avoid screens for 1 hour before bed.',
+        title: 'Study for 45 minutes',
+        description: 'Dedicated study session for exactly 45 minutes.',
         category: 'mind',
-        statRewards: { mind: 2, soul: 1 },
-        difficulty: 3,
-        baseXp: 0,
+        statRewards: { mind: 3 },
+        difficulty: 6,
+        baseXp: 65,
       },
       {
-        title: 'Healthy Meal Prep',
-        description: 'Prepare a balanced, healthy meal for yourself.',
+        title: 'Meditate for 30 minutes',
+        description: 'Sit in meditation for exactly 30 minutes.',
+        category: 'soul',
+        statRewards: { soul: 3 },
+        difficulty: 7,
+        baseXp: 70,
+      },
+
+      // Difficulty 8-9: Very Hard
+      {
+        title: 'Do 100 push-ups',
+        description: 'Complete exactly 100 push-ups in sets of 20.',
+        category: 'body',
+        statRewards: { body: 4 },
+        difficulty: 8,
+        baseXp: 90,
+      },
+      {
+        title: 'Write 1000 words',
+        description: 'Write exactly 1000 words on any topic.',
+        category: 'mind',
+        statRewards: { mind: 4 },
+        difficulty: 8,
+        baseXp: 95,
+      },
+      {
+        title: 'Face 3 inner truths',
+        description: 'Confront 3 difficult truths about yourself.',
+        category: 'soul',
+        statRewards: { soul: 4 },
+        difficulty: 9,
+        baseXp: 100,
+      },
+
+      // Difficulty 10: Extreme
+      {
+        title: 'Complete triathlon training',
+        description: 'Train for swimming, cycling, and running for 90 minutes.',
+        category: 'body',
+        statRewards: { body: 5, mind: 2 },
+        difficulty: 10,
+        baseXp: 150,
+      },
+      {
+        title: 'Master 5 new skills',
+        description: 'Learn and practice 5 new skills for 2 hours total.',
+        category: 'mind',
+        statRewards: { mind: 5, body: 2 },
+        difficulty: 10,
+        baseXp: 150,
+      },
+      {
+        title: 'Transform yourself in 3 areas',
+        description: 'Make significant positive changes in mind, body, and soul.',
+        category: 'soul',
+        statRewards: { body: 2, mind: 2, soul: 5 },
+        difficulty: 10,
+        baseXp: 150,
+      },
+
+      // Mixed attribute examples
+      {
+        title: 'Exercise while learning',
+        description: 'Do 30 push-ups while listening to an educational podcast.',
         category: 'body',
         statRewards: { body: 2, mind: 1 },
-        difficulty: 3,
-        baseXp: 100,
+        difficulty: 5,
+        baseXp: 45,
+      },
+      {
+        title: 'Mindful workout',
+        description: 'Complete a 20-minute workout with full mindfulness.',
+        category: 'body',
+        statRewards: { body: 2, soul: 1 },
+        difficulty: 5,
+        baseXp: 45,
+      },
+      {
+        title: 'Creative expression',
+        description: 'Express yourself through art, music, or writing for 30 minutes.',
+        category: 'soul',
+        statRewards: { mind: 1, soul: 2 },
+        difficulty: 6,
+        baseXp: 55,
       },
     ];
     const priorities = [
@@ -398,9 +407,6 @@ export const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
 
           <div className={styles.section}>
             <h3>Debug</h3>
-            <button onClick={handleAddDebugTasks} className={styles.button}>
-              Add Example Tasks
-            </button>
             <button
               onClick={handleAddDifficultyTasks}
               className={styles.button}
@@ -413,3 +419,4 @@ export const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
     </div>
   );
 };
+
