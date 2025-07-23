@@ -98,6 +98,8 @@ export const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
     if (window.confirm('Clear all data? This cannot be undone.')) {
       const success = userService.clearAllData();
       categoryService.clearCustomCategories();
+      // Clear Start Here progress
+      localStorage.removeItem('startHereGivenTasks');
       if (success) {
         showMessage('Data cleared!', 'success');
         onDataChange?.();
