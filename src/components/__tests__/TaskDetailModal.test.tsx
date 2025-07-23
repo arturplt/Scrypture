@@ -37,7 +37,7 @@ jest.mock('../../utils/dateUtils', () => ({
 describe('TaskDetailModal', () => {
   // Mock the TaskEditForm component only for this suite
   jest.mock('../TaskEditForm', () => ({
-    TaskEditForm: ({ task, onCancel }: { task: any; onCancel: any }) => (
+    TaskEditForm: ({ onCancel }: { task: Task; onCancel: () => void }) => (
       <div data-testid="task-edit-form">
         <button onClick={onCancel}>Cancel Edit</button>
       </div>
