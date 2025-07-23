@@ -332,7 +332,7 @@ export const DifficultySamples: React.FC = () => {
           cursor: 'pointer',
         }}
       >
-        📊 Difficulty Samples
+        🎲 Start Here
       </button>
     );
   }
