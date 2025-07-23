@@ -400,13 +400,16 @@ export const DifficultySamples: React.FC = () => {
         {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(difficulty => {
           const samples = difficultySamples.filter(s => s.difficulty === difficulty);
           const count = samples.length;
+          // Map difficulty 0 to color 1, difficulty 1 to color 2, etc.
+          const colorIndex = difficulty + 1;
+          const colorVar = `--difficulty-${colorIndex}`;
           return (
             <button
               key={difficulty}
               onClick={() => addDifficultySample(difficulty)}
               style={{
                 padding: '8px 12px',
-                backgroundColor: difficulty <= 3 ? '#4CAF50' : difficulty <= 6 ? '#FF9800' : '#F44336',
+                backgroundColor: `var(${colorVar})`,
                 color: 'white',
                 border: '2px solid transparent',
                 borderRadius: '0px',
@@ -415,7 +418,7 @@ export const DifficultySamples: React.FC = () => {
                 cursor: 'pointer',
               }}
             >
-              Level {difficulty} ({count})
+              {difficulty} ({count})
             </button>
           );
         })}

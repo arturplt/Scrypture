@@ -38,9 +38,9 @@ describe('DifficultySamples', () => {
   it('has difficulty level buttons', () => {
     render(<DifficultySamples />);
     fireEvent.click(screen.getByText('📊 Difficulty Samples'));
-    expect(screen.getByText('Level 0 (2)')).toBeInTheDocument();
-    expect(screen.getByText('Level 1 (3)')).toBeInTheDocument();
-    expect(screen.getByText('Level 9 (3)')).toBeInTheDocument();
+    expect(screen.getByText('0 (2)')).toBeInTheDocument();
+    expect(screen.getByText('1 (3)')).toBeInTheDocument();
+    expect(screen.getByText('9 (3)')).toBeInTheDocument();
   });
 
   it('can close modal', () => {
