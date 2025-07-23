@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Task } from '../types';
 import { useTasks } from '../hooks/useTasks';
-import { taskService } from '../services/taskService';
 import { categoryService } from '../services/categoryService';
 import { ConfirmationModal } from './ConfirmationModal';
 import styles from './TaskForm.module.css';
@@ -57,7 +56,6 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({
   const [soulReward, setSoulReward] = useState<number>(
     task.statRewards?.soul || 0
   );
-  const [xpReward, setXpReward] = useState<number>(task.statRewards?.xp || 0);
 
   // Calculate XP based on priority
   const priorityXp = priority === 'high' ? 15 : priority === 'medium' ? 10 : 5;

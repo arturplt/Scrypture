@@ -14,44 +14,7 @@ export const StatsDisplay: React.FC = () => {
     );
   }
 
-  const getStatColor = (statType: 'body' | 'mind' | 'soul') => {
-    switch (statType) {
-      case 'body':
-        return styles.bodyColor;
-      case 'mind':
-        return styles.mindColor;
-      case 'soul':
-        return styles.soulColor;
-      default:
-        return styles.bodyColor;
-    }
-  };
 
-  const getStatIcon = (statType: 'body' | 'mind' | 'soul') => {
-    switch (statType) {
-      case 'body':
-        return '💪';
-      case 'mind':
-        return '🧠';
-      case 'soul':
-        return '✨';
-      default:
-        return '💪';
-    }
-  };
-
-  const getStatName = (statType: 'body' | 'mind' | 'soul') => {
-    switch (statType) {
-      case 'body':
-        return 'Body';
-      case 'mind':
-        return 'Mind';
-      case 'soul':
-        return 'Soul';
-      default:
-        return 'Body';
-    }
-  };
 
   const calculateProgress = (value: number) => {
     // Calculate progress as percentage (0-100)
@@ -65,7 +28,6 @@ export const StatsDisplay: React.FC = () => {
   const currentXp = user.experience;
   const currentLevelBaseXp = (currentLevel - 1) * xpPerLevel;
   const nextLevelBaseXp = currentLevel * xpPerLevel;
-  const xpToNextLevel = nextLevelBaseXp - currentXp;
   const xpProgress = Math.max(
     0,
     Math.min(1, (currentXp - currentLevelBaseXp) / xpPerLevel)

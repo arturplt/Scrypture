@@ -11,7 +11,7 @@ interface TaskCardProps {
 }
 
 export const TaskCard: React.FC<TaskCardProps> = ({ task, onOpenModal }) => {
-  const { toggleTask, deleteTask } = useTasks();
+  const { toggleTask } = useTasks();
   const [isEditing, setIsEditing] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
   const [wasCompleted, setWasCompleted] = useState(task.completed);
@@ -75,24 +75,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onOpenModal }) => {
     return styles.difficultyExtreme; // Fallback for any higher values
   };
 
-  const getCategoryIcon = (category?: string) => {
-    switch (category) {
-      case 'body':
-        return '💪';
-      case 'mind':
-        return '🧠';
-      case 'soul':
-        return '✨';
-      case 'career':
-        return '💼';
-      case 'home':
-        return '🏠';
-      case 'skills':
-        return '🎯';
-      default:
-        return '📝';
-    }
-  };
+
 
   if (isEditing) {
     return (

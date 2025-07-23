@@ -10,8 +10,6 @@ interface TaskDetailModalProps {
   task: Task | null;
   isOpen: boolean;
   onClose: () => void;
-  onEdit?: () => void;
-  onDelete?: () => void;
   onNext?: () => void;
   onPrevious?: () => void;
   hasNext?: boolean;
@@ -22,8 +20,6 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   task,
   isOpen,
   onClose,
-  onEdit,
-  onDelete,
   onNext,
   onPrevious,
   hasNext = false,
@@ -163,14 +159,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
     setShowEditForm(false);
   };
 
-  // Filter out zero rewards, but keep XP first if present
-  const nonZeroRewards = task.statRewards
-    ? Object.entries(task.statRewards).filter(
-        ([_, value]) => value && value > 0
-      )
-    : [];
-  const xpReward = nonZeroRewards.find(([stat]) => stat === 'xp');
-  const otherRewards = nonZeroRewards.filter(([stat]) => stat !== 'xp');
+
 
   return (
     <>

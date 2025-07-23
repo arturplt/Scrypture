@@ -1,8 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTasks } from '../hooks/useTasks';
-import { taskService } from '../services/taskService';
 import { categoryService } from '../services/categoryService';
-import { storageService } from '../services/storageService';
 import { CategoryModal } from './CategoryModal';
 import { Task } from '../types';
 import styles from './TaskForm.module.css';
@@ -18,7 +16,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   onCancel,
   onSave,
 }) => {
-  const { addTask, updateTask, refreshTasks } = useTasks();
+  const { addTask, updateTask } = useTasks();
   const [title, setTitle] = useState(taskToEdit?.title || '');
   const [description, setDescription] = useState(taskToEdit?.description || '');
   const [category, setCategory] = useState<string>(
@@ -29,14 +27,8 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   );
   const [isExpanded, setIsExpanded] = useState(!!taskToEdit);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
-  const [customCategories, setCustomCategories] = useState<
-    Array<{
-      name: string;
-      icon: string;
-      color: string;
-    }>
-  >([]);
-  const [categoryRefreshTrigger, setCategoryRefreshTrigger] = useState(0);
+
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   // Remove getStatRewards and defaultCategoryRewards
   const [bodyReward, setBodyReward] = useState<number>(0);
@@ -140,12 +132,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   };
 
   // Load custom categories on mount and refresh when needed
-  useEffect(() => {
-    const categories = categoryService.getCustomCategories();
-    console.log('Loading custom categories:', categories);
-    console.log('Setting custom categories state:', categories);
-    setCustomCategories(categories);
-  }, [categoryRefreshTrigger]); // Refresh when trigger changes
+
 
   // Auto-resize textarea when description changes
   useEffect(() => {
@@ -170,7 +157,6 @@ export const TaskForm: React.FC<TaskFormProps> = ({
     console.log('Adding new category:', newCategory);
     const success = categoryService.addCustomCategory(newCategory);
     console.log('Category added successfully:', success);
-    setCategoryRefreshTrigger((prev) => prev + 1); // Trigger refresh
     if (success) {
       window.dispatchEvent(new Event('customCategoryAdded'));
     }
