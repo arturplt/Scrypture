@@ -2,6 +2,19 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { DataManager } from '../DataManager';
+import { TaskProvider } from '../../hooks/useTasks';
+import { UserProvider } from '../../hooks/useUser';
+
+// Helper function to render DataManager with TaskProvider
+const renderWithTaskProvider = (ui: React.ReactElement) => {
+  return render(
+    <UserProvider>
+      <TaskProvider>
+        {ui}
+      </TaskProvider>
+    </UserProvider>
+  );
+};
 
 // Mock the storage service
 const mockStorageInstance = {
@@ -27,6 +40,7 @@ jest.mock('../../services/taskService', () => ({
     updateTask: jest.fn(),
     deleteTask: jest.fn(),
     createTask: jest.fn(),
+    getTasks: jest.fn(() => []),
   },
 }));
 
@@ -168,8 +182,8 @@ describe('DataManager', () => {
     categoryService.clearCustomCategories.mockReturnValue(true);
   });
 
-  it('renders data manager interface', () => {
-    render(<DataManager />);
+      it('renders data manager interface', () => {
+      renderWithTaskProvider(<DataManager />);
 
     // Click the toggle button to open the interface
     const toggleButton = screen.getByText('Data Manager');
@@ -184,8 +198,8 @@ describe('DataManager', () => {
     ).toBeInTheDocument();
   });
 
-  it('displays storage statistics', () => {
-    render(<DataManager />);
+      it('displays storage statistics', () => {
+      renderWithTaskProvider(<DataManager />);
 
     // Click the toggle button to open the interface
     const toggleButton = screen.getByText('Data Manager');
@@ -202,7 +216,7 @@ describe('DataManager', () => {
         JSON.stringify(mockBackupData)
       );
 
-      render(<DataManager />);
+      renderWithTaskProvider(<DataManager />);
 
       // Click the toggle button to open the interface
       const toggleButton = screen.getByText('Data Manager');
@@ -222,7 +236,7 @@ describe('DataManager', () => {
         throw new Error('Export failed');
       });
 
-      render(<DataManager />);
+      renderWithTaskProvider(<DataManager />);
 
       // Click the toggle button to open the interface
       const toggleButton = screen.getByText('Data Manager');
@@ -241,7 +255,7 @@ describe('DataManager', () => {
     it('imports data successfully', async () => {
       mockStorageInstance.importData.mockReturnValue(true);
 
-      render(<DataManager />);
+      renderWithTaskProvider(<DataManager />);
 
       // Click the toggle button to open the interface
       const toggleButton = screen.getByText('Data Manager');
@@ -266,7 +280,7 @@ describe('DataManager', () => {
       const { userService } = require('../../services/userService');
       userService.importUserData.mockReturnValue(false);
 
-      render(<DataManager />);
+      renderWithTaskProvider(<DataManager />);
 
       // Click the toggle button to open the interface
       const toggleButton = screen.getByText('Data Manager');
@@ -291,7 +305,7 @@ describe('DataManager', () => {
       const { userService } = require('../../services/userService');
       userService.importUserData.mockReturnValue(false);
 
-      render(<DataManager />);
+      renderWithTaskProvider(<DataManager />);
 
       // Click the toggle button to open the interface
       const toggleButton = screen.getByText('Data Manager');
@@ -317,7 +331,7 @@ describe('DataManager', () => {
     it('creates backup successfully', async () => {
       mockStorageInstance.createBackup.mockReturnValue(mockBackupData);
 
-      render(<DataManager />);
+      renderWithTaskProvider(<DataManager />);
 
       // Click the toggle button to open the interface
       const toggleButton = screen.getByText('Data Manager');
@@ -334,7 +348,7 @@ describe('DataManager', () => {
     it('restores from backup successfully', async () => {
       mockStorageInstance.restoreFromBackup.mockReturnValue(true);
 
-      render(<DataManager />);
+      renderWithTaskProvider(<DataManager />);
 
       // Click the toggle button to open the interface
       const toggleButton = screen.getByText('Data Manager');
@@ -352,7 +366,7 @@ describe('DataManager', () => {
       const { userService } = require('../../services/userService');
       userService.restoreFromBackup.mockReturnValue(false);
 
-      render(<DataManager />);
+      renderWithTaskProvider(<DataManager />);
 
       // Click the toggle button to open the interface
       const toggleButton = screen.getByText('Data Manager');
@@ -369,7 +383,7 @@ describe('DataManager', () => {
 
   describe('Clear Data', () => {
     it('shows confirmation dialog for clear data', async () => {
-      render(<DataManager />);
+      renderWithTaskProvider(<DataManager />);
 
       // Click the toggle button to open the interface
       const toggleButton = screen.getByText('Data Manager');
@@ -385,7 +399,7 @@ describe('DataManager', () => {
     it('clears data when confirmed', async () => {
       mockStorageInstance.clearAllData.mockReturnValue(true);
 
-      render(<DataManager />);
+      renderWithTaskProvider(<DataManager />);
 
       // Click the toggle button to open the interface
       const toggleButton = screen.getByText('Data Manager');
@@ -414,7 +428,7 @@ describe('DataManager', () => {
         throw new Error('Storage error');
       });
 
-      render(<DataManager />);
+      renderWithTaskProvider(<DataManager />);
 
       // Click the toggle button to open the interface
       const toggleButton = screen.getByText('Data Manager');
@@ -430,7 +444,7 @@ describe('DataManager', () => {
         throw new Error('Network error');
       });
 
-      render(<DataManager />);
+      renderWithTaskProvider(<DataManager />);
 
       // Click the toggle button to open the interface
       const toggleButton = screen.getByText('Data Manager');
@@ -450,7 +464,7 @@ describe('DataManager', () => {
       const { userService } = require('../../services/userService');
       userService.importUserData.mockReturnValue(false);
 
-      render(<DataManager />);
+      renderWithTaskProvider(<DataManager />);
 
       // Click the toggle button to open the interface
       const toggleButton = screen.getByText('Data Manager');
@@ -475,7 +489,7 @@ describe('DataManager', () => {
       const { userService } = require('../../services/userService');
       userService.importUserData.mockReturnValue(false);
 
-      render(<DataManager />);
+      renderWithTaskProvider(<DataManager />);
 
       // Click the toggle button to open the interface
       const toggleButton = screen.getByText('Data Manager');
@@ -507,7 +521,7 @@ describe('DataManager', () => {
         );
       });
 
-      render(<DataManager />);
+      renderWithTaskProvider(<DataManager />);
 
       // Click the toggle button to open the interface
       const toggleButton = screen.getByText('Data Manager');
@@ -527,7 +541,7 @@ describe('DataManager', () => {
         JSON.stringify(mockBackupData)
       );
 
-      render(<DataManager />);
+      renderWithTaskProvider(<DataManager />);
 
       // Click the toggle button to open the interface
       const toggleButton = screen.getByText('Data Manager');
