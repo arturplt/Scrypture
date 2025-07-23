@@ -1,0 +1,599 @@
+{
+  "tasks": [
+    {
+      "title": "Morning Stretch Routine",
+      "description": "Start your day with a 10-minute full-body stretch.daddddddd",
+      "category": "body",
+      "completed": false,
+      "priority": "medium",
+      "statRewards": {
+        "body": 2,
+        "xp": 10
+      },
+      "difficulty": 0,
+      "id": "task_1753289291075_zdd96ik52",
+      "createdAt": "2025-07-23T16:48:11.075Z",
+      "updatedAt": "2025-07-23T17:55:08.704Z"
+    },
+    {
+      "title": "Morning Stretch Routine (Focus)",
+      "description": "Start your day with a 10-minute full-body stretch. Focus on quality and consistency.",
+      "category": "body",
+      "completed": false,
+      "priority": "medium",
+      "statRewards": {
+        "body": 2,
+        "xp": 20
+      },
+      "difficulty": 2,
+      "id": "task_1753289291075_uffkol4a6",
+      "createdAt": "2025-07-23T16:48:11.075Z",
+      "updatedAt": "2025-07-23T16:48:11.075Z"
+    },
+    {
+      "title": "Morning Stretch Routine (Urgent)",
+      "description": "Start your day with a 10-minute full-body stretch. Make this your top priority today!",
+      "category": "body",
+      "completed": false,
+      "priority": "high",
+      "statRewards": {
+        "body": 2,
+        "xp": 30
+      },
+      "difficulty": 2,
+      "id": "task_1753289291075_98oikdm7a",
+      "createdAt": "2025-07-23T16:48:11.075Z",
+      "updatedAt": "2025-07-23T16:48:11.075Z"
+    },
+    {
+      "title": "XP Strip Demo - Body Only",
+      "description": "Task with only body stat reward to show red strip.",
+      "category": "body",
+      "completed": false,
+      "priority": "low",
+      "statRewards": {
+        "body": 3,
+        "xp": 15
+      },
+      "difficulty": 3,
+      "id": "task_1753289291075_qx9w1octh",
+      "createdAt": "2025-07-23T16:48:11.075Z",
+      "updatedAt": "2025-07-23T16:48:11.075Z"
+    },
+    {
+      "title": "XP Strip Demo - Body Only (Focus)",
+      "description": "Task with only body stat reward to show red strip. Focus on quality and consistency.",
+      "category": "body",
+      "completed": false,
+      "priority": "medium",
+      "statRewards": {
+        "body": 3,
+        "xp": 30
+      },
+      "difficulty": 3,
+      "id": "task_1753289291075_8hxrclmi6",
+      "createdAt": "2025-07-23T16:48:11.075Z",
+      "updatedAt": "2025-07-23T16:48:11.075Z"
+    },
+    {
+      "title": "XP Strip Demo - Body Only (Urgent)",
+      "description": "Task with only body stat reward to show red strip. Make this your top priority today!",
+      "category": "body",
+      "completed": false,
+      "priority": "high",
+      "statRewards": {
+        "body": 3,
+        "xp": 45
+      },
+      "difficulty": 3,
+      "id": "task_1753289291075_i9iyizvqk",
+      "createdAt": "2025-07-23T16:48:11.075Z",
+      "updatedAt": "2025-07-23T16:48:11.075Z"
+    },
+    {
+      "title": "XP Strip Demo - Mind Only (Focus)",
+      "description": "Task with only mind stat reward to show blue strip. Focus on quality and consistency.",
+      "category": "mind",
+      "completed": false,
+      "priority": "medium",
+      "statRewards": {
+        "mind": 2,
+        "xp": 40
+      },
+      "difficulty": 4,
+      "id": "task_1753289291075_36xbwjc2q",
+      "createdAt": "2025-07-23T16:48:11.075Z",
+      "updatedAt": "2025-07-23T16:48:11.075Z"
+    },
+    {
+      "title": "XP Strip Demo - Mind Only (Urgent)",
+      "description": "Task with only mind stat reward to show blue strip. Make this your top priority today!",
+      "category": "mind",
+      "completed": false,
+      "priority": "high",
+      "statRewards": {
+        "mind": 2,
+        "xp": 60
+      },
+      "difficulty": 4,
+      "id": "task_1753289291075_v3rbqstmd",
+      "createdAt": "2025-07-23T16:48:11.075Z",
+      "updatedAt": "2025-07-23T16:48:11.075Z"
+    },
+    {
+      "title": "XP Strip Demo - Soul Only",
+      "description": "Task with only soul stat reward to show yellow strip.",
+      "category": "soul",
+      "completed": false,
+      "priority": "low",
+      "statRewards": {
+        "soul": 2,
+        "xp": 25
+      },
+      "difficulty": 5,
+      "id": "task_1753289291075_p2w09uswo",
+      "createdAt": "2025-07-23T16:48:11.075Z",
+      "updatedAt": "2025-07-23T16:48:11.075Z"
+    },
+    {
+      "title": "XP Strip Demo - Soul Only (Focus)",
+      "description": "Task with only soul stat reward to show yellow strip. Focus on quality and consistency.",
+      "category": "soul",
+      "completed": false,
+      "priority": "medium",
+      "statRewards": {
+        "soul": 2,
+        "xp": 50
+      },
+      "difficulty": 5,
+      "id": "task_1753289291076_ndx8mc2j6",
+      "createdAt": "2025-07-23T16:48:11.076Z",
+      "updatedAt": "2025-07-23T16:48:11.076Z"
+    },
+    {
+      "title": "XP Strip Demo - Soul Only (Urgent)",
+      "description": "Task with only soul stat reward to show yellow strip. Make this your top priority today!",
+      "category": "soul",
+      "completed": false,
+      "priority": "high",
+      "statRewards": {
+        "soul": 2,
+        "xp": 75
+      },
+      "difficulty": 5,
+      "id": "task_1753289291076_3mv2p3lx8",
+      "createdAt": "2025-07-23T16:48:11.076Z",
+      "updatedAt": "2025-07-23T16:48:11.076Z"
+    },
+    {
+      "title": "XP Strip Demo - All Stats",
+      "description": "Task with all stat rewards to show all three strips.",
+      "category": "body",
+      "completed": false,
+      "priority": "low",
+      "statRewards": {
+        "body": 2,
+        "mind": 1,
+        "soul": 1,
+        "xp": 30
+      },
+      "difficulty": 6,
+      "id": "task_1753289291076_mziyn3vl7",
+      "createdAt": "2025-07-23T16:48:11.076Z",
+      "updatedAt": "2025-07-23T16:48:11.076Z"
+    },
+    {
+      "title": "XP Strip Demo - All Stats (Focus)",
+      "description": "Task with all stat rewards to show all three strips. Focus on quality and consistency.",
+      "category": "body",
+      "completed": false,
+      "priority": "medium",
+      "statRewards": {
+        "body": 2,
+        "mind": 1,
+        "soul": 1,
+        "xp": 60
+      },
+      "difficulty": 6,
+      "id": "task_1753289291076_ije3l8ymj",
+      "createdAt": "2025-07-23T16:48:11.076Z",
+      "updatedAt": "2025-07-23T16:48:11.076Z"
+    },
+    {
+      "title": "XP Strip Demo - All Stats (Urgent)",
+      "description": "Task with all stat rewards to show all three strips. \n\nMake this your top priority today!\n\n\n\n\n\n\n\n\n\n\n\n\nLOLz\nmake hozez",
+      "category": "free time",
+      "completed": false,
+      "priority": "high",
+      "statRewards": {
+        "body": 2,
+        "mind": 1,
+        "soul": 1,
+        "xp": 28
+      },
+      "difficulty": 6,
+      "id": "task_1753289291076_a4ccg8pop",
+      "createdAt": "2025-07-23T16:48:11.076Z",
+      "updatedAt": "2025-07-23T18:04:34.527Z"
+    },
+    {
+      "title": "Hydration Check",
+      "description": "Drink at least 2 liters of water today.",
+      "category": "body",
+      "completed": false,
+      "priority": "low",
+      "statRewards": {
+        "body": 1,
+        "xp": 5
+      },
+      "difficulty": 1,
+      "id": "task_1753289291076_vi7e4merg",
+      "createdAt": "2025-07-23T16:48:11.076Z",
+      "updatedAt": "2025-07-23T16:48:11.076Z"
+    },
+    {
+      "title": "Hydration Check (Focus)",
+      "description": "Drink at least 2 liters of water today. Focus on quality and consistency.",
+      "category": "body",
+      "completed": false,
+      "priority": "medium",
+      "statRewards": {
+        "body": 1,
+        "xp": 11
+      },
+      "difficulty": 1,
+      "id": "task_1753289291076_vhw2c0usr",
+      "createdAt": "2025-07-23T16:48:11.076Z",
+      "updatedAt": "2025-07-23T18:02:52.161Z"
+    },
+    {
+      "title": "Hydration Check (Urgent)",
+      "description": "Drink at least 2 liters of water today. Make this your top priority today!",
+      "category": "body",
+      "completed": false,
+      "priority": "high",
+      "statRewards": {
+        "body": 1,
+        "xp": 15
+      },
+      "difficulty": 1,
+      "id": "task_1753289291076_d3q0lvkhl",
+      "createdAt": "2025-07-23T16:48:11.076Z",
+      "updatedAt": "2025-07-23T16:48:11.076Z"
+    },
+    {
+      "title": "Mindful Walk",
+      "description": "Take a 20-minute walk outdoors, focusing on your breath and surroundings.",
+      "category": "mind",
+      "completed": false,
+      "priority": "low",
+      "statRewards": {
+        "mind": 2,
+        "body": 1,
+        "xp": 20
+      },
+      "difficulty": 3,
+      "id": "task_1753289291076_c8suwdfoe",
+      "createdAt": "2025-07-23T16:48:11.076Z",
+      "updatedAt": "2025-07-23T16:48:11.076Z"
+    },
+    {
+      "title": "Mindful Walk (Focus)",
+      "description": "Take a 20-minute walk outdoors, focusing on your breath and surroundings. Focus on quality and consistency.",
+      "category": "mind",
+      "completed": false,
+      "priority": "medium",
+      "statRewards": {
+        "mind": 2,
+        "body": 1,
+        "xp": 40
+      },
+      "difficulty": 3,
+      "id": "task_1753289291076_p5vu3n75a",
+      "createdAt": "2025-07-23T16:48:11.076Z",
+      "updatedAt": "2025-07-23T16:48:11.076Z"
+    },
+    {
+      "title": "Mindful Walk (Urgent)",
+      "description": "Take a 20-minute walk outdoors, focusing on your breath and surroundings. Make this your top priority today!",
+      "category": "mind",
+      "completed": false,
+      "priority": "high",
+      "statRewards": {
+        "mind": 2,
+        "body": 1,
+        "xp": 60
+      },
+      "difficulty": 3,
+      "id": "task_1753289291077_bwtzz5e2f",
+      "createdAt": "2025-07-23T16:48:11.077Z",
+      "updatedAt": "2025-07-23T16:48:11.077Z"
+    },
+    {
+      "title": "Gratitude Journal",
+      "description": "Write down three things you are grateful for.",
+      "category": "mind",
+      "completed": false,
+      "priority": "low",
+      "statRewards": {
+        "mind": 2,
+        "soul": 1,
+        "xp": 15
+      },
+      "difficulty": 2,
+      "id": "task_1753289291077_wj0pwwktp",
+      "createdAt": "2025-07-23T16:48:11.077Z",
+      "updatedAt": "2025-07-23T16:48:11.077Z"
+    },
+    {
+      "title": "Gratitude Journal (Focus)",
+      "description": "Write down three things you are grateful for. Focus on quality and consistency.",
+      "category": "mind",
+      "completed": false,
+      "priority": "medium",
+      "statRewards": {
+        "mind": 2,
+        "soul": 1,
+        "xp": 30
+      },
+      "difficulty": 2,
+      "id": "task_1753289291077_uthinecld",
+      "createdAt": "2025-07-23T16:48:11.077Z",
+      "updatedAt": "2025-07-23T16:48:11.077Z"
+    },
+    {
+      "title": "Gratitude Journal (Urgent)",
+      "description": "Write down three things you are grateful for. Make this your top priority today!",
+      "category": "mind",
+      "completed": false,
+      "priority": "high",
+      "statRewards": {
+        "mind": 2,
+        "soul": 1,
+        "xp": 45
+      },
+      "difficulty": 2,
+      "id": "task_1753289291077_cxa0e2uof",
+      "createdAt": "2025-07-23T16:48:11.077Z",
+      "updatedAt": "2025-07-23T16:48:11.077Z"
+    },
+    {
+      "title": "Evening Relaxation",
+      "description": "Spend 15 minutes doing a relaxing activity (reading, music, etc.).",
+      "category": "soul",
+      "completed": false,
+      "priority": "low",
+      "statRewards": {
+        "soul": 2,
+        "mind": 1,
+        "xp": 8
+      },
+      "difficulty": 2,
+      "id": "task_1753289291077_nfso1496w",
+      "createdAt": "2025-07-23T16:48:11.077Z",
+      "updatedAt": "2025-07-23T16:48:11.077Z"
+    },
+    {
+      "title": "Evening Relaxation (Focus)",
+      "description": "Spend 15 minutes doing a relaxing activity (reading, music, etc.). Focus on quality and consistency.",
+      "category": "soul",
+      "completed": false,
+      "priority": "medium",
+      "statRewards": {
+        "soul": 2,
+        "mind": 1,
+        "xp": 16
+      },
+      "difficulty": 2,
+      "id": "task_1753289291077_uufbrqord",
+      "createdAt": "2025-07-23T16:48:11.077Z",
+      "updatedAt": "2025-07-23T16:48:11.077Z"
+    },
+    {
+      "title": "Evening Relaxation (Urgent)",
+      "description": "Spend 15 minutes doing a relaxing activity (reading, music, etc.). Make this your top priority today!",
+      "category": "soul",
+      "completed": false,
+      "priority": "high",
+      "statRewards": {
+        "soul": 2,
+        "mind": 1,
+        "xp": 24
+      },
+      "difficulty": 2,
+      "id": "task_1753289291078_53ngx3hzj",
+      "createdAt": "2025-07-23T16:48:11.078Z",
+      "updatedAt": "2025-07-23T16:48:11.078Z"
+    },
+    {
+      "title": "Cardio Exercise",
+      "description": "Complete 30 minutes of moderate cardio (jogging, cycling, etc.).",
+      "category": "body",
+      "completed": false,
+      "priority": "low",
+      "statRewards": {
+        "body": 3,
+        "xp": 50
+      },
+      "difficulty": 5,
+      "id": "task_1753289291078_slu5dta7k",
+      "createdAt": "2025-07-23T16:48:11.078Z",
+      "updatedAt": "2025-07-23T16:48:11.078Z"
+    },
+    {
+      "title": "Cardio Exercise (Focus)",
+      "description": "Complete 30 minutes of moderate cardio (jogging, cycling, etc.). Focus on quality and consistency.",
+      "category": "body",
+      "completed": false,
+      "priority": "medium",
+      "statRewards": {
+        "body": 3,
+        "xp": 100
+      },
+      "difficulty": 5,
+      "id": "task_1753289291078_wslvbynvr",
+      "createdAt": "2025-07-23T16:48:11.078Z",
+      "updatedAt": "2025-07-23T16:48:11.078Z"
+    },
+    {
+      "title": "Cardio Exercise (Urgent)",
+      "description": "Complete 30 minutes of moderate cardio (jogging, cycling, etc.). Make this your top priority today!",
+      "category": "body",
+      "completed": false,
+      "priority": "high",
+      "statRewards": {
+        "body": 3,
+        "xp": 100
+      },
+      "difficulty": 5,
+      "id": "task_1753289291078_hsgen7s0q",
+      "createdAt": "2025-07-23T16:48:11.078Z",
+      "updatedAt": "2025-07-23T16:48:11.078Z"
+    },
+    {
+      "title": "Digital Detox",
+      "description": "Avoid screens for 1 hour before bed.",
+      "category": "mind",
+      "completed": false,
+      "priority": "low",
+      "statRewards": {
+        "mind": 2,
+        "soul": 1,
+        "xp": 0
+      },
+      "difficulty": 3,
+      "id": "task_1753289291078_d3jo8bjqg",
+      "createdAt": "2025-07-23T16:48:11.078Z",
+      "updatedAt": "2025-07-23T16:48:11.078Z"
+    },
+    {
+      "title": "Digital Detox (Focus)",
+      "description": "Avoid screens for 1 hour before bed. Focus on quality and consistency.",
+      "category": "mind",
+      "completed": false,
+      "priority": "medium",
+      "statRewards": {
+        "mind": 2,
+        "soul": 1,
+        "xp": 0
+      },
+      "difficulty": 3,
+      "id": "task_1753289291078_3s3v731xv",
+      "createdAt": "2025-07-23T16:48:11.078Z",
+      "updatedAt": "2025-07-23T16:48:11.078Z"
+    },
+    {
+      "title": "Digital Detox (Urgent)",
+      "description": "Avoid screens for 1 hour before bed. Make this your top priority today!",
+      "category": "mind",
+      "completed": false,
+      "priority": "high",
+      "statRewards": {
+        "mind": 2,
+        "soul": 1,
+        "xp": 0
+      },
+      "difficulty": 3,
+      "id": "task_1753289291079_ips9ud261",
+      "createdAt": "2025-07-23T16:48:11.079Z",
+      "updatedAt": "2025-07-23T16:48:11.079Z"
+    },
+    {
+      "title": "Healthy Meal Prep",
+      "description": "Prepare a balanced, healthy meal for yourself.",
+      "category": "body",
+      "completed": false,
+      "priority": "low",
+      "statRewards": {
+        "body": 2,
+        "mind": 1,
+        "xp": 100
+      },
+      "difficulty": 3,
+      "id": "task_1753289291079_0a7snnrgt",
+      "createdAt": "2025-07-23T16:48:11.079Z",
+      "updatedAt": "2025-07-23T16:48:11.079Z"
+    },
+    {
+      "title": "Healthy Meal Prep (Focus)",
+      "description": "Prepare a balanced, healthy meal for yourself. Focus on quality and consistency.",
+      "category": "body",
+      "completed": false,
+      "priority": "medium",
+      "statRewards": {
+        "body": 2,
+        "mind": 1,
+        "xp": 100
+      },
+      "difficulty": 3,
+      "id": "task_1753289291080_oq6n1fhrh",
+      "createdAt": "2025-07-23T16:48:11.080Z",
+      "updatedAt": "2025-07-23T16:48:11.080Z"
+    },
+    {
+      "title": "Healthy Meal Prep (Urgent)",
+      "description": "Prepare a balanced, healthy meal for yourself. Make this your top priority today!",
+      "category": "body",
+      "completed": false,
+      "priority": "high",
+      "statRewards": {
+        "body": 2,
+        "mind": 1,
+        "xp": 100
+      },
+      "difficulty": 3,
+      "id": "task_1753289291080_geendu417",
+      "createdAt": "2025-07-23T16:48:11.080Z",
+      "updatedAt": "2025-07-23T16:48:11.080Z"
+    },
+    {
+      "title": "weeed",
+      "category": "garden",
+      "completed": false,
+      "priority": "medium",
+      "statRewards": {
+        "xp": 10
+      },
+      "difficulty": 0,
+      "id": "task_1753291187794_pd31okkag",
+      "createdAt": "2025-07-23T17:19:47.794Z",
+      "updatedAt": "2025-07-23T17:19:47.794Z"
+    },
+    {
+      "title": "dupa Jasia chorągiewka",
+      "category": "home",
+      "completed": false,
+      "priority": "medium",
+      "statRewards": {
+        "xp": 10
+      },
+      "difficulty": 0,
+      "id": "task_1753291222558_5zbvzrqr4",
+      "createdAt": "2025-07-23T17:20:22.558Z",
+      "updatedAt": "2025-07-23T17:20:22.558Z"
+    }
+  ],
+  "habits": [],
+  "user": {
+    "id": "user_1753289288164_evznt7z0m",
+    "name": "Artur",
+    "level": 1,
+    "experience": 0,
+    "body": 0,
+    "mind": 0,
+    "soul": 0,
+    "achievements": [],
+    "createdAt": "2025-07-23T16:48:08.164Z",
+    "updatedAt": "2025-07-23T16:48:08.164Z"
+  },
+  "settings": {},
+  "customCategories": [
+    {
+      "name": "cyrk",
+      "icon": "💪",
+      "color": "var(--color-urgent)"
+    }
+  ],
+  "timestamp": "2025-07-23T18:08:29.008Z",
+  "version": "1.0.0"
+}

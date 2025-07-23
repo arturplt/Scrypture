@@ -90,6 +90,9 @@ export const categoryService = {
       { name: 'home', icon: '🏠', color: 'var(--color-home)' },
       { name: 'free time', icon: '🎲', color: 'var(--color-freetime)' },
       { name: 'garden', icon: '🌱', color: 'var(--color-garden)' },
+      { name: 'mind', icon: '🧠', color: 'var(--color-mind)' },
+      { name: 'body', icon: '💪', color: 'var(--color-body)' },
+      { name: 'soul', icon: '✨', color: 'var(--color-soul)' },
     ];
 
     const customCategories = this.getCustomCategories();
