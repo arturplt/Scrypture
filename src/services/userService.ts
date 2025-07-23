@@ -143,15 +143,15 @@ export const userService = {
     return this.updateUser({ achievements: updatedAchievements });
   },
 
-  getSettings(): Record<string, any> {
+  getSettings(): Record<string, unknown> {
     return storageService.getSettings();
   },
 
-  saveSettings(settings: Record<string, any>): boolean {
+  saveSettings(settings: Record<string, unknown>): boolean {
     return storageService.saveSettings(settings);
   },
 
-  updateSetting(key: string, value: any): boolean {
+  updateSetting(key: string, value: unknown): boolean {
     const settings = this.getSettings();
     const updatedSettings = { ...settings, [key]: value };
     return this.saveSettings(updatedSettings);
@@ -166,11 +166,11 @@ export const userService = {
     return storageService.importData(jsonData);
   },
 
-  createBackup(): Record<string, any> {
+  createBackup(): Record<string, unknown> {
     return storageService.createBackup();
   },
 
-  restoreFromBackup(backup: Record<string, any>): boolean {
+  restoreFromBackup(backup: Record<string, unknown>): boolean {
     return storageService.restoreFromBackup(backup);
   },
 
@@ -183,11 +183,11 @@ export const userService = {
   },
 
   // Backup methods
-  saveBackup(backup: Record<string, any>): boolean {
+  saveBackup(backup: Record<string, unknown>): boolean {
     return storageService.saveBackup(backup);
   },
 
-  getBackup(): Record<string, any> | null {
+  getBackup(): Record<string, unknown> | null {
     return storageService.getBackup();
   },
 };
