@@ -10,7 +10,7 @@ jest.mock('../../hooks/useUser', () => ({
   ),
 }));
 
-const mockUseUser = require('../../hooks/useUser').useUser;
+const mockUseUser = jest.mocked(require('../../hooks/useUser').useUser);
 
 const renderWithProvider = (component: React.ReactElement) => {
   return render(component);

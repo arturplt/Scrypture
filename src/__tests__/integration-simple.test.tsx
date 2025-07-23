@@ -254,7 +254,7 @@ describe('Simple Integration Tests', () => {
       ];
 
       // Mock the storage service to return existing tasks
-      const mockStorageService = require('../services/storageService').storageService;
+      const mockStorageService = jest.mocked(require('../services/storageService').storageService);
       mockStorageService.getTasks.mockReturnValue(existingTasks);
       mockStorageService.getUser.mockReturnValue({
         id: '1',
@@ -288,7 +288,7 @@ describe('Simple Integration Tests', () => {
   describe('Error Handling', () => {
     it('handles storage errors gracefully', async () => {
       // Mock storage service to return false instead of throwing
-      const mockStorageService = require('../services/storageService').storageService;
+      const mockStorageService = jest.mocked(require('../services/storageService').storageService);
       mockStorageService.saveTasks.mockReturnValue(false);
 
       renderApp();

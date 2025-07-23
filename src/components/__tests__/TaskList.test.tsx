@@ -82,7 +82,7 @@ describe('TaskList', () => {
     },
   ];
 
-  const mockUseTasks = require('../../hooks/useTasks').useTasks;
+  const mockUseTasks = jest.mocked(require('../../hooks/useTasks').useTasks);
 
   beforeEach(() => {
     jest.clearAllMocks();

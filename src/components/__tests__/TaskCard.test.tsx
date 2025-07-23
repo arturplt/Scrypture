@@ -32,7 +32,7 @@ jest.mock('../../hooks/useTasks', () => ({
   ),
 }));
 
-const mockUseTasks = require('../../hooks/useTasks').useTasks;
+const mockUseTasks = jest.mocked(require('../../hooks/useTasks').useTasks);
 
 const renderWithProvider = (component: React.ReactElement) => {
   return render(<TaskProvider>{component}</TaskProvider>);
