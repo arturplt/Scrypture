@@ -1,9 +1,11 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { TaskEditForm } from '../TaskEditForm';
+import TaskEditForm from '../TaskEditForm';
 import { TaskProvider } from '../../hooks/useTasks';
 import { UserProvider } from '../../hooks/useUser';
 import { Task } from '../../types';
+
+console.log('TaskEditForm default import:', TaskEditForm);
 
 // Mock the useTasks hook
 const mockUpdateTask = jest.fn();

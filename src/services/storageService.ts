@@ -278,7 +278,7 @@ export class StorageService {
       let totalSize = 0;
       Object.values(STORAGE_KEYS).forEach(key => {
         const item = localStorage.getItem(key);
-        if (item) {
+        if (typeof item === 'string' && typeof item.length === 'number') {
           totalSize += item.length;
         }
       });

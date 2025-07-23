@@ -507,6 +507,54 @@ describe('StorageService', () => {
       expect(stats.available).toBe(0);
       expect(stats.percentage).toBe(0);
     });
+
+    test('should call getItem for every storage key', () => {
+      jest.clearAllMocks();
+      const keys = Object.values(require('../storageService').STORAGE_KEYS);
+      localStorageMock.getItem.mockReturnValue('some data');
+      storageService.getStorageStats();
+      keys.forEach(key => {
+        expect(localStorageMock.getItem).toHaveBeenCalledWith(key);
+      });
+    });
+
+    test('should handle some missing keys gracefully', () => {
+      localStorageMock.getItem.mockImplementation((key) => {
+        if (key === 'scrypture_tasks') return JSON.stringify([{ id: '1', title: 'Test Task' }]);
+        // All other keys missing
+        return null;
+      });
+      const stats = storageService.getStorageStats();
+      expect(stats.used).toBeGreaterThan(0);
+      expect(stats.available).toBe(5 * 1024 * 1024);
+      expect(stats.percentage).toBeGreaterThan(0);
+    });
+
+    test('should handle very large data and round percentage', () => {
+      // 5MB = 5 * 1024 * 1024 = 5242880 bytes
+      const largeString = 'x'.repeat(5 * 1024 * 1024); // 5MB
+      localStorageMock.getItem.mockImplementation((key) => {
+        if (key === 'scrypture_tasks') return largeString;
+        return null;
+      });
+      const stats = storageService.getStorageStats();
+      expect(stats.used).toBeGreaterThanOrEqual(5 * 1024 * 1024);
+      expect(stats.percentage).toBeGreaterThanOrEqual(100);
+      // Should be rounded to two decimals
+      expect(Number.isInteger(stats.percentage) || /\d{1,2}\.\d{1,2}/.test(stats.percentage.toString())).toBe(true);
+    });
+
+    test('should handle non-string/corrupted data gracefully', () => {
+      localStorageMock.getItem.mockImplementation((key) => {
+        if (key === 'scrypture_tasks') return { not: 'a string' };
+        return null;
+      });
+      // Should not throw, and used should be 0 (since .length is undefined)
+      const stats = storageService.getStorageStats();
+      expect(stats.used).toBe(0);
+      expect(stats.available).toBe(5 * 1024 * 1024);
+      expect(stats.percentage).toBe(0);
+    });
   });
 
   describe('Data Clearing', () => {

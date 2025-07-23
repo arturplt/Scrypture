@@ -263,4 +263,6 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({ task, onCancel }) =>
     />
     </>
   );
-}; 
+};
+
+export default TaskEditForm; 

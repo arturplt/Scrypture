@@ -44,19 +44,24 @@ export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
 
   const addHabit = (habitData: Omit<Habit, 'id' | 'createdAt' | 'streak'>) => {
     const newHabit = habitService.addHabit(habitData);
-    setHabits(prev => [...prev, newHabit]);
-    // Auto-save is handled by the service, but we can add additional feedback
-    console.log('Habit created and auto-saved');
+    if (newHabit) {
+      setHabits(prev => {
+        const updated = [...prev, newHabit];
+        habitService.saveHabits(updated);
+        return updated;
+      });
+      console.log('Habit created and auto-saved');
+    }
   };
 
   const updateHabit = (id: string, updates: Partial<Habit>) => {
     const success = habitService.updateHabit(id, updates);
     if (success) {
-      setHabits(prev => 
-        prev.map(habit => 
-          habit.id === id ? { ...habit, ...updates } : habit
-        )
-      );
+      setHabits(prev => {
+        const updated = prev.map(habit => habit.id === id ? { ...habit, ...updates } : habit);
+        habitService.saveHabits(updated);
+        return updated;
+      });
       console.log('Habit updated and auto-saved');
     }
   };
@@ -64,7 +69,11 @@ export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
   const deleteHabit = (id: string) => {
     const success = habitService.deleteHabit(id);
     if (success) {
-      setHabits(prev => prev.filter(habit => habit.id !== id));
+      setHabits(prev => {
+        const updated = prev.filter(habit => habit.id !== id);
+        habitService.saveHabits(updated);
+        return updated;
+      });
       console.log('Habit deleted and auto-saved');
     }
   };
@@ -72,8 +81,8 @@ export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
   const completeHabit = (id: string) => {
     const success = habitService.completeHabit(id);
     if (success) {
-      setHabits(prev => 
-        prev.map(habit => {
+      setHabits(prev => {
+        const updated = prev.map(habit => {
           if (habit.id === id) {
             return {
               ...habit,
@@ -82,8 +91,10 @@ export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
             };
           }
           return habit;
-        })
-      );
+        });
+        habitService.saveHabits(updated);
+        return updated;
+      });
       console.log('Habit completed and auto-saved');
     }
     return success;

@@ -26,20 +26,20 @@ jest.mock('../Modal', () => ({
   ),
 }));
 
-// Mock the TaskEditForm component
-jest.mock('../TaskEditForm', () => ({
-  TaskEditForm: ({ task, onCancel }: { task: Task; onCancel: () => void }) => (
-    <div data-testid="task-edit-form">
-      <button onClick={onCancel}>Cancel Edit</button>
-    </div>
-  ),
-}));
-
 jest.mock('../../utils/dateUtils', () => ({
   formatRelativeTime: jest.fn((date) => `formatted ${date.toISOString()}`),
 }));
 
-describe('TaskDetailModal (new system)', () => {
+describe('TaskDetailModal', () => {
+  // Mock the TaskEditForm component only for this suite
+  jest.mock('../TaskEditForm', () => ({
+    TaskEditForm: ({ task, onCancel }: { task: any; onCancel: any }) => (
+      <div data-testid="task-edit-form">
+        <button onClick={onCancel}>Cancel Edit</button>
+      </div>
+    ),
+  }));
+
   const mockTask: Task = {
     id: '1',
     title: 'Test Task',
