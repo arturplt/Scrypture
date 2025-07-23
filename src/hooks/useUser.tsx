@@ -176,6 +176,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     removeStatRewards,
     unlockAchievement,
     createUser,
+    isSaving,
   };
 
   return (

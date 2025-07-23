@@ -27,7 +27,7 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
-  const { addExperience, addStatRewards, removeExperience, removeStatRewards } = useUser();
+  const { addExperience, addStatRewards, removeStatRewards } = useUser();
 
   useEffect(() => {
     // Load tasks from local storage on mount

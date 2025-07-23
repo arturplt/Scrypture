@@ -68,6 +68,7 @@ export interface HabitContextType {
   updateHabit: (id: string, updates: Partial<Habit>) => void;
   deleteHabit: (id: string) => void;
   completeHabit: (id: string) => void;
+  isSaving: boolean;
 }
 
 export interface UserContextType {
@@ -79,4 +80,5 @@ export interface UserContextType {
   removeStatRewards: (rewards: { body?: number; mind?: number; soul?: number; xp?: number }) => void;
   unlockAchievement: (achievementId: string) => void;
   createUser: (name: string) => User;
+  isSaving: boolean;
 } 

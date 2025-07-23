@@ -1,6 +1,5 @@
 import { userService } from '../userService';
 import { storageService } from '../storageService';
-import { User, Achievement } from '../../types';
 
 // Mock the storage service
 jest.mock('../storageService', () => ({

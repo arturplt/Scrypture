@@ -31,11 +31,6 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onOpenModal }) => {
     }
   };
 
-  const handleDelete = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    deleteTask(task.id);
-  };
-
   const handleEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsEditing(true);
@@ -180,30 +175,36 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onOpenModal }) => {
           </div>
 
           {/* Rewards details - hidden until hover */}
-          {(task.statRewards && (task.statRewards?.xp > 0 || task.statRewards?.body > 0 || task.statRewards?.mind > 0 || task.statRewards?.soul > 0)) && (
-            <div className={styles.rewards}>
-              {task.statRewards?.xp && task.statRewards.xp > 0 && (
-                <span className={`${styles.reward} ${styles.rewardXP}`}>
-                  XP: +{task.statRewards.xp}
-                </span>
-              )}
-              {task.statRewards?.body && task.statRewards.body > 0 && (
-                <span className={`${styles.reward} ${styles.rewardBody}`}>
-                  💪 Body: +{task.statRewards.body}
-                </span>
-              )}
-              {task.statRewards?.mind && task.statRewards.mind > 0 && (
-                <span className={`${styles.reward} ${styles.rewardMind}`}>
-                  🧠 Mind: +{task.statRewards.mind}
-                </span>
-              )}
-              {task.statRewards?.soul && task.statRewards.soul > 0 && (
-                <span className={`${styles.reward} ${styles.rewardSoul}`}>
-                  ✨ Soul: +{task.statRewards.soul}
-                </span>
-              )}
-            </div>
+      {(
+        task.statRewards &&
+        ((task.statRewards.xp ?? 0) > 0 ||
+          (task.statRewards.body ?? 0) > 0 ||
+          (task.statRewards.mind ?? 0) > 0 ||
+          (task.statRewards.soul ?? 0) > 0)
+      ) && (
+        <div className={styles.rewards}>
+          {(task.statRewards.xp ?? 0) > 0 && (
+            <span className={`${styles.reward} ${styles.rewardXP}`}>
+              XP: +{task.statRewards.xp}
+            </span>
           )}
+          {(task.statRewards.body ?? 0) > 0 && (
+            <span className={`${styles.reward} ${styles.rewardBody}`}>
+              💪 Body: +{task.statRewards.body}
+            </span>
+          )}
+          {(task.statRewards.mind ?? 0) > 0 && (
+            <span className={`${styles.reward} ${styles.rewardMind}`}>
+              🧠 Mind: +{task.statRewards.mind}
+            </span>
+          )}
+          {(task.statRewards.soul ?? 0) > 0 && (
+            <span className={`${styles.reward} ${styles.rewardSoul}`}>
+              ✨ Soul: +{task.statRewards.soul}
+            </span>
+          )}
+        </div>
+      )}
         </div>
         
         <div className={styles.rightSection} onClick={(e) => e.stopPropagation()}>

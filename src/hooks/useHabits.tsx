@@ -47,7 +47,7 @@ export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
     if (newHabit) {
       setHabits(prev => {
         const updated = [...prev, newHabit];
-        habitService.saveHabits(updated);
+        saveHabitsWithFeedback(updated);
         return updated;
       });
       console.log('Habit created and auto-saved');
@@ -59,7 +59,7 @@ export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
     if (success) {
       setHabits(prev => {
         const updated = prev.map(habit => habit.id === id ? { ...habit, ...updates } : habit);
-        habitService.saveHabits(updated);
+        saveHabitsWithFeedback(updated);
         return updated;
       });
       console.log('Habit updated and auto-saved');
@@ -71,7 +71,7 @@ export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
     if (success) {
       setHabits(prev => {
         const updated = prev.filter(habit => habit.id !== id);
-        habitService.saveHabits(updated);
+        saveHabitsWithFeedback(updated);
         return updated;
       });
       console.log('Habit deleted and auto-saved');
@@ -92,7 +92,7 @@ export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
           }
           return habit;
         });
-        habitService.saveHabits(updated);
+        saveHabitsWithFeedback(updated);
         return updated;
       });
       console.log('Habit completed and auto-saved');
@@ -106,6 +106,7 @@ export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
     updateHabit,
     deleteHabit,
     completeHabit,
+    isSaving, // <-- add this line
   };
 
   return (

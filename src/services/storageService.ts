@@ -1,4 +1,4 @@
-import { Task, Habit, User, Achievement } from '../types';
+import { Task, Habit, User } from '../types';
 
 // Storage keys for different data types
 export const STORAGE_KEYS = {
