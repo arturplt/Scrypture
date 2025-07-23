@@ -8,6 +8,7 @@ import { StatsDisplay } from './components/StatsDisplay';
 import { UserCreation } from './components/UserCreation';
 import { DataManager } from './components/DataManager';
 import { AutoSaveIndicator } from './components/AutoSaveIndicator';
+import { StartHereModal } from './components/StartHereModal';
 
 import styles from './App.module.css';
 import { useRef, useEffect, useState } from 'react';
@@ -112,6 +113,7 @@ function AppContent() {
   const { user, isSaving: userIsSaving } = useUser();
   const { isSaving: habitsIsSaving } = useHabits();
   const [showLevelUp, setShowLevelUp] = useState(false);
+  const [showStartHere, setShowStartHere] = useState(false);
   const lastLevel = useRef<number | null>(null);
 
   useEffect(() => {
@@ -147,12 +149,25 @@ function AppContent() {
       </header>
 
       <main className={styles.main}>
+        <div className={styles.startHereSection}>
+          <button 
+            className={styles.startHereButton}
+            onClick={() => setShowStartHere(true)}
+          >
+            Start Here
+          </button>
+        </div>
         <TaskCounter className={styles.taskCounter} />
         <StatsDisplay />
         <TaskForm />
         <TaskList />
         <DataManager onDataChange={refreshTasks} />
       </main>
+
+      <StartHereModal 
+        isOpen={showStartHere}
+        onClose={() => setShowStartHere(false)}
+      />
 
       <AutoSaveIndicator isSaving={isSaving} lastSaved={lastSaved} />
     </div>

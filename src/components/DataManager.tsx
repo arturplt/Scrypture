@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { userService } from '../services/userService';
 import { categoryService } from '../services/categoryService';
-import { taskService } from '../services/taskService';
 import { useTasks } from '../hooks/useTasks';
 import styles from './DataManager.module.css';
 
