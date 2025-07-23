@@ -18,7 +18,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onOpenModal }) => {
 
   const handleToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.stopPropagation();
-    
+
     if (!task.completed && !isCompleting) {
       setIsCompleting(true);
       // Add a small delay for the animation
@@ -103,69 +103,99 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onOpenModal }) => {
   }
 
   return (
-    <div 
-      className={`${styles.card} ${task.completed ? styles.completed : ''} ${isCompleting ? styles.completing : ''}`} 
+    <div
+      className={`${styles.card} ${task.completed ? styles.completed : ''} ${isCompleting ? styles.completing : ''}`}
       onClick={handleCardClick}
-      style={{
-        // Set XP strip variables dynamically
-        ...(task.statRewards?.xp ? {
-          '--xp-strip-color1': task.statRewards.xp >= 50 ? '#ffe066' : '#90EE90',
-          '--xp-strip-color2': task.statRewards.xp >= 50 ? '#ffd700' : '#32CD32',
-          '--xp-strip-color3': task.statRewards.xp >= 50 ? '#fffbe6' : '#98FB98',
-        } : {}),
-        // Set category strip variables
-        ...(task.statRewards?.body ? { '--body-strip-color': 'var(--color-body)' } : {}),
-        ...(task.statRewards?.mind ? { '--mind-strip-color': 'var(--color-mind)' } : {}),
-        ...(task.statRewards?.soul ? { '--soul-strip-color': 'var(--color-soul)' } : {}),
-      } as React.CSSProperties}
+      style={
+        {
+          // Set XP strip variables dynamically
+          ...(task.statRewards?.xp
+            ? {
+                '--xp-strip-color1':
+                  task.statRewards.xp >= 50 ? '#ffe066' : '#90EE90',
+                '--xp-strip-color2':
+                  task.statRewards.xp >= 50 ? '#ffd700' : '#32CD32',
+                '--xp-strip-color3':
+                  task.statRewards.xp >= 50 ? '#fffbe6' : '#98FB98',
+              }
+            : {}),
+          // Set category strip variables
+          ...(task.statRewards?.body
+            ? { '--body-strip-color': 'var(--color-body)' }
+            : {}),
+          ...(task.statRewards?.mind
+            ? { '--mind-strip-color': 'var(--color-mind)' }
+            : {}),
+          ...(task.statRewards?.soul
+            ? { '--soul-strip-color': 'var(--color-soul)' }
+            : {}),
+        } as React.CSSProperties
+      }
     >
       {/* XP Strip with Category Colors */}
-      {((task.statRewards?.xp && task.statRewards.xp > 0) || 
-        (task.statRewards?.body && task.statRewards.body > 0) || 
-        (task.statRewards?.mind && task.statRewards.mind > 0) || 
+      {((task.statRewards?.xp && task.statRewards.xp > 0) ||
+        (task.statRewards?.body && task.statRewards.body > 0) ||
+        (task.statRewards?.mind && task.statRewards.mind > 0) ||
         (task.statRewards?.soul && task.statRewards.soul > 0)) && (
         <div className={styles.xpStrip}>
           {/* Category color strips with staggered animations */}
           {task.statRewards?.body && task.statRewards.body > 0 && (
-            <div className={styles.categoryStrip} style={{ 
-              background: 'var(--body-strip-color)',
-              animationDelay: '0s'
-            }} />
+            <div
+              className={styles.categoryStrip}
+              style={{
+                background: 'var(--body-strip-color)',
+                animationDelay: '0s',
+              }}
+            />
           )}
           {task.statRewards?.mind && task.statRewards.mind > 0 && (
-            <div className={styles.categoryStrip} style={{ 
-              background: 'var(--mind-strip-color)',
-              animationDelay: '1.33s'
-            }} />
+            <div
+              className={styles.categoryStrip}
+              style={{
+                background: 'var(--mind-strip-color)',
+                animationDelay: '1.33s',
+              }}
+            />
           )}
           {task.statRewards?.soul && task.statRewards.soul > 0 && (
-            <div className={styles.categoryStrip} style={{ 
-              background: 'var(--soul-strip-color)',
-              animationDelay: '2.66s'
-            }} />
+            <div
+              className={styles.categoryStrip}
+              style={{
+                background: 'var(--soul-strip-color)',
+                animationDelay: '2.66s',
+              }}
+            />
           )}
         </div>
       )}
-      
 
       <div className={styles.header}>
         <div className={styles.content}>
-          <h3 className={`${styles.title} ${task.completed ? styles.titleCompleted : ''}`}>
+          <h3
+            className={`${styles.title} ${task.completed ? styles.titleCompleted : ''}`}
+          >
             {task.title}
           </h3>
-          
+
           {task.description && (
-            <p className={`${styles.description} ${task.completed ? styles.descriptionCompleted : ''}`}>
+            <p
+              className={`${styles.description} ${task.completed ? styles.descriptionCompleted : ''}`}
+            >
               {task.description}
             </p>
           )}
-          
+
           <div className={styles.meta}>
-            <span className={`${styles.priority} ${getPriorityColor(task.priority)}`}>
-              {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)} Priority
+            <span
+              className={`${styles.priority} ${getPriorityColor(task.priority)}`}
+            >
+              {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}{' '}
+              Priority
             </span>
             {task.difficulty !== undefined && task.difficulty > 0 && (
-              <span className={`${styles.difficulty} ${getDifficultyColor(task.difficulty)}`}>
+              <span
+                className={`${styles.difficulty} ${getDifficultyColor(task.difficulty)}`}
+              >
                 {task.difficulty}
               </span>
             )}
@@ -175,40 +205,44 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onOpenModal }) => {
           </div>
 
           {/* Rewards details - hidden until hover */}
-      {(
-        task.statRewards &&
-        ((task.statRewards.xp ?? 0) > 0 ||
-          (task.statRewards.body ?? 0) > 0 ||
-          (task.statRewards.mind ?? 0) > 0 ||
-          (task.statRewards.soul ?? 0) > 0)
-      ) && (
-        <div className={styles.rewards}>
-          {(task.statRewards.xp ?? 0) > 0 && (
-            <span className={`${styles.reward} ${styles.rewardXP}`}>
-              XP: +{task.statRewards.xp}
-            </span>
-          )}
-          {(task.statRewards.body ?? 0) > 0 && (
-            <span className={`${styles.reward} ${styles.rewardBody}`}>
-              💪 Body: +{task.statRewards.body}
-            </span>
-          )}
-          {(task.statRewards.mind ?? 0) > 0 && (
-            <span className={`${styles.reward} ${styles.rewardMind}`}>
-              🧠 Mind: +{task.statRewards.mind}
-            </span>
-          )}
-          {(task.statRewards.soul ?? 0) > 0 && (
-            <span className={`${styles.reward} ${styles.rewardSoul}`}>
-              ✨ Soul: +{task.statRewards.soul}
-            </span>
-          )}
+          {task.statRewards &&
+            ((task.statRewards.xp ?? 0) > 0 ||
+              (task.statRewards.body ?? 0) > 0 ||
+              (task.statRewards.mind ?? 0) > 0 ||
+              (task.statRewards.soul ?? 0) > 0) && (
+              <div className={styles.rewards}>
+                {(task.statRewards.xp ?? 0) > 0 && (
+                  <span className={`${styles.reward} ${styles.rewardXP}`}>
+                    XP: +{task.statRewards.xp}
+                  </span>
+                )}
+                {(task.statRewards.body ?? 0) > 0 && (
+                  <span className={`${styles.reward} ${styles.rewardBody}`}>
+                    💪 Body: +{task.statRewards.body}
+                  </span>
+                )}
+                {(task.statRewards.mind ?? 0) > 0 && (
+                  <span className={`${styles.reward} ${styles.rewardMind}`}>
+                    🧠 Mind: +{task.statRewards.mind}
+                  </span>
+                )}
+                {(task.statRewards.soul ?? 0) > 0 && (
+                  <span className={`${styles.reward} ${styles.rewardSoul}`}>
+                    ✨ Soul: +{task.statRewards.soul}
+                  </span>
+                )}
+              </div>
+            )}
         </div>
-      )}
-        </div>
-        
-        <div className={styles.rightSection} onClick={(e) => e.stopPropagation()}>
-          <div className={styles.checkboxContainer} onClick={(e) => e.stopPropagation()}>
+
+        <div
+          className={styles.rightSection}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div
+            className={styles.checkboxContainer}
+            onClick={(e) => e.stopPropagation()}
+          >
             <input
               type="checkbox"
               checked={task.completed}
@@ -216,7 +250,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onOpenModal }) => {
               className={styles.checkbox}
             />
           </div>
-          
+
           <div className={styles.actions} onClick={(e) => e.stopPropagation()}>
             <button
               onClick={handleEdit}
@@ -230,4 +264,4 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onOpenModal }) => {
       </div>
     </div>
   );
-}; 
+};

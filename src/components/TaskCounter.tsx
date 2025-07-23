@@ -8,10 +8,10 @@ interface TaskCounterProps {
 
 export const TaskCounter: React.FC<TaskCounterProps> = ({ className }) => {
   const { tasks } = useTasks();
-  
-  const completedTasks = tasks.filter(task => task.completed).length;
+
+  const completedTasks = tasks.filter((task) => task.completed).length;
   const totalTasks = tasks.length;
-  
+
   return (
     <div className={`${styles.counter} ${className || ''}`}>
       <span className={styles.label}>Tasks Completed</span>
@@ -20,4 +20,4 @@ export const TaskCounter: React.FC<TaskCounterProps> = ({ className }) => {
       </span>
     </div>
   );
-}; 
+};

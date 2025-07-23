@@ -51,8 +51,8 @@ const TestComponent = () => {
       <div data-testid="user-stats">
         Body: {user?.body}, Mind: {user?.mind}, Soul: {user?.soul}
       </div>
-      <button 
-        data-testid="add-stat-rewards" 
+      <button
+        data-testid="add-stat-rewards"
         onClick={() => addStatRewards({ body: 1, mind: 1, xp: 10 })}
       >
         Add Stat Rewards
@@ -70,7 +70,9 @@ describe('useUser - Stat Rewards', () => {
     );
 
     // Check initial stats
-    expect(getByTestId('user-stats')).toHaveTextContent('Body: 0, Mind: 0, Soul: 0');
+    expect(getByTestId('user-stats')).toHaveTextContent(
+      'Body: 0, Mind: 0, Soul: 0'
+    );
 
     // Add stat rewards
     act(() => {
@@ -79,7 +81,9 @@ describe('useUser - Stat Rewards', () => {
 
     // Wait for state updates and check that stats were updated
     await waitFor(() => {
-      expect(getByTestId('user-stats')).toHaveTextContent('Body: 1, Mind: 1, Soul: 0');
+      expect(getByTestId('user-stats')).toHaveTextContent(
+        'Body: 1, Mind: 1, Soul: 0'
+      );
     });
   });
-}); 
+});

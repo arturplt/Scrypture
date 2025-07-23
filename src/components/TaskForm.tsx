@@ -13,19 +13,29 @@ interface TaskFormProps {
   onSave?: () => void;
 }
 
-export const TaskForm: React.FC<TaskFormProps> = ({ taskToEdit, onCancel, onSave }) => {
+export const TaskForm: React.FC<TaskFormProps> = ({
+  taskToEdit,
+  onCancel,
+  onSave,
+}) => {
   const { addTask, updateTask, refreshTasks } = useTasks();
   const [title, setTitle] = useState(taskToEdit?.title || '');
   const [description, setDescription] = useState(taskToEdit?.description || '');
-  const [category, setCategory] = useState<string>(taskToEdit?.category || 'body');
-  const [priority, setPriority] = useState<'low' | 'medium' | 'high'>(taskToEdit?.priority || 'medium');
+  const [category, setCategory] = useState<string>(
+    taskToEdit?.category || 'body'
+  );
+  const [priority, setPriority] = useState<'low' | 'medium' | 'high'>(
+    taskToEdit?.priority || 'medium'
+  );
   const [isExpanded, setIsExpanded] = useState(!!taskToEdit);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
-  const [customCategories, setCustomCategories] = useState<Array<{ 
-    name: string; 
-    icon: string; 
-    color: string;
-  }>>([]);
+  const [customCategories, setCustomCategories] = useState<
+    Array<{
+      name: string;
+      icon: string;
+      color: string;
+    }>
+  >([]);
   const [categoryRefreshTrigger, setCategoryRefreshTrigger] = useState(0);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   // Remove getStatRewards and defaultCategoryRewards
@@ -37,13 +47,15 @@ export const TaskForm: React.FC<TaskFormProps> = ({ taskToEdit, onCancel, onSave
   const isEditMode = !!taskToEdit;
 
   const fibonacciXp = [0, 1, 2, 3, 5, 8, 13, 21, 34, 55];
-  const [difficulty, setDifficulty] = useState<number>(taskToEdit?.difficulty ?? 0);
+  const [difficulty, setDifficulty] = useState<number>(
+    taskToEdit?.difficulty ?? 0
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!title.trim()) return;
-    
+
     const statRewards = {
       body: bodyReward || undefined,
       mind: mindReward || undefined,
@@ -73,7 +85,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ taskToEdit, onCancel, onSave
         difficulty,
       });
     }
-    
+
     // Reset form only if not in edit mode
     if (!isEditMode) {
       setTitle('');
@@ -100,8 +112,12 @@ export const TaskForm: React.FC<TaskFormProps> = ({ taskToEdit, onCancel, onSave
     // Only minimize if clicking outside the entire form and not in edit mode
     const formElement = e.currentTarget.closest('form');
     const relatedTarget = e.relatedTarget as HTMLElement;
-    
-    if (!isEditMode && !title.trim() && (!relatedTarget || !formElement?.contains(relatedTarget))) {
+
+    if (
+      !isEditMode &&
+      !title.trim() &&
+      (!relatedTarget || !formElement?.contains(relatedTarget))
+    ) {
       setIsExpanded(false);
     }
   };
@@ -112,7 +128,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ taskToEdit, onCancel, onSave
       textareaRef.current.style.height = 'auto';
       const scrollHeight = textareaRef.current.scrollHeight;
       const maxHeight = 300; // Match CSS max-height
-      
+
       if (scrollHeight <= maxHeight) {
         textareaRef.current.style.height = scrollHeight + 'px';
         textareaRef.current.style.overflowY = 'hidden';
@@ -146,15 +162,15 @@ export const TaskForm: React.FC<TaskFormProps> = ({ taskToEdit, onCancel, onSave
   const allCategories = categoryService.getAllCategories();
 
   // Remove getStatRewards and defaultCategoryRewards
-  const handleCategoryAdded = (newCategory: { 
-    name: string; 
-    icon: string; 
+  const handleCategoryAdded = (newCategory: {
+    name: string;
+    icon: string;
     color: string;
   }) => {
     console.log('Adding new category:', newCategory);
     const success = categoryService.addCustomCategory(newCategory);
     console.log('Category added successfully:', success);
-    setCategoryRefreshTrigger(prev => prev + 1); // Trigger refresh
+    setCategoryRefreshTrigger((prev) => prev + 1); // Trigger refresh
     if (success) {
       window.dispatchEvent(new Event('customCategoryAdded'));
     }
@@ -173,15 +189,17 @@ export const TaskForm: React.FC<TaskFormProps> = ({ taskToEdit, onCancel, onSave
   const priorityXp = priority === 'high' ? 15 : priority === 'medium' ? 10 : 5;
 
   return (
-    <form 
-      className={`${styles.form} ${isExpanded ? styles.expanded : ''}`} 
-      onSubmit={handleSubmit} 
+    <form
+      className={`${styles.form} ${isExpanded ? styles.expanded : ''}`}
+      onSubmit={handleSubmit}
       noValidate
       onClick={handleFormClick}
     >
       <div className={styles.inputGroup}>
-        <div 
-          className={isExpanded ? styles.titleContainerExpanded : styles.titleContainer}
+        <div
+          className={
+            isExpanded ? styles.titleContainerExpanded : styles.titleContainer
+          }
           onClick={(e) => {
             if (isExpanded) {
               e.stopPropagation();
@@ -222,7 +240,9 @@ export const TaskForm: React.FC<TaskFormProps> = ({ taskToEdit, onCancel, onSave
         <>
           {/* Core Attributes as big selection buttons */}
           <div className={styles.coreAttributesSection}>
-            <label className={styles.coreAttributesLabel}>Core Attributes:</label>
+            <label className={styles.coreAttributesLabel}>
+              Core Attributes:
+            </label>
             <div className={styles.coreAttributesInputs}>
               {/* Show only a golden +1 badge next to the label for each active attribute */}
               {bodyReward > 0 && (
@@ -265,7 +285,9 @@ export const TaskForm: React.FC<TaskFormProps> = ({ taskToEdit, onCancel, onSave
               </button>
             </div>
             <div className={styles.coreAttributeXpLabelWrapper}>
-              <span className={styles.coreAttributeXpLabel}>+{priorityXp + fibonacciXp[difficulty]} XP</span>
+              <span className={styles.coreAttributeXpLabel}>
+                +{priorityXp + fibonacciXp[difficulty]} XP
+              </span>
             </div>
           </div>
           {/* Category selection */}
@@ -291,17 +313,22 @@ export const TaskForm: React.FC<TaskFormProps> = ({ taskToEdit, onCancel, onSave
                   key={option.name}
                   type="button"
                   className={`${styles.categoryButton} ${category === option.name ? styles.categoryButtonActive : ''}`}
-                  style={{ 
+                  style={{
                     borderColor: option.color,
-                    backgroundColor: category === option.name ? option.color : 'transparent',
-                    color: category === option.name ? 'var(--color-bg-primary)' : 'var(--color-text-primary)'
+                    backgroundColor:
+                      category === option.name ? option.color : 'transparent',
+                    color:
+                      category === option.name
+                        ? 'var(--color-bg-primary)'
+                        : 'var(--color-text-primary)',
                   }}
                   onClick={(e) => {
                     e.stopPropagation();
                     setCategory(option.name);
                   }}
                 >
-                  {option.icon} {option.name.charAt(0).toUpperCase() + option.name.slice(1)}
+                  {option.icon}{' '}
+                  {option.name.charAt(0).toUpperCase() + option.name.slice(1)}
                 </button>
               ))}
             </div>
@@ -314,10 +341,14 @@ export const TaskForm: React.FC<TaskFormProps> = ({ taskToEdit, onCancel, onSave
                   key={option.value}
                   type="button"
                   className={`${styles.priorityButton} ${priority === option.value ? styles.priorityButtonActive : ''}`}
-                  style={{ 
+                  style={{
                     borderColor: option.color,
-                    backgroundColor: priority === option.value ? option.color : 'transparent',
-                    color: priority === option.value ? 'var(--color-bg-primary)' : 'var(--color-text-primary)'
+                    backgroundColor:
+                      priority === option.value ? option.color : 'transparent',
+                    color:
+                      priority === option.value
+                        ? 'var(--color-bg-primary)'
+                        : 'var(--color-text-primary)',
                   }}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -335,7 +366,8 @@ export const TaskForm: React.FC<TaskFormProps> = ({ taskToEdit, onCancel, onSave
               <label className={styles.statRewardsLabel}>XP Reward:</label>
               <div className={styles.statRewardsDisplay}>
                 <span className={styles.coreAttributeActiveLabel}>
-                  <span className={styles.statIcon}>⭐</span> <span className={styles.coreAttributePlusOne}>+1</span>
+                  <span className={styles.statIcon}>⭐</span>{' '}
+                  <span className={styles.coreAttributePlusOne}>+1</span>
                 </span>
               </div>
             </div>
@@ -350,7 +382,10 @@ export const TaskForm: React.FC<TaskFormProps> = ({ taskToEdit, onCancel, onSave
                     type="button"
                     className={`${styles.difficultyButton} ${difficulty === idx ? styles.difficultyButtonActive : ''}`}
                     style={{
-                      background: difficulty === idx ? `var(--difficulty-${idx + 1})` : undefined
+                      background:
+                        difficulty === idx
+                          ? `var(--difficulty-${idx + 1})`
+                          : undefined,
                     }}
                     onClick={() => setDifficulty(idx)}
                   >
@@ -360,16 +395,16 @@ export const TaskForm: React.FC<TaskFormProps> = ({ taskToEdit, onCancel, onSave
               </div>
             </div>
           )}
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             className={styles.submitButton}
             onClick={(e) => e.stopPropagation()}
           >
             {isEditMode ? 'Update Task' : 'Add Task'}
           </button>
           {onCancel && (
-            <button 
-              type="button" 
+            <button
+              type="button"
               className={styles.cancelButton}
               onClick={onCancel}
             >
@@ -385,4 +420,4 @@ export const TaskForm: React.FC<TaskFormProps> = ({ taskToEdit, onCancel, onSave
       />
     </form>
   );
-}; 
+};

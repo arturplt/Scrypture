@@ -18,16 +18,16 @@ interface TaskDetailModalProps {
   hasPrevious?: boolean;
 }
 
-export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ 
-  task, 
-  isOpen, 
-  onClose, 
-  onEdit, 
+export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
+  task,
+  isOpen,
+  onClose,
+  onEdit,
   onDelete,
-  onNext, 
-  onPrevious, 
-  hasNext = false, 
-  hasPrevious = false 
+  onNext,
+  onPrevious,
+  hasNext = false,
+  hasPrevious = false,
 }) => {
   // Navigation state for swipe/drag functionality
   const [dragStart, setDragStart] = useState<number | null>(null);
@@ -54,10 +54,10 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
 
   const handleDragEnd = () => {
     if (!dragStart || !dragEnd || !isDragging) return;
-    
+
     // Calculate swipe distance and direction
     const distance = dragStart - dragEnd;
-    const isLeftSwipe = distance > minSwipeDistance;  // Swipe left = next task
+    const isLeftSwipe = distance > minSwipeDistance; // Swipe left = next task
     const isRightSwipe = distance < -minSwipeDistance; // Swipe right = previous task
 
     // Navigate based on swipe direction and availability
@@ -159,16 +159,15 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
     setShowEditForm(true);
   };
 
-
-
   const handleEditCancel = () => {
     setShowEditForm(false);
   };
 
   // Filter out zero rewards, but keep XP first if present
-  const nonZeroRewards = task.statRewards 
-    ? Object.entries(task.statRewards)
-        .filter(([_, value]) => value && value > 0)
+  const nonZeroRewards = task.statRewards
+    ? Object.entries(task.statRewards).filter(
+        ([_, value]) => value && value > 0
+      )
     : [];
   const xpReward = nonZeroRewards.find(([stat]) => stat === 'xp');
   const otherRewards = nonZeroRewards.filter(([stat]) => stat !== 'xp');
@@ -176,160 +175,205 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   return (
     <>
       <Modal isOpen={isOpen} onClose={onClose} title="Task Details">
-      <div 
-        className={styles.container}
-        ref={containerRef}
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
-        onMouseDown={onMouseDown}
-        onMouseMove={onMouseMove}
-        onMouseUp={onMouseUp}
-      >
-        {/* Navigation bar with clickable buttons and swipe indicators */}
-        <div className={styles.navigationBar}>
-          {hasPrevious && (
-            <button 
-              className={`${styles.navIndicator} ${styles.navPrevious}`}
-              onClick={onPrevious}
-              aria-label="Go to previous task"
-            >
-              ← Previous
-            </button>
-          )}
-          {hasNext && (
-            <button 
-              className={`${styles.navIndicator} ${styles.navNext}`}
-              onClick={onNext}
-              aria-label="Go to next task"
-            >
-              Next →
-            </button>
-          )}
-        </div>
-        <div className={styles.header}>
-          <div className={styles.titleSection}>
-            <h3 className={`${styles.title} ${task.completed ? styles.completed : ''}`}>
-              {task.title}
-            </h3>
-            {task.category && (
-              <span className={styles.category}>
-                {getCategoryIcon(task.category)} {task.category.charAt(0).toUpperCase() + task.category.slice(1)}
-              </span>
+        <div
+          className={styles.container}
+          ref={containerRef}
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+          onMouseDown={onMouseDown}
+          onMouseMove={onMouseMove}
+          onMouseUp={onMouseUp}
+        >
+          {/* Navigation bar with clickable buttons and swipe indicators */}
+          <div className={styles.navigationBar}>
+            {hasPrevious && (
+              <button
+                className={`${styles.navIndicator} ${styles.navPrevious}`}
+                onClick={onPrevious}
+                aria-label="Go to previous task"
+              >
+                ← Previous
+              </button>
+            )}
+            {hasNext && (
+              <button
+                className={`${styles.navIndicator} ${styles.navNext}`}
+                onClick={onNext}
+                aria-label="Go to next task"
+              >
+                Next →
+              </button>
             )}
           </div>
-          
-          <div className={styles.headerActions}>
-            <div className={styles.status}>
-              {task.completed ? (
-                <span className={styles.completedStatus}>✓ Completed</span>
-              ) : (
-                <span className={styles.pendingStatus}>⏳ Pending</span>
+          <div className={styles.header}>
+            <div className={styles.titleSection}>
+              <h3
+                className={`${styles.title} ${task.completed ? styles.completed : ''}`}
+              >
+                {task.title}
+              </h3>
+              {task.category && (
+                <span className={styles.category}>
+                  {getCategoryIcon(task.category)}{' '}
+                  {task.category.charAt(0).toUpperCase() +
+                    task.category.slice(1)}
+                </span>
               )}
             </div>
-            
-                  <div className={styles.actionButtons}>
-        <button
-          onClick={handleEdit}
-          className={styles.editButton}
-          aria-label="Edit task"
-        >
-          🖍
-        </button>
-      </div>
-          </div>
-        </div>
 
-        {task.description && (
-          <div className={styles.descriptionSection}>
-            <h4 className={styles.sectionTitle}>Description</h4>
-            <div className={`${styles.description} ${task.completed ? styles.completed : ''}`}>
-              {task.description}
+            <div className={styles.headerActions}>
+              <div className={styles.status}>
+                {task.completed ? (
+                  <span className={styles.completedStatus}>✓ Completed</span>
+                ) : (
+                  <span className={styles.pendingStatus}>⏳ Pending</span>
+                )}
+              </div>
+
+              <div className={styles.actionButtons}>
+                <button
+                  onClick={handleEdit}
+                  className={styles.editButton}
+                  aria-label="Edit task"
+                >
+                  🖍
+                </button>
+              </div>
             </div>
           </div>
-        )}
 
-        <div className={styles.details}>
-          <div className={styles.detailRow}>
-            <span className={styles.detailLabel}>Priority:</span>
-            <span className={`${styles.detailValue} ${getPriorityColor(task.priority)}`}>
-              {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
-            </span>
-          </div>
-
-          <div className={styles.detailRow}>
-            <span className={styles.detailLabel}>Created:</span>
-            <span className={styles.detailValue}>
-              {formatRelativeTime(new Date(task.createdAt))}
-            </span>
-          </div>
-
-          {task.completed && (
-            <div className={styles.detailRow}>
-              <span className={styles.detailLabel}>Status:</span>
-              <span className={styles.detailValue}>
-                Completed
-              </span>
+          {task.description && (
+            <div className={styles.descriptionSection}>
+              <h4 className={styles.sectionTitle}>Description</h4>
+              <div
+                className={`${styles.description} ${task.completed ? styles.completed : ''}`}
+              >
+                {task.description}
+              </div>
             </div>
           )}
 
-          {task.updatedAt && (
+          <div className={styles.details}>
             <div className={styles.detailRow}>
-              <span className={styles.detailLabel}>Last Updated:</span>
-              <span className={styles.detailValue}>
-                {formatRelativeTime(new Date(task.updatedAt))}
+              <span className={styles.detailLabel}>Priority:</span>
+              <span
+                className={`${styles.detailValue} ${getPriorityColor(task.priority)}`}
+              >
+                {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
               </span>
             </div>
-          )}
-        </div>
 
-        <div className={styles.rewardsSection}>
-          <h4 className={styles.sectionTitle}>Rewards</h4>
-          <div className={styles.rewards}>
-            {task.statRewards?.xp > 0 && (
-              <span className={styles.reward} style={{ color: 'var(--color-bg-primary)', background: 'var(--color-accent-gold)', borderColor: 'var(--color-accent-gold)', fontWeight: 'bold' }}>
-                XP: +{task.statRewards?.xp}
+            <div className={styles.detailRow}>
+              <span className={styles.detailLabel}>Created:</span>
+              <span className={styles.detailValue}>
+                {formatRelativeTime(new Date(task.createdAt))}
               </span>
+            </div>
+
+            {task.completed && (
+              <div className={styles.detailRow}>
+                <span className={styles.detailLabel}>Status:</span>
+                <span className={styles.detailValue}>Completed</span>
+              </div>
             )}
-            {task.statRewards?.body > 0 && (
-              <span className={styles.reward} style={{ color: 'var(--color-bg-primary)', background: 'var(--color-body)', borderColor: 'var(--color-body)' }}>
-                💪 Body: +{task.statRewards?.body}
-              </span>
-            )}
-            {task.statRewards?.mind > 0 && (
-              <span className={styles.reward} style={{ color: 'var(--color-bg-primary)', background: 'var(--color-mind)', borderColor: 'var(--color-mind)' }}>
-                🧠 Mind: +{task.statRewards?.mind}
-              </span>
-            )}
-            {task.statRewards?.soul > 0 && (
-              <span className={styles.reward} style={{ color: 'var(--color-bg-primary)', background: 'var(--color-soul)', borderColor: 'var(--color-soul)' }}>
-                ✨ Soul: +{task.statRewards?.soul}
-              </span>
-            )}
-            {(!task.statRewards || (!task.statRewards.xp && !task.statRewards.body && !task.statRewards.mind && !task.statRewards.soul)) && (
-              <span className={styles.reward} style={{ background: 'var(--color-bg-secondary)', color: 'var(--color-text-secondary)' }}>
-                No rewards for this task.
-              </span>
+
+            {task.updatedAt && (
+              <div className={styles.detailRow}>
+                <span className={styles.detailLabel}>Last Updated:</span>
+                <span className={styles.detailValue}>
+                  {formatRelativeTime(new Date(task.updatedAt))}
+                </span>
+              </div>
             )}
           </div>
-        </div>
-      </div>
-    </Modal>
 
-    {/* Custom Confirmation Modal for Delete */}
-    
-
-    {/* Separate Edit Modal */}
-    {showEditForm && task && (
-      <Modal isOpen={showEditForm} onClose={handleEditCancel} title="Edit Task">
-        <div className={styles.editModalContent}>
-          <TaskEditForm
-            task={task}
-            onCancel={handleEditCancel}
-          />
+          <div className={styles.rewardsSection}>
+            <h4 className={styles.sectionTitle}>Rewards</h4>
+            <div className={styles.rewards}>
+              {task.statRewards?.xp > 0 && (
+                <span
+                  className={styles.reward}
+                  style={{
+                    color: 'var(--color-bg-primary)',
+                    background: 'var(--color-accent-gold)',
+                    borderColor: 'var(--color-accent-gold)',
+                    fontWeight: 'bold',
+                  }}
+                >
+                  XP: +{task.statRewards?.xp}
+                </span>
+              )}
+              {task.statRewards?.body > 0 && (
+                <span
+                  className={styles.reward}
+                  style={{
+                    color: 'var(--color-bg-primary)',
+                    background: 'var(--color-body)',
+                    borderColor: 'var(--color-body)',
+                  }}
+                >
+                  💪 Body: +{task.statRewards?.body}
+                </span>
+              )}
+              {task.statRewards?.mind > 0 && (
+                <span
+                  className={styles.reward}
+                  style={{
+                    color: 'var(--color-bg-primary)',
+                    background: 'var(--color-mind)',
+                    borderColor: 'var(--color-mind)',
+                  }}
+                >
+                  🧠 Mind: +{task.statRewards?.mind}
+                </span>
+              )}
+              {task.statRewards?.soul > 0 && (
+                <span
+                  className={styles.reward}
+                  style={{
+                    color: 'var(--color-bg-primary)',
+                    background: 'var(--color-soul)',
+                    borderColor: 'var(--color-soul)',
+                  }}
+                >
+                  ✨ Soul: +{task.statRewards?.soul}
+                </span>
+              )}
+              {(!task.statRewards ||
+                (!task.statRewards.xp &&
+                  !task.statRewards.body &&
+                  !task.statRewards.mind &&
+                  !task.statRewards.soul)) && (
+                <span
+                  className={styles.reward}
+                  style={{
+                    background: 'var(--color-bg-secondary)',
+                    color: 'var(--color-text-secondary)',
+                  }}
+                >
+                  No rewards for this task.
+                </span>
+              )}
+            </div>
+          </div>
         </div>
       </Modal>
-    )}
-  </>
+
+      {/* Custom Confirmation Modal for Delete */}
+
+      {/* Separate Edit Modal */}
+      {showEditForm && task && (
+        <Modal
+          isOpen={showEditForm}
+          onClose={handleEditCancel}
+          title="Edit Task"
+        >
+          <div className={styles.editModalContent}>
+            <TaskEditForm task={task} onCancel={handleEditCancel} />
+          </div>
+        </Modal>
+      )}
+    </>
   );
-}; 
+};

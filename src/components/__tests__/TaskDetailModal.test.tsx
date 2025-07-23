@@ -6,24 +6,28 @@ import { Task } from '../../types';
 
 // Mock the Modal component
 jest.mock('../Modal', () => ({
-  Modal: ({ children, isOpen, onClose, title }: { 
-    children: React.ReactNode; 
-    isOpen: boolean; 
-    onClose: () => void; 
-    title: string; 
-  }) => (
+  Modal: ({
+    children,
+    isOpen,
+    onClose,
+    title,
+  }: {
+    children: React.ReactNode;
+    isOpen: boolean;
+    onClose: () => void;
+    title: string;
+  }) =>
     isOpen ? (
       <div data-testid="modal" role="dialog" aria-modal="true">
         <div data-testid="modal-header">
           <h2>{title}</h2>
-          <button onClick={onClose} aria-label="Close modal">×</button>
+          <button onClick={onClose} aria-label="Close modal">
+            ×
+          </button>
         </div>
-        <div data-testid="modal-content">
-          {children}
-        </div>
+        <div data-testid="modal-content">{children}</div>
       </div>
-    ) : null
-  ),
+    ) : null,
 }));
 
 jest.mock('../../utils/dateUtils', () => ({
@@ -119,21 +123,23 @@ describe('TaskDetailModal', () => {
 
   it('displays task details correctly', () => {
     render(<TaskDetailModal {...defaultProps} />);
-    
+
     // Check task title
     expect(screen.getByText('Test Task')).toBeInTheDocument();
-    
+
     // Check description
     expect(screen.getByText('Description')).toBeInTheDocument();
-    expect(screen.getByText('This is a test task description')).toBeInTheDocument();
-    
+    expect(
+      screen.getByText('This is a test task description')
+    ).toBeInTheDocument();
+
     // Check priority
     expect(screen.getByText('Priority:')).toBeInTheDocument();
     expect(screen.getByText('High')).toBeInTheDocument();
-    
+
     // Check category
     expect(screen.getByText('🏠 Home')).toBeInTheDocument();
-    
+
     // Check status
     expect(screen.getByText('⏳ Pending')).toBeInTheDocument();
   });
@@ -141,26 +147,28 @@ describe('TaskDetailModal', () => {
   it('displays completed task correctly', () => {
     const completedTask = { ...mockTask, completed: true };
     render(<TaskDetailModal {...defaultProps} task={completedTask} />);
-    
+
     // Check completed status
     expect(screen.getByText('✓ Completed')).toBeInTheDocument();
   });
 
   it('handles edit button click', () => {
     render(<TaskDetailModal {...defaultProps} />);
-    
+
     const editButton = screen.getByLabelText('Edit task');
     fireEvent.click(editButton);
-    
+
     // Should show the edit form
     expect(screen.getByTestId('task-edit-form')).toBeInTheDocument();
   });
 
   it('handles navigation when no previous/next tasks', () => {
-    render(<TaskDetailModal {...defaultProps} hasNext={false} hasPrevious={false} />);
-    
+    render(
+      <TaskDetailModal {...defaultProps} hasNext={false} hasPrevious={false} />
+    );
+
     // Navigation buttons should not be present
     expect(screen.queryByText('← Previous')).not.toBeInTheDocument();
     expect(screen.queryByText('Next →')).not.toBeInTheDocument();
   });
-}); 
+});

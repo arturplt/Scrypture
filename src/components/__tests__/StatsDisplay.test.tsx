@@ -6,7 +6,9 @@ import { UserProvider } from '../../hooks/useUser';
 // Mock the useUser hook
 jest.mock('../../hooks/useUser', () => ({
   useUser: jest.fn(),
-  UserProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>
+  UserProvider: ({ children }: { children: React.ReactNode }) => (
+    <div>{children}</div>
+  ),
 }));
 
 const mockUseUser = require('../../hooks/useUser').useUser;
@@ -31,7 +33,7 @@ describe('StatsDisplay', () => {
       soul: 30,
       achievements: [],
       createdAt: new Date('2024-01-01'),
-      updatedAt: new Date('2024-01-01')
+      updatedAt: new Date('2024-01-01'),
     };
 
     mockUseUser.mockReturnValue({ user: mockUser });
@@ -56,7 +58,7 @@ describe('StatsDisplay', () => {
       soul: 30,
       achievements: [],
       createdAt: new Date('2024-01-01'),
-      updatedAt: new Date('2024-01-01')
+      updatedAt: new Date('2024-01-01'),
     };
 
     mockUseUser.mockReturnValue({ user: mockUser });
@@ -81,7 +83,7 @@ describe('StatsDisplay', () => {
       soul: 30,
       achievements: [],
       createdAt: new Date('2024-01-01'),
-      updatedAt: new Date('2024-01-01')
+      updatedAt: new Date('2024-01-01'),
     };
 
     mockUseUser.mockReturnValue({ user: mockUser });
@@ -104,7 +106,7 @@ describe('StatsDisplay', () => {
       soul: 30,
       achievements: [],
       createdAt: new Date('2024-01-01'),
-      updatedAt: new Date('2024-01-01')
+      updatedAt: new Date('2024-01-01'),
     };
 
     mockUseUser.mockReturnValue({ user: mockUser });
@@ -112,7 +114,9 @@ describe('StatsDisplay', () => {
     renderWithProvider(<StatsDisplay />);
 
     // Check that progress containers exist
-    const progressContainers = document.querySelectorAll('[class*="progressContainer"]'); 
+    const progressContainers = document.querySelectorAll(
+      '[class*="progressContainer"]'
+    );
     // Alternative: check for the stat cards which contain the progress containers
     const statCards = screen.getAllByText(/Body|Mind|Soul/);
     expect(statCards.length).toBe(3); // Body, Mind, Soul
@@ -129,7 +133,7 @@ describe('StatsDisplay', () => {
       soul: 30,
       achievements: [],
       createdAt: new Date('2024-01-01'),
-      updatedAt: new Date('2024-01-01')
+      updatedAt: new Date('2024-01-01'),
     };
 
     mockUseUser.mockReturnValue({ user: mockUser });
@@ -148,6 +152,8 @@ describe('StatsDisplay', () => {
     renderWithProvider(<StatsDisplay />);
 
     expect(screen.getByText('Core Attributes')).toBeInTheDocument();
-    expect(screen.getByText('Create a user to see your stats')).toBeInTheDocument();
+    expect(
+      screen.getByText('Create a user to see your stats')
+    ).toBeInTheDocument();
   });
-}); 
+});

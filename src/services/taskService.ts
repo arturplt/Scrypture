@@ -1,7 +1,6 @@
 import { Task } from '../types';
 import { storageService } from './storageService';
 
-
 export const taskService = {
   getTasks(): Task[] {
     return storageService.getTasks();
@@ -24,11 +23,11 @@ export const taskService = {
       // statRewards should be provided explicitly in taskData, or default to undefined
       statRewards: taskData.statRewards,
     };
-    
+
     const tasks = this.getTasks();
     tasks.push(newTask);
     this.saveTasks(tasks);
-    
+
     return newTask;
   },
 
@@ -40,4 +39,4 @@ export const taskService = {
     // Fallback for test environments
     return 'task_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
   },
-}; 
+};

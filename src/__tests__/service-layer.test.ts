@@ -21,7 +21,9 @@ Object.defineProperty(window, 'localStorage', {
 // Mock crypto.randomUUID
 Object.defineProperty(global, 'crypto', {
   value: {
-    randomUUID: jest.fn(() => 'mock-uuid-' + Math.random().toString(36).substr(2, 9)),
+    randomUUID: jest.fn(
+      () => 'mock-uuid-' + Math.random().toString(36).substr(2, 9)
+    ),
   },
 });
 
@@ -39,8 +41,6 @@ describe('Service Layer Integration Tests', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     localStorageMock.clear();
-    
-
   });
 
   describe('Storage Service - Core Functionality', () => {
@@ -67,7 +67,7 @@ describe('Service Layer Integration Tests', () => {
 
       localStorageMock.getItem.mockReturnValue(JSON.stringify(tasks));
       const retrievedTasks = storageService.getTasks();
-      
+
       expect(retrievedTasks).toHaveLength(1);
       expect(retrievedTasks[0].id).toBe('1');
     });
@@ -107,8 +107,8 @@ describe('Service Layer Integration Tests', () => {
           completed: false,
           createdAt: new Date('2024-01-01'),
           updatedAt: new Date('2024-01-01'),
-          statRewards: { body: 1, mind: 0, soul: 0, xp: 20 }
-        }
+          statRewards: { body: 1, mind: 0, soul: 0, xp: 20 },
+        },
       ];
 
       // Mock the storage service to return true
@@ -129,8 +129,8 @@ describe('Service Layer Integration Tests', () => {
           completed: false,
           createdAt: new Date('2024-01-01'),
           updatedAt: new Date('2024-01-01'),
-          statRewards: { body: 1, mind: 0, soul: 0, xp: 20 }
-        }
+          statRewards: { body: 1, mind: 0, soul: 0, xp: 20 },
+        },
       ];
 
       // Mock the storage service to return false (error case)
@@ -150,7 +150,7 @@ describe('Service Layer Integration Tests', () => {
       };
 
       const newHabit = habitService.addHabit(habitData);
-      
+
       expect(newHabit.id).toBeDefined();
       expect(newHabit.name).toBe('Daily Exercise');
       expect(newHabit.streak).toBe(0);
@@ -175,7 +175,7 @@ describe('Service Layer Integration Tests', () => {
       jest.spyOn(habitService, 'saveHabits').mockReturnValue(true);
 
       const result = habitService.completeHabit('1');
-      
+
       expect(result).toBe(true);
     });
   });
@@ -199,7 +199,7 @@ describe('Service Layer Integration Tests', () => {
       jest.spyOn(userService, 'saveUser').mockReturnValue(true);
 
       const result = userService.addExperience(100);
-      
+
       expect(result).toBe(true);
     });
 
@@ -221,7 +221,7 @@ describe('Service Layer Integration Tests', () => {
       jest.spyOn(userService, 'saveUser').mockReturnValue(true);
 
       const result = userService.unlockAchievement('first_task');
-      
+
       expect(result).toBe(true);
     });
   });
@@ -236,7 +236,7 @@ describe('Service Layer Integration Tests', () => {
 
       localStorageMock.getItem.mockReturnValue(JSON.stringify([invalidTask]));
       const retrievedTasks = storageService.getTasks();
-      
+
       // Should filter out invalid tasks
       expect(retrievedTasks).toEqual([]);
     });
@@ -244,7 +244,7 @@ describe('Service Layer Integration Tests', () => {
     test('should handle corrupted data gracefully', () => {
       localStorageMock.getItem.mockReturnValue('invalid json');
       const retrievedTasks = storageService.getTasks();
-      
+
       expect(retrievedTasks).toEqual([]);
     });
   });
@@ -260,7 +260,7 @@ describe('Service Layer Integration Tests', () => {
         completed: false,
         createdAt: new Date('2024-01-01'),
         updatedAt: new Date('2024-01-01'),
-        statRewards: { body: 1, mind: 0, soul: 0, xp: 20 }
+        statRewards: { body: 1, mind: 0, soul: 0, xp: 20 },
       }));
 
       // Mock the storage service to return true
@@ -281,8 +281,8 @@ describe('Service Layer Integration Tests', () => {
           completed: false,
           createdAt: new Date('2024-01-01'),
           updatedAt: new Date('2024-01-01'),
-          statRewards: { body: 1, mind: 0, soul: 0, xp: 20 }
-        }
+          statRewards: { body: 1, mind: 0, soul: 0, xp: 20 },
+        },
       ];
 
       // Mock the storage service to return true
@@ -291,7 +291,7 @@ describe('Service Layer Integration Tests', () => {
       const results = [
         taskService.saveTasks(tasks),
         taskService.saveTasks(tasks),
-        taskService.saveTasks(tasks)
+        taskService.saveTasks(tasks),
       ];
 
       expect(results).toEqual([true, true, true]);
@@ -312,7 +312,7 @@ describe('Service Layer Integration Tests', () => {
 
       const backup = storageService.createBackup();
       const restoreResult = storageService.restoreFromBackup(backup);
-      
+
       expect(backup).toEqual(mockData);
       expect(restoreResult).toBe(true);
     });
@@ -331,7 +331,7 @@ describe('Service Layer Integration Tests', () => {
           completed: false,
           createdAt: new Date('2024-01-01'),
           updatedAt: new Date('2024-01-01'),
-          statRewards: { body: 1, mind: 0, soul: 0, xp: 20 }
+          statRewards: { body: 1, mind: 0, soul: 0, xp: 20 },
         })),
         user: {
           id: '1',
@@ -345,11 +345,11 @@ describe('Service Layer Integration Tests', () => {
             id: `achievement-${i}`,
             name: `Achievement ${i}`,
             description: `Description for achievement ${i}`.repeat(5),
-            unlockedAt: new Date('2024-01-01')
+            unlockedAt: new Date('2024-01-01'),
           })),
           createdAt: new Date('2024-01-01'),
-          updatedAt: new Date('2024-01-01')
-        }
+          updatedAt: new Date('2024-01-01'),
+        },
       };
 
       // Mock localStorage to return substantial data
@@ -370,4 +370,4 @@ describe('Service Layer Integration Tests', () => {
       expect(stats.percentage).toBeGreaterThan(0);
     });
   });
-}); 
+});

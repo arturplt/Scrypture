@@ -23,7 +23,7 @@ export const userService = {
       createdAt: new Date(),
       updatedAt: new Date(),
     };
-    
+
     this.saveUser(newUser);
     return newUser;
   },
@@ -39,21 +39,21 @@ export const userService = {
 
   updateUser(updates: Partial<User>): boolean {
     const user = this.getUser();
-    
+
     if (!user) return false;
-    
+
     const updatedUser = { ...user, ...updates };
     return this.saveUser(updatedUser);
   },
 
   addExperience(amount: number): boolean {
     const user = this.getUser();
-    
+
     if (!user) return false;
 
     const newExperience = user.experience + amount;
     const newLevel = Math.floor(newExperience / 100) + 1; // Simple level calculation
-    
+
     const updates: Partial<User> = {
       experience: newExperience,
       level: newLevel,
@@ -63,7 +63,12 @@ export const userService = {
     return this.updateUser(updates);
   },
 
-  addStatRewards(rewards: { body?: number; mind?: number; soul?: number; xp?: number }): boolean {
+  addStatRewards(rewards: {
+    body?: number;
+    mind?: number;
+    soul?: number;
+    xp?: number;
+  }): boolean {
     const user = this.getUser();
     if (!user) return false;
 
@@ -77,7 +82,12 @@ export const userService = {
     return this.updateUser(updates);
   },
 
-  removeStatRewards(rewards: { body?: number; mind?: number; soul?: number; xp?: number }): boolean {
+  removeStatRewards(rewards: {
+    body?: number;
+    mind?: number;
+    soul?: number;
+    xp?: number;
+  }): boolean {
     const user = this.getUser();
     if (!user) return false;
 
@@ -93,12 +103,12 @@ export const userService = {
 
   removeExperience(amount: number): boolean {
     const user = this.getUser();
-    
+
     if (!user) return false;
 
     const newExperience = Math.max(0, user.experience - amount);
     const newLevel = Math.floor(newExperience / 100) + 1; // Simple level calculation
-    
+
     const updates: Partial<User> = {
       experience: newExperience,
       level: newLevel,
@@ -113,7 +123,9 @@ export const userService = {
     if (!user) return false;
 
     // Check if achievement is already unlocked
-    const alreadyUnlocked = user.achievements.some(a => a.id === achievementId);
+    const alreadyUnlocked = user.achievements.some(
+      (a) => a.id === achievementId
+    );
     if (alreadyUnlocked) return false;
 
     // In a real app, you'd fetch achievement data from a database
@@ -178,4 +190,4 @@ export const userService = {
   getBackup(): Record<string, any> | null {
     return storageService.getBackup();
   },
-}; 
+};

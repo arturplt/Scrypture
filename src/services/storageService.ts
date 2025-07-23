@@ -11,39 +11,45 @@ export const STORAGE_KEYS = {
 } as const;
 
 // Data validation schemas
-const validateTask = (task: any): task is Task => {
+const validateTask = (task: unknown): task is Task => {
   return (
-    typeof task.id === 'string' &&
-    typeof task.title === 'string' &&
-    typeof task.completed === 'boolean' &&
-    task.createdAt instanceof Date &&
-    task.updatedAt instanceof Date &&
-    ['low', 'medium', 'high'].includes(task.priority)
+    typeof task === 'object' &&
+    task !== null &&
+    typeof (task as Task).id === 'string' &&
+    typeof (task as Task).title === 'string' &&
+    typeof (task as Task).completed === 'boolean' &&
+    (task as Task).createdAt instanceof Date &&
+    (task as Task).updatedAt instanceof Date &&
+    ['low', 'medium', 'high'].includes((task as Task).priority)
   );
 };
 
-const validateHabit = (habit: any): habit is Habit => {
+const validateHabit = (habit: unknown): habit is Habit => {
   return (
-    typeof habit.id === 'string' &&
-    typeof habit.name === 'string' &&
-    typeof habit.streak === 'number' &&
-    habit.createdAt instanceof Date &&
-    ['daily', 'weekly', 'monthly'].includes(habit.targetFrequency)
+    typeof habit === 'object' &&
+    habit !== null &&
+    typeof (habit as Habit).id === 'string' &&
+    typeof (habit as Habit).name === 'string' &&
+    typeof (habit as Habit).streak === 'number' &&
+    (habit as Habit).createdAt instanceof Date &&
+    ['daily', 'weekly', 'monthly'].includes((habit as Habit).targetFrequency)
   );
 };
 
-const validateUser = (user: any): user is User => {
+const validateUser = (user: unknown): user is User => {
   return (
-    typeof user.id === 'string' &&
-    typeof user.name === 'string' &&
-    typeof user.level === 'number' &&
-    typeof user.experience === 'number' &&
-    typeof user.body === 'number' &&
-    typeof user.mind === 'number' &&
-    typeof user.soul === 'number' &&
-    Array.isArray(user.achievements) &&
-    user.createdAt instanceof Date &&
-    user.updatedAt instanceof Date
+    typeof user === 'object' &&
+    user !== null &&
+    typeof (user as User).id === 'string' &&
+    typeof (user as User).name === 'string' &&
+    typeof (user as User).level === 'number' &&
+    typeof (user as User).experience === 'number' &&
+    typeof (user as User).body === 'number' &&
+    typeof (user as User).mind === 'number' &&
+    typeof (user as User).soul === 'number' &&
+    Array.isArray((user as User).achievements) &&
+    (user as User).createdAt instanceof Date &&
+    (user as User).updatedAt instanceof Date
   );
 };
 
@@ -83,7 +89,7 @@ export class StorageService {
     try {
       const item = localStorage.getItem(key);
       if (!item) return null;
-      
+
       const parsed = JSON.parse(item);
       return parsed;
     } catch (error) {
@@ -124,14 +130,14 @@ export class StorageService {
 
   // Task-specific methods
   getTasks(): Task[] {
-    const tasks = this.getItem<any[]>(STORAGE_KEYS.TASKS);
+    const tasks = this.getItem<unknown[]>(STORAGE_KEYS.TASKS);
     if (!tasks) return [];
 
     return tasks
-      .map(task => ({
-        ...task,
-        createdAt: new Date(task.createdAt),
-        updatedAt: new Date(task.updatedAt),
+      .map((task) => ({
+        ...(task as Record<string, unknown>),
+        createdAt: new Date((task as any).createdAt),
+        updatedAt: new Date((task as any).updatedAt),
       }))
       .filter(validateTask);
   }
@@ -142,14 +148,16 @@ export class StorageService {
 
   // Habit-specific methods
   getHabits(): Habit[] {
-    const habits = this.getItem<any[]>(STORAGE_KEYS.HABITS);
+    const habits = this.getItem<unknown[]>(STORAGE_KEYS.HABITS);
     if (!habits) return [];
 
     return habits
-      .map(habit => ({
-        ...habit,
-        createdAt: new Date(habit.createdAt),
-        lastCompleted: habit.lastCompleted ? new Date(habit.lastCompleted) : undefined,
+      .map((habit) => ({
+        ...(habit as Record<string, unknown>),
+        createdAt: new Date((habit as any).createdAt),
+        lastCompleted: (habit as any).lastCompleted
+          ? new Date((habit as any).lastCompleted)
+          : undefined,
       }))
       .filter(validateHabit);
   }
@@ -160,20 +168,22 @@ export class StorageService {
 
   // User-specific methods
   getUser(): User | null {
-    const user = this.getItem<any>(STORAGE_KEYS.USER);
-    
+    const user = this.getItem<unknown>(STORAGE_KEYS.USER);
+
     if (!user) return null;
 
     const processedUser = {
-      ...user,
-      createdAt: new Date(user.createdAt),
-      updatedAt: new Date(user.updatedAt),
-      achievements: user.achievements.map((achievement: any) => ({
+      ...(user as Record<string, unknown>),
+      createdAt: new Date((user as any).createdAt),
+      updatedAt: new Date((user as any).updatedAt),
+      achievements: (user as any).achievements.map((achievement: any) => ({
         ...achievement,
-        unlockedAt: achievement.unlockedAt ? new Date(achievement.unlockedAt) : undefined,
+        unlockedAt: achievement.unlockedAt
+          ? new Date(achievement.unlockedAt)
+          : undefined,
       })),
     };
-    
+
     return validateUser(processedUser) ? processedUser : null;
   }
 
@@ -182,11 +192,11 @@ export class StorageService {
   }
 
   // Settings methods
-  getSettings(): Record<string, any> {
-    return this.getItem<Record<string, any>>(STORAGE_KEYS.SETTINGS) || {};
+  getSettings(): Record<string, unknown> {
+    return this.getItem<Record<string, unknown>>(STORAGE_KEYS.SETTINGS) || {};
   }
 
-  saveSettings(settings: Record<string, any>): boolean {
+  saveSettings(settings: Record<string, unknown>): boolean {
     return this.setItem(STORAGE_KEYS.SETTINGS, settings);
   }
 
@@ -204,7 +214,7 @@ export class StorageService {
   }
 
   // Backup and restore functionality
-  createBackup(): Record<string, any> {
+  createBackup(): Record<string, unknown> {
     return {
       tasks: this.getTasks(),
       habits: this.getHabits(),
@@ -216,21 +226,34 @@ export class StorageService {
     };
   }
 
-  saveBackup(backup: Record<string, any>): boolean {
+  saveBackup(backup: Record<string, unknown>): boolean {
     return this.setItem(STORAGE_KEYS.BACKUP, backup);
   }
 
-  getBackup(): Record<string, any> | null {
-    return this.getItem<Record<string, any>>(STORAGE_KEYS.BACKUP);
+  getBackup(): Record<string, unknown> | null {
+    return this.getItem<Record<string, unknown>>(STORAGE_KEYS.BACKUP);
   }
 
-  restoreFromBackup(backup: Record<string, any>): boolean {
+  restoreFromBackup(backup: Record<string, unknown>): boolean {
     try {
-      if (backup.tasks) this.saveTasks(backup.tasks);
-      if (backup.habits) this.saveHabits(backup.habits);
-      if (backup.user) this.saveUser(backup.user);
-      if (backup.settings) this.saveSettings(backup.settings);
-      if (backup.customCategories) this.setGenericItem('scrypture_custom_categories', backup.customCategories);
+      if (backup.tasks && Array.isArray(backup.tasks)) {
+        this.saveTasks(backup.tasks as Task[]);
+      }
+      if (backup.habits && Array.isArray(backup.habits)) {
+        this.saveHabits(backup.habits as Habit[]);
+      }
+      if (backup.user && typeof backup.user === 'object') {
+        this.saveUser(backup.user as User);
+      }
+      if (backup.settings && typeof backup.settings === 'object') {
+        this.saveSettings(backup.settings as Record<string, unknown>);
+      }
+      if (backup.customCategories) {
+        this.setGenericItem(
+          'scrypture_custom_categories',
+          backup.customCategories
+        );
+      }
       return true;
     } catch (error) {
       console.error('Error restoring from backup:', error);
@@ -258,13 +281,13 @@ export class StorageService {
   clearAllData(): boolean {
     const keys = Object.values(STORAGE_KEYS);
     let success = true;
-    
-    keys.forEach(key => {
+
+    keys.forEach((key) => {
       if (!this.removeItem(key)) {
         success = false;
       }
     });
-    
+
     return success;
   }
 
@@ -276,7 +299,7 @@ export class StorageService {
 
     try {
       let totalSize = 0;
-      Object.values(STORAGE_KEYS).forEach(key => {
+      Object.values(STORAGE_KEYS).forEach((key) => {
         const item = localStorage.getItem(key);
         if (typeof item === 'string' && typeof item.length === 'number') {
           totalSize += item.length;
@@ -299,4 +322,4 @@ export class StorageService {
 }
 
 // Export singleton instance
-export const storageService = StorageService.getInstance(); 
+export const storageService = StorageService.getInstance();

@@ -9,16 +9,20 @@ import { categoryService } from '../services/categoryService';
 
 export const TaskList: React.FC = () => {
   const { tasks, deleteTask, refreshTasks } = useTasks();
-  const [selectedTaskIndex, setSelectedTaskIndex] = useState<number | null>(null);
+  const [selectedTaskIndex, setSelectedTaskIndex] = useState<number | null>(
+    null
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [taskToEdit, setTaskToEdit] = useState<Task | null>(null);
   const [sortBy, setSortBy] = useState<'priority' | 'date' | 'xp'>('priority');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  
+
   // Core attributes are now separate from categories - no filtering needed
-  const [allCategories, setAllCategories] = useState<{ name: string; icon: string }[]>([]);
+  const [allCategories, setAllCategories] = useState<
+    { name: string; icon: string }[]
+  >([]);
   useEffect(() => {
     setAllCategories(categoryService.getAllCategories());
     // Listen for custom event to refresh categories
@@ -33,31 +37,40 @@ export const TaskList: React.FC = () => {
   }, []);
 
   // Filter and sort active tasks
-  const activeTasks = tasks.filter(task => !task.completed).filter(task => {
-    if (selectedCategory) {
-      return task.category === selectedCategory;
-    }
-    return true;
-  }).sort((a, b) => {
-    let comparison = 0;
-    
-    if (sortBy === 'priority') {
-      const priorityOrder = { high: 3, medium: 2, low: 1 };
-      comparison = priorityOrder[a.priority] - priorityOrder[b.priority];
-    } else if (sortBy === 'date') {
-      comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-    } else if (sortBy === 'xp') {
-      const aXp = a.statRewards?.xp || 0;
-      const bXp = b.statRewards?.xp || 0;
-      comparison = aXp - bXp;
-    }
-    
-    return sortOrder === 'asc' ? comparison : -comparison;
-  });
+  const activeTasks = tasks
+    .filter((task) => !task.completed)
+    .filter((task) => {
+      if (selectedCategory) {
+        return task.category === selectedCategory;
+      }
+      return true;
+    })
+    .sort((a, b) => {
+      let comparison = 0;
 
-  const completedTasks = tasks.filter(task => task.completed).sort((a, b) => {
-    return new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime();
-  });
+      if (sortBy === 'priority') {
+        const priorityOrder = { high: 3, medium: 2, low: 1 };
+        comparison = priorityOrder[a.priority] - priorityOrder[b.priority];
+      } else if (sortBy === 'date') {
+        comparison =
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      } else if (sortBy === 'xp') {
+        const aXp = a.statRewards?.xp || 0;
+        const bXp = b.statRewards?.xp || 0;
+        comparison = aXp - bXp;
+      }
+
+      return sortOrder === 'asc' ? comparison : -comparison;
+    });
+
+  const completedTasks = tasks
+    .filter((task) => task.completed)
+    .sort((a, b) => {
+      return (
+        new Date(b.updatedAt || b.createdAt).getTime() -
+        new Date(a.updatedAt || a.createdAt).getTime()
+      );
+    });
 
   // Combined tasks for modal navigation
   const sortedTasks = [...activeTasks, ...completedTasks];
@@ -76,7 +89,10 @@ export const TaskList: React.FC = () => {
   };
 
   const handleNextTask = () => {
-    if (selectedTaskIndex !== null && selectedTaskIndex < sortedTasks.length - 1) {
+    if (
+      selectedTaskIndex !== null &&
+      selectedTaskIndex < sortedTasks.length - 1
+    ) {
       setSelectedTaskIndex(selectedTaskIndex + 1);
     }
   };
@@ -110,7 +126,7 @@ export const TaskList: React.FC = () => {
     if (selectedTaskIndex !== null) {
       const prevTaskId = sortedTasks[selectedTaskIndex]?.id;
       // Find the updated task's new index by ID
-      const newIndex = sortedTasks.findIndex(t => t.id === prevTaskId);
+      const newIndex = sortedTasks.findIndex((t) => t.id === prevTaskId);
       setSelectedTaskIndex(newIndex !== -1 ? newIndex : null);
     }
     // Modal remains open to show the updated task
@@ -121,8 +137,10 @@ export const TaskList: React.FC = () => {
     setTaskToEdit(null);
   };
 
-  const selectedTask = selectedTaskIndex !== null ? sortedTasks[selectedTaskIndex] : null;
-  const hasNext = selectedTaskIndex !== null && selectedTaskIndex < sortedTasks.length - 1;
+  const selectedTask =
+    selectedTaskIndex !== null ? sortedTasks[selectedTaskIndex] : null;
+  const hasNext =
+    selectedTaskIndex !== null && selectedTaskIndex < sortedTasks.length - 1;
   const hasPrevious = selectedTaskIndex !== null && selectedTaskIndex > 0;
 
   if (tasks.length === 0) {
@@ -147,25 +165,28 @@ export const TaskList: React.FC = () => {
             <div className={styles.controls}>
               {/* Category Filter */}
               <div className={styles.categoryFilter}>
-                <select 
-                  value={selectedCategory || ''} 
+                <select
+                  value={selectedCategory || ''}
                   onChange={(e) => setSelectedCategory(e.target.value || null)}
                   className={styles.categorySelect}
                 >
                   <option value="">All Categories</option>
-                  {allCategories.map(cat => (
+                  {allCategories.map((cat) => (
                     <option key={cat.name} value={cat.name}>
-                      {cat.icon} {cat.name.charAt(0).toUpperCase() + cat.name.slice(1)}
+                      {cat.icon}{' '}
+                      {cat.name.charAt(0).toUpperCase() + cat.name.slice(1)}
                     </option>
                   ))}
                 </select>
               </div>
-              
+
               {/* Sort Controls */}
               <div className={styles.sortControls}>
-                <select 
-                  value={sortBy} 
-                  onChange={(e) => setSortBy(e.target.value as 'priority' | 'date' | 'xp')}
+                <select
+                  value={sortBy}
+                  onChange={(e) =>
+                    setSortBy(e.target.value as 'priority' | 'date' | 'xp')
+                  }
                   className={styles.sortSelect}
                 >
                   {/* <option value="category">📂 Category</option> */}
@@ -173,9 +194,11 @@ export const TaskList: React.FC = () => {
                   <option value="date">📅 Date</option>
                   <option value="xp">⭐ XP</option>
                 </select>
-                
-                <button 
-                  onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+
+                <button
+                  onClick={() =>
+                    setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+                  }
                   className={styles.sortButton}
                   aria-label={`Sort ${sortOrder === 'asc' ? 'descending' : 'ascending'}`}
                 >
@@ -186,9 +209,9 @@ export const TaskList: React.FC = () => {
           </div>
           <div className={styles.taskGrid}>
             {activeTasks.map((task, index) => (
-              <TaskCard 
-                key={task.id} 
-                task={task} 
+              <TaskCard
+                key={task.id}
+                task={task}
                 onOpenModal={() => handleOpenModal(index)}
               />
             ))}
@@ -202,16 +225,16 @@ export const TaskList: React.FC = () => {
           <h2 className={styles.title}>Completed Tasks</h2>
           <div className={styles.taskGrid}>
             {completedTasks.map((task, index) => (
-              <TaskCard 
-                key={task.id} 
-                task={task} 
+              <TaskCard
+                key={task.id}
+                task={task}
                 onOpenModal={() => handleOpenModal(activeTasks.length + index)}
               />
             ))}
           </div>
         </div>
       )}
-      
+
       {/* Task Detail Modal */}
       {!isEditMode && (
         <TaskDetailModal
@@ -233,7 +256,7 @@ export const TaskList: React.FC = () => {
           <div className={styles.editModalContent}>
             <div className={styles.editModalHeader}>
               <h2>Edit Task</h2>
-              <button 
+              <button
                 onClick={handleCloseModal}
                 className={styles.closeButton}
                 aria-label="Close modal"
@@ -241,7 +264,7 @@ export const TaskList: React.FC = () => {
                 ×
               </button>
             </div>
-            <TaskForm 
+            <TaskForm
               taskToEdit={taskToEdit}
               onSave={handleSaveEdit}
               onCancel={handleCancelEdit}
@@ -251,4 +274,4 @@ export const TaskList: React.FC = () => {
       )}
     </div>
   );
-}; 
+};

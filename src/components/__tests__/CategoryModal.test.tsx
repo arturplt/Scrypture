@@ -8,10 +8,12 @@ jest.mock('../../services/categoryService', () => ({
   categoryService: {
     getCustomCategories: jest.fn(),
     addCustomCategory: jest.fn(),
-  }
+  },
 }));
 
-const mockCategoryService = categoryService as jest.Mocked<typeof categoryService>;
+const mockCategoryService = categoryService as jest.Mocked<
+  typeof categoryService
+>;
 
 describe('CategoryModal', () => {
   const mockOnCategoryAdded = jest.fn();
@@ -89,10 +91,14 @@ describe('CategoryModal', () => {
       />
     );
 
-    const colorButtons = screen.getAllByRole('button').filter(button => 
-      button.style.backgroundColor && button.style.backgroundColor.includes('var(--color-')
-    );
-    
+    const colorButtons = screen
+      .getAllByRole('button')
+      .filter(
+        (button) =>
+          button.style.backgroundColor &&
+          button.style.backgroundColor.includes('var(--color-')
+      );
+
     if (colorButtons.length > 0) {
       fireEvent.click(colorButtons[0]);
       // Since CSS modules don't work in tests, just verify the button is clickable
@@ -110,22 +116,24 @@ describe('CategoryModal', () => {
     );
 
     const submitButton = screen.getByText('Add Category');
-    
+
     // Since the form is empty, the submit should be disabled
     expect(submitButton).toBeDisabled();
-    
+
     // Enter a single character to enable the button but trigger validation
     const nameInput = screen.getByLabelText('Category Name *');
     fireEvent.change(nameInput, { target: { value: 'A' } });
-    
+
     // Now the button should be enabled
     expect(submitButton).not.toBeDisabled();
-    
+
     // Submit and check for validation error
     fireEvent.click(submitButton);
-    
+
     await waitFor(() => {
-      expect(screen.getByText('Category name must be at least 2 characters')).toBeInTheDocument();
+      expect(
+        screen.getByText('Category name must be at least 2 characters')
+      ).toBeInTheDocument();
     });
   });
 
@@ -145,7 +153,9 @@ describe('CategoryModal', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText('Category name must be at least 2 characters')).toBeInTheDocument();
+      expect(
+        screen.getByText('Category name must be at least 2 characters')
+      ).toBeInTheDocument();
     });
   });
 
@@ -165,7 +175,9 @@ describe('CategoryModal', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText('Category name must be 20 characters or less')).toBeInTheDocument();
+      expect(
+        screen.getByText('Category name must be 20 characters or less')
+      ).toBeInTheDocument();
     });
   });
 
@@ -185,13 +197,15 @@ describe('CategoryModal', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText('This category name already exists')).toBeInTheDocument();
+      expect(
+        screen.getByText('This category name already exists')
+      ).toBeInTheDocument();
     });
   });
 
   it('shows validation error for existing custom category name', async () => {
     mockCategoryService.getCustomCategories.mockReturnValue([
-      { name: 'test', icon: '🎯', color: 'var(--color-skills)' }
+      { name: 'test', icon: '🎯', color: 'var(--color-skills)' },
     ]);
 
     render(
@@ -209,7 +223,9 @@ describe('CategoryModal', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText('This category name already exists')).toBeInTheDocument();
+      expect(
+        screen.getByText('This category name already exists')
+      ).toBeInTheDocument();
     });
   });
 
@@ -228,7 +244,7 @@ describe('CategoryModal', () => {
 
     // Select an icon - use getAllByText and select the first button
     const brainIcons = screen.getAllByText('🧠');
-    const brainIconButton = brainIcons.find(el => el.tagName === 'BUTTON');
+    const brainIconButton = brainIcons.find((el) => el.tagName === 'BUTTON');
     fireEvent.click(brainIconButton!);
 
     // Submit the form
@@ -239,7 +255,7 @@ describe('CategoryModal', () => {
       expect(mockOnCategoryAdded).toHaveBeenCalledWith({
         name: 'test category',
         icon: '🧠',
-        color: 'var(--color-body)' // Default color
+        color: 'var(--color-body)', // Default color
       });
       expect(mockOnClose).toHaveBeenCalled();
     });
@@ -292,14 +308,18 @@ describe('CategoryModal', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText('Category name must be at least 2 characters')).toBeInTheDocument();
+      expect(
+        screen.getByText('Category name must be at least 2 characters')
+      ).toBeInTheDocument();
     });
 
     // Clear the error by typing more
     fireEvent.change(nameInput, { target: { value: 'AB' } });
 
     await waitFor(() => {
-      expect(screen.queryByText('Category name must be at least 2 characters')).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('Category name must be at least 2 characters')
+      ).not.toBeInTheDocument();
     });
   });
-}); 
+});

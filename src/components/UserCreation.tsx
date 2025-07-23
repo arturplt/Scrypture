@@ -6,7 +6,9 @@ interface UserCreationProps {
   onUserCreated?: () => void;
 }
 
-export const UserCreation: React.FC<UserCreationProps> = ({ onUserCreated }) => {
+export const UserCreation: React.FC<UserCreationProps> = ({
+  onUserCreated,
+}) => {
   const { user, createUser } = useUser();
   const [name, setName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -14,7 +16,7 @@ export const UserCreation: React.FC<UserCreationProps> = ({ onUserCreated }) => 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!name.trim()) {
       setError('Please enter a name for your character');
       return;
@@ -59,8 +61,10 @@ export const UserCreation: React.FC<UserCreationProps> = ({ onUserCreated }) => 
     <div className={styles.container}>
       <div className={styles.content}>
         <h2 className={styles.title}>Welcome to Scrypture</h2>
-        <p className={styles.subtitle}>Create your character to begin your journey</p>
-        
+        <p className={styles.subtitle}>
+          Create your character to begin your journey
+        </p>
+
         <form className={styles.form} onSubmit={handleSubmit}>
           <div className={styles.inputGroup}>
             <label htmlFor="characterName" className={styles.label}>
@@ -90,8 +94,8 @@ export const UserCreation: React.FC<UserCreationProps> = ({ onUserCreated }) => 
             </ul>
           </div>
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             className={styles.submitButton}
             disabled={isSubmitting || !name.trim()}
           >
@@ -101,4 +105,4 @@ export const UserCreation: React.FC<UserCreationProps> = ({ onUserCreated }) => 
       </div>
     </div>
   );
-}; 
+};

@@ -9,7 +9,9 @@ interface ExtendedTaskContextType extends TaskContextType {
   refreshTasks: () => void;
 }
 
-const TaskContext = createContext<ExtendedTaskContextType | undefined>(undefined);
+const TaskContext = createContext<ExtendedTaskContextType | undefined>(
+  undefined
+);
 
 export const useTasks = () => {
   const context = useContext(TaskContext);
@@ -55,28 +57,26 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
   const addTask = (taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => {
     // Use taskService.createTask to ensure statRewards are calculated
     const newTask = taskService.createTask(taskData);
-    
+
     const updatedTasks = [...tasks, newTask];
     setTasks(updatedTasks);
     saveTasksWithFeedback(updatedTasks);
   };
 
   const updateTask = (id: string, updates: Partial<Task>) => {
-    const updatedTasks = tasks.map(task =>
-      task.id === id
-        ? { ...task, ...updates, updatedAt: new Date() }
-        : task
+    const updatedTasks = tasks.map((task) =>
+      task.id === id ? { ...task, ...updates, updatedAt: new Date() } : task
     );
-    
+
     setTasks(updatedTasks);
     saveTasksWithFeedback(updatedTasks);
   };
 
   const deleteTask = (id: string) => {
     // Find the task before deleting it to check if it was completed
-    const taskToDelete = tasks.find(task => task.id === id);
-    
-    const updatedTasks = tasks.filter(task => task.id !== id);
+    const taskToDelete = tasks.find((task) => task.id === id);
+
+    const updatedTasks = tasks.filter((task) => task.id !== id);
     setTasks(updatedTasks);
     saveTasksWithFeedback(updatedTasks);
 
@@ -87,17 +87,15 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
   };
 
   const toggleTask = (id: string) => {
-    const task = tasks.find(t => t.id === id);
+    const task = tasks.find((t) => t.id === id);
     if (!task) return;
 
     const isCompleting = !task.completed;
-    
-    const updatedTasks = tasks.map(t =>
-      t.id === id
-        ? { ...t, completed: !t.completed, updatedAt: new Date() }
-        : t
+
+    const updatedTasks = tasks.map((t) =>
+      t.id === id ? { ...t, completed: !t.completed, updatedAt: new Date() } : t
     );
-    
+
     setTasks(updatedTasks);
     saveTasksWithFeedback(updatedTasks);
 
@@ -105,7 +103,7 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
     if (isCompleting) {
       // Fetch the latest task from storage to ensure up-to-date statRewards
       const latestTasks = taskService.getTasks();
-      const updatedTask = latestTasks.find(t => t.id === id);
+      const updatedTask = latestTasks.find((t) => t.id === id);
       if (updatedTask && updatedTask.statRewards) {
         addStatRewards(updatedTask.statRewards);
       } else {
@@ -130,9 +128,5 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
     refreshTasks,
   };
 
-  return (
-    <TaskContext.Provider value={value}>
-      {children}
-    </TaskContext.Provider>
-  );
-}; 
+  return <TaskContext.Provider value={value}>{children}</TaskContext.Provider>;
+};

@@ -10,7 +10,16 @@ export const habitService = {
     return storageService.saveHabits(habits);
   },
 
-  addHabit(habit: Omit<Habit, 'id' | 'createdAt' | 'streak'> & { statRewards?: { body?: number; mind?: number; soul?: number; xp?: number } }): Habit {
+  addHabit(
+    habit: Omit<Habit, 'id' | 'createdAt' | 'streak'> & {
+      statRewards?: {
+        body?: number;
+        mind?: number;
+        soul?: number;
+        xp?: number;
+      };
+    }
+  ): Habit {
     const habits = this.getHabits();
     const newHabit: Habit = {
       ...habit,
@@ -19,7 +28,7 @@ export const habitService = {
       streak: 0,
       statRewards: habit.statRewards,
     };
-    
+
     const updatedHabits = [...habits, newHabit];
     this.saveHabits(updatedHabits);
     return newHabit;
@@ -27,35 +36,37 @@ export const habitService = {
 
   updateHabit(id: string, updates: Partial<Habit>): boolean {
     const habits = this.getHabits();
-    const updatedHabits = habits.map(habit =>
+    const updatedHabits = habits.map((habit) =>
       habit.id === id ? { ...habit, ...updates } : habit
     );
-    
+
     return this.saveHabits(updatedHabits);
   },
 
   deleteHabit(id: string): boolean {
     const habits = this.getHabits();
-    const updatedHabits = habits.filter(habit => habit.id !== id);
+    const updatedHabits = habits.filter((habit) => habit.id !== id);
     return this.saveHabits(updatedHabits);
   },
 
   completeHabit(id: string): boolean {
     const habits = this.getHabits();
-    const habit = habits.find(h => h.id === id);
-    
+    const habit = habits.find((h) => h.id === id);
+
     if (!habit) return false;
 
     const now = new Date();
-    const lastCompleted = habit.lastCompleted ? new Date(habit.lastCompleted) : null;
-    
+    const lastCompleted = habit.lastCompleted
+      ? new Date(habit.lastCompleted)
+      : null;
+
     // Check if habit can be completed (not already completed today for daily habits)
     if (habit.targetFrequency === 'daily' && lastCompleted) {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const lastCompletedDate = new Date(lastCompleted);
       lastCompletedDate.setHours(0, 0, 0, 0);
-      
+
       if (today.getTime() === lastCompletedDate.getTime()) {
         return false; // Already completed today
       }
@@ -73,4 +84,4 @@ export const habitService = {
   clearHabits(): boolean {
     return this.saveHabits([]);
   },
-}; 
+};

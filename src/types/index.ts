@@ -75,10 +75,20 @@ export interface UserContextType {
   user: User | null;
   updateUser: (updates: Partial<User>) => void;
   addExperience: (amount: number) => void;
-  addStatRewards: (rewards: { body?: number; mind?: number; soul?: number; xp?: number }) => void;
+  addStatRewards: (rewards: {
+    body?: number;
+    mind?: number;
+    soul?: number;
+    xp?: number;
+  }) => void;
   removeExperience: (amount: number) => void;
-  removeStatRewards: (rewards: { body?: number; mind?: number; soul?: number; xp?: number }) => void;
+  removeStatRewards: (rewards: {
+    body?: number;
+    mind?: number;
+    soul?: number;
+    xp?: number;
+  }) => void;
   unlockAchievement: (achievementId: string) => void;
   createUser: (name: string) => User;
   isSaving: boolean;
-} 
+}

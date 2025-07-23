@@ -146,7 +146,7 @@
 }
 
 /* Auto-expanding textarea for edit mode */
-.descriptionInput[data-auto-expand="true"] {
+.descriptionInput[data-auto-expand='true'] {
   max-height: none;
   overflow-y: visible;
 }
@@ -238,7 +238,7 @@
 .titleInput:invalid + .validationMessage::before,
 .prioritySelect:invalid + .validationMessage::before,
 .descriptionInput:invalid + .validationMessage::before {
-  content: "ℹ️";
+  content: 'ℹ️';
   display: inline-block;
   width: 16px;
   height: 16px;
@@ -378,28 +378,28 @@
     flex-direction: column;
     gap: var(--spacing-sm);
   }
-  
+
   .titleInput {
     width: 100%;
     min-width: unset;
   }
-  
+
   .form {
     padding: var(--spacing-sm);
   }
-  
+
   .categoryButtons {
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: flex-start;
     gap: var(--spacing-xs);
   }
-  
+
   .categoryButton {
     min-width: 80px;
     flex: 0 1 auto;
   }
-  
+
   .statRewardsDisplay {
     flex-direction: column;
   }
@@ -410,11 +410,11 @@
     font-size: 0.75rem;
     padding: var(--spacing-xs) var(--spacing-sm);
   }
-  
+
   .priorityButtons {
     flex-direction: column;
   }
-  
+
   .priorityButton {
     min-width: unset;
   }
@@ -538,7 +538,7 @@
 
 .deleteButton:active {
   transform: translateY(0);
-} 
+}
 
 /* Category Modal Styles */
 .categoryModalForm {
@@ -890,7 +890,7 @@
   color: var(--color-accent-gold);
   font-weight: bold;
   font-size: var(--font-size-xs);
-} 
+}
 
 .coreAttributesSection {
   margin-bottom: var(--spacing-md);
@@ -950,7 +950,7 @@
   color: var(--color-text-primary);
 }
 
-.coreAttributesInputs input[type="number"] {
+.coreAttributesInputs input[type='number'] {
   width: 60px;
   padding: var(--spacing-xs) var(--spacing-sm);
   font-size: var(--font-size-sm);
@@ -991,7 +991,7 @@
   margin: 0 auto;
 }
 
-.statRewardsDisplay input[type="number"] {
+.statRewardsDisplay input[type='number'] {
   width: 60px;
   padding: var(--spacing-xs) var(--spacing-sm);
   font-size: var(--font-size-sm);
@@ -1000,7 +1000,7 @@
   color: var(--color-text-primary);
   border-radius: 0px;
   margin-left: var(--spacing-xs);
-} 
+}
 
 .coreAttributePlusOne {
   color: var(--color-accent-gold);
@@ -1008,7 +1008,7 @@
   font-size: 1.2em;
   margin-left: 0.25em;
   font-family: 'Press Start 2P', monospace;
-} 
+}
 
 .coreAttributeXpLabel {
   color: var(--color-accent-gold);
@@ -1017,13 +1017,13 @@
   margin-left: var(--spacing-lg);
   align-self: center;
   font-family: 'Press Start 2P', monospace;
-} 
+}
 
 .coreAttributeXpLabelWrapper {
   display: flex;
   justify-content: center;
   margin: var(--spacing-sm) 0 var(--spacing-md) 0;
-} 
+}
 
 .totalXpLabelWrapper {
   margin-top: var(--spacing-xs);
@@ -1035,7 +1035,7 @@
   color: var(--color-accent-gold);
   font-family: 'Press Start 2P', monospace;
   font-weight: bold;
-} 
+}
 
 .difficultySelector {
   margin-bottom: var(--spacing-md);
@@ -1101,28 +1101,78 @@
   box-shadow: var(--shadow-active);
 }
 
-.difficultyButton.diff-0 { background: var(--difficulty-1); }
-.difficultyButton.diff-1 { background: var(--difficulty-2); }
-.difficultyButton.diff-2 { background: var(--difficulty-3); }
-.difficultyButton.diff-3 { background: var(--difficulty-4); }
-.difficultyButton.diff-4 { background: var(--difficulty-5); }
-.difficultyButton.diff-5 { background: var(--difficulty-6); }
-.difficultyButton.diff-6 { background: var(--difficulty-7); }
-.difficultyButton.diff-7 { background: var(--difficulty-8); }
-.difficultyButton.diff-8 { background: var(--difficulty-9); }
-.difficultyButton.diff-9 { background: var(--difficulty-10); }
+.difficultyButton.diff-0 {
+  background: var(--difficulty-1);
+}
+.difficultyButton.diff-1 {
+  background: var(--difficulty-2);
+}
+.difficultyButton.diff-2 {
+  background: var(--difficulty-3);
+}
+.difficultyButton.diff-3 {
+  background: var(--difficulty-4);
+}
+.difficultyButton.diff-4 {
+  background: var(--difficulty-5);
+}
+.difficultyButton.diff-5 {
+  background: var(--difficulty-6);
+}
+.difficultyButton.diff-6 {
+  background: var(--difficulty-7);
+}
+.difficultyButton.diff-7 {
+  background: var(--difficulty-8);
+}
+.difficultyButton.diff-8 {
+  background: var(--difficulty-9);
+}
+.difficultyButton.diff-9 {
+  background: var(--difficulty-10);
+}
 
-.difficultyButton.diff-0.difficultyButtonActive { background: var(--difficulty-1); color: var(--color-bg-primary); }
-.difficultyButton.diff-1.difficultyButtonActive { background: var(--difficulty-2); color: var(--color-bg-primary); }
-.difficultyButton.diff-2.difficultyButtonActive { background: var(--difficulty-3); color: var(--color-bg-primary); }
-.difficultyButton.diff-3.difficultyButtonActive { background: var(--difficulty-4); color: var(--color-bg-primary); }
-.difficultyButton.diff-4.difficultyButtonActive { background: var(--difficulty-5); color: var(--color-bg-primary); }
-.difficultyButton.diff-5.difficultyButtonActive { background: var(--difficulty-6); color: var(--color-bg-primary); }
-.difficultyButton.diff-6.difficultyButtonActive { background: var(--difficulty-7); color: var(--color-bg-primary); }
-.difficultyButton.diff-7.difficultyButtonActive { background: var(--difficulty-8); color: var(--color-bg-primary); }
-.difficultyButton.diff-8.difficultyButtonActive { background: var(--difficulty-9); color: var(--color-bg-primary); }
-.difficultyButton.diff-9.difficultyButtonActive { background: var(--difficulty-10); color: var(--color-bg-primary); }
+.difficultyButton.diff-0.difficultyButtonActive {
+  background: var(--difficulty-1);
+  color: var(--color-bg-primary);
+}
+.difficultyButton.diff-1.difficultyButtonActive {
+  background: var(--difficulty-2);
+  color: var(--color-bg-primary);
+}
+.difficultyButton.diff-2.difficultyButtonActive {
+  background: var(--difficulty-3);
+  color: var(--color-bg-primary);
+}
+.difficultyButton.diff-3.difficultyButtonActive {
+  background: var(--difficulty-4);
+  color: var(--color-bg-primary);
+}
+.difficultyButton.diff-4.difficultyButtonActive {
+  background: var(--difficulty-5);
+  color: var(--color-bg-primary);
+}
+.difficultyButton.diff-5.difficultyButtonActive {
+  background: var(--difficulty-6);
+  color: var(--color-bg-primary);
+}
+.difficultyButton.diff-6.difficultyButtonActive {
+  background: var(--difficulty-7);
+  color: var(--color-bg-primary);
+}
+.difficultyButton.diff-7.difficultyButtonActive {
+  background: var(--difficulty-8);
+  color: var(--color-bg-primary);
+}
+.difficultyButton.diff-8.difficultyButtonActive {
+  background: var(--difficulty-9);
+  color: var(--color-bg-primary);
+}
+.difficultyButton.diff-9.difficultyButtonActive {
+  background: var(--difficulty-10);
+  color: var(--color-bg-primary);
+}
 
 .difficultySelectedXp {
   display: none;
-} 
+}

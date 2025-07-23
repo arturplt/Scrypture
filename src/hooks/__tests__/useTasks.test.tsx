@@ -14,7 +14,7 @@ jest.mock('../../services/taskService', () => ({
       id: 'test-task-id',
       createdAt: new Date(),
       updatedAt: new Date(),
-      statRewards: { body: 1, mind: 1, xp: 10 }
+      statRewards: { body: 1, mind: 1, xp: 10 },
     })),
   },
 }));
@@ -69,20 +69,22 @@ const TestComponent = () => {
       <div data-testid="user-stats">
         Body: {user?.body}, Mind: {user?.mind}, Soul: {user?.soul}
       </div>
-      <button 
-        data-testid="add-task" 
-        onClick={() => addTask({
-          title: 'Test Task',
-          description: 'Test Description',
-          category: 'body',
-          completed: false,
-          priority: 'medium'
-        })}
+      <button
+        data-testid="add-task"
+        onClick={() =>
+          addTask({
+            title: 'Test Task',
+            description: 'Test Description',
+            category: 'body',
+            completed: false,
+            priority: 'medium',
+          })
+        }
       >
         Add Task
       </button>
-      <button 
-        data-testid="complete-task" 
+      <button
+        data-testid="complete-task"
         onClick={() => toggleTask('test-task-id')}
       >
         Complete Task
@@ -102,7 +104,9 @@ describe('useTasks - Stat Rewards', () => {
     );
 
     // Check initial stats
-    expect(getByTestId('user-stats')).toHaveTextContent('Body: 0, Mind: 0, Soul: 0');
+    expect(getByTestId('user-stats')).toHaveTextContent(
+      'Body: 0, Mind: 0, Soul: 0'
+    );
 
     // Add a task
     act(() => {
@@ -118,4 +122,4 @@ describe('useTasks - Stat Rewards', () => {
     // Note: In a real test, we would need to wait for state updates
     // For now, we're just testing that the functions are called correctly
   });
-}); 
+});

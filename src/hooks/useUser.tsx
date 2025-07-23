@@ -53,24 +53,29 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
   const addExperience = (amount: number) => {
     const success = userService.addExperience(amount);
-    
+
     if (success && user) {
       const newExperience = user.experience + amount;
       const newLevel = Math.floor(newExperience / 100) + 1;
-      const updatedUser = { 
-        ...user, 
-        experience: newExperience, 
+      const updatedUser = {
+        ...user,
+        experience: newExperience,
         level: newLevel,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
       setUser(updatedUser);
       saveUserWithFeedback(updatedUser);
     }
   };
 
-  const addStatRewards = (rewards: { body?: number; mind?: number; soul?: number; xp?: number }) => {
+  const addStatRewards = (rewards: {
+    body?: number;
+    mind?: number;
+    soul?: number;
+    xp?: number;
+  }) => {
     const success = userService.addStatRewards(rewards);
-    
+
     if (success && user) {
       // Calculate new experience and level if XP is included
       let newExperience = user.experience;
@@ -79,7 +84,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         newExperience = user.experience + rewards.xp;
         newLevel = Math.floor(newExperience / 100) + 1;
       }
-      
+
       const updatedUser = {
         ...user,
         body: user.body + (rewards.body || 0),
@@ -94,9 +99,14 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
   };
 
-  const removeStatRewards = (rewards: { body?: number; mind?: number; soul?: number; xp?: number }) => {
+  const removeStatRewards = (rewards: {
+    body?: number;
+    mind?: number;
+    soul?: number;
+    xp?: number;
+  }) => {
     const success = userService.removeStatRewards(rewards);
-    
+
     if (success && user) {
       // Calculate new experience and level if XP is included
       let newExperience = user.experience;
@@ -105,7 +115,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         newExperience = Math.max(0, user.experience - rewards.xp);
         newLevel = Math.floor(newExperience / 100) + 1;
       }
-      
+
       const updatedUser = {
         ...user,
         body: Math.max(0, user.body - (rewards.body || 0)),
@@ -122,15 +132,15 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
   const removeExperience = (amount: number) => {
     const success = userService.removeExperience(amount);
-    
+
     if (success && user) {
       const newExperience = Math.max(0, user.experience - amount);
       const newLevel = Math.floor(newExperience / 100) + 1;
-      const updatedUser = { 
-        ...user, 
-        experience: newExperience, 
+      const updatedUser = {
+        ...user,
+        experience: newExperience,
         level: newLevel,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
       setUser(updatedUser);
       saveUserWithFeedback(updatedUser);
@@ -179,9 +189,5 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     isSaving,
   };
 
-  return (
-    <UserContext.Provider value={value}>
-      {children}
-    </UserContext.Provider>
-  );
-}; 
+  return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
+};

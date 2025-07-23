@@ -66,12 +66,15 @@ export const StatsDisplay: React.FC = () => {
   const currentLevelBaseXp = (currentLevel - 1) * xpPerLevel;
   const nextLevelBaseXp = currentLevel * xpPerLevel;
   const xpToNextLevel = nextLevelBaseXp - currentXp;
-  const xpProgress = Math.max(0, Math.min(1, (currentXp - currentLevelBaseXp) / xpPerLevel));
+  const xpProgress = Math.max(
+    0,
+    Math.min(1, (currentXp - currentLevelBaseXp) / xpPerLevel)
+  );
 
   return (
     <div className={styles.container}>
       <h3 className={styles.title}>Core Attributes</h3>
-      
+
       <div className={styles.statsGrid}>
         <div className={styles.statCard}>
           <div className={styles.statHeader}>
@@ -80,7 +83,7 @@ export const StatsDisplay: React.FC = () => {
             <span className={styles.statValue}>{user.body}</span>
           </div>
           <div className={styles.progressContainer}>
-            <div 
+            <div
               className={`${styles.progressBar} ${styles.bodyColor}`}
               style={{ width: `${calculateProgress(user.body)}%` }}
             />
@@ -94,7 +97,7 @@ export const StatsDisplay: React.FC = () => {
             <span className={styles.statValue}>{user.mind}</span>
           </div>
           <div className={styles.progressContainer}>
-            <div 
+            <div
               className={`${styles.progressBar} ${styles.mindColor}`}
               style={{ width: `${calculateProgress(user.mind)}%` }}
             />
@@ -108,7 +111,7 @@ export const StatsDisplay: React.FC = () => {
             <span className={styles.statValue}>{user.soul}</span>
           </div>
           <div className={styles.progressContainer}>
-            <div 
+            <div
               className={`${styles.progressBar} ${styles.soulColor}`}
               style={{ width: `${calculateProgress(user.soul)}%` }}
             />
@@ -122,12 +125,20 @@ export const StatsDisplay: React.FC = () => {
           <span className={styles.levelValue}>{user.level}</span>
         </div>
         <div className={styles.experienceDisplay}>
-          <span className={styles.experienceValue}>{currentXp} / {nextLevelBaseXp} </span>
+          <span className={styles.experienceValue}>
+            {currentXp} / {nextLevelBaseXp}{' '}
+          </span>
           <div className={styles.progressContainer} style={{ marginTop: 4 }}>
-            <div className={styles.progressBar} style={{ width: `${xpProgress * 100}%`, background: 'var(--color-accent-gold)' }} />
+            <div
+              className={styles.progressBar}
+              style={{
+                width: `${xpProgress * 100}%`,
+                background: 'var(--color-accent-gold)',
+              }}
+            />
           </div>
         </div>
       </div>
     </div>
   );
-}; 
+};

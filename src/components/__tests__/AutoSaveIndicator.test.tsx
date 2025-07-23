@@ -61,9 +61,12 @@ describe('AutoSaveIndicator', () => {
       expect(screen.getByText(/Saved/i)).toBeInTheDocument();
 
       // Should disappear after 2 seconds
-      await waitFor(() => {
-        expect(screen.queryByText(/Saved/i)).not.toBeInTheDocument();
-      }, { timeout: 3000 });
+      await waitFor(
+        () => {
+          expect(screen.queryByText(/Saved/i)).not.toBeInTheDocument();
+        },
+        { timeout: 3000 }
+      );
     });
   });
 
@@ -122,7 +125,9 @@ describe('AutoSaveIndicator', () => {
 
   describe('Styling and Animation', () => {
     it('applies different styles for different states', () => {
-      const { container, rerender } = render(<AutoSaveIndicator isSaving={true} />);
+      const { container, rerender } = render(
+        <AutoSaveIndicator isSaving={true} />
+      );
 
       // Saving state
       let indicator = container.firstChild as HTMLElement;
@@ -135,7 +140,9 @@ describe('AutoSaveIndicator', () => {
     });
 
     it('applies custom className', () => {
-      const { container } = render(<AutoSaveIndicator isSaving={true} className="custom-class" />);
+      const { container } = render(
+        <AutoSaveIndicator isSaving={true} className="custom-class" />
+      );
 
       const indicator = container.firstChild as HTMLElement;
       expect(indicator.className).toContain('custom-class');
@@ -193,9 +200,12 @@ describe('AutoSaveIndicator', () => {
       expect(screen.getByText(/Saved/i)).toBeInTheDocument();
 
       // Should disappear after timeout
-      await waitFor(() => {
-        expect(screen.queryByText(/Saved/i)).not.toBeInTheDocument();
-      }, { timeout: 3000 });
+      await waitFor(
+        () => {
+          expect(screen.queryByText(/Saved/i)).not.toBeInTheDocument();
+        },
+        { timeout: 3000 }
+      );
     });
   });
-}); 
+});

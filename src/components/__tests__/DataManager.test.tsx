@@ -141,9 +141,11 @@ describe('DataManager', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockStorageInstance.createBackup.mockReturnValue(mockBackupData);
-    mockStorageInstance.exportData.mockReturnValue(JSON.stringify(mockBackupData));
+    mockStorageInstance.exportData.mockReturnValue(
+      JSON.stringify(mockBackupData)
+    );
     mockStorageInstance.getStorageStats.mockReturnValue(mockStorageStats);
-    
+
     // Mock userService.getStorageStats
     const { userService } = require('../../services/userService');
     userService.getStorageStats.mockReturnValue({
@@ -151,7 +153,7 @@ describe('DataManager', () => {
       available: 5242880,
       percentage: 0.02,
     });
-    
+
     // Mock userService methods to return success
     userService.createBackup.mockReturnValue(mockBackupData);
     userService.saveBackup.mockReturnValue(true);
@@ -160,7 +162,7 @@ describe('DataManager', () => {
     userService.clearAllData.mockReturnValue(true);
     userService.exportUserData.mockReturnValue(JSON.stringify(mockBackupData));
     userService.importUserData.mockReturnValue(true);
-    
+
     // Mock categoryService
     const { categoryService } = require('../../services/categoryService');
     categoryService.clearCustomCategories.mockReturnValue(true);
@@ -177,7 +179,9 @@ describe('DataManager', () => {
     expect(screen.getByText('Import')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Save' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Load' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Clear All' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Clear All' })
+    ).toBeInTheDocument();
   });
 
   it('displays storage statistics', () => {
@@ -194,7 +198,9 @@ describe('DataManager', () => {
 
   describe('Export Data', () => {
     it('exports data successfully', async () => {
-      mockStorageInstance.exportData.mockReturnValue(JSON.stringify(mockBackupData));
+      mockStorageInstance.exportData.mockReturnValue(
+        JSON.stringify(mockBackupData)
+      );
 
       render(<DataManager />);
 
@@ -386,11 +392,11 @@ describe('DataManager', () => {
       fireEvent.click(toggleButton);
 
       const clearButton = screen.getByRole('button', { name: 'Clear All' });
-      
+
       // Mock window.confirm to return true
       const originalConfirm = window.confirm;
       window.confirm = jest.fn(() => true);
-      
+
       fireEvent.click(clearButton);
 
       await waitFor(() => {
@@ -496,7 +502,9 @@ describe('DataManager', () => {
   describe('User Experience', () => {
     it('shows loading states during operations', async () => {
       mockStorageInstance.exportData.mockImplementation(() => {
-        return new Promise(resolve => setTimeout(() => resolve(JSON.stringify(mockBackupData)), 100));
+        return new Promise((resolve) =>
+          setTimeout(() => resolve(JSON.stringify(mockBackupData)), 100)
+        );
       });
 
       render(<DataManager />);
@@ -515,7 +523,9 @@ describe('DataManager', () => {
     });
 
     it('provides success feedback', async () => {
-      mockStorageInstance.exportData.mockReturnValue(JSON.stringify(mockBackupData));
+      mockStorageInstance.exportData.mockReturnValue(
+        JSON.stringify(mockBackupData)
+      );
 
       render(<DataManager />);
 
@@ -531,4 +541,4 @@ describe('DataManager', () => {
       });
     });
   });
-}); 
+});

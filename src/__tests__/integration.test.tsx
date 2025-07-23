@@ -51,7 +51,7 @@ jest.mock('../services/categoryService', () => ({
     getAllCategories: jest.fn(() => [
       { name: 'home', icon: '🏠', color: 'var(--color-home)' },
       { name: 'free time', icon: '🎲', color: 'var(--color-freetime)' },
-      { name: 'garden', icon: '🌱', color: 'var(--color-garden)' }
+      { name: 'garden', icon: '🌱', color: 'var(--color-garden)' },
     ]),
   },
 }));
@@ -82,11 +82,15 @@ describe('Integration Tests', () => {
       fireEvent.click(titleInput);
 
       // 4. User fills in task details
-      fireEvent.change(titleInput, { target: { value: 'Complete Integration Test Task' } });
-      
+      fireEvent.change(titleInput, {
+        target: { value: 'Complete Integration Test Task' },
+      });
+
       // 5. User fills in description (textarea appears when form is expanded)
       const descriptionInput = screen.getByPlaceholderText(/Description/);
-      fireEvent.change(descriptionInput, { target: { value: 'This is a test task for integration testing' } });
+      fireEvent.change(descriptionInput, {
+        target: { value: 'This is a test task for integration testing' },
+      });
 
       // 6. User selects core attributes (BODY, MIND, SOUL buttons)
       const bodyButton = screen.getByText(/BODY/);
@@ -105,15 +109,24 @@ describe('Integration Tests', () => {
       fireEvent.click(submitButton);
 
       // 9. Task appears in the task list
-      await waitFor(() => {
-        expect(screen.getByText('Complete Integration Test Task')).toBeInTheDocument();
-      }, { timeout: 5000 });
+      await waitFor(
+        () => {
+          expect(
+            screen.getByText('Complete Integration Test Task')
+          ).toBeInTheDocument();
+        },
+        { timeout: 5000 }
+      );
 
       // 8. Task shows correct details
-      expect(screen.getByText('This is a test task for integration testing')).toBeInTheDocument();
+      expect(
+        screen.getByText('This is a test task for integration testing')
+      ).toBeInTheDocument();
       expect(screen.getByText(/Medium Priority/)).toBeInTheDocument();
       // Task was created successfully and appears in the list
-      expect(screen.getByText('Complete Integration Test Task')).toBeInTheDocument();
+      expect(
+        screen.getByText('Complete Integration Test Task')
+      ).toBeInTheDocument();
     });
 
     it('handles task creation with different categories and priorities', async () => {
@@ -125,12 +138,16 @@ describe('Integration Tests', () => {
 
       // Fill in task details
       fireEvent.change(titleInput, { target: { value: 'Mind Task' } });
-      
+
       const descriptionInput = screen.getByPlaceholderText(/Description/);
-      fireEvent.change(descriptionInput, { target: { value: 'A mind-focused task' } });
+      fireEvent.change(descriptionInput, {
+        target: { value: 'A mind-focused task' },
+      });
 
       // Select mind category
-      const homeCategoryButton = screen.getByRole('button', { name: /🏠 Home/ });
+      const homeCategoryButton = screen.getByRole('button', {
+        name: /🏠 Home/,
+      });
       fireEvent.click(homeCategoryButton);
 
       // Select high priority
@@ -157,7 +174,7 @@ describe('Integration Tests', () => {
       const titleInput = screen.getByPlaceholderText(/Intention/);
       fireEvent.click(titleInput); // Expand form
       fireEvent.change(titleInput, { target: { value: 'Task to Complete' } });
-      
+
       const submitButton = screen.getByText(/Add Task/);
       fireEvent.click(submitButton);
 
@@ -169,7 +186,7 @@ describe('Integration Tests', () => {
       // 3. Find and click the completion checkbox
       const taskCard = screen.getByText('Task to Complete').closest('div');
       const checkbox = taskCard?.querySelector('input[type="checkbox"]');
-      
+
       if (checkbox) {
         fireEvent.click(checkbox);
       }
@@ -187,7 +204,7 @@ describe('Integration Tests', () => {
       // Create multiple tasks
       const titleInput = screen.getByPlaceholderText(/Intention/);
       fireEvent.click(titleInput); // Expand form once
-      
+
       // Create first task
       fireEvent.change(titleInput, { target: { value: 'First Task' } });
       const submitButton = screen.getByText(/Add Task/);
@@ -212,8 +229,12 @@ describe('Integration Tests', () => {
       const firstTaskCard = screen.getByText('First Task').closest('div');
       const thirdTaskCard = screen.getByText('Third Task').closest('div');
 
-      const firstCheckbox = firstTaskCard?.querySelector('input[type="checkbox"]');
-      const thirdCheckbox = thirdTaskCard?.querySelector('input[type="checkbox"]');
+      const firstCheckbox = firstTaskCard?.querySelector(
+        'input[type="checkbox"]'
+      );
+      const thirdCheckbox = thirdTaskCard?.querySelector(
+        'input[type="checkbox"]'
+      );
 
       if (firstCheckbox) fireEvent.click(firstCheckbox);
       if (thirdCheckbox) fireEvent.click(thirdCheckbox);
@@ -238,10 +259,10 @@ describe('Integration Tests', () => {
       // 1. Create a task
       const titleInput = screen.getByPlaceholderText(/Intention/);
       fireEvent.change(titleInput, { target: { value: 'Task to Edit' } });
-      
+
       // Expand the form to see the submit button
       fireEvent.click(titleInput);
-      
+
       const submitButton = screen.getByText(/Add Task/);
       fireEvent.click(submitButton);
 
@@ -273,10 +294,10 @@ describe('Integration Tests', () => {
 
       // Create multiple tasks
       const titleInput = screen.getByPlaceholderText(/Intention/);
-      
+
       // Expand form first by clicking the input
       fireEvent.click(titleInput);
-      
+
       const submitButton = screen.getByText(/Add Task/);
 
       fireEvent.change(titleInput, { target: { value: 'First Task' } });
@@ -342,9 +363,12 @@ describe('Integration Tests', () => {
       renderApp();
 
       // Verify existing task is loaded
-      await waitFor(() => {
-        expect(screen.getByText('Persistent Task')).toBeInTheDocument();
-      }, { timeout: 10000 });
+      await waitFor(
+        () => {
+          expect(screen.getByText('Persistent Task')).toBeInTheDocument();
+        },
+        { timeout: 10000 }
+      );
     }, 15000); // Add timeout to the test
 
     it('handles user data persistence', async () => {
@@ -384,14 +408,18 @@ describe('Integration Tests', () => {
       fireEvent.click(titleInput); // Expand form
 
       // Create body task
-      const homeCategoryButton = screen.getByRole('button', { name: /🏠 Home/ });
+      const homeCategoryButton = screen.getByRole('button', {
+        name: /🏠 Home/,
+      });
       fireEvent.click(homeCategoryButton);
       fireEvent.change(titleInput, { target: { value: 'Body Task' } });
       const submitButton = screen.getByText(/Add Task/);
       fireEvent.click(submitButton);
 
       // Create mind task
-      const freeTimeCategoryButton = screen.getByRole('button', { name: /🎲 Free time/ });
+      const freeTimeCategoryButton = screen.getByRole('button', {
+        name: /🎲 Free time/,
+      });
       fireEvent.click(freeTimeCategoryButton);
       fireEvent.change(titleInput, { target: { value: 'Mind Task' } });
       fireEvent.click(submitButton);
@@ -451,7 +479,9 @@ describe('Integration Tests', () => {
       // Verify sort order changed (high priority should appear first)
       const taskCards = screen.getAllByText(/Task/);
       // Find the task card that contains "High Priority Task"
-      const highPriorityTask = taskCards.find(card => card.textContent?.includes('High Priority Task'));
+      const highPriorityTask = taskCards.find((card) =>
+        card.textContent?.includes('High Priority Task')
+      );
       expect(highPriorityTask).toBeInTheDocument();
     });
   });
@@ -459,7 +489,8 @@ describe('Integration Tests', () => {
   describe('Error Handling Workflow', () => {
     it('handles storage errors gracefully', async () => {
       // Mock storage service to return false instead of throwing
-      const mockStorageService = require('../services/storageService').storageService;
+      const mockStorageService =
+        require('../services/storageService').storageService;
       mockStorageService.saveTasks.mockReturnValue(false);
 
       renderApp();
@@ -468,7 +499,7 @@ describe('Integration Tests', () => {
       const titleInput = screen.getByPlaceholderText(/Intention/);
       fireEvent.click(titleInput); // Expand form
       fireEvent.change(titleInput, { target: { value: 'Error Test Task' } });
-      
+
       const submitButton = screen.getByText(/Add Task/);
       fireEvent.click(submitButton);
 
@@ -481,7 +512,8 @@ describe('Integration Tests', () => {
 
     it('handles network errors during data operations', async () => {
       // Mock services to simulate network errors
-      const mockStorageService = require('../services/storageService').storageService;
+      const mockStorageService =
+        require('../services/storageService').storageService;
       mockStorageService.getTasks.mockReturnValue([]);
 
       renderApp();
@@ -499,15 +531,15 @@ describe('Integration Tests', () => {
       renderApp();
 
       const titleInput = screen.getByPlaceholderText(/Intention/);
-      
+
       // Expand form first
       fireEvent.click(titleInput);
-      
+
       const submitButton = screen.getByText(/Add Task/);
 
       // Create 10 tasks quickly
       const startTime = performance.now();
-      
+
       for (let i = 0; i < 10; i++) {
         fireEvent.change(titleInput, { target: { value: `Task ${i + 1}` } });
         fireEvent.click(submitButton);
@@ -532,20 +564,24 @@ describe('Integration Tests', () => {
       renderApp();
 
       const titleInput = screen.getByPlaceholderText(/Intention/);
-      
+
       // Expand form first
       fireEvent.click(titleInput);
-      
+
       const submitButton = screen.getByText(/Add Task/);
 
       // Rapidly create and interact with tasks
       for (let i = 0; i < 5; i++) {
-        fireEvent.change(titleInput, { target: { value: `Rapid Task ${i + 1}` } });
+        fireEvent.change(titleInput, {
+          target: { value: `Rapid Task ${i + 1}` },
+        });
         fireEvent.click(submitButton);
-        
+
         // Rapidly change categories
         const homeButton = screen.getByRole('button', { name: /🏠 Home/ });
-        const freeTimeButton = screen.getByRole('button', { name: /🎲 Free time/ });
+        const freeTimeButton = screen.getByRole('button', {
+          name: /🎲 Free time/,
+        });
         fireEvent.click(homeButton);
         fireEvent.click(freeTimeButton);
       }
@@ -567,23 +603,26 @@ describe('Integration Tests', () => {
       // Navigate to title input
       const titleInput = screen.getByPlaceholderText(/Intention/);
       titleInput.focus();
-      
+
       // Type using keyboard
       fireEvent.change(titleInput, { target: { value: 'Keyboard Task' } });
-      
+
       // Verify input worked
       expect(titleInput).toHaveValue('Keyboard Task');
-      
+
       // Submit the form
       fireEvent.click(titleInput); // Expand form
       const submitButton = screen.getByText(/Add Task/);
       fireEvent.click(submitButton);
 
       // Verify task was created
-      await waitFor(() => {
-        const keyboardTaskElements = screen.getAllByText('Keyboard Task');
-        expect(keyboardTaskElements.length).toBeGreaterThan(0);
-      }, { timeout: 10000 });
+      await waitFor(
+        () => {
+          const keyboardTaskElements = screen.getAllByText('Keyboard Task');
+          expect(keyboardTaskElements.length).toBeGreaterThan(0);
+        },
+        { timeout: 10000 }
+      );
     }, 15000); // Add timeout to the test
 
     it('provides proper ARIA labels and roles', async () => {
@@ -595,10 +634,10 @@ describe('Integration Tests', () => {
 
       // Expand form to check for submit button
       fireEvent.click(titleInput);
-      
+
       // Check for proper button labels
       const submitButton = screen.getByText(/Add Task/);
       expect(submitButton).toBeInTheDocument();
     });
   });
-}); 
+});

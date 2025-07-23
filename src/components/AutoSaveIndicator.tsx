@@ -7,10 +7,10 @@ interface AutoSaveIndicatorProps {
   className?: string;
 }
 
-export const AutoSaveIndicator: React.FC<AutoSaveIndicatorProps> = ({ 
-  isSaving, 
-  lastSaved, 
-  className = '' 
+export const AutoSaveIndicator: React.FC<AutoSaveIndicatorProps> = ({
+  isSaving,
+  lastSaved,
+  className = '',
 }) => {
   const [showSaved, setShowSaved] = useState(false);
 
@@ -41,4 +41,4 @@ export const AutoSaveIndicator: React.FC<AutoSaveIndicatorProps> = ({
       )}
     </div>
   );
-}; 
+};

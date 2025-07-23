@@ -10,7 +10,9 @@ const mockStorageService = storageService as jest.Mocked<typeof storageService>;
 // Mock crypto.randomUUID
 Object.defineProperty(global, 'crypto', {
   value: {
-    randomUUID: jest.fn(() => 'mock-uuid-' + Math.random().toString(36).substr(2, 9)),
+    randomUUID: jest.fn(
+      () => 'mock-uuid-' + Math.random().toString(36).substr(2, 9)
+    ),
   },
 });
 
@@ -227,7 +229,9 @@ describe('TaskService', () => {
       const result = taskService.saveTasks(tasksWithMissingFields);
 
       expect(result).toBe(true);
-      expect(mockStorageService.saveTasks).toHaveBeenCalledWith(tasksWithMissingFields);
+      expect(mockStorageService.saveTasks).toHaveBeenCalledWith(
+        tasksWithMissingFields
+      );
     });
 
     test('should handle tasks with all fields populated', () => {
@@ -255,16 +259,20 @@ describe('TaskService', () => {
 
   describe('Performance and Reliability', () => {
     test('should handle large task arrays', () => {
-      const largeTaskArray: Task[] = Array.from({ length: 1000 }, (_, index) => ({
-        id: `task-${index}`,
-        title: `Task ${index}`,
-        description: `Description for task ${index}`,
-        completed: index % 2 === 0,
-        createdAt: new Date('2024-01-01'),
-        updatedAt: new Date('2024-01-01'),
-        priority: index % 3 === 0 ? 'high' : index % 3 === 1 ? 'medium' : 'low',
-        category: index % 2 === 0 ? 'work' : 'personal',
-      }));
+      const largeTaskArray: Task[] = Array.from(
+        { length: 1000 },
+        (_, index) => ({
+          id: `task-${index}`,
+          title: `Task ${index}`,
+          description: `Description for task ${index}`,
+          completed: index % 2 === 0,
+          createdAt: new Date('2024-01-01'),
+          updatedAt: new Date('2024-01-01'),
+          priority:
+            index % 3 === 0 ? 'high' : index % 3 === 1 ? 'medium' : 'low',
+          category: index % 2 === 0 ? 'work' : 'personal',
+        })
+      );
 
       mockStorageService.saveTasks.mockReturnValue(true);
 
@@ -352,4 +360,4 @@ describe('TaskService', () => {
       expect(() => taskService.saveTasks(tasks)).toThrow('Save service error');
     });
   });
-}); 
+});

@@ -10,7 +10,9 @@ const mockStorageService = storageService as jest.Mocked<typeof storageService>;
 // Mock crypto.randomUUID
 Object.defineProperty(global, 'crypto', {
   value: {
-    randomUUID: jest.fn(() => 'mock-uuid-' + Math.random().toString(36).substr(2, 9)),
+    randomUUID: jest.fn(
+      () => 'mock-uuid-' + Math.random().toString(36).substr(2, 9)
+    ),
   },
 });
 
@@ -235,10 +237,14 @@ describe('HabitService', () => {
       mockStorageService.getHabits.mockReturnValue(existingHabits);
       mockStorageService.saveHabits.mockReturnValue(true);
 
-      const result = habitService.updateHabit('non-existent-id', { name: 'New Name' });
+      const result = habitService.updateHabit('non-existent-id', {
+        name: 'New Name',
+      });
 
       expect(result).toBe(true);
-      expect(mockStorageService.saveHabits).toHaveBeenCalledWith(existingHabits);
+      expect(mockStorageService.saveHabits).toHaveBeenCalledWith(
+        existingHabits
+      );
     });
 
     test('should handle save failure when updating habit', () => {
@@ -292,7 +298,9 @@ describe('HabitService', () => {
       const result = habitService.deleteHabit('1');
 
       expect(result).toBe(true);
-      expect(mockStorageService.saveHabits).toHaveBeenCalledWith([existingHabits[1]]);
+      expect(mockStorageService.saveHabits).toHaveBeenCalledWith([
+        existingHabits[1],
+      ]);
     });
 
     test('should return true when habit not found', () => {
@@ -314,7 +322,9 @@ describe('HabitService', () => {
       const result = habitService.deleteHabit('non-existent-id');
 
       expect(result).toBe(true);
-      expect(mockStorageService.saveHabits).toHaveBeenCalledWith(existingHabits);
+      expect(mockStorageService.saveHabits).toHaveBeenCalledWith(
+        existingHabits
+      );
     });
 
     test('should handle save failure when deleting habit', () => {
@@ -591,22 +601,28 @@ describe('HabitService', () => {
 
   describe('Performance and Reliability', () => {
     test('should handle large habit arrays', () => {
-      const largeHabitArray: Habit[] = Array.from({ length: 100 }, (_, index) => ({
-        id: `habit-${index}`,
-        name: `Habit ${index}`,
-        description: `Description for habit ${index}`,
-        streak: index % 10,
-        lastCompleted: new Date('2024-01-01'),
-        createdAt: new Date('2024-01-01'),
-        targetFrequency: index % 3 === 0 ? 'daily' : index % 3 === 1 ? 'weekly' : 'monthly',
-      }));
+      const largeHabitArray: Habit[] = Array.from(
+        { length: 100 },
+        (_, index) => ({
+          id: `habit-${index}`,
+          name: `Habit ${index}`,
+          description: `Description for habit ${index}`,
+          streak: index % 10,
+          lastCompleted: new Date('2024-01-01'),
+          createdAt: new Date('2024-01-01'),
+          targetFrequency:
+            index % 3 === 0 ? 'daily' : index % 3 === 1 ? 'weekly' : 'monthly',
+        })
+      );
 
       mockStorageService.saveHabits.mockReturnValue(true);
 
       const result = habitService.saveHabits(largeHabitArray);
 
       expect(result).toBe(true);
-      expect(mockStorageService.saveHabits).toHaveBeenCalledWith(largeHabitArray);
+      expect(mockStorageService.saveHabits).toHaveBeenCalledWith(
+        largeHabitArray
+      );
     });
 
     test('should handle rapid successive operations', () => {
@@ -673,7 +689,9 @@ describe('HabitService', () => {
       });
 
       // The service should throw the error (no error handling implemented)
-      expect(() => habitService.saveHabits(habits)).toThrow('Save service error');
+      expect(() => habitService.saveHabits(habits)).toThrow(
+        'Save service error'
+      );
     });
   });
-}); 
+});

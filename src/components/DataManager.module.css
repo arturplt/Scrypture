@@ -160,18 +160,18 @@
   .buttonGroup {
     flex-direction: column;
   }
-  
+
   .button {
     width: 100%;
     min-width: unset;
   }
-  
+
   .stats {
     flex-direction: column;
     gap: var(--spacing-sm);
   }
-  
+
   .content {
     padding: var(--spacing-sm);
   }
-} 
+}

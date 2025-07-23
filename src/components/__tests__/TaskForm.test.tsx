@@ -9,10 +9,12 @@ jest.mock('../../services/categoryService', () => ({
     getCustomCategories: jest.fn(),
     addCustomCategory: jest.fn(),
     getAllCategories: jest.fn(() => []), // <-- Added mock for getAllCategories
-  }
+  },
 }));
 
-const mockCategoryService = categoryService as jest.Mocked<typeof categoryService>;
+const mockCategoryService = categoryService as jest.Mocked<
+  typeof categoryService
+>;
 
 // Mock the useTasks hook
 const mockAddTask = jest.fn();
@@ -51,19 +53,33 @@ describe('TaskForm (new system)', () => {
     const soulBtn = screen.getByText('SOUL');
     fireEvent.click(bodyBtn);
     const bodySpans = screen.getAllByText('BODY');
-    const bodyLabel = bodySpans.find(span => span.parentElement && span.parentElement.textContent?.includes('+1'));
+    const bodyLabel = bodySpans.find(
+      (span) =>
+        span.parentElement && span.parentElement.textContent?.includes('+1')
+    );
     expect(bodyLabel?.parentElement).toHaveTextContent('BODY +1');
     fireEvent.click(mindBtn);
     const mindSpans = screen.getAllByText('MIND');
-    const mindLabel = mindSpans.find(span => span.parentElement && span.parentElement.textContent?.includes('+1'));
+    const mindLabel = mindSpans.find(
+      (span) =>
+        span.parentElement && span.parentElement.textContent?.includes('+1')
+    );
     expect(mindLabel?.parentElement).toHaveTextContent('MIND +1');
     fireEvent.click(soulBtn);
     const soulSpans = screen.getAllByText('SOUL');
-    const soulLabel = soulSpans.find(span => span.parentElement && span.parentElement.textContent?.includes('+1'));
+    const soulLabel = soulSpans.find(
+      (span) =>
+        span.parentElement && span.parentElement.textContent?.includes('+1')
+    );
     expect(soulLabel?.parentElement).toHaveTextContent('SOUL +1');
     // Toggle off
     fireEvent.click(bodyBtn);
-    const bodyLabelAfter = screen.getAllByText('BODY').find(span => span.parentElement && span.parentElement.textContent?.includes('+1'));
+    const bodyLabelAfter = screen
+      .getAllByText('BODY')
+      .find(
+        (span) =>
+          span.parentElement && span.parentElement.textContent?.includes('+1')
+      );
     expect(bodyLabelAfter).toBeUndefined();
   });
 
@@ -112,8 +128,12 @@ describe('TaskForm (new system)', () => {
   it('submits task with correct difficulty', async () => {
     render(<TaskForm />);
     fireEvent.click(screen.getByPlaceholderText('Intention'));
-    fireEvent.change(screen.getByPlaceholderText('Intention'), { target: { value: 'Diff Test' } });
-    fireEvent.change(screen.getByPlaceholderText('Description (optional)'), { target: { value: 'Diff Desc' } });
+    fireEvent.change(screen.getByPlaceholderText('Intention'), {
+      target: { value: 'Diff Test' },
+    });
+    fireEvent.change(screen.getByPlaceholderText('Description (optional)'), {
+      target: { value: 'Diff Desc' },
+    });
     fireEvent.click(screen.getByText('LOW PRIORITY'));
     fireEvent.click(screen.getByText('8'));
     fireEvent.click(screen.getByText('Add Task'));
@@ -132,8 +152,12 @@ describe('TaskForm (new system)', () => {
   it('submits task with correct statRewards', async () => {
     render(<TaskForm />);
     fireEvent.click(screen.getByPlaceholderText('Intention'));
-    fireEvent.change(screen.getByPlaceholderText('Intention'), { target: { value: 'Test Task' } });
-    fireEvent.change(screen.getByPlaceholderText('Description (optional)'), { target: { value: 'Test Desc' } });
+    fireEvent.change(screen.getByPlaceholderText('Intention'), {
+      target: { value: 'Test Task' },
+    });
+    fireEvent.change(screen.getByPlaceholderText('Description (optional)'), {
+      target: { value: 'Test Desc' },
+    });
     fireEvent.click(screen.getByText('BODY'));
     fireEvent.click(screen.getByText('MIND'));
     fireEvent.click(screen.getByText('LOW PRIORITY'));
@@ -202,4 +226,4 @@ describe('TaskForm (new system)', () => {
     fireEvent.blur(titleInput);
     expect(screen.getByText('Category:')).toBeInTheDocument();
   });
-}); 
+});

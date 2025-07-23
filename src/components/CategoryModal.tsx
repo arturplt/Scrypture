@@ -6,29 +6,59 @@ import styles from './TaskForm.module.css';
 interface CategoryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onCategoryAdded: (category: { 
-    name: string; 
-    icon: string; 
+  onCategoryAdded: (category: {
+    name: string;
+    icon: string;
     color: string;
   }) => void;
 }
 
 const iconOptions = [
-  '💪', '🧠', '✨', '💼', '🏠', '🎯', '⚡', '🔥', '💎', '🌟', '🎨', '📚', 
-  '🏃', '🧘', '🎵', '🍳', '🌱', '🚀', '🎮', '📱', '💻', '🎪', '🏆', '💡'
+  '💪',
+  '🧠',
+  '✨',
+  '💼',
+  '🏠',
+  '🎯',
+  '⚡',
+  '🔥',
+  '💎',
+  '🌟',
+  '🎨',
+  '📚',
+  '🏃',
+  '🧘',
+  '🎵',
+  '🍳',
+  '🌱',
+  '🚀',
+  '🎮',
+  '📱',
+  '💻',
+  '🎪',
+  '🏆',
+  '💡',
 ];
 
 const colorOptions = [
-  'var(--color-body)', 'var(--color-mind)', 'var(--color-soul)', 
-  'var(--color-career)', 'var(--color-home)', 'var(--color-skills)',
-  'var(--color-accent-gold)', 'var(--color-accent-beaver)', 'var(--color-focus)',
-  'var(--color-easy)', 'var(--color-urgent)', 'var(--color-error)'
+  'var(--color-body)',
+  'var(--color-mind)',
+  'var(--color-soul)',
+  'var(--color-career)',
+  'var(--color-home)',
+  'var(--color-skills)',
+  'var(--color-accent-gold)',
+  'var(--color-accent-beaver)',
+  'var(--color-focus)',
+  'var(--color-easy)',
+  'var(--color-urgent)',
+  'var(--color-error)',
 ];
 
-export const CategoryModal: React.FC<CategoryModalProps> = ({ 
-  isOpen, 
-  onClose, 
-  onCategoryAdded 
+export const CategoryModal: React.FC<CategoryModalProps> = ({
+  isOpen,
+  onClose,
+  onCategoryAdded,
 }) => {
   const [categoryName, setCategoryName] = useState('');
   const [selectedIcon, setSelectedIcon] = useState('💪');
@@ -53,14 +83,22 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
 
     // Check if category name already exists (case insensitive)
     const existingCategories = ['home', 'free time', 'garden'];
-    if (existingCategories.some(cat => cat.toLowerCase() === categoryName.trim().toLowerCase())) {
+    if (
+      existingCategories.some(
+        (cat) => cat.toLowerCase() === categoryName.trim().toLowerCase()
+      )
+    ) {
       setError('This category name already exists');
       return;
     }
 
     // Also check against custom categories
     const customCategories = categoryService.getCustomCategories();
-    if (customCategories.some(cat => cat.name.toLowerCase() === categoryName.trim().toLowerCase())) {
+    if (
+      customCategories.some(
+        (cat) => cat.name.toLowerCase() === categoryName.trim().toLowerCase()
+      )
+    ) {
       setError('This category name already exists');
       return;
     }
@@ -68,7 +106,7 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
     onCategoryAdded({
       name: categoryName.trim().toLowerCase(),
       icon: selectedIcon,
-      color: selectedColor
+      color: selectedColor,
     });
 
     // Reset form
@@ -139,12 +177,12 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
 
         <div className={styles.preview}>
           <label className={styles.label}>Preview:</label>
-          <div 
+          <div
             className={styles.categoryPreview}
-            style={{ 
+            style={{
               borderColor: selectedColor,
               backgroundColor: selectedColor,
-              color: 'var(--color-bg-primary)'
+              color: 'var(--color-bg-primary)',
             }}
           >
             {selectedIcon} {categoryName || 'CATEGORY NAME'}
@@ -152,15 +190,15 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
         </div>
 
         <div className={styles.modalActions}>
-          <button 
-            type="button" 
+          <button
+            type="button"
             className={styles.cancelButton}
             onClick={onClose}
           >
             Cancel
           </button>
-          <button 
-            type="button" 
+          <button
+            type="button"
             className={styles.submitButton}
             disabled={!categoryName.trim()}
             onClick={handleSubmit}
@@ -171,4 +209,4 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
       </div>
     </Modal>
   );
-}; 
+};

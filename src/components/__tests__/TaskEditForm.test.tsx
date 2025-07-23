@@ -13,7 +13,9 @@ jest.mock('../../hooks/useTasks', () => ({
   useTasks: () => ({
     updateTask: mockUpdateTask,
   }),
-  TaskProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>
+  TaskProvider: ({ children }: { children: React.ReactNode }) => (
+    <div>{children}</div>
+  ),
 }));
 
 // Mock the useUser hook
@@ -23,7 +25,9 @@ jest.mock('../../hooks/useUser', () => ({
     addStatRewards: jest.fn(),
     removeStatRewards: jest.fn(),
   }),
-  UserProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>
+  UserProvider: ({ children }: { children: React.ReactNode }) => (
+    <div>{children}</div>
+  ),
 }));
 
 const mockTask: Task = {
@@ -40,9 +44,7 @@ const mockTask: Task = {
 const renderWithProvider = (component: React.ReactElement) => {
   return render(
     <UserProvider>
-      <TaskProvider>
-        {component}
-      </TaskProvider>
+      <TaskProvider>{component}</TaskProvider>
     </UserProvider>
   );
 };
@@ -82,14 +84,19 @@ describe('TaskEditForm (new system)', () => {
     renderWithProvider(
       <TaskEditForm task={mockTask} onCancel={mockOnCancel} />
     );
-    fireEvent.change(screen.getByDisplayValue('Test Task'), { target: { value: 'Updated Task' } });
+    fireEvent.change(screen.getByDisplayValue('Test Task'), {
+      target: { value: 'Updated Task' },
+    });
     fireEvent.click(screen.getByText('MIND'));
     fireEvent.click(screen.getByText('Update Task'));
     await waitFor(() => {
-      expect(mockUpdateTask).toHaveBeenCalledWith('1', expect.objectContaining({
-        title: 'Updated Task',
-        statRewards: { mind: 1 },
-      }));
+      expect(mockUpdateTask).toHaveBeenCalledWith(
+        '1',
+        expect.objectContaining({
+          title: 'Updated Task',
+          statRewards: { mind: 1 },
+        })
+      );
     });
   });
-}); 
+});

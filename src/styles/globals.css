@@ -2,100 +2,103 @@
 
 :root {
   /* Scripture Project Color Palette */
-  
+
   /* Primary Background Colors */
-  --color-bg-primary: #23211a;      /* Main background - dark brown */
-  --color-bg-secondary: #2d2b22;    /* Secondary background - medium brown */
-  --color-bg-tertiary: #1a1812;     /* Tertiary background - darker brown */
-  
+  --color-bg-primary: #23211a; /* Main background - dark brown */
+  --color-bg-secondary: #2d2b22; /* Secondary background - medium brown */
+  --color-bg-tertiary: #1a1812; /* Tertiary background - darker brown */
+
   /* Border Colors */
-  --color-border-primary: #39362a;   /* Primary border - medium brown */
+  --color-border-primary: #39362a; /* Primary border - medium brown */
   --color-border-secondary: #44412f; /* Secondary border - lighter brown */
-  --color-border-dark: #18170f;      /* Dark border - very dark brown */
-  
+  --color-border-dark: #18170f; /* Dark border - very dark brown */
+
   /* Text Colors */
-  --color-text-primary: #e8e5d2;    /* Primary text - light cream */
+  --color-text-primary: #e8e5d2; /* Primary text - light cream */
   --color-text-secondary: rgba(232, 229, 210, 0.8);
   --color-text-muted: rgba(232, 229, 210, 0.6);
-  
+
   /* Accent Colors */
-  --color-accent-gold: #b6a432;     /* Gold accent - warm yellow */
-  --color-accent-beaver: #8B4513;   /* Beaver accent - brown */
-  
+  --color-accent-gold: #b6a432; /* Gold accent - warm yellow */
+  --color-accent-beaver: #8b4513; /* Beaver accent - brown */
+
   /* Task Label Colors */
-  --color-urgent: #7b3b3b;           /* Dark red */
-  --color-urgent-border: #a04848;     /* Lighter red border */
-  
-  --color-easy: #2d6b3b;             /* Dark green */
-  --color-easy-border: #3a8a4a;      /* Lighter green border */
-  
-  --color-focus: #6c6747;             /* Dark yellow/brown */
-  --color-focus-border: #8a8560;      /* Lighter yellow border */
-  
-  --color-chill: #3b4a6b;             /* Dark blue */
-  --color-chill-border: #4a5a7b;      /* Lighter blue border */
-  
-  --color-waiting: #6b3b5c;           /* Dark purple */
-  --color-waiting-border: #8a4a75;    /* Lighter purple border */
-  
+  --color-urgent: #7b3b3b; /* Dark red */
+  --color-urgent-border: #a04848; /* Lighter red border */
+
+  --color-easy: #2d6b3b; /* Dark green */
+  --color-easy-border: #3a8a4a; /* Lighter green border */
+
+  --color-focus: #6c6747; /* Dark yellow/brown */
+  --color-focus-border: #8a8560; /* Lighter yellow border */
+
+  --color-chill: #3b4a6b; /* Dark blue */
+  --color-chill-border: #4a5a7b; /* Lighter blue border */
+
+  --color-waiting: #6b3b5c; /* Dark purple */
+  --color-waiting-border: #8a4a75; /* Lighter purple border */
+
   /* Category Colors */
-  --color-body: #CF565C;              /* Indian Red for body/physical */
-  --color-mind: #3C898F;              /* Jelly Bean Blue for mind/intellectual */
-  --color-soul: #F5C387;              /* Macaroni And Cheese for soul/spiritual */
-  --color-career: #F39C12;            /* Orange for career/work */
-  --color-home: #27AE60;              /* Green for home/life */
-  --color-skills: #E74C3C;            /* Red for skills/development */
-  --color-freetime: #00B8D9;          /* Teal for free time */
-  --color-garden: #6FCF97;            /* Light green for garden */
-  
+  --color-body: #cf565c; /* Indian Red for body/physical */
+  --color-mind: #3c898f; /* Jelly Bean Blue for mind/intellectual */
+  --color-soul: #f5c387; /* Macaroni And Cheese for soul/spiritual */
+  --color-career: #f39c12; /* Orange for career/work */
+  --color-home: #27ae60; /* Green for home/life */
+  --color-skills: #e74c3c; /* Red for skills/development */
+  --color-freetime: #00b8d9; /* Teal for free time */
+  --color-garden: #6fcf97; /* Light green for garden */
+
   /* Difficulty Level Colors */
-  --difficulty-1: #2d6b3b;    /* Very Easy - Dark Green */
-  --difficulty-2: #3a8a4a;    /* Easy - Medium Green */
-  --difficulty-3: #4a9a5a;    /* Simple - Light Green */
-  --difficulty-4: #6c6747;    /* Basic - Yellow/Brown */
-  --difficulty-5: #8a8560;    /* Moderate - Light Yellow */
-  --difficulty-6: #b6a432;    /* Intermediate - Gold */
-  --difficulty-7: #d4af37;    /* Challenging - Bright Gold */
-  --difficulty-8: #b67332;    /* Hard - Orange */
-  --difficulty-9: #a04848;    /* Very Hard - Red */
-  --difficulty-10: #7b3b3b;   /* Extreme - Dark Red */
-  
+  --difficulty-1: #2d6b3b; /* Very Easy - Dark Green */
+  --difficulty-2: #3a8a4a; /* Easy - Medium Green */
+  --difficulty-3: #4a9a5a; /* Simple - Light Green */
+  --difficulty-4: #6c6747; /* Basic - Yellow/Brown */
+  --difficulty-5: #8a8560; /* Moderate - Light Yellow */
+  --difficulty-6: #b6a432; /* Intermediate - Gold */
+  --difficulty-7: #d4af37; /* Challenging - Bright Gold */
+  --difficulty-8: #b67332; /* Hard - Orange */
+  --difficulty-9: #a04848; /* Very Hard - Red */
+  --difficulty-10: #7b3b3b; /* Extreme - Dark Red */
+
   /* Status Colors */
   --color-success: #2d6b3b;
   --color-warning: #b6a432;
   --color-error: #7b3b3b;
   --color-info: #3b4a6b;
-  
+
   /* Compact Spacing - Pixel Art Scale */
-  --spacing-xs: 4px;                  /* 4px */
-  --spacing-sm: 6px;                  /* 6px */
-  --spacing-md: 8px;                  /* 8px - MAX PADDING */
-  --spacing-lg: 12px;                 /* 12px */
-  --spacing-xl: 16px;                 /* 16px */
-  --spacing-2xl: 24px;                /* 24px */
-  
+  --spacing-xs: 4px; /* 4px */
+  --spacing-sm: 6px; /* 6px */
+  --spacing-md: 8px; /* 8px - MAX PADDING */
+  --spacing-lg: 12px; /* 12px */
+  --spacing-xl: 16px; /* 16px */
+  --spacing-2xl: 24px; /* 24px */
+
   /* Design Rules - Sharp Corners */
   --border-radius-sm: 0px;
   --border-radius-md: 0px;
   --border-radius-lg: 0px;
-  
+
   /* Design Rules - 4px Borders */
   --border-width-thin: 1px;
   --border-width-normal: 4px;
   --border-width-thick: 8px;
-  
+
   /* Pixel Art Font Sizes */
-  --font-size-xs: 8px;                /* 8px - smallest */
-  --font-size-sm: 10px;               /* 10px */
-  --font-size-md: 12px;               /* 12px - base */
-  --font-size-lg: 14px;               /* 14px */
-  --font-size-xl: 16px;               /* 16px - largest */
-  
+  --font-size-xs: 8px; /* 8px - smallest */
+  --font-size-sm: 10px; /* 10px */
+  --font-size-md: 12px; /* 12px - base */
+  --font-size-lg: 14px; /* 14px */
+  --font-size-xl: 16px; /* 16px - largest */
+
   /* Shadows & Effects */
-  --shadow-inset: inset 4px 4px var(--color-border-secondary), inset -4px -4px var(--color-border-dark);
+  --shadow-inset:
+    inset 4px 4px var(--color-border-secondary),
+    inset -4px -4px var(--color-border-dark);
   --shadow-button: 2px 2px 4px rgba(0, 0, 0, 0.3);
-  --shadow-active: 0 0 0 3px var(--color-accent-gold), 3px 3px 6px rgba(0, 0, 0, 0.4);
-  
+  --shadow-active:
+    0 0 0 3px var(--color-accent-gold), 3px 3px 6px rgba(0, 0, 0, 0.4);
+
   /* Transitions */
   --transition-fast: 0.15s ease;
   --transition-normal: 0.2s ease;
@@ -143,7 +146,10 @@ body {
 }
 
 /* Global Pixel Art Form Styling */
-input, textarea, select, button {
+input,
+textarea,
+select,
+button {
   font-family: 'Press Start 2P', monospace;
   -webkit-font-smoothing: none;
   -moz-osx-font-smoothing: none;
@@ -156,7 +162,8 @@ input, textarea, select, button {
 }
 
 /* Allow text selection in input fields and textareas */
-input, textarea {
+input,
+textarea {
   -webkit-user-select: text;
   -moz-user-select: text;
   -ms-user-select: text;
@@ -170,7 +177,11 @@ input, textarea {
 }
 
 /* Mobile touch improvements for interactive elements */
-button, [role="button"], .card, .checkbox, input[type="checkbox"] {
+button,
+[role='button'],
+.card,
+.checkbox,
+input[type='checkbox'] {
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
   -webkit-touch-action: manipulation;
@@ -238,8 +249,10 @@ button, [role="button"], .card, .checkbox, input[type="checkbox"] {
 }
 
 /* Native scaling for images and media */
-img, svg, canvas {
+img,
+svg,
+canvas {
   image-rendering: pixelated;
   image-rendering: -moz-crisp-edges;
   image-rendering: crisp-edges;
-} 
+}

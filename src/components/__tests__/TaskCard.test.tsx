@@ -27,17 +27,15 @@ jest.mock('../../services/userService', () => ({
 // Mock the useTasks hook
 jest.mock('../../hooks/useTasks', () => ({
   useTasks: jest.fn(),
-  TaskProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>
+  TaskProvider: ({ children }: { children: React.ReactNode }) => (
+    <div>{children}</div>
+  ),
 }));
 
 const mockUseTasks = require('../../hooks/useTasks').useTasks;
 
 const renderWithProvider = (component: React.ReactElement) => {
-  return render(
-    <TaskProvider>
-      {component}
-    </TaskProvider>
-  );
+  return render(<TaskProvider>{component}</TaskProvider>);
 };
 
 describe('TaskCard', () => {
@@ -70,10 +68,7 @@ describe('TaskCard', () => {
   describe('Rendering', () => {
     it('renders task title and description', () => {
       renderWithProvider(
-        <TaskCard
-          task={mockTask}
-          onOpenModal={mockOnOpenModal}
-        />
+        <TaskCard task={mockTask} onOpenModal={mockOnOpenModal} />
       );
 
       expect(screen.getByText('Test Task')).toBeInTheDocument();
@@ -82,10 +77,7 @@ describe('TaskCard', () => {
 
     it('displays priority badge', () => {
       renderWithProvider(
-        <TaskCard
-          task={mockTask}
-          onOpenModal={mockOnOpenModal}
-        />
+        <TaskCard task={mockTask} onOpenModal={mockOnOpenModal} />
       );
 
       expect(screen.getByText('High Priority')).toBeInTheDocument();
@@ -93,10 +85,7 @@ describe('TaskCard', () => {
 
     it('shows checkbox for task completion', () => {
       renderWithProvider(
-        <TaskCard
-          task={mockTask}
-          onOpenModal={mockOnOpenModal}
-        />
+        <TaskCard task={mockTask} onOpenModal={mockOnOpenModal} />
       );
 
       const checkbox = screen.getByRole('checkbox');
@@ -106,12 +95,9 @@ describe('TaskCard', () => {
 
     it('shows completed checkbox for completed tasks', () => {
       const completedTask = { ...mockTask, completed: true };
-      
+
       renderWithProvider(
-        <TaskCard
-          task={completedTask}
-          onOpenModal={mockOnOpenModal}
-        />
+        <TaskCard task={completedTask} onOpenModal={mockOnOpenModal} />
       );
 
       const checkbox = screen.getByRole('checkbox');
@@ -130,10 +116,7 @@ describe('TaskCard', () => {
       };
 
       renderWithProvider(
-        <TaskCard
-          task={taskWithRewards}
-          onOpenModal={mockOnOpenModal}
-        />
+        <TaskCard task={taskWithRewards} onOpenModal={mockOnOpenModal} />
       );
 
       // Check that XP strip is rendered (check for the element presence)
@@ -148,10 +131,7 @@ describe('TaskCard', () => {
       };
 
       renderWithProvider(
-        <TaskCard
-          task={taskWithoutRewards}
-          onOpenModal={mockOnOpenModal}
-        />
+        <TaskCard task={taskWithoutRewards} onOpenModal={mockOnOpenModal} />
       );
 
       // Check that XP strip is not rendered (element should not exist)
@@ -163,10 +143,7 @@ describe('TaskCard', () => {
   describe('Interactions', () => {
     it('calls onOpenModal when card is clicked', () => {
       renderWithProvider(
-        <TaskCard
-          task={mockTask}
-          onOpenModal={mockOnOpenModal}
-        />
+        <TaskCard task={mockTask} onOpenModal={mockOnOpenModal} />
       );
 
       const card = screen.getByText('Test Task').closest('div');
@@ -183,10 +160,7 @@ describe('TaskCard', () => {
       });
 
       renderWithProvider(
-        <TaskCard
-          task={mockTask}
-          onOpenModal={mockOnOpenModal}
-        />
+        <TaskCard task={mockTask} onOpenModal={mockOnOpenModal} />
       );
 
       const checkbox = screen.getByRole('checkbox');
@@ -198,10 +172,7 @@ describe('TaskCard', () => {
 
     it('shows edit button', () => {
       renderWithProvider(
-        <TaskCard
-          task={mockTask}
-          onOpenModal={mockOnOpenModal}
-        />
+        <TaskCard task={mockTask} onOpenModal={mockOnOpenModal} />
       );
 
       expect(screen.getByLabelText('Edit task')).toBeInTheDocument();
@@ -211,10 +182,7 @@ describe('TaskCard', () => {
   describe('Styling and Classes', () => {
     it('applies correct styling based on task completion', () => {
       const { container } = renderWithProvider(
-        <TaskCard
-          task={mockTask}
-          onOpenModal={mockOnOpenModal}
-        />
+        <TaskCard task={mockTask} onOpenModal={mockOnOpenModal} />
       );
 
       const cardElement = container.firstChild as HTMLElement;
@@ -224,12 +192,9 @@ describe('TaskCard', () => {
 
     it('applies completed styling for completed tasks', () => {
       const completedTask = { ...mockTask, completed: true };
-      
+
       const { container } = renderWithProvider(
-        <TaskCard
-          task={completedTask}
-          onOpenModal={mockOnOpenModal}
-        />
+        <TaskCard task={completedTask} onOpenModal={mockOnOpenModal} />
       );
 
       const cardElement = container.firstChild as HTMLElement;
@@ -241,12 +206,9 @@ describe('TaskCard', () => {
   describe('Edge Cases', () => {
     it('handles tasks without description', () => {
       const taskWithoutDescription = { ...mockTask, description: '' };
-      
+
       renderWithProvider(
-        <TaskCard
-          task={taskWithoutDescription}
-          onOpenModal={mockOnOpenModal}
-        />
+        <TaskCard task={taskWithoutDescription} onOpenModal={mockOnOpenModal} />
       );
 
       expect(screen.getByText('Test Task')).toBeInTheDocument();
@@ -256,12 +218,9 @@ describe('TaskCard', () => {
     // Skipped due to planned migration to sprites and emoji rendering issues in test environments
     it.skip('handles tasks without category', () => {
       const taskWithoutCategory = { ...mockTask, category: undefined };
-      
+
       renderWithProvider(
-        <TaskCard
-          task={taskWithoutCategory}
-          onOpenModal={mockOnOpenModal}
-        />
+        <TaskCard task={taskWithoutCategory} onOpenModal={mockOnOpenModal} />
       );
 
       expect(screen.getByText('Test Task')).toBeInTheDocument();
@@ -271,15 +230,12 @@ describe('TaskCard', () => {
 
     it('handles tasks without statRewards', () => {
       const taskWithoutRewards = { ...mockTask, statRewards: undefined };
-      
+
       renderWithProvider(
-        <TaskCard
-          task={taskWithoutRewards}
-          onOpenModal={mockOnOpenModal}
-        />
+        <TaskCard task={taskWithoutRewards} onOpenModal={mockOnOpenModal} />
       );
 
       expect(screen.getByText('Test Task')).toBeInTheDocument();
     });
   });
-}); 
+});

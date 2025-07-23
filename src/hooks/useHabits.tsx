@@ -45,7 +45,7 @@ export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
   const addHabit = (habitData: Omit<Habit, 'id' | 'createdAt' | 'streak'>) => {
     const newHabit = habitService.addHabit(habitData);
     if (newHabit) {
-      setHabits(prev => {
+      setHabits((prev) => {
         const updated = [...prev, newHabit];
         saveHabitsWithFeedback(updated);
         return updated;
@@ -57,8 +57,10 @@ export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
   const updateHabit = (id: string, updates: Partial<Habit>) => {
     const success = habitService.updateHabit(id, updates);
     if (success) {
-      setHabits(prev => {
-        const updated = prev.map(habit => habit.id === id ? { ...habit, ...updates } : habit);
+      setHabits((prev) => {
+        const updated = prev.map((habit) =>
+          habit.id === id ? { ...habit, ...updates } : habit
+        );
         saveHabitsWithFeedback(updated);
         return updated;
       });
@@ -69,8 +71,8 @@ export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
   const deleteHabit = (id: string) => {
     const success = habitService.deleteHabit(id);
     if (success) {
-      setHabits(prev => {
-        const updated = prev.filter(habit => habit.id !== id);
+      setHabits((prev) => {
+        const updated = prev.filter((habit) => habit.id !== id);
         saveHabitsWithFeedback(updated);
         return updated;
       });
@@ -81,8 +83,8 @@ export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
   const completeHabit = (id: string) => {
     const success = habitService.completeHabit(id);
     if (success) {
-      setHabits(prev => {
-        const updated = prev.map(habit => {
+      setHabits((prev) => {
+        const updated = prev.map((habit) => {
           if (habit.id === id) {
             return {
               ...habit,
@@ -110,8 +112,6 @@ export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
   };
 
   return (
-    <HabitContext.Provider value={value}>
-      {children}
-    </HabitContext.Provider>
+    <HabitContext.Provider value={value}>{children}</HabitContext.Provider>
   );
-}; 
+};

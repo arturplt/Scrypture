@@ -47,7 +47,9 @@ describe('useHabits', () => {
 
   describe('Initialization', () => {
     it('loads habits from storage on initialization', () => {
-      const { result } = renderHook(() => useHabits(), { wrapper: HabitProvider });
+      const { result } = renderHook(() => useHabits(), {
+        wrapper: HabitProvider,
+      });
 
       expect(habitService.getHabits).toHaveBeenCalled();
       expect(result.current.habits).toEqual(mockHabits);
@@ -56,7 +58,9 @@ describe('useHabits', () => {
     it('returns empty array when no habits exist', () => {
       (habitService.getHabits as jest.Mock).mockReturnValue([]);
 
-      const { result } = renderHook(() => useHabits(), { wrapper: HabitProvider });
+      const { result } = renderHook(() => useHabits(), {
+        wrapper: HabitProvider,
+      });
 
       expect(result.current.habits).toEqual([]);
     });
@@ -64,7 +68,9 @@ describe('useHabits', () => {
 
   describe('addHabit', () => {
     it('adds a new habit successfully', async () => {
-      const { result } = renderHook(() => useHabits(), { wrapper: HabitProvider });
+      const { result } = renderHook(() => useHabits(), {
+        wrapper: HabitProvider,
+      });
       const newHabit = {
         id: '3',
         name: 'New Habit',
@@ -82,17 +88,21 @@ describe('useHabits', () => {
           targetFrequency: 'daily',
         });
       });
-      await waitFor(() => expect(habitService.addHabit).toHaveBeenCalledWith({
-        name: 'New Habit',
-        description: 'A new habit to track',
-        targetFrequency: 'daily',
-      }));
+      await waitFor(() =>
+        expect(habitService.addHabit).toHaveBeenCalledWith({
+          name: 'New Habit',
+          description: 'A new habit to track',
+          targetFrequency: 'daily',
+        })
+      );
       await waitFor(() => expect(habitService.saveHabits).toHaveBeenCalled());
     });
 
     it('handles errors when adding habit fails', async () => {
       (habitService.addHabit as jest.Mock).mockReturnValue(false);
-      const { result } = renderHook(() => useHabits(), { wrapper: HabitProvider });
+      const { result } = renderHook(() => useHabits(), {
+        wrapper: HabitProvider,
+      });
       const newHabit = {
         name: 'New Habit',
         description: 'A new habit to track',
@@ -103,95 +113,131 @@ describe('useHabits', () => {
         result.current.addHabit(newHabit);
       });
 
-      await waitFor(() => expect(habitService.addHabit).toHaveBeenCalledWith(newHabit));
+      await waitFor(() =>
+        expect(habitService.addHabit).toHaveBeenCalledWith(newHabit)
+      );
       // Should not call saveHabits if addHabit fails
-      await waitFor(() => expect(habitService.saveHabits).not.toHaveBeenCalled());
+      await waitFor(() =>
+        expect(habitService.saveHabits).not.toHaveBeenCalled()
+      );
     });
   });
 
   describe('updateHabit', () => {
     it('updates an existing habit successfully', async () => {
       (habitService.updateHabit as jest.Mock).mockReturnValue(true);
-      const { result } = renderHook(() => useHabits(), { wrapper: HabitProvider });
+      const { result } = renderHook(() => useHabits(), {
+        wrapper: HabitProvider,
+      });
       const updates = { name: 'Updated Habit Name' };
 
       act(() => {
         result.current.updateHabit('1', updates);
       });
 
-      await waitFor(() => expect(habitService.updateHabit).toHaveBeenCalledWith('1', updates));
+      await waitFor(() =>
+        expect(habitService.updateHabit).toHaveBeenCalledWith('1', updates)
+      );
       await waitFor(() => expect(habitService.saveHabits).toHaveBeenCalled());
     });
 
     it('handles errors when updating habit fails', async () => {
       (habitService.updateHabit as jest.Mock).mockReturnValue(false);
-      const { result } = renderHook(() => useHabits(), { wrapper: HabitProvider });
+      const { result } = renderHook(() => useHabits(), {
+        wrapper: HabitProvider,
+      });
       const updates = { name: 'Updated Habit Name' };
 
       act(() => {
         result.current.updateHabit('1', updates);
       });
 
-      await waitFor(() => expect(habitService.updateHabit).toHaveBeenCalledWith('1', updates));
-      await waitFor(() => expect(habitService.saveHabits).not.toHaveBeenCalled());
+      await waitFor(() =>
+        expect(habitService.updateHabit).toHaveBeenCalledWith('1', updates)
+      );
+      await waitFor(() =>
+        expect(habitService.saveHabits).not.toHaveBeenCalled()
+      );
     });
   });
 
   describe('deleteHabit', () => {
     it('deletes a habit successfully', async () => {
       (habitService.deleteHabit as jest.Mock).mockReturnValue(true);
-      const { result } = renderHook(() => useHabits(), { wrapper: HabitProvider });
+      const { result } = renderHook(() => useHabits(), {
+        wrapper: HabitProvider,
+      });
 
       act(() => {
         result.current.deleteHabit('1');
       });
 
-      await waitFor(() => expect(habitService.deleteHabit).toHaveBeenCalledWith('1'));
+      await waitFor(() =>
+        expect(habitService.deleteHabit).toHaveBeenCalledWith('1')
+      );
       await waitFor(() => expect(habitService.saveHabits).toHaveBeenCalled());
     });
 
     it('handles errors when deleting habit fails', async () => {
       (habitService.deleteHabit as jest.Mock).mockReturnValue(false);
-      const { result } = renderHook(() => useHabits(), { wrapper: HabitProvider });
+      const { result } = renderHook(() => useHabits(), {
+        wrapper: HabitProvider,
+      });
 
       act(() => {
         result.current.deleteHabit('1');
       });
 
-      await waitFor(() => expect(habitService.deleteHabit).toHaveBeenCalledWith('1'));
-      await waitFor(() => expect(habitService.saveHabits).not.toHaveBeenCalled());
+      await waitFor(() =>
+        expect(habitService.deleteHabit).toHaveBeenCalledWith('1')
+      );
+      await waitFor(() =>
+        expect(habitService.saveHabits).not.toHaveBeenCalled()
+      );
     });
   });
 
   describe('completeHabit', () => {
     it('completes a habit successfully', async () => {
       (habitService.completeHabit as jest.Mock).mockReturnValue(true);
-      const { result } = renderHook(() => useHabits(), { wrapper: HabitProvider });
+      const { result } = renderHook(() => useHabits(), {
+        wrapper: HabitProvider,
+      });
 
       act(() => {
         result.current.completeHabit('1');
       });
 
-      await waitFor(() => expect(habitService.completeHabit).toHaveBeenCalledWith('1'));
+      await waitFor(() =>
+        expect(habitService.completeHabit).toHaveBeenCalledWith('1')
+      );
       await waitFor(() => expect(habitService.saveHabits).toHaveBeenCalled());
     });
 
     it('handles errors when completing habit fails', async () => {
       (habitService.completeHabit as jest.Mock).mockReturnValue(false);
-      const { result } = renderHook(() => useHabits(), { wrapper: HabitProvider });
+      const { result } = renderHook(() => useHabits(), {
+        wrapper: HabitProvider,
+      });
 
       act(() => {
         result.current.completeHabit('1');
       });
 
-      await waitFor(() => expect(habitService.completeHabit).toHaveBeenCalledWith('1'));
-      await waitFor(() => expect(habitService.saveHabits).not.toHaveBeenCalled());
+      await waitFor(() =>
+        expect(habitService.completeHabit).toHaveBeenCalledWith('1')
+      );
+      await waitFor(() =>
+        expect(habitService.saveHabits).not.toHaveBeenCalled()
+      );
     });
   });
 
   describe('Habit Statistics', () => {
     it('calculates total habits correctly', () => {
-      const { result } = renderHook(() => useHabits(), { wrapper: HabitProvider });
+      const { result } = renderHook(() => useHabits(), {
+        wrapper: HabitProvider,
+      });
 
       expect(result.current.habits).toHaveLength(2);
     });
@@ -204,9 +250,13 @@ describe('useHabits', () => {
           lastCompleted: today,
         },
       ];
-      (habitService.getHabits as jest.Mock).mockReturnValue(habitsCompletedToday);
+      (habitService.getHabits as jest.Mock).mockReturnValue(
+        habitsCompletedToday
+      );
 
-      const { result } = renderHook(() => useHabits(), { wrapper: HabitProvider });
+      const { result } = renderHook(() => useHabits(), {
+        wrapper: HabitProvider,
+      });
 
       // This would depend on the actual implementation
       // For now, we just verify the habits are loaded
@@ -214,7 +264,9 @@ describe('useHabits', () => {
     });
 
     it('calculates streak statistics', () => {
-      const { result } = renderHook(() => useHabits(), { wrapper: HabitProvider });
+      const { result } = renderHook(() => useHabits(), {
+        wrapper: HabitProvider,
+      });
 
       // Verify habits with different streaks are loaded
       const habits = result.current.habits;
@@ -235,7 +287,9 @@ describe('useHabits', () => {
 
     it('handles save errors gracefully', async () => {
       (habitService.saveHabits as jest.Mock).mockReturnValue(false);
-      const { result } = renderHook(() => useHabits(), { wrapper: HabitProvider });
+      const { result } = renderHook(() => useHabits(), {
+        wrapper: HabitProvider,
+      });
       const newHabit = {
         name: 'New Habit',
         description: 'A new habit to track',
@@ -265,7 +319,9 @@ describe('useHabits', () => {
       (habitService.addHabit as jest.Mock).mockReturnValue(newHabit);
       (habitService.updateHabit as jest.Mock).mockReturnValue(true);
       (habitService.completeHabit as jest.Mock).mockReturnValue(true);
-      const { result } = renderHook(() => useHabits(), { wrapper: HabitProvider });
+      const { result } = renderHook(() => useHabits(), {
+        wrapper: HabitProvider,
+      });
 
       act(() => {
         result.current.addHabit({
@@ -291,7 +347,9 @@ describe('useHabits', () => {
       (habitService.addHabit as jest.Mock).mockReturnValue(newHabit);
       (habitService.updateHabit as jest.Mock).mockReturnValue(true);
       (habitService.completeHabit as jest.Mock).mockReturnValue(true);
-      const { result } = renderHook(() => useHabits(), { wrapper: HabitProvider });
+      const { result } = renderHook(() => useHabits(), {
+        wrapper: HabitProvider,
+      });
 
       // Add a habit
       act(() => {
@@ -313,7 +371,9 @@ describe('useHabits', () => {
       });
 
       // Each operation should trigger a save
-      await waitFor(() => expect(habitService.saveHabits).toHaveBeenCalledTimes(3));
+      await waitFor(() =>
+        expect(habitService.saveHabits).toHaveBeenCalledTimes(3)
+      );
     });
   });
-}); 
+});

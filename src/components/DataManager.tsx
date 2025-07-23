@@ -11,9 +11,14 @@ interface DataManagerProps {
 export const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState('');
-  const [messageType, setMessageType] = useState<'success' | 'error' | 'info'>('info');
+  const [messageType, setMessageType] = useState<'success' | 'error' | 'info'>(
+    'info'
+  );
 
-  const showMessage = (msg: string, type: 'success' | 'error' | 'info' = 'info') => {
+  const showMessage = (
+    msg: string,
+    type: 'success' | 'error' | 'info' = 'info'
+  ) => {
     setMessage(msg);
     setMessageType(type);
     setTimeout(() => setMessage(''), 3000);
@@ -116,39 +121,44 @@ export const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
     const taskTemplates = [
       {
         title: 'Reflect on Profound Wisdom',
-        description: 'Contemplate a meaningful quote or teaching. Write down your insights.',
+        description:
+          'Contemplate a meaningful quote or teaching. Write down your insights.',
         category: 'mind',
-        statRewards: { mind: 2, xp: 5 }
+        statRewards: { mind: 2, xp: 5 },
       },
       {
         title: 'Practice Good Habit',
-        description: 'Identify and practice a positive habit today. Note your progress.',
+        description:
+          'Identify and practice a positive habit today. Note your progress.',
         category: 'body',
-        statRewards: { body: 1, mind: 1, xp: 5 }
+        statRewards: { body: 1, mind: 1, xp: 5 },
       },
       {
         title: 'Guided Breathing Exercise',
-        description: 'Follow a 5-minute guided breathing session to relax and center yourself.',
+        description:
+          'Follow a 5-minute guided breathing session to relax and center yourself.',
         category: 'soul',
-        statRewards: { soul: 2, xp: 5 }
+        statRewards: { soul: 2, xp: 5 },
       },
       {
         title: 'Mindful Meditation',
-        description: 'Spend 10 minutes in mindful meditation. Focus on your breath and let thoughts pass.',
+        description:
+          'Spend 10 minutes in mindful meditation. Focus on your breath and let thoughts pass.',
         category: 'soul',
-        statRewards: { soul: 2, mind: 1, xp: 5 }
+        statRewards: { soul: 2, mind: 1, xp: 5 },
       },
       {
         title: 'Physical Exercise Routine',
-        description: 'Complete a specific exercise routine (e.g., yoga, stretching, or a workout).',
+        description:
+          'Complete a specific exercise routine (e.g., yoga, stretching, or a workout).',
         category: 'body',
-        statRewards: { body: 2, xp: 5 }
+        statRewards: { body: 2, xp: 5 },
       },
       {
         title: 'Gratitude Practice',
         description: 'Write down three things you are grateful for today.',
         category: 'mind',
-        statRewards: { mind: 1, soul: 1, xp: 5 }
+        statRewards: { mind: 1, soul: 1, xp: 5 },
       },
     ];
     const priorities = [
@@ -156,8 +166,8 @@ export const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
       { value: 'medium', label: 'Medium', xp: 10 },
       { value: 'high', label: 'High', xp: 15 },
     ];
-    taskTemplates.forEach(template => {
-      priorities.forEach(priority => {
+    taskTemplates.forEach((template) => {
+      priorities.forEach((priority) => {
         let title = template.title;
         let description = template.description;
         // Make titles/descriptions unique for each priority
@@ -174,7 +184,7 @@ export const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
           category: template.category,
           completed: false,
           priority: priority.value as 'low' | 'medium' | 'high',
-          statRewards: { ...template.statRewards, xp: priority.xp }
+          statRewards: { ...template.statRewards, xp: priority.xp },
         });
       });
     });
@@ -235,7 +245,8 @@ export const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
       },
       {
         title: 'Mindful Walk',
-        description: 'Take a 20-minute walk outdoors, focusing on your breath and surroundings.',
+        description:
+          'Take a 20-minute walk outdoors, focusing on your breath and surroundings.',
         category: 'mind',
         statRewards: { mind: 2, body: 1 },
         difficulty: 3,
@@ -251,7 +262,8 @@ export const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
       },
       {
         title: 'Evening Relaxation',
-        description: 'Spend 15 minutes doing a relaxing activity (reading, music, etc.).',
+        description:
+          'Spend 15 minutes doing a relaxing activity (reading, music, etc.).',
         category: 'soul',
         statRewards: { soul: 2, mind: 1 },
         difficulty: 2,
@@ -259,7 +271,8 @@ export const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
       },
       {
         title: 'Cardio Exercise',
-        description: 'Complete 30 minutes of moderate cardio (jogging, cycling, etc.).',
+        description:
+          'Complete 30 minutes of moderate cardio (jogging, cycling, etc.).',
         category: 'body',
         statRewards: { body: 3 },
         difficulty: 5,
@@ -287,8 +300,8 @@ export const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
       { value: 'medium', label: 'Medium', xpMultiplier: 2 },
       { value: 'high', label: 'High', xpMultiplier: 3 },
     ];
-    difficultyTasks.forEach(template => {
-      priorities.forEach(priority => {
+    difficultyTasks.forEach((template) => {
+      priorities.forEach((priority) => {
         let title = template.title;
         let description = template.description;
         if (priority.value === 'medium') {
@@ -388,7 +401,10 @@ export const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
             <button onClick={handleAddDebugTasks} className={styles.button}>
               Add Example Tasks
             </button>
-            <button onClick={handleAddDifficultyTasks} className={styles.button}>
+            <button
+              onClick={handleAddDifficultyTasks}
+              className={styles.button}
+            >
               Add Difficulty Sample Tasks
             </button>
           </div>
@@ -396,4 +412,4 @@ export const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
       )}
     </div>
   );
-}; 
+};

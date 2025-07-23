@@ -12,8 +12,8 @@ describe('TaskCounter', () => {
         </TaskProvider>
       </UserProvider>
     );
-    
+
     expect(screen.getByText(/Tasks Completed/i)).toBeInTheDocument();
     expect(screen.getByText('0 / 0')).toBeInTheDocument();
   });
-}); 
+});

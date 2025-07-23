@@ -14,7 +14,7 @@ const testCategory = {
   name: 'test-category',
   icon: '🎯',
   color: 'var(--color-skills)',
-  points: { body: 1, mind: 1, soul: 1 }
+  points: { body: 1, mind: 1, soul: 1 },
 };
 
 const addResult = categoryService.addCustomCategory(testCategory);
@@ -45,4 +45,4 @@ console.log('\n5. Checking all categories...');
 const allCategories = categoryService.getAllCategories();
 console.log('All categories:', allCategories);
 
-console.log('\n=== Debug Complete ==='); 
+console.log('\n=== Debug Complete ===');

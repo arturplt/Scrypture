@@ -14,7 +14,8 @@ export const categoryService = {
   getCustomCategories(): CustomCategory[] {
     try {
       console.log('Attempting to get custom categories from storage...');
-      const categories = storageService.getGenericItem<CustomCategory[]>(STORAGE_KEY);
+      const categories =
+        storageService.getGenericItem<CustomCategory[]>(STORAGE_KEY);
       console.log('Retrieved custom categories from storage:', categories);
       const result = categories || [];
       console.log('Returning categories:', result);
@@ -41,22 +42,26 @@ export const categoryService = {
     try {
       const categories = this.getCustomCategories();
       console.log('Current custom categories:', categories);
-      
+
       // Check if category already exists
-      if (categories.some(cat => cat.name.toLowerCase() === category.name.toLowerCase())) {
+      if (
+        categories.some(
+          (cat) => cat.name.toLowerCase() === category.name.toLowerCase()
+        )
+      ) {
         console.log('Category already exists:', category.name);
         return false;
       }
-      
+
       categories.push(category);
       console.log('Saving categories:', categories);
       const success = this.saveCustomCategories(categories);
       console.log('Save successful:', success);
-      
+
       // Verify the save worked by reading back
       const verifyCategories = this.getCustomCategories();
       console.log('Verification - categories after save:', verifyCategories);
-      
+
       return success;
     } catch (error) {
       console.error('Error in addCustomCategory:', error);
@@ -66,32 +71,43 @@ export const categoryService = {
 
   removeCustomCategory(categoryName: string): boolean {
     const categories = this.getCustomCategories();
-    const filteredCategories = categories.filter(cat => cat.name.toLowerCase() !== categoryName.toLowerCase());
-    
+    const filteredCategories = categories.filter(
+      (cat) => cat.name.toLowerCase() !== categoryName.toLowerCase()
+    );
+
     if (filteredCategories.length === categories.length) {
       return false; // Category not found
     }
-    
+
     return this.saveCustomCategories(filteredCategories);
   },
 
-  getAllCategories(): (CustomCategory | { name: string; icon: string; color: string })[] {
+  getAllCategories(): (
+    | CustomCategory
+    | { name: string; icon: string; color: string }
+  )[] {
     const defaultCategories = [
       { name: 'home', icon: '🏠', color: 'var(--color-home)' },
       { name: 'free time', icon: '🎲', color: 'var(--color-freetime)' },
-      { name: 'garden', icon: '🌱', color: 'var(--color-garden)' }
+      { name: 'garden', icon: '🌱', color: 'var(--color-garden)' },
     ];
-    
+
     const customCategories = this.getCustomCategories();
     return [...defaultCategories, ...customCategories];
   },
 
-  getCategoryByName(name: string): CustomCategory | { name: string; icon: string; color: string } | null {
+  getCategoryByName(
+    name: string
+  ): CustomCategory | { name: string; icon: string; color: string } | null {
     const allCategories = this.getAllCategories();
-    return allCategories.find(cat => cat.name.toLowerCase() === name.toLowerCase()) || null;
+    return (
+      allCategories.find(
+        (cat) => cat.name.toLowerCase() === name.toLowerCase()
+      ) || null
+    );
   },
 
   clearCustomCategories(): boolean {
     return this.saveCustomCategories([]);
-  }
-}; 
+  },
+};

@@ -20,7 +20,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   onCancel,
   confirmText = 'Confirm',
   cancelText = 'Cancel',
-  confirmButtonStyle = 'primary'
+  confirmButtonStyle = 'primary',
 }) => {
   if (!isOpen) return null;
 
@@ -52,4 +52,4 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
       </div>
     </div>
   );
-}; 
+};

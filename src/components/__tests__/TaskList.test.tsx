@@ -10,7 +10,13 @@ jest.mock('../../hooks/useTasks', () => ({
 }));
 
 jest.mock('../TaskCard', () => ({
-  TaskCard: ({ task, onOpenModal }: { task: Task; onOpenModal: () => void }) => (
+  TaskCard: ({
+    task,
+    onOpenModal,
+  }: {
+    task: Task;
+    onOpenModal: () => void;
+  }) => (
     <div data-testid={`task-card-${task.id}`} onClick={onOpenModal}>
       {task.title}
     </div>
@@ -18,13 +24,18 @@ jest.mock('../TaskCard', () => ({
 }));
 
 jest.mock('../TaskDetailModal', () => ({
-  TaskDetailModal: ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => (
+  TaskDetailModal: ({
+    isOpen,
+    onClose,
+  }: {
+    isOpen: boolean;
+    onClose: () => void;
+  }) =>
     isOpen ? (
       <div data-testid="task-detail-modal">
         <button onClick={onClose}>Close Modal</button>
       </div>
-    ) : null
-  ),
+    ) : null,
 }));
 
 describe('TaskList', () => {
@@ -85,7 +96,9 @@ describe('TaskList', () => {
       render(<TaskList />);
 
       expect(screen.getByText('No tasks yet')).toBeInTheDocument();
-      expect(screen.getByText('Create your first task to begin your journey')).toBeInTheDocument();
+      expect(
+        screen.getByText('Create your first task to begin your journey')
+      ).toBeInTheDocument();
       expect(screen.getByText('✨')).toBeInTheDocument();
     });
 
@@ -232,7 +245,9 @@ describe('TaskList', () => {
       fireEvent.click(closeButton);
 
       await waitFor(() => {
-        expect(screen.queryByTestId('task-detail-modal')).not.toBeInTheDocument();
+        expect(
+          screen.queryByTestId('task-detail-modal')
+        ).not.toBeInTheDocument();
       });
     });
 
@@ -272,7 +287,7 @@ describe('TaskList', () => {
     });
 
     it('does not show completed tasks section when no completed tasks', () => {
-      const tasksWithoutCompleted = mockTasks.filter(task => !task.completed);
+      const tasksWithoutCompleted = mockTasks.filter((task) => !task.completed);
       mockUseTasks.mockReturnValue({ tasks: tasksWithoutCompleted });
 
       render(<TaskList />);
@@ -282,7 +297,7 @@ describe('TaskList', () => {
     });
 
     it('does not show active tasks section when no active tasks', () => {
-      const onlyCompletedTasks = mockTasks.filter(task => task.completed);
+      const onlyCompletedTasks = mockTasks.filter((task) => task.completed);
       mockUseTasks.mockReturnValue({ tasks: onlyCompletedTasks });
 
       render(<TaskList />);
@@ -340,14 +355,19 @@ describe('TaskList', () => {
       const taskWithLongTitle = [
         {
           ...mockTasks[0],
-          title: 'This is a very long task title that might cause layout issues in the task list component',
+          title:
+            'This is a very long task title that might cause layout issues in the task list component',
         },
       ];
       mockUseTasks.mockReturnValue({ tasks: taskWithLongTitle });
 
       render(<TaskList />);
 
-      expect(screen.getByText('This is a very long task title that might cause layout issues in the task list component')).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'This is a very long task title that might cause layout issues in the task list component'
+        )
+      ).toBeInTheDocument();
     });
   });
 
@@ -426,7 +446,7 @@ describe('TaskList', () => {
       render(<TaskList />);
 
       const categorySelect = screen.getByDisplayValue('All Categories');
-      
+
       // Filter by a category that has no active tasks (only completed tasks)
       fireEvent.change(categorySelect, { target: { value: 'garden' } });
 
@@ -435,7 +455,7 @@ describe('TaskList', () => {
       expect(screen.queryByText('Workout')).not.toBeInTheDocument();
       expect(screen.queryByText('Read Book')).not.toBeInTheDocument();
       expect(screen.queryByText('Study Programming')).not.toBeInTheDocument();
-      
+
       // But completed tasks should still be visible
       expect(screen.getByText('Completed Tasks')).toBeInTheDocument();
       expect(screen.getByText('Meditation')).toBeInTheDocument();
@@ -472,4 +492,4 @@ describe('TaskList', () => {
       expect(screen.queryByText('Workout')).not.toBeInTheDocument();
     });
   });
-}); 
+});

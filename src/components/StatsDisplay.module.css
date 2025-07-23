@@ -168,18 +168,18 @@
   .container {
     padding: var(--spacing-sm);
   }
-  
+
   .title {
     font-size: var(--font-size-sm);
   }
-  
+
   .statName,
   .statValue {
     font-size: var(--font-size-xs);
   }
-  
+
   .levelInfo {
     flex-direction: column;
     gap: var(--spacing-sm);
   }
-} 
+}

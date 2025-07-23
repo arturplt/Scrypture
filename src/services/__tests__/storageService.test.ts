@@ -20,14 +20,14 @@ beforeEach(() => {
   localStorageMock.setItem.mockImplementation(() => {});
   localStorageMock.removeItem.mockImplementation(() => {});
   localStorageMock.getItem.mockImplementation(() => null);
-  
-
 });
 
 // Mock crypto.randomUUID
 Object.defineProperty(global, 'crypto', {
   value: {
-    randomUUID: jest.fn(() => 'mock-uuid-' + Math.random().toString(36).substr(2, 9)),
+    randomUUID: jest.fn(
+      () => 'mock-uuid-' + Math.random().toString(36).substr(2, 9)
+    ),
   },
 });
 
@@ -41,8 +41,6 @@ afterAll(() => {
   console.error = originalConsoleError;
 });
 
-
-
 describe('StorageService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -53,7 +51,7 @@ describe('StorageService', () => {
     test('should detect when localStorage is available', () => {
       localStorageMock.setItem.mockImplementation(() => {});
       localStorageMock.removeItem.mockImplementation(() => {});
-      
+
       // Recreate service to test availability check
       const service = (storageService as any).constructor.getInstance();
       expect(service).toBeDefined();
@@ -63,7 +61,7 @@ describe('StorageService', () => {
       localStorageMock.setItem.mockImplementation(() => {
         throw new Error('Storage not available');
       });
-      
+
       // Recreate service to test unavailability
       const service = (storageService as any).constructor.getInstance();
       expect(service).toBeDefined();
@@ -84,7 +82,7 @@ describe('StorageService', () => {
 
     test('should save and retrieve tasks', () => {
       const tasks = [mockTask];
-      
+
       const saveResult = storageService.saveTasks(tasks);
       expect(saveResult).toBe(true);
       expect(localStorageMock.setItem).toHaveBeenCalledWith(
@@ -94,7 +92,7 @@ describe('StorageService', () => {
 
       localStorageMock.getItem.mockReturnValue(JSON.stringify(tasks));
       const retrievedTasks = storageService.getTasks();
-      
+
       expect(retrievedTasks).toHaveLength(1);
       expect(retrievedTasks[0].id).toBe('1');
       expect(retrievedTasks[0].title).toBe('Test Task');
@@ -103,7 +101,7 @@ describe('StorageService', () => {
     test('should handle empty tasks array', () => {
       const saveResult = storageService.saveTasks([]);
       expect(saveResult).toBe(true);
-      
+
       localStorageMock.getItem.mockReturnValue('[]');
       const retrievedTasks = storageService.getTasks();
       expect(retrievedTasks).toEqual([]);
@@ -118,7 +116,7 @@ describe('StorageService', () => {
 
       localStorageMock.getItem.mockReturnValue(JSON.stringify([invalidTask]));
       const retrievedTasks = storageService.getTasks();
-      
+
       // Should filter out invalid tasks
       expect(retrievedTasks).toEqual([]);
     });
@@ -126,7 +124,7 @@ describe('StorageService', () => {
     test('should handle corrupted task data', () => {
       localStorageMock.getItem.mockReturnValue('invalid json');
       const retrievedTasks = storageService.getTasks();
-      
+
       expect(retrievedTasks).toEqual([]);
     });
 
@@ -162,7 +160,7 @@ describe('StorageService', () => {
 
     test('should save and retrieve habits', () => {
       const habits = [mockHabit];
-      
+
       const saveResult = storageService.saveHabits(habits);
       expect(saveResult).toBe(true);
       expect(localStorageMock.setItem).toHaveBeenCalledWith(
@@ -172,7 +170,7 @@ describe('StorageService', () => {
 
       localStorageMock.getItem.mockReturnValue(JSON.stringify(habits));
       const retrievedHabits = storageService.getHabits();
-      
+
       expect(retrievedHabits).toHaveLength(1);
       expect(retrievedHabits[0].id).toBe('1');
       expect(retrievedHabits[0].name).toBe('Daily Exercise');
@@ -184,9 +182,11 @@ describe('StorageService', () => {
         lastCompleted: undefined,
       };
 
-      localStorageMock.getItem.mockReturnValue(JSON.stringify([habitWithoutLastCompleted]));
+      localStorageMock.getItem.mockReturnValue(
+        JSON.stringify([habitWithoutLastCompleted])
+      );
       const retrievedHabits = storageService.getHabits();
-      
+
       expect(retrievedHabits).toHaveLength(1);
       expect(retrievedHabits[0].lastCompleted).toBeUndefined();
     });
@@ -200,7 +200,7 @@ describe('StorageService', () => {
 
       localStorageMock.getItem.mockReturnValue(JSON.stringify([invalidHabit]));
       const retrievedHabits = storageService.getHabits();
-      
+
       // Should filter out invalid habits
       expect(retrievedHabits).toEqual([]);
     });
@@ -218,7 +218,7 @@ describe('StorageService', () => {
         body: 0,
         mind: 0,
         soul: 0,
-        achievements: []
+        achievements: [],
       };
 
       localStorageMock.getItem.mockReturnValue(JSON.stringify(mockUser));
@@ -226,7 +226,10 @@ describe('StorageService', () => {
 
       const saveResult = storageService.saveUser(mockUser);
       expect(saveResult).toBe(true);
-      expect(localStorageMock.setItem).toHaveBeenCalledWith('scrypture_user', JSON.stringify(mockUser));
+      expect(localStorageMock.setItem).toHaveBeenCalledWith(
+        'scrypture_user',
+        JSON.stringify(mockUser)
+      );
 
       const retrievedUser = storageService.getUser();
       expect(retrievedUser).toEqual(mockUser);
@@ -255,9 +258,9 @@ describe('StorageService', () => {
             id: 'achievement1',
             name: 'First Task',
             description: 'Complete your first task',
-            unlockedAt: new Date('2024-01-01')
-          }
-        ]
+            unlockedAt: new Date('2024-01-01'),
+          },
+        ],
       };
 
       localStorageMock.getItem.mockReturnValue(JSON.stringify(mockUser));
@@ -271,7 +274,7 @@ describe('StorageService', () => {
   describe('Settings Operations', () => {
     test('should save and retrieve settings', () => {
       const settings = { theme: 'dark', notifications: true };
-      
+
       const saveResult = storageService.saveSettings(settings);
       expect(saveResult).toBe(true);
       expect(localStorageMock.setItem).toHaveBeenCalledWith(
@@ -281,14 +284,14 @@ describe('StorageService', () => {
 
       localStorageMock.getItem.mockReturnValue(JSON.stringify(settings));
       const retrievedSettings = storageService.getSettings();
-      
+
       expect(retrievedSettings).toEqual(settings);
     });
 
     test('should return empty object for no settings', () => {
       localStorageMock.getItem.mockReturnValue(null);
       const retrievedSettings = storageService.getSettings();
-      
+
       expect(retrievedSettings).toEqual({});
     });
   });
@@ -297,8 +300,8 @@ describe('StorageService', () => {
     test('should create backup with all data', () => {
       const mockTasks = [{ id: '1', title: 'Test Task' } as Task];
       const mockHabits = [{ id: '1', name: 'Test Habit' } as Habit];
-      const mockUser = { 
-        id: '1', 
+      const mockUser = {
+        id: '1',
         name: 'Test User',
         level: 1,
         experience: 0,
@@ -307,7 +310,7 @@ describe('StorageService', () => {
         soul: 0,
         achievements: [],
         createdAt: new Date('2024-01-01'),
-        updatedAt: new Date('2024-01-01')
+        updatedAt: new Date('2024-01-01'),
       } as User;
       const mockSettings = { theme: 'dark' };
 
@@ -318,7 +321,7 @@ describe('StorageService', () => {
       jest.spyOn(storageService, 'getSettings').mockReturnValue(mockSettings);
 
       const backup = storageService.createBackup();
-      
+
       expect(backup.tasks).toEqual(mockTasks);
       expect(backup.habits).toEqual(mockHabits);
       expect(backup.user).toEqual(mockUser);
@@ -346,7 +349,7 @@ describe('StorageService', () => {
 
       localStorageMock.getItem.mockReturnValue(JSON.stringify(backup));
       const retrievedBackup = storageService.getBackup();
-      
+
       expect(retrievedBackup).toEqual(backup);
     });
 
@@ -354,8 +357,8 @@ describe('StorageService', () => {
       const backup = {
         tasks: [{ id: '1', title: 'Test Task' } as Task],
         habits: [{ id: '1', name: 'Test Habit' } as Habit],
-        user: { 
-          id: '1', 
+        user: {
+          id: '1',
           name: 'Test User',
           level: 1,
           experience: 0,
@@ -364,14 +367,14 @@ describe('StorageService', () => {
           soul: 0,
           achievements: [],
           createdAt: new Date('2024-01-01'),
-          updatedAt: new Date('2024-01-01')
+          updatedAt: new Date('2024-01-01'),
         } as User,
         settings: { theme: 'dark' },
       };
 
       const restoreResult = storageService.restoreFromBackup(backup);
       expect(restoreResult).toBe(true);
-      
+
       // Should have called save methods for each data type
       expect(localStorageMock.setItem).toHaveBeenCalledTimes(4);
     });
@@ -392,8 +395,8 @@ describe('StorageService', () => {
       const mockData = {
         tasks: [{ id: '1', title: 'Test Task' } as Task],
         habits: [{ id: '1', name: 'Test Habit' } as Habit],
-        user: { 
-          id: '1', 
+        user: {
+          id: '1',
           name: 'Test User',
           level: 1,
           experience: 0,
@@ -402,7 +405,7 @@ describe('StorageService', () => {
           soul: 0,
           achievements: [],
           createdAt: new Date('2024-01-01'),
-          updatedAt: new Date('2024-01-01')
+          updatedAt: new Date('2024-01-01'),
         } as User,
         settings: { theme: 'dark' },
       };
@@ -410,7 +413,7 @@ describe('StorageService', () => {
       jest.spyOn(storageService, 'createBackup').mockReturnValue(mockData);
 
       const exportedData = storageService.exportData();
-      
+
       expect(typeof exportedData).toBe('string');
       const parsedData = JSON.parse(exportedData);
       // Compare everything except timestamps which are serialized as strings
@@ -432,8 +435,8 @@ describe('StorageService', () => {
       const mockData = {
         tasks: [{ id: '1', title: 'Test Task' } as Task],
         habits: [{ id: '1', name: 'Test Habit' } as Habit],
-        user: { 
-          id: '1', 
+        user: {
+          id: '1',
           name: 'Test User',
           level: 1,
           experience: 0,
@@ -442,21 +445,21 @@ describe('StorageService', () => {
           soul: 0,
           achievements: [],
           createdAt: new Date('2024-01-01'),
-          updatedAt: new Date('2024-01-01')
+          updatedAt: new Date('2024-01-01'),
         } as User,
         settings: { theme: 'dark' },
       };
 
       const jsonData = JSON.stringify(mockData);
       const importResult = storageService.importData(jsonData);
-      
+
       expect(importResult).toBe(true);
     });
 
     test('should handle invalid JSON import', () => {
       const invalidJson = 'invalid json data';
       const importResult = storageService.importData(invalidJson);
-      
+
       expect(importResult).toBe(false);
     });
   });
@@ -465,32 +468,72 @@ describe('StorageService', () => {
     test('should calculate storage usage', () => {
       // Mock localStorage to return substantial data
       localStorageMock.getItem.mockImplementation((key) => {
-        if (key === 'scrypture_tasks') return JSON.stringify([
-          { id: '1', title: 'Test Task', description: 'A test task', completed: false, createdAt: new Date(), updatedAt: new Date(), priority: 'medium', category: 'body' },
-          { id: '2', title: 'Another Task', description: 'Another test task', completed: true, createdAt: new Date(), updatedAt: new Date(), priority: 'high', category: 'mind' }
-        ]);
-        if (key === 'scrypture_habits') return JSON.stringify([
-          { id: '1', name: 'Test Habit', description: 'A test habit', streak: 5, targetFrequency: 'daily', createdAt: new Date() },
-          { id: '2', name: 'Another Habit', description: 'Another test habit', streak: 3, targetFrequency: 'weekly', createdAt: new Date() }
-        ]);
-        if (key === 'scrypture_user') return JSON.stringify({ 
-          id: '1', 
-          name: 'Test User',
-          level: 1,
-          experience: 0,
-          body: 0,
-          mind: 0,
-          soul: 0,
-          achievements: [],
-          createdAt: new Date('2024-01-01').toISOString(),
-          updatedAt: new Date('2024-01-01').toISOString()
-        });
-        if (key === 'scrypture_settings') return JSON.stringify({ theme: 'dark', notifications: true, autoSave: true });
+        if (key === 'scrypture_tasks')
+          return JSON.stringify([
+            {
+              id: '1',
+              title: 'Test Task',
+              description: 'A test task',
+              completed: false,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+              priority: 'medium',
+              category: 'body',
+            },
+            {
+              id: '2',
+              title: 'Another Task',
+              description: 'Another test task',
+              completed: true,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+              priority: 'high',
+              category: 'mind',
+            },
+          ]);
+        if (key === 'scrypture_habits')
+          return JSON.stringify([
+            {
+              id: '1',
+              name: 'Test Habit',
+              description: 'A test habit',
+              streak: 5,
+              targetFrequency: 'daily',
+              createdAt: new Date(),
+            },
+            {
+              id: '2',
+              name: 'Another Habit',
+              description: 'Another test habit',
+              streak: 3,
+              targetFrequency: 'weekly',
+              createdAt: new Date(),
+            },
+          ]);
+        if (key === 'scrypture_user')
+          return JSON.stringify({
+            id: '1',
+            name: 'Test User',
+            level: 1,
+            experience: 0,
+            body: 0,
+            mind: 0,
+            soul: 0,
+            achievements: [],
+            createdAt: new Date('2024-01-01').toISOString(),
+            updatedAt: new Date('2024-01-01').toISOString(),
+          });
+        if (key === 'scrypture_settings')
+          return JSON.stringify({
+            theme: 'dark',
+            notifications: true,
+            autoSave: true,
+          });
         return null;
       });
 
       const stats = storageService.getStorageStats();
-      
+
       expect(stats.used).toBeGreaterThan(0);
       expect(stats.available).toBe(5 * 1024 * 1024); // 5MB
       expect(stats.percentage).toBeGreaterThan(0);
@@ -502,7 +545,7 @@ describe('StorageService', () => {
       });
 
       const stats = storageService.getStorageStats();
-      
+
       expect(stats.used).toBe(0);
       expect(stats.available).toBe(0);
       expect(stats.percentage).toBe(0);
@@ -513,14 +556,15 @@ describe('StorageService', () => {
       const keys = Object.values(require('../storageService').STORAGE_KEYS);
       localStorageMock.getItem.mockReturnValue('some data');
       storageService.getStorageStats();
-      keys.forEach(key => {
+      keys.forEach((key) => {
         expect(localStorageMock.getItem).toHaveBeenCalledWith(key);
       });
     });
 
     test('should handle some missing keys gracefully', () => {
       localStorageMock.getItem.mockImplementation((key) => {
-        if (key === 'scrypture_tasks') return JSON.stringify([{ id: '1', title: 'Test Task' }]);
+        if (key === 'scrypture_tasks')
+          return JSON.stringify([{ id: '1', title: 'Test Task' }]);
         // All other keys missing
         return null;
       });
@@ -541,7 +585,10 @@ describe('StorageService', () => {
       expect(stats.used).toBeGreaterThanOrEqual(5 * 1024 * 1024);
       expect(stats.percentage).toBeGreaterThanOrEqual(100);
       // Should be rounded to two decimals
-      expect(Number.isInteger(stats.percentage) || /\d{1,2}\.\d{1,2}/.test(stats.percentage.toString())).toBe(true);
+      expect(
+        Number.isInteger(stats.percentage) ||
+          /\d{1,2}\.\d{1,2}/.test(stats.percentage.toString())
+      ).toBe(true);
     });
 
     test('should handle non-string/corrupted data gracefully', () => {
@@ -560,7 +607,7 @@ describe('StorageService', () => {
   describe('Data Clearing', () => {
     test('should clear all data', () => {
       const clearResult = storageService.clearAllData();
-      
+
       expect(clearResult).toBe(true);
       expect(localStorageMock.removeItem).toHaveBeenCalledTimes(6); // All storage keys
     });
@@ -571,8 +618,8 @@ describe('StorageService', () => {
       });
 
       const clearResult = storageService.clearAllData();
-      
+
       expect(clearResult).toBe(false);
     });
   });
-}); 
+});

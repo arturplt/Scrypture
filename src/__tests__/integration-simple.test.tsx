@@ -51,9 +51,9 @@ jest.mock('../services/categoryService', () => ({
     getAllCategories: jest.fn(() => [
       { name: 'body', icon: '💪' },
       { name: 'mind', icon: '🧠' },
-      { name: 'soul', icon: '✨' }
-    ])
-  }
+      { name: 'soul', icon: '✨' },
+    ]),
+  },
 }));
 
 describe('Simple Integration Tests', () => {
@@ -82,7 +82,9 @@ describe('Simple Integration Tests', () => {
       fireEvent.click(titleInput);
 
       // 4. Fill in task title
-      fireEvent.change(titleInput, { target: { value: 'Test Integration Task' } });
+      fireEvent.change(titleInput, {
+        target: { value: 'Test Integration Task' },
+      });
 
       // 5. Verify form is expanded and submit button appears
       const submitButton = screen.getByText(/Add Task/);
@@ -132,11 +134,15 @@ describe('Simple Integration Tests', () => {
       fireEvent.click(titleInput);
 
       // 2. Fill in title
-      fireEvent.change(titleInput, { target: { value: 'Task with Description' } });
+      fireEvent.change(titleInput, {
+        target: { value: 'Task with Description' },
+      });
 
       // 3. Fill in description
       const descriptionInput = screen.getByPlaceholderText(/Description/);
-      fireEvent.change(descriptionInput, { target: { value: 'This is a test description' } });
+      fireEvent.change(descriptionInput, {
+        target: { value: 'This is a test description' },
+      });
 
       // 4. Submit task
       const submitButton = screen.getByText(/Add Task/);
@@ -205,7 +211,7 @@ describe('Simple Integration Tests', () => {
       const titleInput = screen.getByPlaceholderText(/Intention/);
       fireEvent.click(titleInput);
       fireEvent.change(titleInput, { target: { value: 'Task to Complete' } });
-      
+
       const submitButton = screen.getByText(/Add Task/);
       fireEvent.click(submitButton);
 
@@ -217,16 +223,19 @@ describe('Simple Integration Tests', () => {
       // 3. Find and click the completion checkbox
       const taskCard = screen.getByText('Task to Complete').closest('div');
       const checkbox = taskCard?.querySelector('input[type="checkbox"]');
-      
+
       if (checkbox) {
         fireEvent.click(checkbox);
       }
 
       // 4. Verify task is completed (check for completed state or task still visible)
-      await waitFor(() => {
-        // The task should still be visible but marked as completed
-        expect(screen.getByText('Task to Complete')).toBeInTheDocument();
-      }, { timeout: 3000 });
+      await waitFor(
+        () => {
+          // The task should still be visible but marked as completed
+          expect(screen.getByText('Task to Complete')).toBeInTheDocument();
+        },
+        { timeout: 3000 }
+      );
     });
   });
 
@@ -243,12 +252,13 @@ describe('Simple Integration Tests', () => {
           completed: false,
           createdAt: new Date('2024-01-01'),
           updatedAt: new Date('2024-01-01'),
-          statRewards: { body: 1, mind: 0, soul: 0, xp: 20 }
-        }
+          statRewards: { body: 1, mind: 0, soul: 0, xp: 20 },
+        },
       ];
-      
+
       // Mock the storage service to return existing tasks
-      const mockStorageService = require('../services/storageService').storageService;
+      const mockStorageService =
+        require('../services/storageService').storageService;
       mockStorageService.getTasks.mockReturnValue(existingTasks);
       mockStorageService.getUser.mockReturnValue({
         id: '1',
@@ -260,15 +270,18 @@ describe('Simple Integration Tests', () => {
         soul: 0,
         achievements: [],
         createdAt: new Date('2024-01-01'),
-        updatedAt: new Date('2024-01-01')
+        updatedAt: new Date('2024-01-01'),
       });
 
       renderApp();
 
       // Wait for app to load with existing data
-      await waitFor(() => {
-        expect(screen.getByText('Test Task')).toBeInTheDocument();
-      }, { timeout: 10000 });
+      await waitFor(
+        () => {
+          expect(screen.getByText('Test Task')).toBeInTheDocument();
+        },
+        { timeout: 10000 }
+      );
 
       // Verify task is displayed
       expect(screen.getByText('Test Task')).toBeInTheDocument();
@@ -279,15 +292,19 @@ describe('Simple Integration Tests', () => {
   describe('Error Handling', () => {
     it('handles storage errors gracefully', async () => {
       // Mock storage service to return false instead of throwing
-      const mockStorageService = require('../services/storageService').storageService;
+      const mockStorageService =
+        require('../services/storageService').storageService;
       mockStorageService.saveTasks.mockReturnValue(false);
 
       renderApp();
 
       // Wait for app to load
-      await waitFor(() => {
-        expect(screen.getByPlaceholderText('Intention')).toBeInTheDocument();
-      }, { timeout: 10000 });
+      await waitFor(
+        () => {
+          expect(screen.getByPlaceholderText('Intention')).toBeInTheDocument();
+        },
+        { timeout: 10000 }
+      );
 
       // Try to add a task (should handle error gracefully)
       const titleInput = screen.getByPlaceholderText('Intention');
@@ -298,9 +315,12 @@ describe('Simple Integration Tests', () => {
       fireEvent.click(submitButton);
 
       // App should not crash and should still be functional
-      await waitFor(() => {
-        expect(screen.getByPlaceholderText('Intention')).toBeInTheDocument();
-      }, { timeout: 10000 });
+      await waitFor(
+        () => {
+          expect(screen.getByPlaceholderText('Intention')).toBeInTheDocument();
+        },
+        { timeout: 10000 }
+      );
     }, 15000); // Increased timeout
   });
 
@@ -309,22 +329,25 @@ describe('Simple Integration Tests', () => {
       renderApp();
 
       // Wait for app to load
-      await waitFor(() => {
-        expect(screen.getByPlaceholderText('Intention')).toBeInTheDocument();
-      }, { timeout: 10000 });
+      await waitFor(
+        () => {
+          expect(screen.getByPlaceholderText('Intention')).toBeInTheDocument();
+        },
+        { timeout: 10000 }
+      );
 
       // Navigate to title input
       const titleInput = screen.getByPlaceholderText('Intention');
       titleInput.focus();
-      
+
       // Type using keyboard
       fireEvent.change(titleInput, { target: { value: 'Keyboard Test' } });
-      
+
       // Verify input worked
       expect(titleInput).toHaveValue('Keyboard Test');
     }, 15000); // Increased timeout
   });
-}); 
+});
 
 const renderAppXP = () => {
   return render(<App />);
@@ -359,9 +382,9 @@ describe('XP Sorting Integration', () => {
 
     const sortSelect = screen.getByDisplayValue('⚡ Priority');
     const options = Array.from(sortSelect.querySelectorAll('option'));
-    
+
     // Check that XP option exists
-    const xpOption = options.find(option => option.value === 'xp');
+    const xpOption = options.find((option) => option.value === 'xp');
     expect(xpOption).toBeInTheDocument();
     expect(xpOption).toHaveTextContent('⭐ XP');
   });
@@ -382,8 +405,12 @@ describe('XP Sorting Integration', () => {
     });
 
     // Complete the task
-    const taskCard = screen.getByText('Task to Delete').closest('[data-testid^="task-card-"]');
-    const checkbox = taskCard?.querySelector('input[type="checkbox"]') as HTMLInputElement;
+    const taskCard = screen
+      .getByText('Task to Delete')
+      .closest('[data-testid^="task-card-"]');
+    const checkbox = taskCard?.querySelector(
+      'input[type="checkbox"]'
+    ) as HTMLInputElement;
     fireEvent.click(checkbox);
 
     // Wait for task to be marked as completed
@@ -392,7 +419,9 @@ describe('XP Sorting Integration', () => {
     });
 
     // Delete the completed task
-    const deleteButton = taskCard?.querySelector('button[aria-label="Delete task"]') as HTMLButtonElement;
+    const deleteButton = taskCard?.querySelector(
+      'button[aria-label="Delete task"]'
+    ) as HTMLButtonElement;
     fireEvent.click(deleteButton);
 
     // Wait for task to be removed
@@ -403,4 +432,4 @@ describe('XP Sorting Integration', () => {
     // The experience points and stats should be removed from the user
     // This is verified by the fact that the task is deleted and the user stats are updated
   });
-}); 
+});
