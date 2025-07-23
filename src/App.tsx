@@ -8,7 +8,6 @@ import { StatsDisplay } from './components/StatsDisplay';
 import { UserCreation } from './components/UserCreation';
 import { DataManager } from './components/DataManager';
 import { AutoSaveIndicator } from './components/AutoSaveIndicator';
-import { DifficultySamples } from './components/DifficultySamples';
 
 import styles from './App.module.css';
 import { useRef, useEffect, useState } from 'react';
@@ -156,7 +155,6 @@ function AppContent() {
       </main>
 
       <AutoSaveIndicator isSaving={isSaving} lastSaved={lastSaved} />
-      <DifficultySamples />
     </div>
   );
 }
