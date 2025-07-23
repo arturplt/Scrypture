@@ -559,6 +559,57 @@ export const TaskTemplateDebug: React.FC = () => {
     }
   };
 
+  const addMindTemplates = async () => {
+    const mindTemplates = taskTemplates.filter(t => t.category === 'mind');
+    for (let i = 0; i < mindTemplates.length; i++) {
+      const template = mindTemplates[i];
+      addTask({
+        title: template.title,
+        description: template.description,
+        completed: false,
+        priority: template.priority,
+        category: template.category,
+        statRewards: { ...template.statRewards },
+        difficulty: template.difficulty,
+      });
+      await new Promise(resolve => setTimeout(resolve, 10));
+    }
+  };
+
+  const addBodyTemplates = async () => {
+    const bodyTemplates = taskTemplates.filter(t => t.category === 'body');
+    for (let i = 0; i < bodyTemplates.length; i++) {
+      const template = bodyTemplates[i];
+      addTask({
+        title: template.title,
+        description: template.description,
+        completed: false,
+        priority: template.priority,
+        category: template.category,
+        statRewards: { ...template.statRewards },
+        difficulty: template.difficulty,
+      });
+      await new Promise(resolve => setTimeout(resolve, 10));
+    }
+  };
+
+  const addSoulTemplates = async () => {
+    const soulTemplates = taskTemplates.filter(t => t.category === 'soul');
+    for (let i = 0; i < soulTemplates.length; i++) {
+      const template = soulTemplates[i];
+      addTask({
+        title: template.title,
+        description: template.description,
+        completed: false,
+        priority: template.priority,
+        category: template.category,
+        statRewards: { ...template.statRewards },
+        difficulty: template.difficulty,
+      });
+      await new Promise(resolve => setTimeout(resolve, 10));
+    }
+  };
+
   const addRandomTemplate = () => {
     const randomTemplate = taskTemplates[Math.floor(Math.random() * taskTemplates.length)];
     addTask({
@@ -637,39 +688,91 @@ export const TaskTemplateDebug: React.FC = () => {
         </p>
       </div>
 
-      <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
-        <button
-          onClick={addAllTemplates}
-          style={{
-            padding: '8px 12px',
-            backgroundColor: 'var(--color-accent-gold)',
-            color: 'var(--color-bg-primary)',
-            border: '2px solid var(--color-accent-gold)',
-            borderRadius: '0px',
-            fontFamily: 'Press Start 2P, monospace',
-            fontSize: '10px',
-            cursor: 'pointer',
-            flex: 1,
-          }}
-        >
-          Add All ({taskTemplates.length})
-        </button>
-        <button
-          onClick={addRandomTemplate}
-          style={{
-            padding: '8px 12px',
-            backgroundColor: 'var(--color-bg-secondary)',
-            color: 'var(--color-text-primary)',
-            border: '2px solid var(--color-border-primary)',
-            borderRadius: '0px',
-            fontFamily: 'Press Start 2P, monospace',
-            fontSize: '10px',
-            cursor: 'pointer',
-            flex: 1,
-          }}
-        >
-          Add Random
-        </button>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button
+            onClick={addAllTemplates}
+            style={{
+              padding: '8px 12px',
+              backgroundColor: 'var(--color-accent-gold)',
+              color: 'var(--color-bg-primary)',
+              border: '2px solid var(--color-accent-gold)',
+              borderRadius: '0px',
+              fontFamily: 'Press Start 2P, monospace',
+              fontSize: '10px',
+              cursor: 'pointer',
+              flex: 1,
+            }}
+          >
+            Add All ({taskTemplates.length})
+          </button>
+          <button
+            onClick={addRandomTemplate}
+            style={{
+              padding: '8px 12px',
+              backgroundColor: 'var(--color-bg-secondary)',
+              color: 'var(--color-text-primary)',
+              border: '2px solid var(--color-border-primary)',
+              borderRadius: '0px',
+              fontFamily: 'Press Start 2P, monospace',
+              fontSize: '10px',
+              cursor: 'pointer',
+              flex: 1,
+            }}
+          >
+            Add Random
+          </button>
+        </div>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button
+            onClick={addMindTemplates}
+            style={{
+              padding: '8px 12px',
+              backgroundColor: '#4a90e2',
+              color: 'white',
+              border: '2px solid #4a90e2',
+              borderRadius: '0px',
+              fontFamily: 'Press Start 2P, monospace',
+              fontSize: '10px',
+              cursor: 'pointer',
+              flex: 1,
+            }}
+          >
+            🧠 Mind ({taskTemplates.filter(t => t.category === 'mind').length})
+          </button>
+          <button
+            onClick={addBodyTemplates}
+            style={{
+              padding: '8px 12px',
+              backgroundColor: '#e74c3c',
+              color: 'white',
+              border: '2px solid #e74c3c',
+              borderRadius: '0px',
+              fontFamily: 'Press Start 2P, monospace',
+              fontSize: '10px',
+              cursor: 'pointer',
+              flex: 1,
+            }}
+          >
+            💪 Body ({taskTemplates.filter(t => t.category === 'body').length})
+          </button>
+          <button
+            onClick={addSoulTemplates}
+            style={{
+              padding: '8px 12px',
+              backgroundColor: '#f39c12',
+              color: 'white',
+              border: '2px solid #f39c12',
+              borderRadius: '0px',
+              fontFamily: 'Press Start 2P, monospace',
+              fontSize: '10px',
+              cursor: 'pointer',
+              flex: 1,
+            }}
+          >
+            ✨ Soul ({taskTemplates.filter(t => t.category === 'soul').length})
+          </button>
+        </div>
       </div>
 
       <div style={{ fontSize: '10px', fontFamily: 'Press Start 2P, monospace' }}>
