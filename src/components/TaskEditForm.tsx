@@ -3,6 +3,7 @@ import { Task } from '../types';
 import { useTasks } from '../hooks/useTasks';
 import { categoryService } from '../services/categoryService';
 import { ConfirmationModal } from './ConfirmationModal';
+import { CategoryModal } from './CategoryModal';
 import styles from './TaskForm.module.css';
 
 interface TaskEditFormProps {
@@ -22,6 +23,7 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({
     task.priority
   );
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Auto-resize textarea function
@@ -113,6 +115,19 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({
 
   const allCategories = categoryService.getAllCategories();
 
+  const handleCategoryAdded = (newCategory: {
+    name: string;
+    icon: string;
+    color: string;
+  }) => {
+    console.log('Adding new category:', newCategory);
+    const success = categoryService.addCustomCategory(newCategory);
+    console.log('Category added successfully:', success);
+    if (success) {
+      window.dispatchEvent(new Event('customCategoryAdded'));
+    }
+  };
+
   return (
     <>
       <form className={styles.form} onSubmit={handleSubmit} noValidate>
@@ -144,13 +159,36 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({
         </div>
 
         <div className={styles.categorySelector}>
-          <label className={styles.categoryLabel}>Category:</label>
+          <div className={styles.categoryHeader}>
+            <div className={styles.categoryHeaderContent}>
+              <label className={styles.categoryLabel}>Category:</label>
+              <button
+                type="button"
+                className={styles.addCategoryButton}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsCategoryModalOpen(true);
+                }}
+              >
+                + Add Category
+              </button>
+            </div>
+          </div>
           <div className={styles.categoryButtons}>
             {allCategories.map((option) => (
               <button
                 key={option.name}
                 type="button"
                 className={`${styles.categoryButton} ${category === option.name ? styles.categoryButtonActive : ''}`}
+                style={{
+                  borderColor: option.color,
+                  backgroundColor:
+                    category === option.name ? option.color : 'transparent',
+                  color:
+                    category === option.name
+                      ? 'var(--color-bg-primary)'
+                      : 'var(--color-text-primary)',
+                }}
                 onClick={() => setCategory(option.name)}
               >
                 {option.icon}{' '}
@@ -278,6 +316,11 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({
         confirmText="Delete"
         cancelText="Cancel"
         confirmButtonStyle="danger"
+      />
+      <CategoryModal
+        isOpen={isCategoryModalOpen}
+        onClose={() => setIsCategoryModalOpen(false)}
+        onCategoryAdded={handleCategoryAdded}
       />
     </>
   );

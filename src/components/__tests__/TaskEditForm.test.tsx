@@ -57,13 +57,14 @@ describe('TaskEditForm (new system)', () => {
     );
     expect(screen.getByDisplayValue('Test Task')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Test Description')).toBeInTheDocument();
-    expect(screen.getByText('BODY +1')).toBeInTheDocument();
+    expect(screen.getByText('+1')).toBeInTheDocument();
     // Toggle MIND on
     fireEvent.click(screen.getByText('MIND'));
-    expect(screen.getByText('MIND +1')).toBeInTheDocument();
+    expect(screen.getAllByText('+1')).toHaveLength(2);
     // Toggle BODY off
-    fireEvent.click(screen.getByText('BODY'));
-    expect(screen.queryByText('BODY +1')).not.toBeInTheDocument();
+    const bodyButtons = screen.getAllByText('BODY');
+    fireEvent.click(bodyButtons[1]); // Click the button, not the span
+    expect(screen.getAllByText('+1')).toHaveLength(1);
   });
 
   it('shows correct XP for each priority', () => {
@@ -94,7 +95,10 @@ describe('TaskEditForm (new system)', () => {
         '1',
         expect.objectContaining({
           title: 'Updated Task',
-          statRewards: { mind: 1 },
+          statRewards: expect.objectContaining({
+            mind: 1,
+            body: 1,
+          }),
         })
       );
     });
