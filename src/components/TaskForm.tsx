@@ -203,12 +203,36 @@ export const TaskForm: React.FC<TaskFormProps> = ({
         // Add animation class
         formElement.classList.add(styles.slideToTop);
         
-        // Scroll the form into view with smooth animation
-        formElement.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'start',
-          inline: 'nearest'
-        });
+        // Scroll to the very top of the page first with smooth animation
+        // Use fallback for browsers that don't support smooth scrolling
+        try {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        } catch (e) {
+          // Fallback for browsers that don't support smooth scrolling
+          window.scrollTo(0, 0);
+        }
+        
+        // Also scroll the form into view to ensure it's visible
+        setTimeout(() => {
+          try {
+            formElement.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'start',
+              inline: 'nearest'
+            });
+          } catch (e) {
+            // Fallback for browsers that don't support smooth scrolling
+            formElement.scrollIntoView();
+          }
+          
+          // Focus on the title input for better UX
+          if (titleInputRef.current) {
+            titleInputRef.current.focus();
+          }
+        }, 200);
         
         // Remove animation class after animation completes
         setTimeout(() => {

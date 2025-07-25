@@ -9,6 +9,7 @@ import { UserCreation } from './components/UserCreation';
 import { DataManager } from './components/DataManager';
 import { AutoSaveIndicator } from './components/AutoSaveIndicator';
 import { StartHereModal } from './components/StartHereModal';
+import { InstallPrompt } from './components/InstallPrompt';
 
 import styles from './App.module.css';
 import { useRef, useEffect, useState } from 'react';
@@ -114,6 +115,7 @@ function AppContent() {
   const { isSaving: habitsIsSaving } = useHabits();
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [showStartHere, setShowStartHere] = useState(false);
+  const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const lastLevel = useRef<number | null>(null);
   const taskListRef = useRef<TaskListRef | null>(null);
 
@@ -125,6 +127,21 @@ function AppContent() {
       lastLevel.current = user.level;
     }
   }, [user]);
+
+  // Show install prompt on mobile devices after a delay
+  useEffect(() => {
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isStandalone = window.navigator.standalone || 
+      (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+    
+    if (isMobile && !isStandalone) {
+      const timer = setTimeout(() => {
+        setShowInstallPrompt(true);
+      }, 3000); // Show after 3 seconds
+      
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   const handleNavigateToTask = (taskId: string) => {
     if (taskListRef.current) {
@@ -145,6 +162,9 @@ function AppContent() {
           level={user.level}
           onClose={() => setShowLevelUp(false)}
         />
+      )}
+      {showInstallPrompt && (
+        <InstallPrompt onClose={() => setShowInstallPrompt(false)} />
       )}
       <header className={styles.header}>
         <h1 className={styles.title}>Scrypture</h1>

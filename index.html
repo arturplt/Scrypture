@@ -3,9 +3,41 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover, minimal-ui" />
     <meta name="description" content="Scrypture - Your mystical habit-tracking companion" />
     <meta name="theme-color" content="#667eea" />
+    
+    <!-- Mobile Web App Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Scrypture" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="application-name" content="Scrypture" />
+    
+    <!-- iOS Specific -->
+    <meta name="apple-touch-fullscreen" content="yes" />
+    <meta name="apple-mobile-web-app-orientations" content="portrait" />
+    <meta name="format-detection" content="telephone=no" />
+    
+    <!-- Android Specific -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="theme-color" content="#667eea" />
+    <meta name="msapplication-TileColor" content="#667eea" />
+    <meta name="msapplication-config" content="none" />
+    
+    <!-- Additional Mobile Optimizations -->
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="MobileOptimized" content="width" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" href="/icon-192.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="/icon-152.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/icon-180.png" />
+    <link rel="apple-touch-icon" sizes="167x167" href="/icon-167.png" />
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,5 +49,38 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Force address bar hiding script -->
+    <script>
+      // Force address bar hiding on mobile
+      function hideAddressBar() {
+        if (document.documentElement.requestFullscreen) {
+          document.documentElement.requestFullscreen();
+        }
+        
+        // iOS Safari specific
+        if (window.navigator.standalone) {
+          document.body.style.height = '100vh';
+          document.body.style.height = '100dvh';
+        }
+        
+        // Android Chrome specific
+        if (window.innerHeight > window.outerHeight) {
+          // Address bar is hidden
+          document.body.style.height = '100vh';
+          document.body.style.height = '100dvh';
+        }
+      }
+      
+      // Run on load and orientation change
+      window.addEventListener('load', hideAddressBar);
+      window.addEventListener('orientationchange', hideAddressBar);
+      window.addEventListener('resize', hideAddressBar);
+      
+      // iOS Safari specific
+      if (window.navigator.standalone) {
+        document.addEventListener('touchstart', function() {}, {passive: true});
+      }
+    </script>
   </body>
 </html> 

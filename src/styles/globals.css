@@ -256,3 +256,139 @@ canvas {
   image-rendering: -moz-crisp-edges;
   image-rendering: crisp-edges;
 }
+
+/* Mobile Web App Styles */
+@media screen and (display-mode: standalone) {
+  body {
+    /* Prevent overscroll bounce on iOS */
+    overscroll-behavior: none;
+    /* Ensure full height in standalone mode */
+    height: 100vh;
+    height: 100dvh; /* Dynamic viewport height for mobile */
+    /* Force full screen */
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+  }
+  
+  #root {
+    /* Ensure root takes full height */
+    height: 100vh;
+    height: 100dvh;
+    /* Prevent any overflow */
+    overflow: hidden;
+  }
+}
+
+/* iOS Safari specific adjustments */
+@supports (-webkit-touch-callout: none) {
+  body {
+    /* Prevent zoom on input focus */
+    -webkit-text-size-adjust: 100%;
+    /* Prevent bounce scrolling */
+    -webkit-overflow-scrolling: touch;
+    /* Force full height */
+    height: 100vh;
+    height: 100dvh;
+    /* Handle safe areas for notched devices */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+  
+  /* When in standalone mode (added to home screen) */
+  @media screen and (display-mode: standalone) {
+    body {
+      /* Remove safe area padding in standalone mode */
+      padding: 0;
+      /* Force full screen */
+      position: fixed;
+      width: 100%;
+      height: 100vh;
+      height: 100dvh;
+      top: 0;
+      left: 0;
+      overflow: hidden;
+    }
+  }
+}
+
+/* Android Chrome specific adjustments */
+@media screen and (max-width: 768px) {
+  body {
+    /* Prevent address bar from showing/hiding */
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    top: 0;
+    left: 0;
+    /* Force full screen */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+  
+  #root {
+    height: 100%;
+    height: 100vh;
+    height: 100dvh;
+    overflow-y: auto;
+    /* Enable momentum scrolling */
+    -webkit-overflow-scrolling: touch;
+    /* Force hardware acceleration */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+}
+
+/* Force full screen on all mobile devices */
+@media (max-width: 768px) {
+  html, body {
+    /* Prevent any scrolling outside the app */
+    overflow: hidden;
+    /* Force full height */
+    height: 100vh;
+    height: 100dvh;
+    /* Prevent bounce */
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  #root {
+    /* Allow scrolling only within the app */
+    height: 100vh;
+    height: 100dvh;
+    overflow-y: auto;
+    /* Smooth scrolling */
+    scroll-behavior: smooth;
+    /* Hardware acceleration */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+}
+
+/* Prevent text selection on mobile for better app feel */
+@media (max-width: 768px) {
+  * {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  
+  /* Allow text selection in inputs and textareas */
+  input, textarea {
+    -webkit-user-select: text;
+    -khtml-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+  }
+}
