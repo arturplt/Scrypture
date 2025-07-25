@@ -54,12 +54,13 @@
 ### **Implementation Tracking (1 file)**
 10. **07-mvp-checklist.md** - Implementation tracking (new, streamlined)
 
-### **Design Documentation (1 file)**
+### **Design Documentation (2 files)**
 11. **10-color-system.md** - Visual design (copied)
+12. **11-ui-enhancements.md** - Recent UI enhancements and UX improvements (new)
 
 ### **Navigation (2 files)**
-12. **README.md** - Folder overview (new)
-13. **SUMMARY.md** - This summary (new)
+13. **README.md** - Folder overview (new)
+14. **SUMMARY.md** - This summary (new)
 
 ## 🎯 **MVP Feature Focus**
 

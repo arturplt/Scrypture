@@ -78,8 +78,9 @@ This index serves as the master navigation guide for the Scrypture MVP documenta
 | Document | Purpose | Target Audience | Dependencies |
 |----------|---------|-----------------|--------------|
 | **[10-color-system.md](10-color-system.md)** | Color palette, accessibility, theming | Designers, frontend developers | 02-mvp-features.md |
+| **[11-ui-enhancements.md](11-ui-enhancements.md)** | Recent UI enhancements and UX improvements | Designers, frontend developers, users | 02-mvp-features.md, 10-color-system.md |
 
-**Key Concepts**: User experience, accessibility compliance, design system, responsive design
+**Key Concepts**: User experience, accessibility compliance, design system, responsive design, UI enhancements
 
 ## 🔗 **Dependency Mapping**
 
