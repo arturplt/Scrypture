@@ -33,6 +33,12 @@ export const InstallPrompt: React.FC<InstallPromptProps> = ({ onClose }) => {
     return null;
   }
 
+  const handleClose = () => {
+    // Mark that install prompt has been shown
+    localStorage.setItem('installPromptShown', 'true');
+    onClose();
+  };
+
   const getInstallInstructions = () => {
     if (isIOS) {
       return {
@@ -73,7 +79,7 @@ export const InstallPrompt: React.FC<InstallPromptProps> = ({ onClose }) => {
           <h3>📱 {instructions.title}</h3>
           <button 
             className={styles.closeButton}
-            onClick={onClose}
+            onClick={handleClose}
             aria-label="Close install prompt"
           >
             ✕
@@ -102,7 +108,7 @@ export const InstallPrompt: React.FC<InstallPromptProps> = ({ onClose }) => {
         <div className={styles.actions}>
           <button 
             className={styles.primaryButton}
-            onClick={onClose}
+            onClick={handleClose}
           >
             Got it!
           </button>

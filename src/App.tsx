@@ -128,13 +128,16 @@ function AppContent() {
     }
   }, [user]);
 
-  // Show install prompt on mobile devices after a delay
+  // Show install prompt on mobile devices after a delay (only on first visit)
   useEffect(() => {
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const isStandalone = window.navigator.standalone || 
       (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
     
-    if (isMobile && !isStandalone) {
+    // Check if install prompt has been shown before
+    const hasShownInstallPrompt = localStorage.getItem('installPromptShown');
+    
+    if (isMobile && !isStandalone && !hasShownInstallPrompt) {
       const timer = setTimeout(() => {
         setShowInstallPrompt(true);
       }, 3000); // Show after 3 seconds

@@ -380,3 +380,20 @@
   color: var(--color-text-primary);
   background: var(--color-bg-secondary);
 }
+
+/* Responsive styles for categories */
+@media (max-width: 768px) {
+  .categories {
+    flex-direction: row;
+    flex-wrap: wrap;
+    overflow-x: visible;
+    padding-bottom: var(--spacing-xs);
+  }
+  
+  .categories .category {
+    flex-shrink: 0;
+    white-space: nowrap;
+    margin-right: var(--spacing-xs);
+    margin-bottom: var(--spacing-xs);
+  }
+}
