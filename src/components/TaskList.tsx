@@ -67,6 +67,13 @@ export const TaskList = forwardRef<TaskListRef>((props, ref) => {
       const taskIndex = sortedTasks.findIndex(task => task.id === taskId);
       if (taskIndex !== -1) {
         setIsEditMode(false);
+        // Also highlight the task
+        setHighlightedTaskId(taskId);
+        const el = taskRefs.current[taskId];
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        setTimeout(() => setHighlightedTaskId(null), 3000);
       }
     },
     highlightTask: (taskId: string) => {
@@ -301,12 +308,15 @@ export const TaskList = forwardRef<TaskListRef>((props, ref) => {
                         // Find the task's index in the full sorted tasks array
                         const taskIndex = activeTasks.findIndex(t => t.id === task.id);
                         return (
-                          <TaskCard
+                          <div
                             key={task.id}
-                            task={task}
                             ref={el => taskRefs.current[task.id] = el}
-                            isHighlighted={highlightedTaskId === task.id}
-                          />
+                          >
+                            <TaskCard
+                              task={task}
+                              isHighlighted={highlightedTaskId === task.id}
+                            />
+                          </div>
                         );
                       })}
                     </div>

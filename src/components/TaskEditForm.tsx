@@ -24,6 +24,8 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({
   );
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [isCanceling, setIsCanceling] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Auto-resize textarea function
@@ -87,13 +89,33 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({
   };
 
   const handleCancel = () => {
-    // The transition animation is now handled by the parent TaskCard component
-    // No need to reset form values here as the card will be re-rendered
-    onCancel();
+    // Add smooth animation for cancel
+    setIsCanceling(true);
+    const cancelButton = document.querySelector(`.${styles.cancelButton}`) as HTMLElement;
+    if (cancelButton) {
+      cancelButton.style.animation = 'smoothOut 0.4s cubic-bezier(0.4, 0.0, 0.2, 1) forwards';
+    }
+    
+    // Delay the actual cancel to allow animation to complete
+    setTimeout(() => {
+      setIsCanceling(false);
+      onCancel();
+    }, 400);
   };
 
   const handleDelete = () => {
-    setShowDeleteConfirm(true);
+    // Add smooth animation for delete button
+    setIsDeleting(true);
+    const deleteButton = document.querySelector(`.${styles.deleteButton}`) as HTMLElement;
+    if (deleteButton) {
+      deleteButton.style.animation = 'smoothOut 0.4s cubic-bezier(0.4, 0.0, 0.2, 1) forwards';
+    }
+    
+    // Show confirmation modal after animation
+    setTimeout(() => {
+      setIsDeleting(false);
+      setShowDeleteConfirm(true);
+    }, 400);
   };
 
   const confirmDelete = () => {
@@ -332,15 +354,17 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({
           </button>
           <button
             type="button"
-            className={styles.cancelButton}
+            className={`${styles.cancelButton} ${isCanceling ? styles.animating : ''}`}
             onClick={handleCancel}
+            disabled={isCanceling || isDeleting}
           >
             Cancel
           </button>
           <button
             type="button"
-            className={styles.deleteButton}
+            className={`${styles.deleteButton} ${isDeleting ? styles.animating : ''}`}
             onClick={handleDelete}
+            disabled={isCanceling || isDeleting}
           >
             Delete Task
           </button>

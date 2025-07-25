@@ -11,6 +11,7 @@ interface TaskFormProps {
   onSave?: () => void;
   onNavigateToTask?: (taskId: string) => void;
   onEditTask?: (task: Task) => void;
+  onTaskCreated?: (taskId: string) => void;
 }
 
 export const TaskForm: React.FC<TaskFormProps> = ({
@@ -19,6 +20,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   onSave,
   onNavigateToTask,
   onEditTask,
+  onTaskCreated,
 }) => {
   const { addTask, updateTask, tasks } = useTasks();
   const [title, setTitle] = useState(taskToEdit?.title || '');
@@ -34,6 +36,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   const [showValidation, setShowValidation] = useState(false);
   const [showAutoFill, setShowAutoFill] = useState(false);
   const [selectedAutoFillIndex, setSelectedAutoFillIndex] = useState(0);
+  const [isCollapsing, setIsCollapsing] = useState(false);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const titleInputRef = useRef<HTMLInputElement>(null);
@@ -189,7 +192,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
       onSave?.();
     } else {
       // Create new task
-      addTask({
+      const newTask = addTask({
         title: title.trim(),
         description: description.trim() || undefined,
         categories,
@@ -198,6 +201,12 @@ export const TaskForm: React.FC<TaskFormProps> = ({
         statRewards,
         difficulty,
       });
+      
+      // Minimize the form after creating a task
+      setIsExpanded(false);
+      
+      // Call the callback to highlight the newly created task
+      onTaskCreated?.(newTask.id);
     }
 
     // Reset form only if not in edit mode
@@ -221,12 +230,12 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   const handleTitleClick = () => {
     setIsExpanded(true);
     
-    // Add slide-to-top animation with a small delay to ensure expansion happens first
+    // Add elastic expansion animation
     setTimeout(() => {
       const formElement = document.querySelector(`.${styles.form}`);
       if (formElement) {
-        // Add animation class
-        formElement.classList.add(styles.slideToTop);
+        // Add elastic expansion animation class
+        formElement.classList.add(styles.expanding);
         
         // Scroll to the very top of the page first with smooth animation
         // Use fallback for browsers that don't support smooth scrolling
@@ -265,7 +274,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
         
         // Remove animation class after animation completes
         setTimeout(() => {
-          formElement.classList.remove(styles.slideToTop);
+          formElement.classList.remove(styles.expanding);
         }, 800);
       }
     }, 50);
@@ -281,7 +290,21 @@ export const TaskForm: React.FC<TaskFormProps> = ({
       !title.trim() &&
       (!relatedTarget || !formElement?.contains(relatedTarget))
     ) {
-      setIsExpanded(false);
+      // Add elastic collapse animation
+      setIsCollapsing(true);
+      const formElement = document.querySelector(`.${styles.form}`);
+      if (formElement) {
+        formElement.classList.add(styles.collapsing);
+        
+        // Remove animation class and reset state after animation completes
+        setTimeout(() => {
+          formElement.classList.remove(styles.collapsing);
+          setIsCollapsing(false);
+          setIsExpanded(false);
+        }, 600);
+      } else {
+        setIsExpanded(false);
+      }
     }
   };
 
@@ -427,7 +450,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 
   return (
     <form
-      className={`${styles.form} ${isExpanded ? styles.expanded : ''}`}
+      className={`${styles.form} ${isExpanded ? styles.expanded : ''} ${isCollapsing ? styles.collapsing : ''}`}
       onSubmit={handleSubmit}
       noValidate
       onClick={handleFormClick}

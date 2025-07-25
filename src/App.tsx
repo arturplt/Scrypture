@@ -163,6 +163,13 @@ function AppContent() {
     setEditingTask(null);
   };
 
+  const handleTaskCreated = (taskId: string) => {
+    // Navigate to and highlight the newly created task
+    if (taskListRef.current) {
+      taskListRef.current.navigateToTask(taskId);
+    }
+  };
+
   // Show user creation if no user exists
   if (!user) {
     return <UserCreation />;
@@ -203,6 +210,7 @@ function AppContent() {
         <TaskForm 
           onNavigateToTask={handleNavigateToTask} 
           onEditTask={handleEditTask}
+          onTaskCreated={handleTaskCreated}
         />
         <TaskList ref={taskListRef} />
         <DataManager onDataChange={refreshTasks} />

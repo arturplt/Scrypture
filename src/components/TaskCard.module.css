@@ -808,3 +808,25 @@
     filter: brightness(1.1) saturate(1.1);
   }
 }
+
+/* Highlighting animation for newly created tasks */
+.card.highlighted {
+  animation: highlightPulse 2s ease-in-out;
+  box-shadow: 0 0 20px var(--color-accent-gold);
+  border: 2px solid var(--color-accent-gold);
+}
+
+@keyframes highlightPulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 20px var(--color-accent-gold);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 0 30px var(--color-accent-gold);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 20px var(--color-accent-gold);
+  }
+}

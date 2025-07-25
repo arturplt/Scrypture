@@ -62,6 +62,8 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
     const updatedTasks = [...tasks, newTask];
     setTasks(updatedTasks);
     saveTasksWithFeedback(updatedTasks);
+    
+    return newTask;
   };
 
   const updateTask = (id: string, updates: Partial<Task>) => {

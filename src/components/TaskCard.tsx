@@ -8,9 +8,10 @@ import styles from './TaskCard.module.css';
 interface TaskCardProps {
   task: Task;
   onOpenModal?: () => void;
+  isHighlighted?: boolean;
 }
 
-export const TaskCard: React.FC<TaskCardProps> = ({ task, onOpenModal }) => {
+export const TaskCard: React.FC<TaskCardProps> = ({ task, onOpenModal, isHighlighted }) => {
   const { toggleTask, bringTaskToTop } = useTasks();
   const [isEditing, setIsEditing] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
@@ -137,6 +138,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onOpenModal }) => {
     if (isEditing) baseClasses.push(styles.editing);
     if (isExitingEdit) baseClasses.push(styles.exitingEdit);
     if (isReentering) baseClasses.push(styles.reentering);
+    if (isHighlighted) baseClasses.push(styles.highlighted);
     
     return baseClasses.join(' ');
   };
