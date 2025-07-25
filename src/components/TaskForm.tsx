@@ -21,8 +21,8 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   const { addTask, updateTask, tasks } = useTasks();
   const [title, setTitle] = useState(taskToEdit?.title || '');
   const [description, setDescription] = useState(taskToEdit?.description || '');
-  const [category, setCategory] = useState<string>(
-    taskToEdit?.category || 'body'
+  const [categories, setCategories] = useState<string[]>(
+    taskToEdit?.categories || ['body']
   );
   const [priority, setPriority] = useState<'low' | 'medium' | 'high'>(
     taskToEdit?.priority || 'medium'
@@ -36,10 +36,31 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const titleInputRef = useRef<HTMLInputElement>(null);
   // Remove getStatRewards and defaultCategoryRewards
-  const [bodyReward, setBodyReward] = useState<number>(0);
-  const [mindReward, setMindReward] = useState<number>(0);
-  const [soulReward, setSoulReward] = useState<number>(0);
-  const [xpReward, setXpReward] = useState<number>(0);
+  const [bodyReward, setBodyReward] = useState<number>(
+    taskToEdit?.statRewards?.body || 0
+  );
+  const [mindReward, setMindReward] = useState<number>(
+    taskToEdit?.statRewards?.mind || 0
+  );
+  const [soulReward, setSoulReward] = useState<number>(
+    taskToEdit?.statRewards?.soul || 0
+  );
+  const [xpReward, setXpReward] = useState<number>(
+    taskToEdit?.statRewards?.xp || 0
+  );
+
+  // Update core attribute rewards when editing a task that has Body, Mind, Soul categories
+  useEffect(() => {
+    if (taskToEdit) {
+      const hasBody = taskToEdit.categories?.includes('body') || false;
+      const hasMind = taskToEdit.categories?.includes('mind') || false;
+      const hasSoul = taskToEdit.categories?.includes('soul') || false;
+      
+      setBodyReward(hasBody ? 1 : 0);
+      setMindReward(hasMind ? 1 : 0);
+      setSoulReward(hasSoul ? 1 : 0);
+    }
+  }, [taskToEdit]);
 
   const isEditMode = !!taskToEdit;
 
@@ -56,7 +77,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
     return tasks.filter(task => 
       task.title.toLowerCase().includes(term) ||
       task.description?.toLowerCase().includes(term) ||
-      task.category?.toLowerCase().includes(term)
+      (task.categories && task.categories.some(cat => cat.toLowerCase().includes(term)))
     ).slice(0, 5); // Limit to 5 suggestions
   };
 
@@ -156,7 +177,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
       updateTask(taskToEdit.id, {
         title: title.trim(),
         description: description.trim() || undefined,
-        category,
+        categories,
         priority,
         statRewards,
         difficulty,
@@ -167,7 +188,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
       addTask({
         title: title.trim(),
         description: description.trim() || undefined,
-        category,
+        categories,
         completed: false,
         priority,
         statRewards,
@@ -179,7 +200,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
     if (!isEditMode) {
       setTitle('');
       setDescription('');
-      setCategory('home');
+      setCategories(['body']);
       setPriority('medium');
       setBodyReward(0);
       setMindReward(0);
@@ -218,14 +239,18 @@ export const TaskForm: React.FC<TaskFormProps> = ({
         // Also scroll the form into view to ensure it's visible
         setTimeout(() => {
           try {
-            formElement.scrollIntoView({ 
-              behavior: 'smooth', 
-              block: 'start',
-              inline: 'nearest'
-            });
+            if (formElement.scrollIntoView) {
+              formElement.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'start',
+                inline: 'nearest'
+              });
+            }
           } catch (e) {
             // Fallback for browsers that don't support smooth scrolling
-            formElement.scrollIntoView();
+            if (formElement.scrollIntoView) {
+              formElement.scrollIntoView();
+            }
           }
           
           // Focus on the title input for better UX
@@ -291,7 +316,38 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   const allCategories = categoryService.getAllCategories();
 
   // For task creation, show all categories so users can create tasks in any category
-  const categoriesForTaskCreation = allCategories;
+  // But exclude Body, Mind, Soul since they're automatically added when core attributes are selected
+  const categoriesForTaskCreation = allCategories.filter(category => 
+    !['body', 'mind', 'soul'].includes(category.name)
+  );
+
+  // Automatically manage Body, Mind, Soul categories based on core attribute selection
+  useEffect(() => {
+    const newCategories = [...categories];
+    
+    // Add Body category if bodyReward > 0
+    if (bodyReward > 0 && !newCategories.includes('body')) {
+      newCategories.push('body');
+    } else if (bodyReward === 0 && newCategories.includes('body')) {
+      newCategories.splice(newCategories.indexOf('body'), 1);
+    }
+    
+    // Add Mind category if mindReward > 0
+    if (mindReward > 0 && !newCategories.includes('mind')) {
+      newCategories.push('mind');
+    } else if (mindReward === 0 && newCategories.includes('mind')) {
+      newCategories.splice(newCategories.indexOf('mind'), 1);
+    }
+    
+    // Add Soul category if soulReward > 0
+    if (soulReward > 0 && !newCategories.includes('soul')) {
+      newCategories.push('soul');
+    } else if (soulReward === 0 && newCategories.includes('soul')) {
+      newCategories.splice(newCategories.indexOf('soul'), 1);
+    }
+    
+    setCategories(newCategories);
+  }, [bodyReward, mindReward, soulReward]);
 
   // Filter out empty categories (categories with no tasks)
   const getCategoriesWithTasks = () => {
@@ -307,7 +363,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
     
     // Get unique categories that have tasks
     const categoriesWithTasks = new Set(
-      tasks.map(task => task.category || 'uncategorized')
+      tasks.flatMap(task => task.categories || ['uncategorized'])
     );
     
     // Filter categories to include:
@@ -335,6 +391,22 @@ export const TaskForm: React.FC<TaskFormProps> = ({
     if (success) {
       window.dispatchEvent(new Event('customCategoryAdded'));
     }
+  };
+
+  const handleCategoryToggle = (categoryName: string) => {
+    setCategories(prev => {
+      if (prev.includes(categoryName)) {
+        // Remove category if it's already selected
+        return prev.filter(cat => cat !== categoryName);
+      } else {
+        // Add category if it's not selected
+        return [...prev, categoryName];
+      }
+    });
+  };
+
+  const handleCategoryRemove = (categoryName: string) => {
+    setCategories(prev => prev.filter(cat => cat !== categoryName));
   };
 
   const handleFormClick = (e: React.MouseEvent) => {
@@ -508,20 +580,20 @@ export const TaskForm: React.FC<TaskFormProps> = ({
                 <button
                   key={option.name}
                   type="button"
-                  className={`${styles.categoryButton} ${category === option.name ? styles.categoryButtonActive : ''}`}
+                  className={`${styles.categoryButton} ${categories.includes(option.name) ? styles.categoryButtonActive : ''}`}
                   style={{
                     borderColor: option.color,
                     backgroundColor:
-                      category === option.name ? option.color : 'transparent',
+                      categories.includes(option.name) ? option.color : 'transparent',
                     color:
-                      category === option.name
+                      categories.includes(option.name)
                         ? 'var(--color-bg-primary)'
                         : 'var(--color-text-primary)',
                   }}
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    setCategory(option.name);
+                    handleCategoryToggle(option.name);
                   }}
                 >
                   {option.icon}{' '}
@@ -529,6 +601,53 @@ export const TaskForm: React.FC<TaskFormProps> = ({
                 </button>
               ))}
             </div>
+            {/* Selected Categories Display */}
+            {categories.length > 0 && (
+              <div className={styles.selectedCategories}>
+                <label className={styles.selectedCategoriesLabel}>Selected:</label>
+                <div className={styles.selectedCategoriesList}>
+                  {categories.map((categoryName) => {
+                    // Check if this is a core attribute category
+                    const isCoreAttribute = ['body', 'mind', 'soul'].includes(categoryName);
+                    const category = isCoreAttribute 
+                      ? { name: categoryName, icon: categoryName === 'body' ? '💪' : categoryName === 'mind' ? '🧠' : '✨', color: 'var(--color-accent-gold)' }
+                      : categoriesForTaskCreation.find(cat => cat.name === categoryName);
+                    
+                    return (
+                      <div
+                        key={categoryName}
+                        className={`${styles.selectedCategoryTag} ${isCoreAttribute ? styles.coreAttributeTag : ''}`}
+                        style={{
+                          borderColor: category?.color || 'var(--color-border-primary)',
+                          backgroundColor: category?.color || 'transparent',
+                        }}
+                      >
+                        <span className={styles.selectedCategoryIcon}>
+                          {category?.icon || '📁'}
+                        </span>
+                        <span className={styles.selectedCategoryName}>
+                          {categoryName.charAt(0).toUpperCase() + categoryName.slice(1)}
+                        </span>
+                        {!isCoreAttribute && (
+                          <button
+                            type="button"
+                            className={styles.removeCategoryButton}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleCategoryRemove(categoryName);
+                            }}
+                            aria-label={`Remove ${categoryName} category`}
+                          >
+                            ✕
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
           <div className={styles.prioritySelector}>
             <label className={styles.priorityLabel}>Priority:</label>

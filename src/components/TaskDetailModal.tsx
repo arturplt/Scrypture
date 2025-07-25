@@ -202,12 +202,15 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
               >
                 {task.title}
               </h3>
-              {task.category && (
-                <span className={styles.category}>
-                  {getCategoryIcon(task.category)}{' '}
-                  {task.category.charAt(0).toUpperCase() +
-                    task.category.slice(1)}
-                </span>
+              {task.categories && task.categories.length > 0 && (
+                <div className={styles.categories}>
+                  {task.categories.map((category, index) => (
+                    <span key={index} className={styles.category}>
+                      {getCategoryIcon(category)}{' '}
+                      {category.charAt(0).toUpperCase() + category.slice(1)}
+                    </span>
+                  ))}
+                </div>
               )}
             </div>
 

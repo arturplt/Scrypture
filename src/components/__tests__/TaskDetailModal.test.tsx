@@ -3,6 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { TaskDetailModal } from '../TaskDetailModal';
 import { Task } from '../../types';
+import { TaskProvider } from '../../hooks/useTasks';
 
 // Mock the Modal component
 jest.mock('../Modal', () => ({
@@ -52,7 +53,7 @@ describe('TaskDetailModal', () => {
     createdAt: new Date('2024-01-01T10:00:00Z'),
     updatedAt: new Date('2024-01-01T11:00:00Z'),
     priority: 'high',
-    category: 'home',
+    categories: ['home'],
     statRewards: {
       body: 1,
       mind: 1,
@@ -153,7 +154,11 @@ describe('TaskDetailModal', () => {
   });
 
   it('handles edit button click', () => {
-    render(<TaskDetailModal {...defaultProps} />);
+    render(
+      <TaskProvider>
+        <TaskDetailModal {...defaultProps} />
+      </TaskProvider>
+    );
 
     const editButton = screen.getByLabelText('Edit task');
     fireEvent.click(editButton);
@@ -164,7 +169,9 @@ describe('TaskDetailModal', () => {
 
   it('handles navigation when no previous/next tasks', () => {
     render(
-      <TaskDetailModal {...defaultProps} hasNext={false} hasPrevious={false} />
+      <TaskProvider>
+        <TaskDetailModal {...defaultProps} hasNext={false} hasPrevious={false} />
+      </TaskProvider>
     );
 
     // Navigation buttons should not be present

@@ -42,7 +42,7 @@ describe('TaskService', () => {
           createdAt: new Date('2024-01-01'),
           updatedAt: new Date('2024-01-01'),
           priority: 'medium',
-          category: 'work',
+          categories: ['work'],
         },
       ];
 
@@ -84,7 +84,7 @@ describe('TaskService', () => {
           createdAt: new Date('2024-01-01'),
           updatedAt: new Date('2024-01-01'),
           priority: 'medium',
-          category: 'work',
+          categories: ['work'],
         },
       ];
 
@@ -107,7 +107,7 @@ describe('TaskService', () => {
           createdAt: new Date('2024-01-01'),
           updatedAt: new Date('2024-01-01'),
           priority: 'medium',
-          category: 'work',
+          categories: ['work'],
         },
       ];
 
@@ -129,7 +129,7 @@ describe('TaskService', () => {
           createdAt: new Date('2024-01-01'),
           updatedAt: new Date('2024-01-01'),
           priority: 'medium',
-          category: 'work',
+          categories: ['work'],
         },
       ];
 
@@ -174,7 +174,7 @@ describe('TaskService', () => {
           createdAt: new Date('2024-01-01'),
           updatedAt: new Date('2024-01-01'),
           priority: 'medium',
-          category: 'work',
+          categories: ['work'],
         },
       ];
 
@@ -197,7 +197,7 @@ describe('TaskService', () => {
           createdAt: new Date('2024-01-01'),
           updatedAt: new Date('2024-01-01'),
           priority: 'medium',
-          category: 'work',
+          categories: ['work'],
         },
       ];
 
@@ -220,7 +220,8 @@ describe('TaskService', () => {
           createdAt: new Date('2024-01-01'),
           updatedAt: new Date('2024-01-01'),
           priority: 'medium',
-          // Missing description and category
+          categories: ['body'], // Default category
+          // Missing description
         },
       ];
 
@@ -244,7 +245,7 @@ describe('TaskService', () => {
           createdAt: new Date('2024-01-01'),
           updatedAt: new Date('2024-01-01'),
           priority: 'high',
-          category: 'personal',
+          categories: ['personal'],
         },
       ];
 
@@ -270,7 +271,7 @@ describe('TaskService', () => {
           updatedAt: new Date('2024-01-01'),
           priority:
             index % 3 === 0 ? 'high' : index % 3 === 1 ? 'medium' : 'low',
-          category: index % 2 === 0 ? 'work' : 'personal',
+          categories: index % 2 === 0 ? ['work'] : ['personal'],
         })
       );
 
@@ -292,7 +293,7 @@ describe('TaskService', () => {
           createdAt: new Date('2024-01-01'),
           updatedAt: new Date('2024-01-01'),
           priority: 'medium',
-          category: 'work',
+          categories: ['work'],
         },
       ];
 
@@ -348,7 +349,7 @@ describe('TaskService', () => {
           createdAt: new Date('2024-01-01'),
           updatedAt: new Date('2024-01-01'),
           priority: 'medium',
-          category: 'work',
+          categories: ['work'],
         },
       ];
 
@@ -358,6 +359,73 @@ describe('TaskService', () => {
 
       // The service should throw the error (no error handling implemented)
       expect(() => taskService.saveTasks(tasks)).toThrow('Save service error');
+    });
+  });
+
+  describe('Migration', () => {
+    test('should migrate old tasks with single category to multiple categories', () => {
+      const oldTasks: any[] = [
+        {
+          id: '1',
+          title: 'Old Task',
+          description: 'Test Description',
+          completed: false,
+          createdAt: new Date('2024-01-01'),
+          updatedAt: new Date('2024-01-01'),
+          priority: 'medium',
+          category: 'work', // Old single category field
+        },
+      ];
+
+      mockStorageService.getTasks.mockReturnValue(oldTasks);
+
+      const result = taskService.getTasks();
+
+      expect(result).toEqual([
+        {
+          id: '1',
+          title: 'Old Task',
+          description: 'Test Description',
+          completed: false,
+          createdAt: new Date('2024-01-01'),
+          updatedAt: new Date('2024-01-01'),
+          priority: 'medium',
+          categories: ['work'], // Migrated to array
+          category: undefined, // Old field removed
+        },
+      ]);
+    });
+
+    test('should provide default category for tasks with no categories', () => {
+      const tasksWithoutCategories: any[] = [
+        {
+          id: '1',
+          title: 'Task Without Categories',
+          description: 'Test Description',
+          completed: false,
+          createdAt: new Date('2024-01-01'),
+          updatedAt: new Date('2024-01-01'),
+          priority: 'medium',
+          // No categories field
+        },
+      ];
+
+      mockStorageService.getTasks.mockReturnValue(tasksWithoutCategories);
+
+      const result = taskService.getTasks();
+
+      expect(result).toEqual([
+        {
+          id: '1',
+          title: 'Task Without Categories',
+          description: 'Test Description',
+          completed: false,
+          createdAt: new Date('2024-01-01'),
+          updatedAt: new Date('2024-01-01'),
+          priority: 'medium',
+          categories: ['body'], // Default category provided
+        },
+      ]);
     });
   });
 });

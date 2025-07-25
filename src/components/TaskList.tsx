@@ -51,7 +51,7 @@ export const TaskList = forwardRef<TaskListRef>((props, ref) => {
     
     // Get unique categories that have tasks
     const categoriesWithTasks = new Set(
-      tasks.map(task => task.category || 'uncategorized')
+      tasks.flatMap(task => task.categories || ['uncategorized'])
     );
     
     // Only show categories that actually have tasks in the filter dropdown
@@ -82,7 +82,7 @@ export const TaskList = forwardRef<TaskListRef>((props, ref) => {
     const searchTerm = keyword.toLowerCase().trim();
     const titleMatch = task.title.toLowerCase().includes(searchTerm);
     const descriptionMatch = task.description?.toLowerCase().includes(searchTerm) || false;
-    const categoryMatch = task.category?.toLowerCase().includes(searchTerm) || false;
+    const categoryMatch = (task.categories && task.categories.some(cat => cat.toLowerCase().includes(searchTerm))) || false;
     
     return titleMatch || descriptionMatch || categoryMatch;
   };
@@ -92,7 +92,7 @@ export const TaskList = forwardRef<TaskListRef>((props, ref) => {
     .filter((task) => !task.completed)
     .filter((task) => {
       if (selectedCategory) {
-        return task.category === selectedCategory;
+        return task.categories && task.categories.includes(selectedCategory);
       }
       return true;
     })
@@ -133,7 +133,8 @@ export const TaskList = forwardRef<TaskListRef>((props, ref) => {
 
   // Group active tasks by category
   const groupedActiveTasks = activeTasks.reduce((groups, task) => {
-    const category = task.category || 'Uncategorized';
+    // Use the first category for grouping, or 'Uncategorized' if none
+    const category = (task.categories && task.categories.length > 0) ? task.categories[0] : 'Uncategorized';
     if (!groups[category]) {
       groups[category] = [];
     }

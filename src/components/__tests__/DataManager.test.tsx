@@ -272,7 +272,7 @@ describe('DataManager', () => {
       fireEvent.change(fileInput, { target: { files: [file] } });
 
       await waitFor(() => {
-        expect(screen.getByText('Imported!')).toBeInTheDocument();
+        expect(screen.getByText(/Imported!/)).toBeInTheDocument();
       });
     });
 
@@ -358,7 +358,7 @@ describe('DataManager', () => {
       fireEvent.click(restoreButton);
 
       await waitFor(() => {
-        expect(screen.getByText('Restored!')).toBeInTheDocument();
+        expect(screen.getByText(/Restored!/)).toBeInTheDocument();
       });
     });
 
@@ -414,7 +414,7 @@ describe('DataManager', () => {
       fireEvent.click(clearButton);
 
       await waitFor(() => {
-        expect(screen.getByText('Data cleared!')).toBeInTheDocument();
+        expect(screen.getByText(/Data cleared!/)).toBeInTheDocument();
       });
 
       // Restore original confirm

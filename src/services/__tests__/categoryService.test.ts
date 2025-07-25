@@ -209,11 +209,14 @@ describe('categoryService', () => {
 
       const result = categoryService.getAllCategories();
 
-      expect(result).toHaveLength(4); // 3 default + 1 custom
+      expect(result).toHaveLength(7); // 6 default (home, free time, garden, body, mind, soul) + 1 custom
       expect(result[0].name).toBe('home');
       expect(result[1].name).toBe('free time');
       expect(result[2].name).toBe('garden');
-      expect(result[3].name).toBe('test');
+      expect(result[3].name).toBe('mind');
+      expect(result[4].name).toBe('body');
+      expect(result[5].name).toBe('soul');
+      expect(result[6].name).toBe('test');
     });
 
     it('returns only default categories when no custom categories exist', () => {
@@ -221,10 +224,13 @@ describe('categoryService', () => {
 
       const result = categoryService.getAllCategories();
 
-      expect(result).toHaveLength(3);
+      expect(result).toHaveLength(6); // 6 default categories (home, free time, garden, body, mind, soul)
       expect(result[0].name).toBe('home');
       expect(result[1].name).toBe('free time');
       expect(result[2].name).toBe('garden');
+      expect(result[3].name).toBe('mind');
+      expect(result[4].name).toBe('body');
+      expect(result[5].name).toBe('soul');
     });
   });
 

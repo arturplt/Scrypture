@@ -6,7 +6,7 @@ export interface Task {
   createdAt: Date;
   updatedAt: Date;
   priority: 'low' | 'medium' | 'high';
-  category?: string;
+  categories: string[]; // Changed from category?: string to categories: string[]
   statRewards?: {
     body?: number;
     mind?: number;

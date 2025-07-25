@@ -18,7 +18,7 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({
   const { updateTask, deleteTask, tasks } = useTasks();
   const [title, setTitle] = useState(task.title);
   const [description, setDescription] = useState(task.description || '');
-  const [category, setCategory] = useState<string>(task.category || 'home');
+  const [categories, setCategories] = useState<string[]>(task.categories || ['body']);
   const [priority, setPriority] = useState<'low' | 'medium' | 'high'>(
     task.priority
   );
@@ -39,7 +39,7 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({
   useEffect(() => {
     setTitle(task.title);
     setDescription(task.description || '');
-    setCategory(task.category || 'home');
+    setCategories(task.categories || ['body']);
     setPriority(task.priority);
   }, [task]);
 
@@ -77,7 +77,7 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({
     updateTask(task.id, {
       title: title.trim(),
       description: description.trim() || undefined,
-      category,
+      categories,
       priority,
       statRewards,
       difficulty,
@@ -89,7 +89,7 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({
     // Reset form to original values
     setTitle(task.title);
     setDescription(task.description || '');
-    setCategory(task.category || 'home');
+    setCategories(task.categories || ['body']);
     setPriority(task.priority);
     onCancel();
   };
@@ -115,8 +115,38 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({
 
   const allCategories = categoryService.getAllCategories();
 
-  // For task editing, show all categories so users can change to any category
-  const categoriesForTaskEditing = allCategories;
+  // For task editing, show all categories except Body, Mind, Soul since they're automatically managed
+  const categoriesForTaskEditing = allCategories.filter(category => 
+    !['body', 'mind', 'soul'].includes(category.name)
+  );
+
+  // Automatically manage Body, Mind, Soul categories based on core attribute selection
+  useEffect(() => {
+    const newCategories = [...categories];
+    
+    // Add Body category if bodyReward > 0
+    if (bodyReward > 0 && !newCategories.includes('body')) {
+      newCategories.push('body');
+    } else if (bodyReward === 0 && newCategories.includes('body')) {
+      newCategories.splice(newCategories.indexOf('body'), 1);
+    }
+    
+    // Add Mind category if mindReward > 0
+    if (mindReward > 0 && !newCategories.includes('mind')) {
+      newCategories.push('mind');
+    } else if (mindReward === 0 && newCategories.includes('mind')) {
+      newCategories.splice(newCategories.indexOf('mind'), 1);
+    }
+    
+    // Add Soul category if soulReward > 0
+    if (soulReward > 0 && !newCategories.includes('soul')) {
+      newCategories.push('soul');
+    } else if (soulReward === 0 && newCategories.includes('soul')) {
+      newCategories.splice(newCategories.indexOf('soul'), 1);
+    }
+    
+    setCategories(newCategories);
+  }, [bodyReward, mindReward, soulReward]);
 
   const handleCategoryAdded = (newCategory: {
     name: string;
@@ -182,17 +212,25 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({
               <button
                 key={option.name}
                 type="button"
-                className={`${styles.categoryButton} ${category === option.name ? styles.categoryButtonActive : ''}`}
+                className={`${styles.categoryButton} ${categories.includes(option.name) ? styles.categoryButtonActive : ''}`}
                 style={{
                   borderColor: option.color,
                   backgroundColor:
-                    category === option.name ? option.color : 'transparent',
+                    categories.includes(option.name) ? option.color : 'transparent',
                   color:
-                    category === option.name
+                    categories.includes(option.name)
                       ? 'var(--color-bg-primary)'
                       : 'var(--color-text-primary)',
                 }}
-                onClick={() => setCategory(option.name)}
+                onClick={() => {
+                  const newCategories = [...categories];
+                  if (newCategories.includes(option.name)) {
+                    newCategories.splice(newCategories.indexOf(option.name), 1);
+                  } else {
+                    newCategories.push(option.name);
+                  }
+                  setCategories(newCategories);
+                }}
               >
                 {option.icon}{' '}
                 {option.name.charAt(0).toUpperCase() + option.name.slice(1)}

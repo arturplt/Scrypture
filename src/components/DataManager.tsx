@@ -53,8 +53,12 @@ export const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
         const data = e.target?.result as string;
         const success = userService.importUserData(data);
         if (success) {
-          showMessage('Imported!', 'success');
+          showMessage('Imported! Refreshing...', 'success');
           onDataChange?.();
+          // Refresh the page after import to ensure all data is loaded
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
         } else {
           showMessage('Import failed', 'error');
         }
@@ -81,8 +85,12 @@ export const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
       if (backup) {
         const success = userService.restoreFromBackup(backup);
         if (success) {
-          showMessage('Restored!', 'success');
+          showMessage('Restored! Refreshing...', 'success');
           onDataChange?.();
+          // Refresh the page after restore to ensure all data is loaded
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
         } else {
           showMessage('Restore failed', 'error');
         }
@@ -101,8 +109,12 @@ export const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
       // Clear Start Here progress
       localStorage.removeItem('startHereGivenTasks');
       if (success) {
-        showMessage('Data cleared!', 'success');
+        showMessage('Data cleared! Refreshing...', 'success');
         onDataChange?.();
+        // Refresh the page after a short delay to ensure complete reset
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
       } else {
         showMessage('Clear failed', 'error');
       }
@@ -373,7 +385,7 @@ export const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
         description: sample.description,
         completed: false,
         priority: sample.priority,
-        category: sample.category,
+        categories: [sample.category], // Convert single category to array
         statRewards: { ...sample.statRewards },
         difficulty: sample.difficulty,
       });
