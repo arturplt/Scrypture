@@ -280,7 +280,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
           <div className={styles.rewardsSection}>
             <h4 className={styles.sectionTitle}>Rewards</h4>
             <div className={styles.rewards}>
-              {task.statRewards?.xp > 0 && (
+              {task.statRewards?.xp && task.statRewards.xp > 0 && (
                 <span
                   className={styles.reward}
                   style={{
@@ -290,10 +290,10 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                     fontWeight: 'bold',
                   }}
                 >
-                  XP: +{task.statRewards?.xp}
+                  XP: +{task.statRewards.xp}
                 </span>
               )}
-              {task.statRewards?.body > 0 && (
+              {task.statRewards?.body && task.statRewards.body > 0 && (
                 <span
                   className={styles.reward}
                   style={{
@@ -302,10 +302,10 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                     borderColor: 'var(--color-body)',
                   }}
                 >
-                  💪 Body: +{task.statRewards?.body}
+                  💪 Body: +{task.statRewards.body}
                 </span>
               )}
-              {task.statRewards?.mind > 0 && (
+              {task.statRewards?.mind && task.statRewards.mind > 0 && (
                 <span
                   className={styles.reward}
                   style={{
@@ -314,10 +314,10 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                     borderColor: 'var(--color-mind)',
                   }}
                 >
-                  🧠 Mind: +{task.statRewards?.mind}
+                  🧠 Mind: +{task.statRewards.mind}
                 </span>
               )}
-              {task.statRewards?.soul > 0 && (
+              {task.statRewards?.soul && task.statRewards.soul > 0 && (
                 <span
                   className={styles.reward}
                   style={{
@@ -326,7 +326,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                     borderColor: 'var(--color-soul)',
                   }}
                 >
-                  ✨ Soul: +{task.statRewards?.soul}
+                  ✨ Soul: +{task.statRewards.soul}
                 </span>
               )}
               {(!task.statRewards ||
@@ -357,6 +357,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
           isOpen={showEditForm}
           onClose={handleEditCancel}
           title="Edit Task"
+          customPadding="4px"
         >
           <div className={styles.editModalContent}>
             <TaskEditForm task={task} onCancel={handleEditCancel} />

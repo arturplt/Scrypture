@@ -66,8 +66,8 @@ export const TaskForm: React.FC<TaskFormProps> = ({
     const newTitle = e.target.value;
     setTitle(newTitle);
     
-    // Show auto-fill suggestions if there are matches
-    if (newTitle.trim().length >= 2) {
+    // Show auto-fill suggestions if there are matches and user is typing
+    if (newTitle.trim().length >= 2 && autoFillSuggestions.length > 0) {
       setShowAutoFill(true);
       setSelectedAutoFillIndex(0);
     } else {
@@ -81,7 +81,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   };
 
   const handleAutoFillSelect = (task: Task) => {
-    setTitle(task.title);
+    // Don't fill the title field, just navigate to the task
     setShowAutoFill(false);
     
     // Navigate to the selected task
@@ -119,7 +119,13 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   };
 
   const handleClickOutside = (e: MouseEvent) => {
-    if (titleInputRef.current && !titleInputRef.current.contains(e.target as Node)) {
+    // Only hide auto-fill if clicking outside the title input AND auto-fill suggestions
+    const target = e.target as Node;
+    const titleInput = titleInputRef.current;
+    const autoFillContainer = document.querySelector(`.${styles.autoFillSuggestions}`);
+    
+    if (titleInput && !titleInput.contains(target) && 
+        autoFillContainer && !autoFillContainer.contains(target)) {
       setShowAutoFill(false);
     }
   };
@@ -189,6 +195,27 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 
   const handleTitleClick = () => {
     setIsExpanded(true);
+    
+    // Add slide-to-top animation with a small delay to ensure expansion happens first
+    setTimeout(() => {
+      const formElement = document.querySelector(`.${styles.form}`);
+      if (formElement) {
+        // Add animation class
+        formElement.classList.add(styles.slideToTop);
+        
+        // Scroll the form into view with smooth animation
+        formElement.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start',
+          inline: 'nearest'
+        });
+        
+        // Remove animation class after animation completes
+        setTimeout(() => {
+          formElement.classList.remove(styles.slideToTop);
+        }, 800);
+      }
+    }, 50);
   };
 
   const handleTitleBlur = (e: React.FocusEvent) => {
@@ -238,6 +265,39 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 
   // Remove mainCategories, only use customCategories for allCategories
   const allCategories = categoryService.getAllCategories();
+
+  // For task creation, show all categories so users can create tasks in any category
+  const categoriesForTaskCreation = allCategories;
+
+  // Filter out empty categories (categories with no tasks)
+  const getCategoriesWithTasks = () => {
+    const customCategories = categoryService.getCustomCategories();
+    
+    // Predetermined categories that should always be shown
+    const predeterminedCategories = ['home', 'free time', 'garden'];
+    
+    if (!tasks || tasks.length === 0) {
+      // If no tasks exist, show all default categories plus any custom categories
+      return allCategories;
+    }
+    
+    // Get unique categories that have tasks
+    const categoriesWithTasks = new Set(
+      tasks.map(task => task.category || 'uncategorized')
+    );
+    
+    // Filter categories to include:
+    // 1. Categories that have tasks
+    // 2. All custom categories (even if they don't have tasks yet)
+    // 3. Predetermined categories (Home, Free Time, Garden) - always show
+    return allCategories.filter(category => 
+      categoriesWithTasks.has(category.name) || 
+      customCategories.some(customCat => customCat.name === category.name) ||
+      predeterminedCategories.includes(category.name)
+    );
+  };
+
+  const categoriesWithTasks = getCategoriesWithTasks();
 
   // Remove getStatRewards and defaultCategoryRewards
   const handleCategoryAdded = (newCategory: {
@@ -313,7 +373,9 @@ export const TaskForm: React.FC<TaskFormProps> = ({
                   className={`${styles.autoFillSuggestion} ${index === selectedAutoFillIndex ? styles.autoFillSuggestionSelected : ''}`}
                   onClick={() => handleAutoFillSelect(task)}
                 >
+                  <span className={styles.autoFillIcon}>🔍</span>
                   {task.title}
+                  <span className={styles.autoFillHint}>View task</span>
                 </div>
               ))}
             </div>
@@ -363,21 +425,33 @@ export const TaskForm: React.FC<TaskFormProps> = ({
               <button
                 type="button"
                 className={`${styles.coreAttributeButton} ${bodyReward > 0 ? styles.coreAttributeButtonActive : ''}`}
-                onClick={() => setBodyReward(bodyReward > 0 ? 0 : 1)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setBodyReward(bodyReward > 0 ? 0 : 1);
+                }}
               >
                 BODY
               </button>
               <button
                 type="button"
                 className={`${styles.coreAttributeButton} ${mindReward > 0 ? styles.coreAttributeButtonActive : ''}`}
-                onClick={() => setMindReward(mindReward > 0 ? 0 : 1)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setMindReward(mindReward > 0 ? 0 : 1);
+                }}
               >
                 MIND
               </button>
               <button
                 type="button"
                 className={`${styles.coreAttributeButton} ${soulReward > 0 ? styles.coreAttributeButtonActive : ''}`}
-                onClick={() => setSoulReward(soulReward > 0 ? 0 : 1)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setSoulReward(soulReward > 0 ? 0 : 1);
+                }}
               >
                 SOUL
               </button>
@@ -406,7 +480,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
               </div>
             </div>
             <div className={styles.categoryButtons}>
-              {allCategories.map((option) => (
+              {categoriesForTaskCreation.map((option) => (
                 <button
                   key={option.name}
                   type="button"
@@ -421,6 +495,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
                         : 'var(--color-text-primary)',
                   }}
                   onClick={(e) => {
+                    e.preventDefault();
                     e.stopPropagation();
                     setCategory(option.name);
                   }}
@@ -449,6 +524,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
                         : 'var(--color-text-primary)',
                   }}
                   onClick={(e) => {
+                    e.preventDefault();
                     e.stopPropagation();
                     setPriority(option.value as 'low' | 'medium' | 'high');
                   }}
@@ -485,7 +561,11 @@ export const TaskForm: React.FC<TaskFormProps> = ({
                           ? `var(--difficulty-${idx + 1})`
                           : undefined,
                     }}
-                    onClick={() => setDifficulty(idx)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setDifficulty(idx);
+                    }}
                   >
                     {idx}
                   </button>

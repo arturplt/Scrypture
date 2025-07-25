@@ -15,7 +15,7 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({
   task,
   onCancel,
 }) => {
-  const { updateTask, deleteTask } = useTasks();
+  const { updateTask, deleteTask, tasks } = useTasks();
   const [title, setTitle] = useState(task.title);
   const [description, setDescription] = useState(task.description || '');
   const [category, setCategory] = useState<string>(task.category || 'home');
@@ -115,6 +115,9 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({
 
   const allCategories = categoryService.getAllCategories();
 
+  // For task editing, show all categories so users can change to any category
+  const categoriesForTaskEditing = allCategories;
+
   const handleCategoryAdded = (newCategory: {
     name: string;
     icon: string;
@@ -175,7 +178,7 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({
             </div>
           </div>
           <div className={styles.categoryButtons}>
-            {allCategories.map((option) => (
+            {categoriesForTaskEditing.map((option) => (
               <button
                 key={option.name}
                 type="button"

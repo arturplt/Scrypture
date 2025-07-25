@@ -7,6 +7,8 @@
   box-shadow: var(--shadow-button);
   transition: all var(--transition-normal);
   cursor: pointer;
+  position: relative;
+  z-index: 10;
 }
 
 .form:not(.expanded):hover {
@@ -18,10 +20,40 @@
 .form.expanded {
   padding: var(--spacing-sm);
   cursor: default;
+  z-index: 20;
 }
 
 .form.expanded .inputGroup {
   cursor: default;
+}
+
+/* Slide to top animation */
+.slideToTop {
+  animation: slideToTop 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform-origin: top center;
+}
+
+@keyframes slideToTop {
+  0% {
+    transform: translateY(0) scale(1);
+    box-shadow: var(--shadow-button);
+    border-color: var(--color-border-primary);
+  }
+  25% {
+    transform: translateY(-5px) scale(1.01);
+    box-shadow: var(--shadow-active);
+    border-color: var(--color-accent-gold);
+  }
+  75% {
+    transform: translateY(-2px) scale(1.005);
+    box-shadow: var(--shadow-active);
+    border-color: var(--color-accent-gold);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    box-shadow: var(--shadow-button);
+    border-color: var(--color-border-primary);
+  }
 }
 
 .inputGroup {
@@ -122,6 +154,9 @@
   color: var(--color-text-primary);
   border-bottom: 1px solid var(--color-border-secondary);
   transition: all var(--transition-normal);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
 }
 
 .autoFillSuggestion:last-child {
@@ -141,6 +176,18 @@
 .autoFillSuggestionSelected:hover {
   background: var(--color-accent-gold);
   color: var(--color-bg-primary);
+}
+
+.autoFillIcon {
+  font-size: var(--font-size-xs);
+  opacity: 0.7;
+}
+
+.autoFillHint {
+  margin-left: auto;
+  font-size: var(--font-size-xs);
+  opacity: 0.6;
+  font-style: italic;
 }
 
 .prioritySelect {

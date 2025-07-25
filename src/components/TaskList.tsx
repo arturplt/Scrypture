@@ -42,6 +42,26 @@ export const TaskList = forwardRef<TaskListRef>((props, ref) => {
     };
   }, []);
 
+  // Filter out empty categories for the dropdown only
+  const getCategoriesWithTasks = () => {
+    if (!tasks || tasks.length === 0) {
+      // If no tasks exist, show no categories in filter dropdown
+      return [];
+    }
+    
+    // Get unique categories that have tasks
+    const categoriesWithTasks = new Set(
+      tasks.map(task => task.category || 'uncategorized')
+    );
+    
+    // Only show categories that actually have tasks in the filter dropdown
+    return allCategories.filter(category => 
+      categoriesWithTasks.has(category.name)
+    );
+  };
+
+  const categoriesWithTasks = getCategoriesWithTasks();
+
   // Expose navigateToTask method via ref
   useImperativeHandle(ref, () => ({
     navigateToTask: (taskId: string) => {
@@ -255,7 +275,7 @@ export const TaskList = forwardRef<TaskListRef>((props, ref) => {
                   className={styles.categorySelect}
                 >
                   <option value="">All Categories</option>
-                  {allCategories.map((cat) => (
+                  {categoriesWithTasks.map((cat) => (
                     <option key={cat.name} value={cat.name}>
                       {cat.icon}{' '}
                       {cat.name.charAt(0).toUpperCase() + cat.name.slice(1)}

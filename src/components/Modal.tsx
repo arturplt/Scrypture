@@ -6,6 +6,7 @@ interface ModalProps {
   onClose: () => void;
   title: string;
   children: React.ReactNode;
+  customPadding?: string;
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -13,6 +14,7 @@ export const Modal: React.FC<ModalProps> = ({
   onClose,
   title,
   children,
+  customPadding,
 }) => {
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -47,7 +49,12 @@ export const Modal: React.FC<ModalProps> = ({
             ×
           </button>
         </div>
-        <div className={styles.content}>{children}</div>
+        <div 
+          className={styles.content} 
+          style={customPadding ? { padding: customPadding } : undefined}
+        >
+          {children}
+        </div>
       </div>
     </div>
   );
