@@ -17,6 +17,11 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onOpenModal }) => {
   const [wasCompleted, setWasCompleted] = useState(task.completed);
   const [showDetails, setShowDetails] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  
+  // New transition states for smooth animations
+  const [isTransitioningToEdit, setIsTransitioningToEdit] = useState(false);
+  const [isExitingEdit, setIsExitingEdit] = useState(false);
+  const [isReentering, setIsReentering] = useState(false);
 
   const handleToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.stopPropagation();
@@ -35,11 +40,42 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onOpenModal }) => {
 
   const handleEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsEditing(true);
+    
+    // Prevent multiple rapid clicks during transition
+    if (isTransitioningToEdit || isEditing || isExitingEdit) {
+      return;
+    }
+    
+    // Start transition animation
+    setIsTransitioningToEdit(true);
+    
+    // After transition animation completes, show edit form
+    setTimeout(() => {
+      setIsTransitioningToEdit(false);
+      setIsEditing(true);
+    }, 200); // Match faster animation duration
   };
 
   const handleCancelEdit = () => {
-    setIsEditing(false);
+    // Prevent multiple rapid cancel clicks during transition
+    if (isExitingEdit || isReentering) {
+      return;
+    }
+    
+    // Start exit animation
+    setIsExitingEdit(true);
+    
+    // After exit animation, hide edit form and show card
+    setTimeout(() => {
+      setIsExitingEdit(false);
+      setIsEditing(false);
+      setIsReentering(true);
+      
+      // After re-entrance animation, reset state
+      setTimeout(() => {
+        setIsReentering(false);
+      }, 200); // Match faster animation duration
+    }, 420); // Match new exit animation duration
   };
 
   const handleTitleClick = (e: React.MouseEvent) => {
@@ -91,11 +127,32 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onOpenModal }) => {
     return styles.difficultyExtreme; // Fallback for any higher values
   };
 
+  // Determine the appropriate CSS class for the card
+  const getCardClassName = () => {
+    const baseClasses = [styles.card];
+    
+    if (task.completed) baseClasses.push(styles.completed);
+    if (isCompleting) baseClasses.push(styles.completing);
+    if (isTransitioningToEdit) baseClasses.push(styles.transitioningToEdit);
+    if (isEditing) baseClasses.push(styles.editing);
+    if (isExitingEdit) baseClasses.push(styles.exitingEdit);
+    if (isReentering) baseClasses.push(styles.reentering);
+    
+    return baseClasses.join(' ');
+  };
 
+  // Don't render anything during transition to edit
+  if (isTransitioningToEdit) {
+    return (
+      <div className={getCardClassName()}>
+        {/* Empty div to maintain layout during transition */}
+      </div>
+    );
+  }
 
   if (isEditing) {
     return (
-      <div className={`${styles.card} ${styles.editing}`}>
+      <div className={getCardClassName()}>
         <TaskEditForm task={task} onCancel={handleCancelEdit} />
       </div>
     );
@@ -103,7 +160,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onOpenModal }) => {
 
   return (
     <div
-      className={`${styles.card} ${task.completed ? styles.completed : ''} ${isCompleting ? styles.completing : ''}`}
+      className={getCardClassName()}
       onClick={handleCardClick}
       style={
         {

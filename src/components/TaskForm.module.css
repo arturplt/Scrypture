@@ -1,6 +1,6 @@
 .form {
   background: var(--color-bg-secondary);
-  border: 4px solid var(--color-border-primary);
+  border: none;
   border-radius: 0px;
   padding: var(--spacing-xs);
   margin-bottom: var(--spacing-md);
@@ -9,10 +9,15 @@
   cursor: pointer;
   position: relative;
   z-index: 10;
+  transform-origin: center;
+  /* Prevent text flickering during animations */
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
 }
 
 .form:not(.expanded):hover {
-  border-color: var(--color-accent-gold);
   box-shadow: var(--shadow-active);
   transform: translateY(-1px);
 }
@@ -27,6 +32,24 @@
   cursor: default;
 }
 
+/* Smooth transition when form is inside transitioning card */
+.form.transitioning {
+  animation: formTransition 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  animation-delay: 0.05s;
+  opacity: 0;
+}
+
+@keyframes formTransition {
+  0% {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Slide to top animation */
 .slideToTop {
   animation: slideToTop 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -37,22 +60,18 @@
   0% {
     transform: translateY(0) scale(1);
     box-shadow: var(--shadow-button);
-    border-color: var(--color-border-primary);
   }
   25% {
     transform: translateY(-5px) scale(1.01);
     box-shadow: var(--shadow-active);
-    border-color: var(--color-accent-gold);
   }
   75% {
     transform: translateY(-2px) scale(1.005);
     box-shadow: var(--shadow-active);
-    border-color: var(--color-accent-gold);
   }
   100% {
     transform: translateY(0) scale(1);
     box-shadow: var(--shadow-button);
-    border-color: var(--color-border-primary);
   }
 }
 
@@ -596,9 +615,9 @@
 .deleteButton {
   flex: 1;
   padding: var(--spacing-sm) var(--spacing-md);
-  background: var(--color-error);
-  color: var(--color-bg-primary);
-  border: 2px solid var(--color-error);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-muted);
+  border: 2px solid var(--color-border-secondary);
   border-radius: 0px;
   font-size: var(--font-size-sm);
   font-weight: normal;
@@ -609,6 +628,7 @@
   -webkit-font-smoothing: none;
   -moz-osx-font-smoothing: none;
   text-rendering: optimizeSpeed;
+  opacity: 0.7;
 }
 
 .deleteButton:hover {
@@ -616,6 +636,8 @@
   box-shadow: var(--shadow-active);
   background: var(--color-error);
   border-color: var(--color-error);
+  color: var(--color-bg-primary);
+  opacity: 1;
 }
 
 .deleteButton:active {

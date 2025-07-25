@@ -82,15 +82,13 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({
       statRewards,
       difficulty,
     });
+    // Use the same smooth transition when submitting
     onCancel();
   };
 
   const handleCancel = () => {
-    // Reset form to original values
-    setTitle(task.title);
-    setDescription(task.description || '');
-    setCategories(task.categories || ['body']);
-    setPriority(task.priority);
+    // The transition animation is now handled by the parent TaskCard component
+    // No need to reset form values here as the card will be re-rendered
     onCancel();
   };
 
@@ -100,6 +98,7 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({
 
   const confirmDelete = () => {
     deleteTask(task.id);
+    // Use the same smooth transition when deleting
     onCancel();
   };
 
@@ -163,7 +162,7 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({
 
   return (
     <>
-      <form className={styles.form} onSubmit={handleSubmit} noValidate>
+      <form className={`${styles.form} ${styles.transitioning}`} onSubmit={handleSubmit} noValidate>
         <div className={styles.inputGroup}>
           <div style={{ flex: 1, position: 'relative' }}>
             <input

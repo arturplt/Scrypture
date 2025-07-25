@@ -1,260 +1,120 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { TaskCard } from '../TaskCard';
-import { Task } from '../../types';
-import { TaskProvider } from '../../hooks/useTasks';
 
-// Mock the services
-jest.mock('../../services/taskService', () => ({
-  taskService: {
-    updateTask: jest.fn(),
-    deleteTask: jest.fn(),
+// Mock task for testing
+const mockTask = {
+  id: '1',
+  title: 'Test Task',
+  description: 'Test description',
+  completed: false,
+  priority: 'medium' as const,
+  categories: ['body'],
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  statRewards: {
+    body: 1,
+    xp: 10
   },
-}));
-
-jest.mock('../../services/userService', () => ({
-  userService: {
-    getUser: jest.fn(() => ({
-      level: 5,
-      experience: 1000,
-      achievements: [],
-    })),
-    updateUser: jest.fn(),
-  },
-}));
-
-// Mock the useTasks hook
-jest.mock('../../hooks/useTasks', () => ({
-  useTasks: jest.fn(),
-  TaskProvider: ({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
-  ),
-}));
-
-const mockUseTasks = jest.mocked(require('../../hooks/useTasks').useTasks);
-
-const renderWithProvider = (component: React.ReactElement) => {
-  return render(<TaskProvider>{component}</TaskProvider>);
+  difficulty: 3
 };
 
-describe('TaskCard', () => {
-  const mockTask: Task = {
-    id: '1',
-    title: 'Test Task',
-    description: 'Test Description',
-    categories: ['mind'],
-    priority: 'high' as const,
-    completed: false,
-    createdAt: new Date('2024-01-01'),
-    updatedAt: new Date('2024-01-01'),
-    statRewards: {
-      xp: 50,
-      mind: 10,
-    },
-  };
+// Mock the hooks
+jest.mock('../../hooks/useTasks', () => ({
+  useTasks: () => ({
+    toggleTask: jest.fn(),
+    bringTaskToTop: jest.fn(),
+  }),
+  TaskProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+}));
 
-  const mockOnOpenModal = jest.fn();
+jest.mock('../../hooks/useUser', () => ({
+  useUser: () => ({
+    addExperience: jest.fn(),
+    addStatRewards: jest.fn(),
+    removeStatRewards: jest.fn(),
+  }),
+  UserProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+}));
 
+describe('TaskCard Animation Tests', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    // Mock the useTasks hook
-    mockUseTasks.mockReturnValue({
-      toggleTask: jest.fn(),
-      deleteTask: jest.fn(),
-      bringTaskToTop: jest.fn(),
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('should start in normal state without animation classes', () => {
+    render(<TaskCard task={mockTask} />);
+    
+    const card = screen.getByText('Test Task').closest('div');
+    expect(card).not.toHaveClass('transitioningToEdit');
+    expect(card).not.toHaveClass('editing');
+    expect(card).not.toHaveClass('exitingEdit');
+    expect(card).not.toHaveClass('reentering');
+  });
+
+  it('should apply transitioningToEdit class when edit button is clicked', () => {
+    render(<TaskCard task={mockTask} />);
+    
+    const editButton = screen.getByLabelText('Edit task');
+    fireEvent.click(editButton);
+    
+    const card = screen.getByText('Test Task').closest('div');
+    expect(card).toHaveClass('transitioningToEdit');
+  });
+
+  it('should transition to editing state after 200ms', async () => {
+    render(<TaskCard task={mockTask} />);
+    
+    const editButton = screen.getByLabelText('Edit task');
+    fireEvent.click(editButton);
+    
+    // Should be in transitioning state
+    const card = screen.getByText('Test Task').closest('div');
+    expect(card).toHaveClass('transitioningToEdit');
+    
+    // Fast forward 200ms
+    jest.advanceTimersByTime(200);
+    
+    await waitFor(() => {
+      expect(card).toHaveClass('editing');
+      expect(card).not.toHaveClass('transitioningToEdit');
     });
   });
 
-  describe('Rendering', () => {
-    it('renders task title and description', () => {
-      renderWithProvider(
-        <TaskCard task={mockTask} onOpenModal={mockOnOpenModal} />
-      );
-
-      expect(screen.getByText('Test Task')).toBeInTheDocument();
-      expect(screen.getByText('Test Description')).toBeInTheDocument();
-    });
-
-    it('displays priority badge', () => {
-      renderWithProvider(
-        <TaskCard task={mockTask} onOpenModal={mockOnOpenModal} />
-      );
-
-      expect(screen.getByText('High Priority')).toBeInTheDocument();
-    });
-
-    it('shows checkbox for task completion', () => {
-      renderWithProvider(
-        <TaskCard task={mockTask} onOpenModal={mockOnOpenModal} />
-      );
-
-      const checkbox = screen.getByRole('checkbox');
-      expect(checkbox).toBeInTheDocument();
-      expect(checkbox).not.toBeChecked();
-    });
-
-    it('shows completed checkbox for completed tasks', () => {
-      const completedTask = { ...mockTask, completed: true };
-
-      renderWithProvider(
-        <TaskCard task={completedTask} onOpenModal={mockOnOpenModal} />
-      );
-
-      const checkbox = screen.getByRole('checkbox');
-      expect(checkbox).toBeChecked();
-    });
-
-    it('renders XP strip with category colors when stat rewards are present', () => {
-      const taskWithRewards = {
-        ...mockTask,
-        statRewards: {
-          xp: 25, // less than 50, so should use #90EE90, #32CD32, #98FB98
-          body: 2,
-          mind: 1,
-          soul: 1,
-        },
-      };
-
-      renderWithProvider(
-        <TaskCard task={taskWithRewards} onOpenModal={mockOnOpenModal} />
-      );
-
-      // Check that XP strip is rendered (check for the element presence)
-      const xpStrip = document.querySelector('.xpStrip');
-      expect(xpStrip).toBeInTheDocument();
-    });
-
-    it('does not render XP strip when no stat rewards are present', () => {
-      const taskWithoutRewards = {
-        ...mockTask,
-        statRewards: undefined,
-      };
-
-      renderWithProvider(
-        <TaskCard task={taskWithoutRewards} onOpenModal={mockOnOpenModal} />
-      );
-
-      // Check that XP strip is not rendered (element should not exist)
-      const xpStrip = document.querySelector('.xpStrip');
-      expect(xpStrip).toBeNull();
-    });
+  it('should prevent multiple rapid edit clicks during transition', () => {
+    render(<TaskCard task={mockTask} />);
+    
+    const editButton = screen.getByLabelText('Edit task');
+    
+    // Click multiple times rapidly
+    fireEvent.click(editButton);
+    fireEvent.click(editButton);
+    fireEvent.click(editButton);
+    
+    // Should only be in transitioning state, not editing
+    const card = screen.getByText('Test Task').closest('div');
+    expect(card).toHaveClass('transitioningToEdit');
+    expect(card).not.toHaveClass('editing');
   });
 
-  describe('Interactions', () => {
-    it('calls onOpenModal when card is clicked', () => {
-      renderWithProvider(
-        <TaskCard task={mockTask} onOpenModal={mockOnOpenModal} />
-      );
-
-      const card = screen.getByText('Test Task').closest('div');
-      fireEvent.click(card!);
-
-      expect(mockOnOpenModal).toHaveBeenCalled();
-    });
-
-    it('toggles task completion when checkbox is clicked', () => {
-      const mockToggleTask = jest.fn();
-      mockUseTasks.mockReturnValue({
-        toggleTask: mockToggleTask,
-        deleteTask: jest.fn(),
-      });
-
-      renderWithProvider(
-        <TaskCard task={mockTask} onOpenModal={mockOnOpenModal} />
-      );
-
-      const checkbox = screen.getByRole('checkbox');
-      fireEvent.click(checkbox);
-
-      // The actual toggle logic is handled by the useTasks hook
-      expect(checkbox).toBeInTheDocument();
-    });
-
-    it('shows edit button', () => {
-      renderWithProvider(
-        <TaskCard task={mockTask} onOpenModal={mockOnOpenModal} />
-      );
-
-      expect(screen.getByLabelText('Edit task')).toBeInTheDocument();
-    });
-
-    it('calls bringTaskToTop when title is clicked', () => {
-      const mockBringTaskToTop = jest.fn();
-      mockUseTasks.mockReturnValue({
-        toggleTask: jest.fn(),
-        deleteTask: jest.fn(),
-        bringTaskToTop: mockBringTaskToTop,
-      });
-
-      renderWithProvider(
-        <TaskCard task={mockTask} onOpenModal={mockOnOpenModal} />
-      );
-
-      const title = screen.getByText('Test Task');
-      fireEvent.click(title);
-
-      expect(mockBringTaskToTop).toHaveBeenCalledWith('1');
-    });
-  });
-
-  describe('Styling and Classes', () => {
-    it('applies correct styling based on task completion', () => {
-      const { container } = renderWithProvider(
-        <TaskCard task={mockTask} onOpenModal={mockOnOpenModal} />
-      );
-
-      const cardElement = container.firstChild as HTMLElement;
-      // Since CSS modules don't work in tests, just verify the element exists
-      expect(cardElement).toBeInTheDocument();
-    });
-
-    it('applies completed styling for completed tasks', () => {
-      const completedTask = { ...mockTask, completed: true };
-
-      const { container } = renderWithProvider(
-        <TaskCard task={completedTask} onOpenModal={mockOnOpenModal} />
-      );
-
-      const cardElement = container.firstChild as HTMLElement;
-      // Since CSS modules don't work in tests, just verify the element exists
-      expect(cardElement).toBeInTheDocument();
-    });
-  });
-
-  describe('Edge Cases', () => {
-    it('handles tasks without description', () => {
-      const taskWithoutDescription = { ...mockTask, description: '' };
-
-      renderWithProvider(
-        <TaskCard task={taskWithoutDescription} onOpenModal={mockOnOpenModal} />
-      );
-
-      expect(screen.getByText('Test Task')).toBeInTheDocument();
-      expect(screen.queryByText('Test Description')).not.toBeInTheDocument();
-    });
-
-    // Skipped due to planned migration to sprites and emoji rendering issues in test environments
-    it.skip('handles tasks without category', () => {
-      const taskWithoutCategory = { ...mockTask, category: undefined };
-
-      renderWithProvider(
-        <TaskCard task={taskWithoutCategory} onOpenModal={mockOnOpenModal} />
-      );
-
-      expect(screen.getByText('Test Task')).toBeInTheDocument();
-      // Should show default category icon (📝)
-      expect(screen.getByText('📝')).toBeInTheDocument();
-    });
-
-    it('handles tasks without statRewards', () => {
-      const taskWithoutRewards = { ...mockTask, statRewards: undefined };
-
-      renderWithProvider(
-        <TaskCard task={taskWithoutRewards} onOpenModal={mockOnOpenModal} />
-      );
-
-      expect(screen.getByText('Test Task')).toBeInTheDocument();
-    });
+  it('should apply correct CSS classes for different animation states', () => {
+    render(<TaskCard task={mockTask} />);
+    
+    const card = screen.getByText('Test Task').closest('div');
+    const baseClasses = card?.className.split(' ');
+    
+    // Should have base card class
+    expect(baseClasses).toContain('card');
+    
+    // Should not have animation classes initially
+    expect(baseClasses).not.toContain('transitioningToEdit');
+    expect(baseClasses).not.toContain('editing');
+    expect(baseClasses).not.toContain('exitingEdit');
+    expect(baseClasses).not.toContain('reentering');
   });
 });

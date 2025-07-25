@@ -13,6 +13,8 @@ import { InstallPrompt } from './components/InstallPrompt';
 import { UserCreation } from './components/UserCreation';
 import { Task } from './types';
 import styles from './App.module.css';
+import { Modal } from './components/Modal';
+import { TaskEditForm } from './components/TaskEditForm';
 
 function LevelUpModal({
   level,
@@ -198,7 +200,10 @@ function AppContent() {
         </div>
         <TaskCounter className={styles.taskCounter} />
         <StatsDisplay />
-        <TaskForm onNavigateToTask={handleNavigateToTask} />
+        <TaskForm 
+          onNavigateToTask={handleNavigateToTask} 
+          onEditTask={handleEditTask}
+        />
         <TaskList ref={taskListRef} />
         <DataManager onDataChange={refreshTasks} />
       </main>
@@ -207,6 +212,18 @@ function AppContent() {
         isOpen={showStartHere}
         onClose={() => setShowStartHere(false)}
       />
+
+      {/* Edit Task Modal */}
+      {editingTask && (
+        <Modal
+          isOpen={!!editingTask}
+          onClose={handleCloseEditModal}
+          title="Edit Task"
+          customPadding="4px"
+        >
+          <TaskEditForm task={editingTask} onCancel={handleCloseEditModal} />
+        </Modal>
+      )}
 
       <AutoSaveIndicator isSaving={isSaving} lastSaved={lastSaved} />
     </div>

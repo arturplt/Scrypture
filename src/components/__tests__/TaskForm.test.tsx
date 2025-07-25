@@ -367,3 +367,169 @@ describe('Auto-fill Functionality', () => {
     expect(mockNavigateToTask).toHaveBeenCalledWith('1');
   });
 });
+
+describe('Suggestion-to-Edit Functionality', () => {
+  it('should call onEditTask when suggestion is clicked', () => {
+    const mockEditTask = jest.fn();
+    render(<TaskForm onEditTask={mockEditTask} />);
+
+    const titleInput = screen.getByPlaceholderText('Intention');
+    fireEvent.change(titleInput, { target: { value: 'workout' } });
+
+    const suggestion = screen.getByText('Workout');
+    fireEvent.click(suggestion);
+
+    expect(mockEditTask).toHaveBeenCalledWith(expect.objectContaining({
+      id: '1',
+      title: 'Workout',
+      categories: ['body']
+    }));
+  });
+
+  it('should call onEditTask when suggestion is selected with Enter key', () => {
+    const mockEditTask = jest.fn();
+    render(<TaskForm onEditTask={mockEditTask} />);
+
+    const titleInput = screen.getByPlaceholderText('Intention');
+    fireEvent.change(titleInput, { target: { value: 'workout' } });
+    fireEvent.keyDown(titleInput, { key: 'Enter' });
+
+    expect(mockEditTask).toHaveBeenCalledWith(expect.objectContaining({
+      id: '1',
+      title: 'Workout'
+    }));
+  });
+
+  it('should prioritize onEditTask over onNavigateToTask when both are provided', () => {
+    const mockEditTask = jest.fn();
+    const mockNavigateToTask = jest.fn();
+    render(<TaskForm onEditTask={mockEditTask} onNavigateToTask={mockNavigateToTask} />);
+
+    const titleInput = screen.getByPlaceholderText('Intention');
+    fireEvent.change(titleInput, { target: { value: 'workout' } });
+
+    const suggestion = screen.getByText('Workout');
+    fireEvent.click(suggestion);
+
+    expect(mockEditTask).toHaveBeenCalled();
+    expect(mockNavigateToTask).not.toHaveBeenCalled();
+  });
+
+  it('should fall back to onNavigateToTask when onEditTask is not provided', () => {
+    const mockNavigateToTask = jest.fn();
+    render(<TaskForm onNavigateToTask={mockNavigateToTask} />);
+
+    const titleInput = screen.getByPlaceholderText('Intention');
+    fireEvent.change(titleInput, { target: { value: 'workout' } });
+
+    const suggestion = screen.getByText('Workout');
+    fireEvent.click(suggestion);
+
+    expect(mockNavigateToTask).toHaveBeenCalledWith('1');
+  });
+
+  it('should hide suggestions after selecting one', () => {
+    const mockEditTask = jest.fn();
+    render(<TaskForm onEditTask={mockEditTask} />);
+
+    const titleInput = screen.getByPlaceholderText('Intention');
+    fireEvent.change(titleInput, { target: { value: 'workout' } });
+
+    expect(screen.getByText('Workout')).toBeInTheDocument();
+
+    const suggestion = screen.getByText('Workout');
+    fireEvent.click(suggestion);
+
+    expect(screen.queryByText('Workout')).not.toBeInTheDocument();
+  });
+
+  it('should show "Edit task" hint in suggestions', () => {
+    render(<TaskForm onEditTask={jest.fn()} />);
+
+    const titleInput = screen.getByPlaceholderText('Intention');
+    fireEvent.change(titleInput, { target: { value: 'workout' } });
+
+    expect(screen.getByText('Edit task')).toBeInTheDocument();
+  });
+
+  it('should show search icon in suggestions', () => {
+    render(<TaskForm onEditTask={jest.fn()} />);
+
+    const titleInput = screen.getByPlaceholderText('Intention');
+    fireEvent.change(titleInput, { target: { value: 'workout' } });
+
+    expect(screen.getByText('🔍')).toBeInTheDocument();
+  });
+
+  it('should handle keyboard navigation in suggestions', () => {
+    const mockEditTask = jest.fn();
+    render(<TaskForm onEditTask={mockEditTask} />);
+
+    const titleInput = screen.getByPlaceholderText('Intention');
+    fireEvent.change(titleInput, { target: { value: 'workout' } });
+
+    // Navigate down
+    fireEvent.keyDown(titleInput, { key: 'ArrowDown' });
+    expect(screen.getByText('Study Programming')).toHaveClass('autoFillSuggestionSelected');
+
+    // Navigate up
+    fireEvent.keyDown(titleInput, { key: 'ArrowUp' });
+    expect(screen.getByText('Workout')).toHaveClass('autoFillSuggestionSelected');
+
+    // Select with Enter
+    fireEvent.keyDown(titleInput, { key: 'Enter' });
+    expect(mockEditTask).toHaveBeenCalledWith(expect.objectContaining({
+      title: 'Workout'
+    }));
+  });
+
+  it('should close suggestions with Escape key', () => {
+    render(<TaskForm onEditTask={jest.fn()} />);
+
+    const titleInput = screen.getByPlaceholderText('Intention');
+    fireEvent.change(titleInput, { target: { value: 'workout' } });
+
+    expect(screen.getByText('Workout')).toBeInTheDocument();
+
+    fireEvent.keyDown(titleInput, { key: 'Escape' });
+
+    expect(screen.queryByText('Workout')).not.toBeInTheDocument();
+  });
+
+  it('should filter suggestions by title, description, and categories', () => {
+    render(<TaskForm onEditTask={jest.fn()} />);
+
+    const titleInput = screen.getByPlaceholderText('Intention');
+
+    // Search by title
+    fireEvent.change(titleInput, { target: { value: 'Study' } });
+    expect(screen.getByText('Study Programming')).toBeInTheDocument();
+
+    // Search by category
+    fireEvent.change(titleInput, { target: { value: 'home' } });
+    expect(screen.getByText('Clean Kitchen')).toBeInTheDocument();
+
+    // Search by description
+    fireEvent.change(titleInput, { target: { value: 'exercise' } });
+    expect(screen.getByText('Workout')).toBeInTheDocument();
+  });
+
+  it('should limit suggestions to 5 items', () => {
+    render(<TaskForm onEditTask={jest.fn()} />);
+
+    const titleInput = screen.getByPlaceholderText('Intention');
+    fireEvent.change(titleInput, { target: { value: 'a' } });
+
+    const suggestions = screen.getAllByText(/Edit task/);
+    expect(suggestions.length).toBeLessThanOrEqual(5);
+  });
+
+  it('should not show suggestions for short search terms', () => {
+    render(<TaskForm onEditTask={jest.fn()} />);
+
+    const titleInput = screen.getByPlaceholderText('Intention');
+    fireEvent.change(titleInput, { target: { value: 'a' } });
+
+    expect(screen.queryByText('Edit task')).not.toBeInTheDocument();
+  });
+});

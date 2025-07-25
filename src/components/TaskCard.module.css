@@ -8,6 +8,12 @@
   box-shadow: var(--shadow-button);
   cursor: pointer;
   position: relative;
+  transform-origin: center;
+  /* Prevent text flickering during animations */
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
 }
 
 .card:hover {
@@ -20,6 +26,116 @@
   opacity: 0.7;
   background: var(--color-bg-tertiary);
   border-color: var(--color-border-dark);
+}
+
+/* Smooth transition to edit form */
+.card.transitioningToEdit {
+  animation: cardToEditForm 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  pointer-events: none;
+}
+
+@keyframes cardToEditForm {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+    border-color: var(--color-border-primary);
+    padding: var(--spacing-md);
+    box-shadow: var(--shadow-button);
+  }
+  100% {
+    transform: translateY(-1px);
+    opacity: 0.4;
+    border-color: var(--color-accent-gold);
+    padding: calc(var(--spacing-md) + 4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+}
+
+/* Edit form entrance animation - refined expansion */
+.card.editing {
+  animation: editFormEntrance 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  transform-origin: center;
+}
+
+@keyframes editFormEntrance {
+  0% {
+    transform: translateY(-1px);
+    opacity: 0.4;
+    border-color: var(--color-accent-gold);
+    padding: calc(var(--spacing-md) + 4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+    border-color: var(--color-border-primary);
+    padding: var(--spacing-md);
+    box-shadow: var(--shadow-button);
+  }
+}
+
+/* Form content reveal animation - refined appearance */
+.card.editing .form {
+  animation: formContentReveal 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  animation-delay: 0.05s;
+  opacity: 0;
+}
+
+@keyframes formContentReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Smooth exit animation when canceling edit - refined */
+.card.exitingEdit {
+  animation: editFormExit 0.42s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes editFormExit {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+    padding: var(--spacing-md);
+    box-shadow: var(--shadow-button);
+  }
+  50% {
+    transform: translateY(1px);
+    opacity: 0.7;
+    padding: calc(var(--spacing-md) - 2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  100% {
+    transform: translateY(2px);
+    opacity: 0;
+    padding: calc(var(--spacing-md) - 4px);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  }
+}
+
+/* Card re-entrance after canceling edit - refined */
+.card.reentering {
+  animation: cardReentrance 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes cardReentrance {
+  0% {
+    transform: translateY(2px);
+    opacity: 0;
+    padding: calc(var(--spacing-md) - 4px);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+    padding: var(--spacing-md);
+    box-shadow: var(--shadow-button);
+  }
 }
 
 .header {
@@ -252,11 +368,6 @@
   color: var(--color-accent-gold);
   background: var(--color-bg-tertiary);
   transform: scale(1.1);
-}
-
-.card.editing {
-  border-color: var(--color-accent-gold);
-  box-shadow: 0 0 0 2px var(--color-accent-gold);
 }
 
 /* Completion animation */
