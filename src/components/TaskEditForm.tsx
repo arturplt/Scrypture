@@ -89,33 +89,51 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({
   };
 
   const handleCancel = () => {
-    // Add smooth animation for cancel
+    // Add enhanced animation for cancel
     setIsCanceling(true);
     const cancelButton = document.querySelector(`.${styles.cancelButton}`) as HTMLElement;
-    if (cancelButton) {
-      cancelButton.style.animation = 'smoothOut 0.4s cubic-bezier(0.4, 0.0, 0.2, 1) forwards';
-    }
     
-    // Delay the actual cancel to allow animation to complete
-    setTimeout(() => {
+    // Check if animations are disabled (mobile or reduced motion)
+    const isMobile = window.innerWidth <= 768;
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    
+    if (cancelButton && !isMobile && !prefersReducedMotion) {
+      cancelButton.style.animation = 'fadeOutScale 0.5s ease-in-out forwards';
+      
+      // Delay the actual cancel to allow animation to complete
+      setTimeout(() => {
+        setIsCanceling(false);
+        onCancel();
+      }, 500);
+    } else {
+      // Immediate cancel for mobile or reduced motion
       setIsCanceling(false);
       onCancel();
-    }, 400);
+    }
   };
 
   const handleDelete = () => {
-    // Add smooth animation for delete button
+    // Add enhanced animation for delete button
     setIsDeleting(true);
     const deleteButton = document.querySelector(`.${styles.deleteButton}`) as HTMLElement;
-    if (deleteButton) {
-      deleteButton.style.animation = 'smoothOut 0.4s cubic-bezier(0.4, 0.0, 0.2, 1) forwards';
-    }
     
-    // Show confirmation modal after animation
-    setTimeout(() => {
+    // Check if animations are disabled (mobile or reduced motion)
+    const isMobile = window.innerWidth <= 768;
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    
+    if (deleteButton && !isMobile && !prefersReducedMotion) {
+      deleteButton.style.animation = 'slideOutDown 0.5s ease-in-out forwards';
+      
+      // Show confirmation modal after animation
+      setTimeout(() => {
+        setIsDeleting(false);
+        setShowDeleteConfirm(true);
+      }, 500);
+    } else {
+      // Immediate modal for mobile or reduced motion
       setIsDeleting(false);
       setShowDeleteConfirm(true);
-    }, 400);
+    }
   };
 
   const confirmDelete = () => {

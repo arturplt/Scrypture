@@ -230,54 +230,143 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   const handleTitleClick = () => {
     setIsExpanded(true);
     
-    // Add elastic expansion animation
-    setTimeout(() => {
-      const formElement = document.querySelector(`.${styles.form}`);
-      if (formElement) {
-        // Add elastic expansion animation class
-        formElement.classList.add(styles.expanding);
-        
-        // Scroll to the very top of the page first with smooth animation
-        // Use fallback for browsers that don't support smooth scrolling
-        try {
-          window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-          });
-        } catch (e) {
-          // Fallback for browsers that don't support smooth scrolling
-          window.scrollTo(0, 0);
-        }
-        
-        // Also scroll the form into view to ensure it's visible
-        setTimeout(() => {
+    // Check if animations are disabled (mobile or reduced motion)
+    const isMobile = window.innerWidth <= 768;
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    
+    if (!isMobile && !prefersReducedMotion) {
+      // Add elastic expansion animation
+      setTimeout(() => {
+        const formElement = document.querySelector(`.${styles.form}`);
+        if (formElement) {
+          // Add elastic expansion animation class
+          formElement.classList.add(styles.expanding);
+          
+          // Scroll to the very top of the page first with smooth animation
+          // Use fallback for browsers that don't support smooth scrolling
           try {
-            if (formElement.scrollIntoView) {
-              formElement.scrollIntoView({ 
-                behavior: 'smooth', 
-                block: 'start',
-                inline: 'nearest'
-              });
-            }
+            window.scrollTo({
+              top: 0,
+              behavior: 'smooth'
+            });
           } catch (e) {
             // Fallback for browsers that don't support smooth scrolling
-            if (formElement.scrollIntoView) {
-              formElement.scrollIntoView();
-            }
+            window.scrollTo(0, 0);
           }
           
-          // Focus on the title input for better UX
-          if (titleInputRef.current) {
-            titleInputRef.current.focus();
-          }
-        }, 200);
-        
-        // Remove animation class after animation completes
-        setTimeout(() => {
-          formElement.classList.remove(styles.expanding);
-        }, 800);
+          // Also scroll the form into view to ensure it's visible
+          setTimeout(() => {
+            try {
+              if (formElement.scrollIntoView) {
+                formElement.scrollIntoView({ 
+                  behavior: 'smooth', 
+                  block: 'start',
+                  inline: 'nearest'
+                });
+              }
+            } catch (e) {
+              // Fallback for browsers that don't support smooth scrolling
+              if (formElement.scrollIntoView) {
+                formElement.scrollIntoView();
+              }
+            }
+            
+            // Focus on the title input for better UX
+            if (titleInputRef.current) {
+              titleInputRef.current.focus();
+            }
+          }, 200);
+          
+          // Remove animation class after animation completes
+          setTimeout(() => {
+            formElement.classList.remove(styles.expanding);
+          }, 800);
+        }
+      }, 50);
+    } else {
+      // Immediate expansion for mobile or reduced motion
+      try {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      } catch (e) {
+        window.scrollTo(0, 0);
       }
-    }, 50);
+      
+      // Focus on the title input for better UX
+      if (titleInputRef.current) {
+        titleInputRef.current.focus();
+      }
+    }
+  };
+
+  // New function to handle title bar tap for scrolling to top
+  const handleTitleBarTap = () => {
+    console.log('Title bar tapped, isExpanded:', isExpanded);
+    
+    if (isExpanded) {
+      // If form is already expanded, just scroll to top
+      console.log('Form is expanded, scrolling to top...');
+      
+      // Check if we're in a scrollable container
+      const scrollableContainers = document.querySelectorAll('[style*="overflow"], [style*="scroll"]');
+      console.log('Found scrollable containers:', scrollableContainers.length);
+      
+      // Multiple scrolling methods for better compatibility
+      try {
+        // Method 1: Smooth scroll to top
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+        console.log('Smooth scroll to top executed');
+      } catch (e) {
+        console.log('Smooth scroll failed, using instant scroll');
+        window.scrollTo(0, 0);
+      }
+      
+      // Method 2: Scroll form into view
+      const formElement = document.querySelector(`.${styles.form}`);
+      if (formElement) {
+        try {
+          formElement.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start',
+            inline: 'nearest'
+          });
+          console.log('Form scrollIntoView executed');
+        } catch (e) {
+          console.log('Form scrollIntoView failed, using instant scroll');
+          formElement.scrollIntoView();
+        }
+      }
+      
+      // Method 3: Scroll body to top
+      try {
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
+        console.log('Body scrollTop set to 0');
+      } catch (e) {
+        console.log('Body scrollTop failed');
+      }
+      
+      // Method 4: Force scroll after a short delay
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        console.log('Delayed scroll to top executed');
+      }, 100);
+      
+      // Focus on the title input
+      if (titleInputRef.current) {
+        titleInputRef.current.focus();
+        console.log('Title input focused');
+      }
+    } else {
+      // If form is not expanded, expand it first
+      console.log('Form not expanded, calling handleTitleClick');
+      handleTitleClick();
+    }
   };
 
   const handleTitleBlur = (e: React.FocusEvent) => {
@@ -290,19 +379,28 @@ export const TaskForm: React.FC<TaskFormProps> = ({
       !title.trim() &&
       (!relatedTarget || !formElement?.contains(relatedTarget))
     ) {
-      // Add elastic collapse animation
-      setIsCollapsing(true);
-      const formElement = document.querySelector(`.${styles.form}`);
-      if (formElement) {
-        formElement.classList.add(styles.collapsing);
-        
-        // Remove animation class and reset state after animation completes
-        setTimeout(() => {
-          formElement.classList.remove(styles.collapsing);
-          setIsCollapsing(false);
+      // Check if animations are disabled (mobile or reduced motion)
+      const isMobile = window.innerWidth <= 768;
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      
+      if (!isMobile && !prefersReducedMotion) {
+        // Add elastic collapse animation
+        setIsCollapsing(true);
+        const formElement = document.querySelector(`.${styles.form}`);
+        if (formElement) {
+          formElement.classList.add(styles.collapsing);
+          
+          // Remove animation class and reset state after animation completes
+          setTimeout(() => {
+            formElement.classList.remove(styles.collapsing);
+            setIsCollapsing(false);
+            setIsExpanded(false);
+          }, 600);
+        } else {
           setIsExpanded(false);
-        }, 600);
+        }
       } else {
+        // Immediate collapse for mobile or reduced motion
         setIsExpanded(false);
       }
     }
@@ -461,12 +559,8 @@ export const TaskForm: React.FC<TaskFormProps> = ({
             isExpanded ? styles.titleContainerExpanded : styles.titleContainer
           }
           onClick={(e) => {
-            if (isExpanded) {
-              e.stopPropagation();
-              handleTitleClick();
-            } else {
-              handleTitleClick();
-            }
+            e.stopPropagation();
+            handleTitleBarTap();
           }}
         >
           <input
@@ -478,10 +572,9 @@ export const TaskForm: React.FC<TaskFormProps> = ({
             className={styles.titleInput}
             maxLength={100}
             ref={titleInputRef}
-
             onInvalid={handleInvalid}
             onBlur={handleTitleBlur}
-            onClick={handleTitleClick}
+            onClick={handleTitleBarTap}
           />
           {showValidation && (
             <div className={styles.validationMessage}>
