@@ -35,6 +35,18 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   // Minimum swipe distance required to trigger navigation (in px)
   const minSwipeDistance = 50;
 
+  // Scroll to top when modal opens for smooth sliding effect
+  useEffect(() => {
+    if (isOpen && containerRef.current) {
+      // Small delay to ensure modal is rendered
+      setTimeout(() => {
+        if (containerRef.current) {
+          containerRef.current.scrollTop = 0;
+        }
+      }, 100);
+    }
+  }, [isOpen]);
+
   // Unified drag handling for both touch and mouse events
   const handleDragStart = (clientX: number) => {
     setDragEnd(null);
@@ -163,7 +175,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
 
   return (
     <>
-      <Modal isOpen={isOpen} onClose={onClose} title="Task Details">
+      <Modal isOpen={isOpen} onClose={onClose} title="Task Details" position="bottom">
         <div
           className={styles.container}
           ref={containerRef}

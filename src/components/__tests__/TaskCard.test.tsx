@@ -43,7 +43,7 @@ describe('TaskCard', () => {
     id: '1',
     title: 'Test Task',
     description: 'Test Description',
-    category: 'mind',
+    categories: ['mind'],
     priority: 'high' as const,
     completed: false,
     createdAt: new Date('2024-01-01'),
@@ -62,6 +62,7 @@ describe('TaskCard', () => {
     mockUseTasks.mockReturnValue({
       toggleTask: jest.fn(),
       deleteTask: jest.fn(),
+      bringTaskToTop: jest.fn(),
     });
   });
 
@@ -176,6 +177,24 @@ describe('TaskCard', () => {
       );
 
       expect(screen.getByLabelText('Edit task')).toBeInTheDocument();
+    });
+
+    it('calls bringTaskToTop when title is clicked', () => {
+      const mockBringTaskToTop = jest.fn();
+      mockUseTasks.mockReturnValue({
+        toggleTask: jest.fn(),
+        deleteTask: jest.fn(),
+        bringTaskToTop: mockBringTaskToTop,
+      });
+
+      renderWithProvider(
+        <TaskCard task={mockTask} onOpenModal={mockOnOpenModal} />
+      );
+
+      const title = screen.getByText('Test Task');
+      fireEvent.click(title);
+
+      expect(mockBringTaskToTop).toHaveBeenCalledWith('1');
     });
   });
 

@@ -5,6 +5,9 @@
   user-select: none;
   cursor: grab;
   position: relative;
+  scroll-behavior: smooth;
+  overflow-y: auto;
+  max-height: calc(90vh - 80px);
 }
 
 .container:active {

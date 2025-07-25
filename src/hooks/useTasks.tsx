@@ -7,6 +7,7 @@ interface ExtendedTaskContextType extends TaskContextType {
   isSaving: boolean;
   lastSaved: Date | null;
   refreshTasks: () => void;
+  bringTaskToTop: (id: string) => void;
 }
 
 const TaskContext = createContext<ExtendedTaskContextType | undefined>(
@@ -117,6 +118,16 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
     setTasks(savedTasks);
   };
 
+  const bringTaskToTop = (id: string) => {
+    const taskIndex = tasks.findIndex((task) => task.id === id);
+    if (taskIndex === -1) return;
+
+    const [taskToMove] = tasks.splice(taskIndex, 1);
+    tasks.unshift(taskToMove);
+    setTasks([...tasks]);
+    saveTasksWithFeedback(tasks);
+  };
+
   const value: ExtendedTaskContextType = {
     tasks,
     addTask,
@@ -126,6 +137,7 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
     isSaving,
     lastSaved,
     refreshTasks,
+    bringTaskToTop,
   };
 
   return <TaskContext.Provider value={value}>{children}</TaskContext.Provider>;

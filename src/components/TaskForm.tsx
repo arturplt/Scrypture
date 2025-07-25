@@ -601,53 +601,6 @@ export const TaskForm: React.FC<TaskFormProps> = ({
                 </button>
               ))}
             </div>
-            {/* Selected Categories Display */}
-            {categories.length > 0 && (
-              <div className={styles.selectedCategories}>
-                <label className={styles.selectedCategoriesLabel}>Selected:</label>
-                <div className={styles.selectedCategoriesList}>
-                  {categories.map((categoryName) => {
-                    // Check if this is a core attribute category
-                    const isCoreAttribute = ['body', 'mind', 'soul'].includes(categoryName);
-                    const category = isCoreAttribute 
-                      ? { name: categoryName, icon: categoryName === 'body' ? '💪' : categoryName === 'mind' ? '🧠' : '✨', color: 'var(--color-accent-gold)' }
-                      : categoriesForTaskCreation.find(cat => cat.name === categoryName);
-                    
-                    return (
-                      <div
-                        key={categoryName}
-                        className={`${styles.selectedCategoryTag} ${isCoreAttribute ? styles.coreAttributeTag : ''}`}
-                        style={{
-                          borderColor: category?.color || 'var(--color-border-primary)',
-                          backgroundColor: category?.color || 'transparent',
-                        }}
-                      >
-                        <span className={styles.selectedCategoryIcon}>
-                          {category?.icon || '📁'}
-                        </span>
-                        <span className={styles.selectedCategoryName}>
-                          {categoryName.charAt(0).toUpperCase() + categoryName.slice(1)}
-                        </span>
-                        {!isCoreAttribute && (
-                          <button
-                            type="button"
-                            className={styles.removeCategoryButton}
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              handleCategoryRemove(categoryName);
-                            }}
-                            aria-label={`Remove ${categoryName} category`}
-                          >
-                            ✕
-                          </button>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
           </div>
           <div className={styles.prioritySelector}>
             <label className={styles.priorityLabel}>Priority:</label>

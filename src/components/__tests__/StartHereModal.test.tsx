@@ -39,6 +39,9 @@ describe('StartHereModal', () => {
     expect(screen.getByText('Mind')).toBeInTheDocument();
     expect(screen.getByText('Body')).toBeInTheDocument();
     expect(screen.getByText('Soul')).toBeInTheDocument();
+    expect(screen.getByText('Home')).toBeInTheDocument();
+    expect(screen.getByText('Free time')).toBeInTheDocument();
+    expect(screen.getByText('Garden')).toBeInTheDocument();
   });
 
   it('does not render when closed', () => {
@@ -58,6 +61,9 @@ describe('StartHereModal', () => {
     expect(screen.getByText('Read 1 page')).toBeInTheDocument();
     expect(screen.getByText('Drink 1 glass of water')).toBeInTheDocument();
     expect(screen.getByText('Light 1 candle')).toBeInTheDocument();
+    expect(screen.getByText('Make your bed')).toBeInTheDocument();
+    expect(screen.getByText('Play 1 song')).toBeInTheDocument();
+    expect(screen.getByText('Water 1 plant')).toBeInTheDocument();
   });
 
   it('shows difficulty level for each task', () => {
@@ -65,7 +71,7 @@ describe('StartHereModal', () => {
       <StartHereModal isOpen={true} onClose={jest.fn()} />
     );
 
-    expect(screen.getAllByText(/Next Task \(Difficulty \d+\)/)).toHaveLength(3);
+    expect(screen.getAllByText(/Next Task \(Difficulty \d+\)/)).toHaveLength(6);
   });
 
   it('shows progress for each category', () => {
@@ -73,8 +79,8 @@ describe('StartHereModal', () => {
       <StartHereModal isOpen={true} onClose={jest.fn()} />
     );
 
-    // Should show 0% progress initially
-    expect(screen.getAllByText('0%')).toHaveLength(3);
+    // Should show 0% progress initially for all 6 categories
+    expect(screen.getAllByText('0%')).toHaveLength(6);
   });
 
   it('adds task when Add This Task button is clicked', async () => {
@@ -90,6 +96,50 @@ describe('StartHereModal', () => {
       expect(localStorageMock.setItem).toHaveBeenCalledWith(
         'startHereGivenTasks',
         JSON.stringify(['mind_0'])
+      );
+    });
+  });
+
+  it('supports multi-select functionality', () => {
+    renderWithProviders(
+      <StartHereModal isOpen={true} onClose={jest.fn()} />
+    );
+
+    // Click on multiple category cards to select them
+    const mindCard = screen.getByText('Mind').closest('div');
+    const bodyCard = screen.getByText('Body').closest('div');
+    const homeCard = screen.getByText('Home').closest('div');
+
+    fireEvent.click(mindCard!);
+    fireEvent.click(bodyCard!);
+    fireEvent.click(homeCard!);
+
+    // Should show selected categories
+    expect(screen.getByText('Selected categories: mind, body, home')).toBeInTheDocument();
+    expect(screen.getByText('Add Tasks for All Selected Categories')).toBeInTheDocument();
+  });
+
+  it('adds multiple tasks when multi-select button is clicked', async () => {
+    renderWithProviders(
+      <StartHereModal isOpen={true} onClose={jest.fn()} />
+    );
+
+    // Select multiple categories
+    const mindCard = screen.getByText('Mind').closest('div');
+    const bodyCard = screen.getByText('Body').closest('div');
+
+    fireEvent.click(mindCard!);
+    fireEvent.click(bodyCard!);
+
+    // Click the multi-add button
+    const multiAddButton = screen.getByText('Add Tasks for All Selected Categories');
+    fireEvent.click(multiAddButton);
+
+    // Should save both tasks
+    await waitFor(() => {
+      expect(localStorageMock.setItem).toHaveBeenCalledWith(
+        'startHereGivenTasks',
+        JSON.stringify(['mind_0', 'body_0'])
       );
     });
   });

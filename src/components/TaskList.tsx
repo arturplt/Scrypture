@@ -1,7 +1,6 @@
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { useTasks } from '../hooks/useTasks';
 import { TaskCard } from './TaskCard';
-import { TaskDetailModal } from './TaskDetailModal';
 import { TaskForm } from './TaskForm';
 import { Task } from '../types';
 import styles from './TaskList.module.css';
@@ -13,10 +12,6 @@ export interface TaskListRef {
 
 export const TaskList = forwardRef<TaskListRef>((props, ref) => {
   const { tasks, deleteTask, refreshTasks } = useTasks();
-  const [selectedTaskIndex, setSelectedTaskIndex] = useState<number | null>(
-    null
-  );
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [taskToEdit, setTaskToEdit] = useState<Task | null>(null);
   const [sortBy, setSortBy] = useState<'priority' | 'date' | 'xp'>('priority');
@@ -68,8 +63,6 @@ export const TaskList = forwardRef<TaskListRef>((props, ref) => {
       // Find the task in the sorted tasks array
       const taskIndex = sortedTasks.findIndex(task => task.id === taskId);
       if (taskIndex !== -1) {
-        setSelectedTaskIndex(taskIndex);
-        setIsModalOpen(true);
         setIsEditMode(false);
       }
     }
@@ -145,46 +138,9 @@ export const TaskList = forwardRef<TaskListRef>((props, ref) => {
   // Combined tasks for modal navigation
   const sortedTasks = [...activeTasks, ...completedTasks];
 
-  const handleOpenModal = (taskIndex: number) => {
-    setSelectedTaskIndex(taskIndex);
-    setIsModalOpen(true);
-    setIsEditMode(false);
-  };
-
   const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedTaskIndex(null);
     setIsEditMode(false);
     setTaskToEdit(null);
-  };
-
-  const handleNextTask = () => {
-    if (
-      selectedTaskIndex !== null &&
-      selectedTaskIndex < sortedTasks.length - 1
-    ) {
-      setSelectedTaskIndex(selectedTaskIndex + 1);
-    }
-  };
-
-  const handlePreviousTask = () => {
-    if (selectedTaskIndex !== null && selectedTaskIndex > 0) {
-      setSelectedTaskIndex(selectedTaskIndex - 1);
-    }
-  };
-
-  const handleEditTask = () => {
-    if (selectedTask) {
-      setTaskToEdit(selectedTask);
-      setIsEditMode(true);
-    }
-  };
-
-  const handleDeleteTask = () => {
-    if (selectedTask) {
-      deleteTask(selectedTask.id);
-      handleCloseModal();
-    }
   };
 
   const handleSaveEdit = () => {
@@ -192,14 +148,6 @@ export const TaskList = forwardRef<TaskListRef>((props, ref) => {
     setTaskToEdit(null);
     // Refresh tasks from storage to ensure latest data
     refreshTasks();
-    // Always find the updated task by ID in the current sortedTasks
-    if (selectedTaskIndex !== null) {
-      const prevTaskId = sortedTasks[selectedTaskIndex]?.id;
-      // Find the updated task's new index by ID
-      const newIndex = sortedTasks.findIndex((t) => t.id === prevTaskId);
-      setSelectedTaskIndex(newIndex !== -1 ? newIndex : null);
-    }
-    // Modal remains open to show the updated task
   };
 
   const handleCancelEdit = () => {
@@ -218,15 +166,9 @@ export const TaskList = forwardRef<TaskListRef>((props, ref) => {
   };
 
   const getCategoryIcon = (categoryName: string) => {
-    const category = allCategories.find(cat => cat.name.toLowerCase() === categoryName.toLowerCase());
-    return category?.icon || '📁';
+    const category = allCategories.find(cat => cat.name === categoryName);
+    return category?.icon || '📝';
   };
-
-  const selectedTask =
-    selectedTaskIndex !== null ? sortedTasks[selectedTaskIndex] : null;
-  const hasNext =
-    selectedTaskIndex !== null && selectedTaskIndex < sortedTasks.length - 1;
-  const hasPrevious = selectedTaskIndex !== null && selectedTaskIndex > 0;
 
   if (tasks.length === 0) {
     return (
@@ -351,7 +293,6 @@ export const TaskList = forwardRef<TaskListRef>((props, ref) => {
                           <TaskCard
                             key={task.id}
                             task={task}
-                            onOpenModal={() => handleOpenModal(taskIndex)}
                           />
                         );
                       })}
@@ -373,24 +314,10 @@ export const TaskList = forwardRef<TaskListRef>((props, ref) => {
               <TaskCard
                 key={task.id}
                 task={task}
-                onOpenModal={() => handleOpenModal(activeTasks.length + index)}
               />
             ))}
           </div>
         </div>
-      )}
-
-      {/* Task Detail Modal */}
-      {!isEditMode && (
-        <TaskDetailModal
-          task={selectedTask}
-          isOpen={isModalOpen}
-          onClose={handleCloseModal}
-          onNext={handleNextTask}
-          onPrevious={handlePreviousTask}
-          hasNext={hasNext}
-          hasPrevious={hasPrevious}
-        />
       )}
 
       {/* Edit Form Modal */}
