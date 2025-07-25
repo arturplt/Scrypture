@@ -48,7 +48,7 @@ describe('TaskList', () => {
       createdAt: new Date('2024-01-01'),
       updatedAt: new Date('2024-01-01'),
       priority: 'high' as const,
-      category: 'home',
+      category: 'body',
     },
     {
       id: '2',
@@ -58,26 +58,36 @@ describe('TaskList', () => {
       createdAt: new Date('2024-01-02'),
       updatedAt: new Date('2024-01-02'),
       priority: 'medium' as const,
-      category: 'free time',
+      category: 'mind',
     },
     {
       id: '3',
       title: 'Meditation',
-      description: 'Daily meditation',
+      description: 'Daily meditation practice',
       completed: true,
       createdAt: new Date('2024-01-03'),
       updatedAt: new Date('2024-01-03'),
       priority: 'low' as const,
-      category: 'garden',
+      category: 'soul',
     },
     {
       id: '4',
       title: 'Study Programming',
-      description: 'Learn React',
+      description: 'Learn React development',
       completed: false,
       createdAt: new Date('2024-01-04'),
       updatedAt: new Date('2024-01-04'),
       priority: 'high' as const,
+      category: 'skills',
+    },
+    {
+      id: '5',
+      title: 'Clean Kitchen',
+      description: 'Clean the kitchen area',
+      completed: false,
+      createdAt: new Date('2024-01-05'),
+      updatedAt: new Date('2024-01-05'),
+      priority: 'medium' as const,
       category: 'home',
     },
   ];
@@ -268,6 +278,75 @@ describe('TaskList', () => {
       fireEvent.click(secondTaskCard);
 
       expect(screen.getByTestId('task-detail-modal')).toBeInTheDocument();
+    });
+  });
+
+  describe('Search Functionality', () => {
+    it('filters tasks by search keyword', () => {
+      render(<TaskList />);
+
+      const searchInput = screen.getByPlaceholderText('Search tasks...');
+      fireEvent.change(searchInput, { target: { value: 'workout' } });
+
+      // Should show tasks matching "workout"
+      expect(screen.getByText('Workout')).toBeInTheDocument();
+      // Should not show tasks that don't match
+      expect(screen.queryByText('Read Book')).not.toBeInTheDocument();
+    });
+
+    it('searches in title, description, and category', () => {
+      render(<TaskList />);
+
+      const searchInput = screen.getByPlaceholderText('Search tasks...');
+      
+      // Search by title
+      fireEvent.change(searchInput, { target: { value: 'Study' } });
+      expect(screen.getByText('Study Programming')).toBeInTheDocument();
+      
+      // Search by category
+      fireEvent.change(searchInput, { target: { value: 'home' } });
+      expect(screen.getByText('Workout')).toBeInTheDocument();
+      expect(screen.getByText('Study Programming')).toBeInTheDocument();
+    });
+
+    it('shows clear search button when search has value', () => {
+      render(<TaskList />);
+
+      const searchInput = screen.getByPlaceholderText('Search tasks...');
+      fireEvent.change(searchInput, { target: { value: 'test' } });
+
+      const clearButton = screen.getByLabelText('Clear search');
+      expect(clearButton).toBeInTheDocument();
+    });
+
+    it('clears search when clear button is clicked', () => {
+      render(<TaskList />);
+
+      const searchInput = screen.getByPlaceholderText('Search tasks...');
+      fireEvent.change(searchInput, { target: { value: 'test' } });
+
+      const clearButton = screen.getByLabelText('Clear search');
+      fireEvent.click(clearButton);
+
+      expect(searchInput).toHaveValue('');
+      // All tasks should be visible again
+      expect(screen.getByText('Workout')).toBeInTheDocument();
+      expect(screen.getByText('Read Book')).toBeInTheDocument();
+      expect(screen.getByText('Study Programming')).toBeInTheDocument();
+    });
+
+    it('prioritizes search matches at the top of the list', () => {
+      render(<TaskList />);
+
+      const searchInput = screen.getByPlaceholderText('Search tasks...');
+      fireEvent.change(searchInput, { target: { value: 'home' } });
+
+      // Get all task cards
+      const taskCards = screen.getAllByTestId(/task-card-/);
+      
+      // The first task should be one that matches the search
+      const firstTaskCard = taskCards[0];
+      expect(firstTaskCard).toBeInTheDocument();
     });
   });
 

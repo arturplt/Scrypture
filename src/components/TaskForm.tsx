@@ -9,14 +9,16 @@ interface TaskFormProps {
   taskToEdit?: Task;
   onCancel?: () => void;
   onSave?: () => void;
+  onNavigateToTask?: (taskId: string) => void;
 }
 
 export const TaskForm: React.FC<TaskFormProps> = ({
   taskToEdit,
   onCancel,
   onSave,
+  onNavigateToTask,
 }) => {
-  const { addTask, updateTask } = useTasks();
+  const { addTask, updateTask, tasks } = useTasks();
   const [title, setTitle] = useState(taskToEdit?.title || '');
   const [description, setDescription] = useState(taskToEdit?.description || '');
   const [category, setCategory] = useState<string>(
@@ -28,9 +30,11 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   const [isExpanded, setIsExpanded] = useState(!!taskToEdit);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [showValidation, setShowValidation] = useState(false);
-
+  const [showAutoFill, setShowAutoFill] = useState(false);
+  const [selectedAutoFillIndex, setSelectedAutoFillIndex] = useState(0);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const titleInputRef = useRef<HTMLInputElement>(null);
   // Remove getStatRewards and defaultCategoryRewards
   const [bodyReward, setBodyReward] = useState<number>(0);
   const [mindReward, setMindReward] = useState<number>(0);
@@ -43,6 +47,89 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   const [difficulty, setDifficulty] = useState<number>(
     taskToEdit?.difficulty ?? 0
   );
+
+  // Filter tasks for auto-fill suggestions
+  const getAutoFillSuggestions = (searchTerm: string): Task[] => {
+    if (!searchTerm.trim() || searchTerm.length < 2 || !tasks) return [];
+    
+    const term = searchTerm.toLowerCase().trim();
+    return tasks.filter(task => 
+      task.title.toLowerCase().includes(term) ||
+      task.description?.toLowerCase().includes(term) ||
+      task.category?.toLowerCase().includes(term)
+    ).slice(0, 5); // Limit to 5 suggestions
+  };
+
+  const autoFillSuggestions = getAutoFillSuggestions(title);
+
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newTitle = e.target.value;
+    setTitle(newTitle);
+    
+    // Show auto-fill suggestions if there are matches
+    if (newTitle.trim().length >= 2) {
+      setShowAutoFill(true);
+      setSelectedAutoFillIndex(0);
+    } else {
+      setShowAutoFill(false);
+    }
+    
+    // Clear validation message when user starts typing
+    if (newTitle.trim()) {
+      setShowValidation(false);
+    }
+  };
+
+  const handleAutoFillSelect = (task: Task) => {
+    setTitle(task.title);
+    setShowAutoFill(false);
+    
+    // Navigate to the selected task
+    if (onNavigateToTask) {
+      onNavigateToTask(task.id);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!showAutoFill || autoFillSuggestions.length === 0) return;
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setSelectedAutoFillIndex(prev => 
+          prev < autoFillSuggestions.length - 1 ? prev + 1 : 0
+        );
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setSelectedAutoFillIndex(prev => 
+          prev > 0 ? prev - 1 : autoFillSuggestions.length - 1
+        );
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (autoFillSuggestions[selectedAutoFillIndex]) {
+          handleAutoFillSelect(autoFillSuggestions[selectedAutoFillIndex]);
+        }
+        break;
+      case 'Escape':
+        setShowAutoFill(false);
+        break;
+    }
+  };
+
+  const handleClickOutside = (e: MouseEvent) => {
+    if (titleInputRef.current && !titleInputRef.current.contains(e.target as Node)) {
+      setShowAutoFill(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -202,16 +289,12 @@ export const TaskForm: React.FC<TaskFormProps> = ({
           <input
             type="text"
             value={title}
-            onChange={(e) => {
-              setTitle(e.target.value);
-              // Clear validation message when user starts typing
-              if (e.target.value.trim()) {
-                setShowValidation(false);
-              }
-            }}
+            onChange={handleTitleChange}
+            onKeyDown={handleKeyDown}
             placeholder="Intention"
             className={styles.titleInput}
             maxLength={100}
+            ref={titleInputRef}
 
             onInvalid={handleInvalid}
             onBlur={handleTitleBlur}
@@ -220,6 +303,19 @@ export const TaskForm: React.FC<TaskFormProps> = ({
           {showValidation && (
             <div className={styles.validationMessage}>
               Please fill this field
+            </div>
+          )}
+          {showAutoFill && (
+            <div className={styles.autoFillSuggestions}>
+              {autoFillSuggestions.map((task, index) => (
+                <div
+                  key={task.id}
+                  className={`${styles.autoFillSuggestion} ${index === selectedAutoFillIndex ? styles.autoFillSuggestionSelected : ''}`}
+                  onClick={() => handleAutoFillSelect(task)}
+                >
+                  {task.title}
+                </div>
+              ))}
             </div>
           )}
         </div>

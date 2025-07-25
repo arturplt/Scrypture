@@ -1,7 +1,7 @@
 import { TaskProvider, useTasks } from './hooks/useTasks';
 import { UserProvider, useUser } from './hooks/useUser';
 import { HabitProvider, useHabits } from './hooks/useHabits';
-import { TaskList } from './components/TaskList';
+import { TaskList, TaskListRef } from './components/TaskList';
 import { TaskForm } from './components/TaskForm';
 import { TaskCounter } from './components/TaskCounter';
 import { StatsDisplay } from './components/StatsDisplay';
@@ -115,6 +115,7 @@ function AppContent() {
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [showStartHere, setShowStartHere] = useState(false);
   const lastLevel = useRef<number | null>(null);
+  const taskListRef = useRef<TaskListRef | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -124,6 +125,12 @@ function AppContent() {
       lastLevel.current = user.level;
     }
   }, [user]);
+
+  const handleNavigateToTask = (taskId: string) => {
+    if (taskListRef.current) {
+      taskListRef.current.navigateToTask(taskId);
+    }
+  };
 
   // Show user creation if no user exists
   if (!user) {
@@ -159,8 +166,8 @@ function AppContent() {
         </div>
         <TaskCounter className={styles.taskCounter} />
         <StatsDisplay />
-        <TaskForm />
-        <TaskList />
+        <TaskForm onNavigateToTask={handleNavigateToTask} />
+        <TaskList ref={taskListRef} />
         <DataManager onDataChange={refreshTasks} />
       </main>
 

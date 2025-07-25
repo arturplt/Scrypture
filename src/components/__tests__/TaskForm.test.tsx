@@ -18,9 +18,55 @@ const mockCategoryService = categoryService as jest.Mocked<
 
 // Mock the useTasks hook
 const mockAddTask = jest.fn();
+const mockUpdateTask = jest.fn();
+const mockTasks = [
+  {
+    id: '1',
+    title: 'Workout',
+    description: 'Daily exercise routine',
+    completed: false,
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-01-01'),
+    priority: 'high' as const,
+    category: 'body',
+  },
+  {
+    id: '2',
+    title: 'Read Book',
+    description: 'Read 30 minutes',
+    completed: false,
+    createdAt: new Date('2024-01-02'),
+    updatedAt: new Date('2024-01-02'),
+    priority: 'medium' as const,
+    category: 'mind',
+  },
+  {
+    id: '3',
+    title: 'Study Programming',
+    description: 'Learn React development',
+    completed: false,
+    createdAt: new Date('2024-01-04'),
+    updatedAt: new Date('2024-01-04'),
+    priority: 'high' as const,
+    category: 'skills',
+  },
+  {
+    id: '4',
+    title: 'Clean Kitchen',
+    description: 'Clean the kitchen area',
+    completed: false,
+    createdAt: new Date('2024-01-05'),
+    updatedAt: new Date('2024-01-05'),
+    priority: 'medium' as const,
+    category: 'home',
+  },
+];
+
 jest.mock('../../hooks/useTasks', () => ({
   useTasks: () => ({
     addTask: mockAddTask,
+    updateTask: mockUpdateTask,
+    tasks: mockTasks,
   }),
 }));
 
@@ -260,5 +306,73 @@ describe('TaskForm (new system)', () => {
     
     // Validation message should be hidden (not visible in DOM)
     expect(screen.queryByText('Please fill this field')).not.toBeInTheDocument();
+  });
+});
+
+describe('Auto-fill Functionality', () => {
+  it('shows auto-fill suggestions when typing in title field', () => {
+    render(<TaskForm />);
+
+    const titleInput = screen.getByPlaceholderText('Intention');
+    fireEvent.change(titleInput, { target: { value: 'workout' } });
+
+    // Should show auto-fill suggestions
+    expect(screen.getByText('Workout')).toBeInTheDocument();
+  });
+
+  it('filters suggestions based on title, description, and category', () => {
+    render(<TaskForm />);
+
+    const titleInput = screen.getByPlaceholderText('Intention');
+    
+    // Search by title
+    fireEvent.change(titleInput, { target: { value: 'Study' } });
+    expect(screen.getByText('Study Programming')).toBeInTheDocument();
+    
+    // Search by category
+    fireEvent.change(titleInput, { target: { value: 'home' } });
+    expect(screen.getByText('Clean Kitchen')).toBeInTheDocument();
+  });
+
+  it('navigates to task when suggestion is clicked', () => {
+    const mockNavigateToTask = jest.fn();
+    render(<TaskForm onNavigateToTask={mockNavigateToTask} />);
+
+    const titleInput = screen.getByPlaceholderText('Intention');
+    fireEvent.change(titleInput, { target: { value: 'workout' } });
+
+    const suggestion = screen.getByText('Workout');
+    fireEvent.click(suggestion);
+
+    expect(mockNavigateToTask).toHaveBeenCalledWith('1');
+  });
+
+  it('handles keyboard navigation in suggestions', () => {
+    render(<TaskForm />);
+
+    const titleInput = screen.getByPlaceholderText('Intention');
+    fireEvent.change(titleInput, { target: { value: 'workout' } });
+
+    // Press arrow down to select next suggestion
+    fireEvent.keyDown(titleInput, { key: 'ArrowDown' });
+    
+    // Press enter to select
+    fireEvent.keyDown(titleInput, { key: 'Enter' });
+    
+    // Should have selected a suggestion
+    expect(titleInput).toHaveValue('Workout');
+  });
+
+  it('hides suggestions when clicking outside', () => {
+    render(<TaskForm />);
+
+    const titleInput = screen.getByPlaceholderText('Intention');
+    fireEvent.change(titleInput, { target: { value: 'workout' } });
+
+    // Click outside the input
+    fireEvent.mouseDown(document.body);
+
+    // Suggestions should be hidden
+    expect(screen.queryByText('Workout')).not.toBeInTheDocument();
   });
 });

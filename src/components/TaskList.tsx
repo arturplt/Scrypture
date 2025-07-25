@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { useTasks } from '../hooks/useTasks';
 import { TaskCard } from './TaskCard';
 import { TaskDetailModal } from './TaskDetailModal';
@@ -7,7 +7,11 @@ import { Task } from '../types';
 import styles from './TaskList.module.css';
 import { categoryService } from '../services/categoryService';
 
-export const TaskList: React.FC = () => {
+export interface TaskListRef {
+  navigateToTask: (taskId: string) => void;
+}
+
+export const TaskList = forwardRef<TaskListRef>((props, ref) => {
   const { tasks, deleteTask, refreshTasks } = useTasks();
   const [selectedTaskIndex, setSelectedTaskIndex] = useState<number | null>(
     null
@@ -18,6 +22,7 @@ export const TaskList: React.FC = () => {
   const [sortBy, setSortBy] = useState<'priority' | 'date' | 'xp'>('priority');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [searchKeyword, setSearchKeyword] = useState<string>('');
 
   // Core attributes are now separate from categories - no filtering needed
   const [allCategories, setAllCategories] = useState<
@@ -36,6 +41,31 @@ export const TaskList: React.FC = () => {
     };
   }, []);
 
+  // Expose navigateToTask method via ref
+  useImperativeHandle(ref, () => ({
+    navigateToTask: (taskId: string) => {
+      // Find the task in the sorted tasks array
+      const taskIndex = sortedTasks.findIndex(task => task.id === taskId);
+      if (taskIndex !== -1) {
+        setSelectedTaskIndex(taskIndex);
+        setIsModalOpen(true);
+        setIsEditMode(false);
+      }
+    }
+  }));
+
+  // Search function to check if task matches keyword
+  const taskMatchesSearch = (task: Task, keyword: string): boolean => {
+    if (!keyword.trim()) return true;
+    
+    const searchTerm = keyword.toLowerCase().trim();
+    const titleMatch = task.title.toLowerCase().includes(searchTerm);
+    const descriptionMatch = task.description?.toLowerCase().includes(searchTerm) || false;
+    const categoryMatch = task.category?.toLowerCase().includes(searchTerm) || false;
+    
+    return titleMatch || descriptionMatch || categoryMatch;
+  };
+
   // Filter and sort active tasks
   const activeTasks = tasks
     .filter((task) => !task.completed)
@@ -46,6 +76,14 @@ export const TaskList: React.FC = () => {
       return true;
     })
     .sort((a, b) => {
+      // First, prioritize search matches
+      const aMatchesSearch = taskMatchesSearch(a, searchKeyword);
+      const bMatchesSearch = taskMatchesSearch(b, searchKeyword);
+      
+      if (aMatchesSearch && !bMatchesSearch) return -1;
+      if (!aMatchesSearch && bMatchesSearch) return 1;
+      
+      // Then apply normal sorting
       let comparison = 0;
 
       if (sortBy === 'priority') {
@@ -163,6 +201,26 @@ export const TaskList: React.FC = () => {
           <div className={styles.sectionHeader}>
             <h2 className={styles.title}>Active Tasks</h2>
             <div className={styles.controls}>
+              {/* Search Input */}
+              <div className={styles.searchContainer}>
+                <input
+                  type="text"
+                  placeholder="Search tasks..."
+                  value={searchKeyword}
+                  onChange={(e) => setSearchKeyword(e.target.value)}
+                  className={styles.searchInput}
+                />
+                {searchKeyword && (
+                  <button
+                    onClick={() => setSearchKeyword('')}
+                    className={styles.clearSearchButton}
+                    aria-label="Clear search"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+
               {/* Category Filter */}
               <div className={styles.categoryFilter}>
                 <select
@@ -241,8 +299,6 @@ export const TaskList: React.FC = () => {
           task={selectedTask}
           isOpen={isModalOpen}
           onClose={handleCloseModal}
-          onEdit={handleEditTask}
-          onDelete={handleDeleteTask}
           onNext={handleNextTask}
           onPrevious={handlePreviousTask}
           hasNext={hasNext}
@@ -274,4 +330,4 @@ export const TaskList: React.FC = () => {
       )}
     </div>
   );
-};
+});
