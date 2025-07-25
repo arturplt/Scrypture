@@ -23,6 +23,7 @@ export const TaskList = forwardRef<TaskListRef>((props, ref) => {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchKeyword, setSearchKeyword] = useState<string>('');
+  const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
 
   // Core attributes are now separate from categories - no filtering needed
   const [allCategories, setAllCategories] = useState<
@@ -110,6 +111,16 @@ export const TaskList = forwardRef<TaskListRef>((props, ref) => {
       );
     });
 
+  // Group active tasks by category
+  const groupedActiveTasks = activeTasks.reduce((groups, task) => {
+    const category = task.category || 'Uncategorized';
+    if (!groups[category]) {
+      groups[category] = [];
+    }
+    groups[category].push(task);
+    return groups;
+  }, {} as Record<string, Task[]>);
+
   // Combined tasks for modal navigation
   const sortedTasks = [...activeTasks, ...completedTasks];
 
@@ -173,6 +184,21 @@ export const TaskList = forwardRef<TaskListRef>((props, ref) => {
   const handleCancelEdit = () => {
     setIsEditMode(false);
     setTaskToEdit(null);
+  };
+
+  const toggleCategoryCollapse = (category: string) => {
+    const newCollapsed = new Set(collapsedCategories);
+    if (newCollapsed.has(category)) {
+      newCollapsed.delete(category);
+    } else {
+      newCollapsed.add(category);
+    }
+    setCollapsedCategories(newCollapsed);
+  };
+
+  const getCategoryIcon = (categoryName: string) => {
+    const category = allCategories.find(cat => cat.name.toLowerCase() === categoryName.toLowerCase());
+    return category?.icon || '📁';
   };
 
   const selectedTask =
@@ -265,14 +291,54 @@ export const TaskList = forwardRef<TaskListRef>((props, ref) => {
               </div>
             </div>
           </div>
-          <div className={styles.taskGrid}>
-            {activeTasks.map((task, index) => (
-              <TaskCard
-                key={task.id}
-                task={task}
-                onOpenModal={() => handleOpenModal(index)}
-              />
-            ))}
+
+          {/* Grouped Tasks by Category */}
+          <div className={styles.categoryGroups}>
+            {Object.entries(groupedActiveTasks).map(([category, categoryTasks]) => {
+              const isCollapsed = collapsedCategories.has(category);
+              const categoryIcon = getCategoryIcon(category);
+              
+              return (
+                <div key={category} className={styles.categoryGroup}>
+                  <button
+                    className={styles.categoryHeader}
+                    onClick={() => toggleCategoryCollapse(category)}
+                    aria-label={`${isCollapsed ? 'Expand' : 'Collapse'} ${category} category`}
+                  >
+                    <div className={styles.categoryIcon}>
+                      <span className={styles.icon32x32}>{categoryIcon}</span>
+                    </div>
+                    <div className={styles.categoryInfo}>
+                      <h3 className={styles.categoryTitle}>
+                        {category.charAt(0).toUpperCase() + category.slice(1)}
+                      </h3>
+                      <span className={styles.categoryCount}>
+                        {categoryTasks.length} task{categoryTasks.length !== 1 ? 's' : ''}
+                      </span>
+                    </div>
+                    <div className={styles.collapseIcon}>
+                      {isCollapsed ? '▼' : '▲'}
+                    </div>
+                  </button>
+                  
+                  {!isCollapsed && (
+                    <div className={styles.categoryTasks}>
+                      {categoryTasks.map((task, index) => {
+                        // Find the task's index in the full sorted tasks array
+                        const taskIndex = activeTasks.findIndex(t => t.id === task.id);
+                        return (
+                          <TaskCard
+                            key={task.id}
+                            task={task}
+                            onOpenModal={() => handleOpenModal(taskIndex)}
+                          />
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
