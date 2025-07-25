@@ -10,6 +10,7 @@ interface TaskFormProps {
   onCancel?: () => void;
   onSave?: () => void;
   onNavigateToTask?: (taskId: string) => void;
+  onEditTask?: (task: Task) => void;
 }
 
 export const TaskForm: React.FC<TaskFormProps> = ({
@@ -17,6 +18,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   onCancel,
   onSave,
   onNavigateToTask,
+  onEditTask,
 }) => {
   const { addTask, updateTask, tasks } = useTasks();
   const [title, setTitle] = useState(taskToEdit?.title || '');
@@ -102,11 +104,13 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   };
 
   const handleAutoFillSelect = (task: Task) => {
-    // Don't fill the title field, just navigate to the task
     setShowAutoFill(false);
     
-    // Navigate to the selected task
-    if (onNavigateToTask) {
+    // If onEditTask is provided, use it to open the edit modal
+    if (onEditTask) {
+      onEditTask(task);
+    } else if (onNavigateToTask) {
+      // Fall back to navigation behavior
       onNavigateToTask(task.id);
     }
   };
@@ -471,7 +475,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
                 >
                   <span className={styles.autoFillIcon}>🔍</span>
                   {task.title}
-                  <span className={styles.autoFillHint}>View task</span>
+                  <span className={styles.autoFillHint}>Edit task</span>
                 </div>
               ))}
             </div>

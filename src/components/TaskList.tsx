@@ -1,4 +1,4 @@
-import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle, useRef } from 'react';
 import { useTasks } from '../hooks/useTasks';
 import { TaskCard } from './TaskCard';
 import { TaskForm } from './TaskForm';
@@ -8,6 +8,7 @@ import { categoryService } from '../services/categoryService';
 
 export interface TaskListRef {
   navigateToTask: (taskId: string) => void;
+  highlightTask: (taskId: string) => void;
 }
 
 export const TaskList = forwardRef<TaskListRef>((props, ref) => {
@@ -19,6 +20,8 @@ export const TaskList = forwardRef<TaskListRef>((props, ref) => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchKeyword, setSearchKeyword] = useState<string>('');
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
+  const [highlightedTaskId, setHighlightedTaskId] = useState<string | null>(null);
+  const taskRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   // Core attributes are now separate from categories - no filtering needed
   const [allCategories, setAllCategories] = useState<
@@ -65,7 +68,15 @@ export const TaskList = forwardRef<TaskListRef>((props, ref) => {
       if (taskIndex !== -1) {
         setIsEditMode(false);
       }
-    }
+    },
+    highlightTask: (taskId: string) => {
+      setHighlightedTaskId(taskId);
+      const el = taskRefs.current[taskId];
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      setTimeout(() => setHighlightedTaskId(null), 2000);
+    },
   }));
 
   // Search function to check if task matches keyword
@@ -293,6 +304,8 @@ export const TaskList = forwardRef<TaskListRef>((props, ref) => {
                           <TaskCard
                             key={task.id}
                             task={task}
+                            ref={el => taskRefs.current[task.id] = el}
+                            isHighlighted={highlightedTaskId === task.id}
                           />
                         );
                       })}

@@ -1,18 +1,18 @@
+import React, { useState, useRef, useEffect } from 'react';
 import { TaskProvider, useTasks } from './hooks/useTasks';
 import { UserProvider, useUser } from './hooks/useUser';
 import { HabitProvider, useHabits } from './hooks/useHabits';
-import { TaskList, TaskListRef } from './components/TaskList';
 import { TaskForm } from './components/TaskForm';
+import { TaskList, TaskListRef } from './components/TaskList';
 import { TaskCounter } from './components/TaskCounter';
 import { StatsDisplay } from './components/StatsDisplay';
-import { UserCreation } from './components/UserCreation';
 import { DataManager } from './components/DataManager';
-import { AutoSaveIndicator } from './components/AutoSaveIndicator';
 import { StartHereModal } from './components/StartHereModal';
+import { AutoSaveIndicator } from './components/AutoSaveIndicator';
 import { InstallPrompt } from './components/InstallPrompt';
-
+import { UserCreation } from './components/UserCreation';
+import { Task } from './types';
 import styles from './App.module.css';
-import { useRef, useEffect, useState } from 'react';
 
 function LevelUpModal({
   level,
@@ -116,6 +116,7 @@ function AppContent() {
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [showStartHere, setShowStartHere] = useState(false);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
   const lastLevel = useRef<number | null>(null);
   const taskListRef = useRef<TaskListRef | null>(null);
 
@@ -150,6 +151,14 @@ function AppContent() {
     if (taskListRef.current) {
       taskListRef.current.navigateToTask(taskId);
     }
+  };
+
+  const handleEditTask = (task: Task) => {
+    setEditingTask(task);
+  };
+
+  const handleCloseEditModal = () => {
+    setEditingTask(null);
   };
 
   // Show user creation if no user exists

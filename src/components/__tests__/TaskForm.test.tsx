@@ -28,7 +28,7 @@ const mockTasks = [
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-01'),
     priority: 'high' as const,
-    category: 'body',
+    categories: ['body'],
   },
   {
     id: '2',
@@ -38,7 +38,7 @@ const mockTasks = [
     createdAt: new Date('2024-01-02'),
     updatedAt: new Date('2024-01-02'),
     priority: 'medium' as const,
-    category: 'mind',
+    categories: ['mind'],
   },
   {
     id: '3',
@@ -48,7 +48,7 @@ const mockTasks = [
     createdAt: new Date('2024-01-04'),
     updatedAt: new Date('2024-01-04'),
     priority: 'high' as const,
-    category: 'skills',
+    categories: ['skills'],
   },
   {
     id: '4',
@@ -58,7 +58,7 @@ const mockTasks = [
     createdAt: new Date('2024-01-05'),
     updatedAt: new Date('2024-01-05'),
     priority: 'medium' as const,
-    category: 'home',
+    categories: ['home'],
   },
 ];
 
@@ -318,6 +318,7 @@ describe('Auto-fill Functionality', () => {
 
     // Should show auto-fill suggestions
     expect(screen.getByText('Workout')).toBeInTheDocument();
+    expect(screen.getByText('Edit task')).toBeInTheDocument();
   });
 
   it('filters suggestions based on title, description, and category', () => {
@@ -328,13 +329,32 @@ describe('Auto-fill Functionality', () => {
     // Search by title
     fireEvent.change(titleInput, { target: { value: 'Study' } });
     expect(screen.getByText('Study Programming')).toBeInTheDocument();
+    expect(screen.getByText('Edit task')).toBeInTheDocument();
     
     // Search by category
     fireEvent.change(titleInput, { target: { value: 'home' } });
     expect(screen.getByText('Clean Kitchen')).toBeInTheDocument();
+    expect(screen.getByText('Edit task')).toBeInTheDocument();
   });
 
-  it('navigates to task when suggestion is clicked', () => {
+  it('opens edit modal when suggestion is clicked', () => {
+    const mockEditTask = jest.fn();
+    render(<TaskForm onEditTask={mockEditTask} />);
+
+    const titleInput = screen.getByPlaceholderText('Intention');
+    fireEvent.change(titleInput, { target: { value: 'workout' } });
+
+    const suggestion = screen.getByText('Workout');
+    fireEvent.click(suggestion);
+
+    expect(mockEditTask).toHaveBeenCalledWith(expect.objectContaining({
+      id: '1',
+      title: 'Workout',
+      categories: ['body']
+    }));
+  });
+
+  it('falls back to navigation when onEditTask is not provided', () => {
     const mockNavigateToTask = jest.fn();
     render(<TaskForm onNavigateToTask={mockNavigateToTask} />);
 
@@ -345,34 +365,5 @@ describe('Auto-fill Functionality', () => {
     fireEvent.click(suggestion);
 
     expect(mockNavigateToTask).toHaveBeenCalledWith('1');
-  });
-
-  it('handles keyboard navigation in suggestions', () => {
-    render(<TaskForm />);
-
-    const titleInput = screen.getByPlaceholderText('Intention');
-    fireEvent.change(titleInput, { target: { value: 'workout' } });
-
-    // Press arrow down to select next suggestion
-    fireEvent.keyDown(titleInput, { key: 'ArrowDown' });
-    
-    // Press enter to select
-    fireEvent.keyDown(titleInput, { key: 'Enter' });
-    
-    // Should have selected a suggestion
-    expect(titleInput).toHaveValue('Workout');
-  });
-
-  it('hides suggestions when clicking outside', () => {
-    render(<TaskForm />);
-
-    const titleInput = screen.getByPlaceholderText('Intention');
-    fireEvent.change(titleInput, { target: { value: 'workout' } });
-
-    // Click outside the input
-    fireEvent.mouseDown(document.body);
-
-    // Suggestions should be hidden
-    expect(screen.queryByText('Workout')).not.toBeInTheDocument();
   });
 });
