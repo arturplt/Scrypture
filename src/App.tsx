@@ -157,10 +157,14 @@ function AppContent() {
 
   const handleEditTask = (task: Task) => {
     console.log('handleEditTask called with task:', task);
+    console.log('Current editingTask state before set:', editingTask);
     setEditingTask(task);
+    console.log('setEditingTask called with task:', task);
   };
 
   const handleCloseEditModal = () => {
+    console.log('handleCloseEditModal called');
+    console.log('Current editingTask state before clear:', editingTask);
     setEditingTask(null);
   };
 
@@ -232,6 +236,13 @@ function AppContent() {
         >
           <TaskEditForm task={editingTask} onCancel={handleCloseEditModal} />
         </Modal>
+      )}
+
+      {/* Debug info */}
+      {process.env.NODE_ENV === 'test' && (
+        <div style={{ position: 'fixed', top: 0, right: 0, background: 'red', color: 'white', padding: '10px', zIndex: 10000 }}>
+          editingTask: {editingTask ? 'SET' : 'NULL'}
+        </div>
       )}
 
       <AutoSaveIndicator isSaving={isSaving} lastSaved={lastSaved} />

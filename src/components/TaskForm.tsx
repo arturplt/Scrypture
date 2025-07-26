@@ -86,14 +86,18 @@ export const TaskForm: React.FC<TaskFormProps> = ({
     ).slice(0, 5); // Limit to 5 suggestions
   };
 
+  // Recalculate suggestions whenever title changes
   const autoFillSuggestions = getAutoFillSuggestions(title);
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTitle = e.target.value;
     setTitle(newTitle);
     
+    // Recalculate suggestions based on new title
+    const newSuggestions = getAutoFillSuggestions(newTitle);
+    
     // Show auto-fill suggestions if there are matches and user is typing
-    if (newTitle.trim().length >= 2 && autoFillSuggestions.length > 0) {
+    if (newTitle.trim().length >= 2 && newSuggestions.length > 0) {
       setShowAutoFill(true);
       setSelectedAutoFillIndex(0);
     } else {
@@ -591,6 +595,8 @@ export const TaskForm: React.FC<TaskFormProps> = ({
                   className={`${styles.autoFillSuggestion} ${index === selectedAutoFillIndex ? styles.autoFillSuggestionSelected : ''}`}
                   onClick={() => {
                     console.log('Auto-fill suggestion clicked:', task.title);
+                    console.log('onEditTask prop exists:', !!onEditTask);
+                    console.log('onEditTask prop:', onEditTask);
                     handleAutoFillSelect(task);
                   }}
                 >
