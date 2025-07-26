@@ -147,38 +147,41 @@ describe('TaskCard', () => {
 
     it('should show TaskEditForm when in editing state', async () => {
       render(<TaskCard task={mockTask} />);
-
       const editButton = screen.getByLabelText('Edit task');
       fireEvent.click(editButton);
-
-      // Fast forward to complete transition
       act(() => {
         jest.advanceTimersByTime(200);
       });
-
-      // Should show the edit form container
-      const cardContainer = screen.getByText('Test Task').closest('div');
-      const editFormContainer = cardContainer?.querySelector('.editFormContainer');
-      expect(editFormContainer).toBeInTheDocument();
+      // The edit form should be present by its input or button
+      expect(screen.getByRole('form')).toBeInTheDocument();
     });
 
-    it('should handle cancel edit functionality', async () => {
+    it('should handle cancel edit functionality and transition states', async () => {
       render(<TaskCard task={mockTask} />);
-
       const editButton = screen.getByLabelText('Edit task');
       fireEvent.click(editButton);
-
-      // Fast forward to complete transition
       act(() => {
         jest.advanceTimersByTime(200);
       });
-
-      // Should be in editing state
+      // Simulate clicking cancel in the edit form
+      // Find the cancel button by text or aria-label
+      const cancelButton = screen.getByRole('button', { name: /cancel/i });
+      fireEvent.click(cancelButton);
+      // Should enter exitingEdit state
       const cardContainer = screen.getByText('Test Task').closest('div');
-      expect(cardContainer).toHaveClass('editing');
-
-      // Cancel button should be available in the edit form
-      // Note: The actual cancel functionality is handled by TaskEditForm component
+      expect(cardContainer).toHaveClass('exitingEdit');
+      // Fast forward exit animation
+      act(() => {
+        jest.advanceTimersByTime(420);
+      });
+      // Should enter reentering state
+      expect(cardContainer).toHaveClass('reentering');
+      // Fast forward reentering animation
+      act(() => {
+        jest.advanceTimersByTime(200);
+      });
+      // Should no longer be editing
+      expect(cardContainer).not.toHaveClass('editing');
     });
   });
 
@@ -196,24 +199,21 @@ describe('TaskCard', () => {
       expect(screen.getByText('⏳ Pending')).toBeInTheDocument();
     });
 
-    it('should collapse task details when card is clicked again', () => {
+    it('should collapse task details when card is clicked again and show closing animation', () => {
       render(<TaskCard task={mockTask} />);
-
       const cardContainer = screen.getByText('Test Task').closest('div');
-      
       // First click to expand
       if (cardContainer) {
         fireEvent.click(cardContainer);
       }
       expect(screen.getByText('Status:')).toBeInTheDocument();
-
       // Second click to collapse
       if (cardContainer) {
         fireEvent.click(cardContainer);
       }
-      
-      // Status should still be visible during collapse animation
-      expect(screen.getByText('Status:')).toBeInTheDocument();
+      // The details should have the closing class during animation
+      const details = screen.getByText('Status:').closest('div');
+      expect(details).toHaveClass('closing');
     });
   });
 
@@ -248,24 +248,12 @@ describe('TaskCard', () => {
   describe('Rewards Display', () => {
     it('should display XP rewards', () => {
       render(<TaskCard task={mockTask} />);
-
-      // Rewards are shown on hover, so we need to trigger hover
-      const cardContainer = screen.getByText('Test Task').closest('div');
-      if (cardContainer) {
-        fireEvent.mouseEnter(cardContainer);
-      }
-
+      // XP reward should always be visible if present
       expect(screen.getByText('XP: +10')).toBeInTheDocument();
     });
 
     it('should display mind rewards', () => {
       render(<TaskCard task={mockTask} />);
-
-      const cardContainer = screen.getByText('Test Task').closest('div');
-      if (cardContainer) {
-        fireEvent.mouseEnter(cardContainer);
-      }
-
       expect(screen.getByText('🧠 Mind: +1')).toBeInTheDocument();
     });
   });
@@ -286,6 +274,27 @@ describe('TaskCard', () => {
 
       const cardContainer = screen.getByText('Test Task').closest('div');
       expect(cardContainer).toHaveClass('highlighted');
+    });
+
+    it('should apply exitingEdit and reentering classes during edit cancel transitions', async () => {
+      render(<TaskCard task={mockTask} />);
+      const editButton = screen.getByLabelText('Edit task');
+      fireEvent.click(editButton);
+      act(() => {
+        jest.advanceTimersByTime(200);
+      });
+      const cancelButton = screen.getByRole('button', { name: /cancel/i });
+      fireEvent.click(cancelButton);
+      const cardContainer = screen.getByText('Test Task').closest('div');
+      expect(cardContainer).toHaveClass('exitingEdit');
+      act(() => {
+        jest.advanceTimersByTime(420);
+      });
+      expect(cardContainer).toHaveClass('reentering');
+      act(() => {
+        jest.advanceTimersByTime(200);
+      });
+      expect(cardContainer).not.toHaveClass('editing');
     });
   });
 });
