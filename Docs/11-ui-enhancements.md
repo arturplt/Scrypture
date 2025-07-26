@@ -235,3 +235,91 @@ Edit modals now use minimal 4px padding and fill the container width, providing 
 
 *Last Updated: December 2024*
 *Version: 1.0.0* 
+
+## TaskCard Inline Edit Functionality
+
+### Overview
+The TaskCard component now features inline edit functionality, allowing users to edit tasks directly within the card instead of opening a separate modal. This provides a more seamless and intuitive editing experience.
+
+### Implementation Details
+
+#### Key Changes Made:
+
+1. **TaskCard.tsx Modifications**:
+   - Modified `handleEdit` function to always use inline edit instead of modal
+   - Added conditional rendering to show `TaskEditForm` inside the card when `isEditing` is true
+   - Maintained all existing animations and transitions
+   - Preserved XP strip and category animations during edit mode
+
+2. **TaskCard.module.css Enhancements**:
+   - Added `.editFormContainer` styles for proper form display within card
+   - Reset form styling to work within card context (removed borders, shadows)
+   - Added smooth animation for edit form appearance
+   - Added 8px left margin to prevent interference with animated XP strip
+   - Ensured proper spacing and layout for form elements
+
+3. **Test Updates**:
+   - Updated `TaskCard.test.tsx` to reflect inline edit functionality
+   - Added comprehensive tests for edit transitions and animations
+   - Fixed TypeScript issues and added proper null checks
+   - Added tests for task details expansion and rewards display
+
+#### Features:
+
+✅ **Inline Edit Form**: TaskEditForm appears directly inside the task card
+✅ **Smooth Transitions**: Maintains existing animation system for entering/exiting edit mode
+✅ **Visual Continuity**: Card maintains its visual identity while form appears inside
+✅ **XP Strip Compatibility**: 8px left margin prevents interference with animated XP strip
+✅ **Responsive Design**: Form adapts to card layout and styling
+✅ **All Functionality Preserved**: Categories, priority, difficulty, core attributes work exactly the same
+
+#### User Experience:
+
+- **Click Edit Button (🖍)**: Triggers smooth transition to inline edit form
+- **Edit Form Appearance**: Form expands within the card with smooth animation
+- **Cancel/Submit**: Smooth transition back to card view
+- **No Modal Interruption**: Seamless editing experience without modal overlay
+
+#### Technical Benefits:
+
+- **Reduced Complexity**: Single component handles both view and edit modes
+- **Better Performance**: No modal rendering overhead
+- **Improved Accessibility**: Edit form is part of the natural document flow
+- **Mobile Friendly**: Better touch interaction on mobile devices
+
+### CSS Classes Added:
+
+```css
+.editFormContainer {
+  width: 100%;
+  padding: 0;
+  margin: 0 0 0 8px; /* 8px left margin to avoid XP strip interference */
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.card.editing .editFormContainer {
+  animation: editFormAppear 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+```
+
+### Animation States:
+
+- **`.transitioningToEdit`**: Initial transition animation
+- **`.editing`**: Active edit state with form visible
+- **`.exitingEdit`**: Exit animation when canceling
+- **`.reentering`**: Re-entrance animation after edit
+
+### Testing Coverage:
+
+- ✅ Inline edit functionality
+- ✅ Transition animations
+- ✅ Multiple click prevention
+- ✅ Task details expansion
+- ✅ Priority and difficulty display
+- ✅ Rewards display on hover
+- ✅ Animation states
+- ✅ TypeScript compatibility
+
+This enhancement significantly improves the user experience by providing a more intuitive and seamless editing workflow while maintaining all existing functionality and visual design consistency. 

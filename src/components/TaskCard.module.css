@@ -817,16 +817,101 @@
 }
 
 @keyframes highlightPulse {
-  0% {
-    transform: scale(1);
-    box-shadow: 0 0 20px var(--color-accent-gold);
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(255, 224, 102, 0.3);
   }
   50% {
-    transform: scale(1.02);
-    box-shadow: 0 0 30px var(--color-accent-gold);
+    box-shadow: 0 0 30px rgba(255, 224, 102, 0.5);
+  }
+}
+
+/* Edit form container styles */
+.editFormContainer {
+  width: 100%;
+  padding: 0;
+  margin: 0 0 0 8px; /* Add 8px left margin to avoid XP strip interference */
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.editFormContainer .form {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.editFormContainer .form .inputGroup {
+  margin-bottom: var(--spacing-sm);
+}
+
+.editFormContainer .form .titleInput {
+  background: var(--color-bg-primary);
+  border: 2px solid var(--color-border-primary);
+  border-radius: 0;
+  padding: var(--spacing-sm);
+  font-size: 1.1rem;
+  font-weight: 600;
+  width: 100%;
+  margin-bottom: var(--spacing-sm);
+}
+
+.editFormContainer .form .descriptionInput {
+  background: var(--color-bg-primary);
+  border: 2px solid var(--color-border-primary);
+  border-radius: 0;
+  padding: var(--spacing-sm);
+  width: 100%;
+  min-height: 60px;
+  resize: vertical;
+  margin-bottom: var(--spacing-sm);
+}
+
+.editFormContainer .form .categorySelector,
+.editFormContainer .form .prioritySelector,
+.editFormContainer .form .difficultySelector,
+.editFormContainer .form .coreAttributesSection {
+  margin-bottom: var(--spacing-sm);
+}
+
+.editFormContainer .form .buttonGroup {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+}
+
+.editFormContainer .form .submitButton,
+.editFormContainer .form .cancelButton,
+.editFormContainer .form .deleteButton {
+  flex: 1;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: 0;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Ensure form elements don't inherit card hover effects */
+.card.editing .editFormContainer .form:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Smooth transition for edit form appearance */
+.card.editing .editFormContainer {
+  animation: editFormAppear 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes editFormAppear {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
   }
   100% {
-    transform: scale(1);
-    box-shadow: 0 0 20px var(--color-accent-gold);
+    opacity: 1;
+    transform: translateY(0);
   }
 }
