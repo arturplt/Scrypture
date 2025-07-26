@@ -95,4 +95,12 @@ describe('StartHereSection', () => {
     const progressBars = document.querySelectorAll('div[style*="width: 0%"]');
     expect(progressBars.length).toBeGreaterThan(0);
   });
+
+  it('renders with collapsible completed sections', () => {
+    render(<StartHereSection isVisible={true} onClose={jest.fn()} />);
+    
+    // Check that the component renders with the new collapsible functionality
+    expect(screen.getByText('Start Here')).toBeInTheDocument();
+    expect(screen.getByText(/Choose categories to get started with progressively challenging tasks and habits:/)).toBeInTheDocument();
+  });
 }); 

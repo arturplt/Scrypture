@@ -212,8 +212,21 @@
   margin-bottom: var(--spacing-sm);
 }
 
+.completedTasksHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  padding: var(--spacing-xs) 0;
+  transition: all var(--transition-normal);
+}
+
+.completedTasksHeader:hover {
+  background: var(--color-bg-primary);
+}
+
 .completedTasksTitle {
-  margin: 0 0 var(--spacing-sm) 0;
+  margin: 0;
   font-size: var(--font-size-xs);
   font-weight: normal;
   color: var(--color-text-secondary);
@@ -221,6 +234,16 @@
   -webkit-font-smoothing: none;
   -moz-osx-font-smoothing: none;
   text-rendering: optimizeSpeed;
+}
+
+.collapseIcon {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  font-family: 'Press Start 2P', monospace;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+  transition: transform var(--transition-normal);
 }
 
 .completedTasksList {

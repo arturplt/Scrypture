@@ -32,6 +32,7 @@ export const StartHereSection: React.FC<StartHereSectionProps> = ({ isVisible, o
   const [givenTasks, setGivenTasks] = useState<Set<string>>(new Set());
   const [givenHabits, setGivenHabits] = useState<Set<string>>(new Set());
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+  const [collapsedCompletedSections, setCollapsedCompletedSections] = useState<Set<string>>(new Set());
 
   // Load given tasks from localStorage on component mount
   useEffect(() => {
@@ -1167,6 +1168,18 @@ export const StartHereSection: React.FC<StartHereSectionProps> = ({ isVisible, o
     });
   };
 
+  const handleCompletedSectionToggle = (sectionKey: string) => {
+    setCollapsedCompletedSections(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(sectionKey)) {
+        newSet.delete(sectionKey);
+      } else {
+        newSet.add(sectionKey);
+      }
+      return newSet;
+    });
+  };
+
   const availableCategories = ['mind', 'body', 'soul', 'home', 'free time', 'garden'];
   const availableHabitCategories = ['mind', 'body', 'soul'];
 
@@ -1220,15 +1233,27 @@ export const StartHereSection: React.FC<StartHereSectionProps> = ({ isVisible, o
                   <>
                     {completedTasks.length > 0 && (
                       <div className={styles.completedTasksSection}>
-                        <h4 className={styles.completedTasksTitle}>Completed Tasks</h4>
-                        <div className={styles.completedTasksList}>
-                          {completedTasks.map((task, index) => (
-                            <div key={index} className={styles.completedTaskItem}>
-                              <span className={styles.completedTaskTitle}>✅ {task.title}</span>
-                              <span className={styles.completedTaskDifficulty}>(Difficulty {task.difficulty})</span>
-                            </div>
-                          ))}
+                        <div 
+                          className={styles.completedTasksHeader}
+                          onClick={() => handleCompletedSectionToggle(`tasks-${category}`)}
+                        >
+                          <h4 className={styles.completedTasksTitle}>
+                            Completed Tasks ({completedTasks.length})
+                          </h4>
+                          <span className={styles.collapseIcon}>
+                            {collapsedCompletedSections.has(`tasks-${category}`) ? '▼' : '▲'}
+                          </span>
                         </div>
+                        {!collapsedCompletedSections.has(`tasks-${category}`) && (
+                          <div className={styles.completedTasksList}>
+                            {completedTasks.map((task, index) => (
+                              <div key={index} className={styles.completedTaskItem}>
+                                <span className={styles.completedTaskTitle}>✅ {task.title}</span>
+                                <span className={styles.completedTaskDifficulty}>(Difficulty {task.difficulty})</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )}
                     
@@ -1298,15 +1323,27 @@ export const StartHereSection: React.FC<StartHereSectionProps> = ({ isVisible, o
                   <>
                     {completedHabits.length > 0 && (
                       <div className={styles.completedTasksSection}>
-                        <h4 className={styles.completedTasksTitle}>Completed Habits</h4>
-                        <div className={styles.completedTasksList}>
-                          {completedHabits.map((habit, index) => (
-                            <div key={index} className={styles.completedTaskItem}>
-                              <span className={styles.completedTaskTitle}>✅ {habit.name}</span>
-                              <span className={styles.completedTaskDifficulty}>({habit.targetFrequency})</span>
-                            </div>
-                          ))}
+                        <div 
+                          className={styles.completedTasksHeader}
+                          onClick={() => handleCompletedSectionToggle(`habits-${category}`)}
+                        >
+                          <h4 className={styles.completedTasksTitle}>
+                            Completed Habits ({completedHabits.length})
+                          </h4>
+                          <span className={styles.collapseIcon}>
+                            {collapsedCompletedSections.has(`habits-${category}`) ? '▼' : '▲'}
+                          </span>
                         </div>
+                        {!collapsedCompletedSections.has(`habits-${category}`) && (
+                          <div className={styles.completedTasksList}>
+                            {completedHabits.map((habit, index) => (
+                              <div key={index} className={styles.completedTaskItem}>
+                                <span className={styles.completedTaskTitle}>✅ {habit.name}</span>
+                                <span className={styles.completedTaskDifficulty}>({habit.targetFrequency})</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )}
                     
