@@ -354,6 +354,69 @@ Auto-save is triggered on the following task operations:
 - **Validation Integration**: Auto-save works alongside form validation requirements
 - **Dual Indicator Support**: Auto-save indicators in both form header and footer
 
+## TaskCard Auto-Save Implementation
+
+### Features Implemented
+
+1. **Individual Task Auto-Save**: Each TaskCard component displays its own auto-save indicator
+2. **Task Completion Feedback**: Real-time feedback when tasks are completed or toggled
+3. **Edit Mode Integration**: Auto-save indicators remain visible during task editing
+4. **Title Section Integration**: Auto-save indicator positioned next to task title
+5. **State Change Handling**: Auto-save indicators respond to task state changes
+
+### Technical Implementation
+
+#### Component Structure
+```tsx
+// TaskCard.tsx
+import { AutoSaveIndicator } from './AutoSaveIndicator';
+import { useTasks } from '../hooks/useTasks';
+
+export const TaskCard: React.FC<TaskCardProps> = ({ 
+  task, 
+  isHighlighted,
+  triggerEdit 
+}) => {
+  const { toggleTask, bringTaskToTop, isSaving } = useTasks();
+  
+  return (
+    <div className={getCardClassName()}>
+      <div className={styles.header}>
+        <div className={styles.content}>
+          <div className={styles.titleSection}>
+            <h3 className={`${styles.title} ${task.completed ? styles.titleCompleted : ''}`}>
+              {task.title}
+            </h3>
+            <div className={styles.autoSaveContainer}>
+              <AutoSaveIndicator isSaving={isSaving} />
+            </div>
+          </div>
+          {/* Rest of card content */}
+        </div>
+      </div>
+    </div>
+  );
+};
+```
+
+#### Auto-Save Triggers
+
+Auto-save is triggered on the following task operations:
+
+1. **Task Completion** - When tasks are toggled between completed and incomplete
+2. **Task Editing** - When tasks are edited via inline edit functionality
+3. **Task State Changes** - Any changes to task properties or status
+4. **Task Interactions** - Clicking, editing, or modifying task data
+5. **Real-time Updates** - Auto-save indicators update in real-time
+
+### User Experience
+
+- **Individual Task Feedback**: Each task card shows its own auto-save status
+- **Title Section Integration**: Auto-save indicator positioned next to task title for visibility
+- **Completion Integration**: Auto-save feedback during task completion animations
+- **Edit Mode Support**: Auto-save indicators remain visible during task editing
+- **State Change Responsiveness**: Auto-save indicators respond to all task state changes
+
 ## Testing
 
 ### Test Coverage
@@ -488,6 +551,29 @@ describe('TaskForm', () => {
 
   it('updates task and triggers auto-save in edit mode', () => {
     // Tests task editing with auto-save integration
+  });
+
+  // Additional test cases...
+});
+```
+
+```tsx
+// TaskCard.test.tsx
+describe('TaskCard Auto-Save', () => {
+  it('should display auto-save indicator in task card', () => {
+    // Tests that auto-save indicator is present in task card
+  });
+
+  it('should show saving state when isSaving is true', () => {
+    // Tests that "Saving..." state is displayed
+  });
+
+  it('should show auto-save indicator during task completion', () => {
+    // Tests auto-save indicator during task completion
+  });
+
+  it('should handle auto-save state changes', () => {
+    // Tests auto-save state transitions
   });
 
   // Additional test cases...

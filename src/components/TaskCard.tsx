@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Task } from '../types';
 import { useTasks } from '../hooks/useTasks';
 import { TaskEditForm } from './TaskEditForm';
+import { AutoSaveIndicator } from './AutoSaveIndicator';
 import { formatRelativeTime } from '../utils/dateUtils';
 import styles from './TaskCard.module.css';
 
@@ -17,7 +18,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   isHighlighted,
   triggerEdit 
 }) => {
-  const { toggleTask, bringTaskToTop } = useTasks();
+  const { toggleTask, bringTaskToTop, isSaving } = useTasks();
   const [isEditing, setIsEditing] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
   const [wasCompleted, setWasCompleted] = useState(task.completed);
@@ -249,12 +250,17 @@ export const TaskCard: React.FC<TaskCardProps> = ({
         <>
           <div className={styles.header}>
             <div className={styles.content}>
-              <h3
-                className={`${styles.title} ${task.completed ? styles.titleCompleted : ''}`}
-                onClick={handleTitleClick}
-              >
-                {task.title}
-              </h3>
+              <div className={styles.titleSection}>
+                <h3
+                  className={`${styles.title} ${task.completed ? styles.titleCompleted : ''}`}
+                  onClick={handleTitleClick}
+                >
+                  {task.title}
+                </h3>
+                <div className={styles.autoSaveContainer}>
+                  <AutoSaveIndicator isSaving={isSaving} />
+                </div>
+              </div>
 
               {task.description && (
                 <p
