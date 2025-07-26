@@ -477,36 +477,6 @@ export const TaskForm: React.FC<TaskFormProps> = ({
     setCategories(newCategories);
   }, [bodyReward, mindReward, soulReward]);
 
-  // Filter out empty categories (categories with no tasks)
-  const getCategoriesWithTasks = () => {
-    const customCategories = categoryService.getCustomCategories();
-    
-    // Predetermined categories that should always be shown
-    const predeterminedCategories = ['home', 'free time', 'garden'];
-    
-    if (!tasks || tasks.length === 0) {
-      // If no tasks exist, show all default categories plus any custom categories
-      return allCategories;
-    }
-    
-    // Get unique categories that have tasks
-    const categoriesWithTasks = new Set(
-      tasks.flatMap(task => task.categories || ['uncategorized'])
-    );
-    
-    // Filter categories to include:
-    // 1. Categories that have tasks
-    // 2. All custom categories (even if they don't have tasks yet)
-    // 3. Predetermined categories (Home, Free Time, Garden) - always show
-    return allCategories.filter(category => 
-      categoriesWithTasks.has(category.name) || 
-      customCategories.some(customCat => customCat.name === category.name) ||
-      predeterminedCategories.includes(category.name)
-    );
-  };
-
-  const categoriesWithTasks = getCategoriesWithTasks();
-
   // Remove getStatRewards and defaultCategoryRewards
   const handleCategoryAdded = (newCategory: {
     name: string;
@@ -531,10 +501,6 @@ export const TaskForm: React.FC<TaskFormProps> = ({
         return [...prev, categoryName];
       }
     });
-  };
-
-  const handleCategoryRemove = (categoryName: string) => {
-    setCategories(prev => prev.filter(cat => cat !== categoryName));
   };
 
   const handleFormClick = (e: React.MouseEvent) => {

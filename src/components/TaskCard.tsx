@@ -7,17 +7,13 @@ import styles from './TaskCard.module.css';
 
 interface TaskCardProps {
   task: Task;
-  onOpenModal?: () => void;
   isHighlighted?: boolean;
-  onEditTask?: (task: Task) => void;
   triggerEdit?: boolean; // New prop to trigger inline edit
 }
 
 export const TaskCard: React.FC<TaskCardProps> = ({ 
   task, 
-  onOpenModal, 
   isHighlighted,
-  onEditTask,
   triggerEdit 
 }) => {
   const { toggleTask, bringTaskToTop } = useTasks();
