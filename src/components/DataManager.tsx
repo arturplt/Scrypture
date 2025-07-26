@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { userService } from '../services/userService';
 import { categoryService } from '../services/categoryService';
-import { useTasks } from '../hooks/useTasks';
 import styles from './DataManager.module.css';
 
 interface DataManagerProps {
@@ -9,12 +8,12 @@ interface DataManagerProps {
 }
 
 export const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
-  const { addTask, refreshTasks } = useTasks();
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState<'success' | 'error' | 'info'>(
     'info'
   );
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   const showMessage = (
     msg: string,
@@ -103,22 +102,29 @@ export const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
   };
 
   const handleClearData = () => {
-    if (window.confirm('Clear all data? This cannot be undone.')) {
-      const success = userService.clearAllData();
-      categoryService.clearCustomCategories();
-      // Clear Start Here progress
-      localStorage.removeItem('startHereGivenTasks');
-      if (success) {
-        showMessage('Data cleared! Refreshing...', 'success');
-        onDataChange?.();
-        // Refresh the page after a short delay to ensure complete reset
-        setTimeout(() => {
-          window.location.reload();
-        }, 1000);
-      } else {
-        showMessage('Clear failed', 'error');
-      }
+    setShowClearConfirm(true);
+  };
+
+  const handleConfirmClearData = () => {
+    const success = userService.clearAllData();
+    categoryService.clearCustomCategories();
+    // Clear Start Here progress
+    localStorage.removeItem('startHereGivenTasks');
+    if (success) {
+      showMessage('Data cleared! Refreshing...', 'success');
+      onDataChange?.();
+      // Refresh the page after a short delay to ensure complete reset
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } else {
+      showMessage('Clear failed', 'error');
     }
+    setShowClearConfirm(false);
+  };
+
+  const handleCancelClearData = () => {
+    setShowClearConfirm(false);
   };
 
   const getStorageStats = () => {
@@ -131,272 +137,7 @@ export const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
 
   const stats = getStorageStats();
 
-  // Difficulty sample tasks
-  const difficultySamples = [
-    // Difficulty 0 - Easiest
-    {
-      title: 'Drink 3 glasses of water',
-      description: 'Stay hydrated with exactly 3 full glasses of water',
-      priority: 'low' as const,
-      category: 'body',
-      statRewards: { body: 1, xp: 15 },
-      difficulty: 0,
-    },
-    {
-      title: 'Light 3 candles',
-      description: 'Create a peaceful atmosphere with 3 candles',
-      priority: 'low' as const,
-      category: 'soul',
-      statRewards: { soul: 1, xp: 15 },
-      difficulty: 0,
-    },
-    // Difficulty 1 - Very Easy
-    {
-      title: 'Take 10 deep breaths',
-      description: 'Pause and take exactly 10 slow, deep breaths',
-      priority: 'low' as const,
-      category: 'soul',
-      statRewards: { soul: 1, xp: 15 },
-      difficulty: 1,
-    },
-    {
-      title: 'Stretch for 5 minutes',
-      description: 'Do a focused stretching routine for exactly 5 minutes',
-      priority: 'low' as const,
-      category: 'body',
-      statRewards: { body: 1, xp: 15 },
-      difficulty: 1,
-    },
-    {
-      title: 'Read 5 pages',
-      description: 'Read exactly 5 pages of any book or article',
-      priority: 'low' as const,
-      category: 'mind',
-      statRewards: { mind: 1, xp: 15 },
-      difficulty: 1,
-    },
-    // Difficulty 2 - Easy
-    {
-      title: 'Do 10 push-ups',
-      description: 'Complete exactly 10 push-ups (modify form as needed)',
-      priority: 'low' as const,
-      category: 'body',
-      statRewards: { body: 1, xp: 20 },
-      difficulty: 2,
-    },
-    {
-      title: 'Write 3 ideas',
-      description: 'Write down exactly 3 new ideas or thoughts',
-      priority: 'low' as const,
-      category: 'mind',
-      statRewards: { mind: 1, xp: 20 },
-      difficulty: 2,
-    },
-    {
-      title: 'Express 5 gratitudes',
-      description: 'Write down or say exactly 5 things you\'re grateful for',
-      priority: 'low' as const,
-      category: 'soul',
-      statRewards: { soul: 1, xp: 20 },
-      difficulty: 2,
-    },
-    // Difficulty 3 - Moderate
-    {
-      title: 'Take a 30-min walk',
-      description: 'Go for a brisk walk for exactly 30 minutes',
-      priority: 'medium' as const,
-      category: 'body',
-      statRewards: { body: 1, xp: 40 },
-      difficulty: 3,
-    },
-    {
-      title: 'Learn 10 new words',
-      description: 'Look up and learn the meaning of 10 new words',
-      priority: 'medium' as const,
-      category: 'mind',
-      statRewards: { mind: 1, xp: 40 },
-      difficulty: 3,
-    },
-    {
-      title: 'Listen to 3 songs mindfully',
-      description: 'Listen to 3 songs with full attention and presence',
-      priority: 'medium' as const,
-      category: 'soul',
-      statRewards: { soul: 1, xp: 40 },
-      difficulty: 3,
-    },
-    // Difficulty 4 - Medium
-    {
-      title: 'Do 30 push-ups',
-      description: 'Complete exactly 30 push-ups in sets of 10',
-      priority: 'medium' as const,
-      category: 'body',
-      statRewards: { body: 1, xp: 45 },
-      difficulty: 4,
-    },
-    {
-      title: 'Reflect for 15 minutes',
-      description: 'Spend exactly 15 minutes in quiet reflection',
-      priority: 'medium' as const,
-      category: 'mind',
-      statRewards: { mind: 1, xp: 40 },
-      difficulty: 4,
-    },
-    {
-      title: 'Journal for 20 minutes',
-      description: 'Write in your journal for exactly 20 minutes',
-      priority: 'medium' as const,
-      category: 'soul',
-      statRewards: { soul: 1, xp: 45 },
-      difficulty: 4,
-    },
-    // Difficulty 5 - Challenging
-    {
-      title: 'Do 50 sit-ups',
-      description: 'Complete exactly 50 sit-ups or crunches',
-      priority: 'medium' as const,
-      category: 'body',
-      statRewards: { body: 1, xp: 45 },
-      difficulty: 5,
-    },
-    {
-      title: 'Study for 30 minutes',
-      description: 'Dedicated study session for exactly 30 minutes',
-      priority: 'medium' as const,
-      category: 'mind',
-      statRewards: { mind: 1, xp: 50 },
-      difficulty: 5,
-    },
-    {
-      title: 'Meditate for 15 minutes',
-      description: 'Sit in meditation for exactly 15 minutes',
-      priority: 'medium' as const,
-      category: 'soul',
-      statRewards: { soul: 1, xp: 50 },
-      difficulty: 5,
-    },
-    // Difficulty 6 - Hard
-    {
-      title: 'Do 100 jumping jacks',
-      description: 'Complete exactly 100 jumping jacks in sets of 25',
-      priority: 'medium' as const,
-      category: 'body',
-      statRewards: { body: 1, xp: 50 },
-      difficulty: 6,
-    },
-    {
-      title: 'Write 500 words',
-      description: 'Write exactly 500 words on any topic',
-      priority: 'medium' as const,
-      category: 'mind',
-      statRewards: { mind: 1, xp: 55 },
-      difficulty: 6,
-    },
-    {
-      title: 'Connect with 3 friends',
-      description: 'Reach out to 3 people you care about',
-      priority: 'medium' as const,
-      category: 'soul',
-      statRewards: { soul: 1, xp: 50 },
-      difficulty: 6,
-    },
-    // Difficulty 7 - Very Hard
-    {
-      title: 'Do 20 burpees',
-      description: 'Complete exactly 20 burpees (modify as needed)',
-      priority: 'medium' as const,
-      category: 'body',
-      statRewards: { body: 1, xp: 55 },
-      difficulty: 7,
-    },
-    {
-      title: 'Solve 10 puzzles',
-      description: 'Complete 10 crossword clues, sudoku cells, or brain teasers',
-      priority: 'medium' as const,
-      category: 'mind',
-      statRewards: { mind: 1, xp: 60 },
-      difficulty: 7,
-    },
-    {
-      title: 'Practice forgiveness for 20 minutes',
-      description: 'Spend 20 minutes practicing forgiveness meditation',
-      priority: 'medium' as const,
-      category: 'soul',
-      statRewards: { soul: 1, xp: 55 },
-      difficulty: 7,
-    },
-    // Difficulty 8 - Expert
-    {
-      title: 'Do 100 push-ups',
-      description: 'Complete exactly 100 push-ups in sets of 20',
-      priority: 'high' as const,
-      category: 'body',
-      statRewards: { body: 1, xp: 90 },
-      difficulty: 8,
-    },
-    {
-      title: 'Complete 60-min deep work',
-      description: 'Focus on a complex task for exactly 60 minutes without interruption',
-      priority: 'high' as const,
-      category: 'mind',
-      statRewards: { mind: 1, xp: 90 },
-      difficulty: 8,
-    },
-    {
-      title: 'Meditate for 45 minutes',
-      description: 'Sit in meditation for exactly 45 minutes',
-      priority: 'high' as const,
-      category: 'soul',
-      statRewards: { soul: 1, xp: 90 },
-      difficulty: 8,
-    },
-    // Difficulty 9 - Master
-    {
-      title: 'Run 5 kilometers',
-      description: 'Run exactly 5 kilometers at your own pace',
-      priority: 'high' as const,
-      category: 'body',
-      statRewards: { body: 1, xp: 110 },
-      difficulty: 9,
-    },
-    {
-      title: 'Solve 10 complex problems',
-      description: 'Tackle 10 challenging intellectual problems or projects',
-      priority: 'high' as const,
-      category: 'mind',
-      statRewards: { mind: 1, xp: 120 },
-      difficulty: 9,
-    },
-    {
-      title: 'Face 3 inner truths',
-      description: 'Confront 3 difficult truths about yourself',
-      priority: 'high' as const,
-      category: 'soul',
-      statRewards: { soul: 1, xp: 120 },
-      difficulty: 9,
-    },
-  ];
 
-  const handleAddDifficultySamples = async () => {
-    for (let i = 0; i < difficultySamples.length; i++) {
-      const sample = difficultySamples[i];
-      addTask({
-        title: sample.title,
-        description: sample.description,
-        completed: false,
-        priority: sample.priority,
-        categories: [sample.category], // Convert single category to array
-        statRewards: { ...sample.statRewards },
-        difficulty: sample.difficulty,
-      });
-      await new Promise(resolve => setTimeout(resolve, 10));
-    }
-    setTimeout(() => {
-      refreshTasks();
-    }, 100);
-    showMessage('Difficulty samples added!', 'success');
-    onDataChange?.();
-  };
 
   return (
     <div className={styles.container}>
@@ -455,26 +196,36 @@ export const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
           </div>
 
           <div className={styles.section}>
-            <h3>Samples</h3>
-            <button
-              onClick={handleAddDifficultySamples}
-              className={styles.button}
-            >
-              Add Difficulty Samples
-            </button>
-          </div>
-
-          <div className={styles.section}>
             <h3>Danger</h3>
-            <button
-              onClick={handleClearData}
-              className={`${styles.button} ${styles.danger}`}
-            >
-              Clear All
-            </button>
+            {!showClearConfirm ? (
+              <button
+                onClick={handleClearData}
+                className={`${styles.button} ${styles.danger}`}
+              >
+                Clear All
+              </button>
+            ) : (
+              <div className={styles.confirmationContainer}>
+                <p className={styles.confirmationMessage}>
+                  Are you sure you want to clear all data? This action cannot be undone and will permanently delete all your tasks, habits, user data, and custom categories.
+                </p>
+                <div className={styles.confirmationActions}>
+                  <button
+                    onClick={handleCancelClearData}
+                    className={styles.button}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleConfirmClearData}
+                    className={`${styles.button} ${styles.danger}`}
+                  >
+                    Clear All Data
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
-
-
         </div>
       )}
     </div>
