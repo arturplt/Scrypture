@@ -9,9 +9,15 @@ interface TaskCardProps {
   task: Task;
   onOpenModal?: () => void;
   isHighlighted?: boolean;
+  onEditTask?: (task: Task) => void;
 }
 
-export const TaskCard: React.FC<TaskCardProps> = ({ task, onOpenModal, isHighlighted }) => {
+export const TaskCard: React.FC<TaskCardProps> = ({ 
+  task, 
+  onOpenModal, 
+  isHighlighted,
+  onEditTask 
+}) => {
   const { toggleTask, bringTaskToTop } = useTasks();
   const [isEditing, setIsEditing] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
@@ -42,6 +48,13 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onOpenModal, isHighlig
   const handleEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
     
+    // If onEditTask is provided, use the App-level edit modal
+    if (onEditTask) {
+      onEditTask(task);
+      return;
+    }
+    
+    // Otherwise, use the inline edit functionality
     // Prevent multiple rapid clicks during transition
     if (isTransitioningToEdit || isEditing || isExitingEdit) {
       return;

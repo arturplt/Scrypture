@@ -11,7 +11,12 @@ export interface TaskListRef {
   highlightTask: (taskId: string) => void;
 }
 
-export const TaskList = forwardRef<TaskListRef>((props, ref) => {
+interface TaskListProps {
+  onEditTask?: (task: Task) => void;
+}
+
+export const TaskList = forwardRef<TaskListRef, TaskListProps>((props, ref) => {
+  const { onEditTask } = props;
   const { tasks, deleteTask, refreshTasks } = useTasks();
   const [isEditMode, setIsEditMode] = useState(false);
   const [taskToEdit, setTaskToEdit] = useState<Task | null>(null);
@@ -315,6 +320,7 @@ export const TaskList = forwardRef<TaskListRef>((props, ref) => {
                             <TaskCard
                               task={task}
                               isHighlighted={highlightedTaskId === task.id}
+                              onEditTask={onEditTask}
                             />
                           </div>
                         );

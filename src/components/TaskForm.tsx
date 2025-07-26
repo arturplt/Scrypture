@@ -107,10 +107,12 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   };
 
   const handleAutoFillSelect = (task: Task) => {
+    console.log('handleAutoFillSelect called with task:', task);
     setShowAutoFill(false);
     
     // If onEditTask is provided, use it to open the edit modal
     if (onEditTask) {
+      console.log('Calling onEditTask with task:', task);
       onEditTask(task);
     } else if (onNavigateToTask) {
       // Fall back to navigation behavior
@@ -587,7 +589,10 @@ export const TaskForm: React.FC<TaskFormProps> = ({
                 <div
                   key={task.id}
                   className={`${styles.autoFillSuggestion} ${index === selectedAutoFillIndex ? styles.autoFillSuggestionSelected : ''}`}
-                  onClick={() => handleAutoFillSelect(task)}
+                  onClick={() => {
+                    console.log('Auto-fill suggestion clicked:', task.title);
+                    handleAutoFillSelect(task);
+                  }}
                 >
                   <span className={styles.autoFillIcon}>🔍</span>
                   {task.title}

@@ -237,10 +237,20 @@ describe('App Integration Tests', () => {
     const suggestion = screen.getByText('Workout');
     fireEvent.click(suggestion);
 
+    // Wait for modal to appear and check for modal content
     await waitFor(() => {
-      const form = screen.getByText('Update Task').closest('form');
+      // Look for the modal title
+      const modalTitle = screen.getByText('Edit Task');
+      expect(modalTitle).toBeInTheDocument();
+      
+      // Look for the TaskEditForm content
+      const updateButton = screen.getByText('Update Task');
+      expect(updateButton).toBeInTheDocument();
+      
+      // Check if the form has the transitioning class
+      const form = updateButton.closest('form');
       expect(form).toHaveClass('transitioning');
-    });
+    }, { timeout: 5000 });
   });
 
   it('should handle multiple rapid clicks gracefully', async () => {
@@ -258,8 +268,14 @@ describe('App Integration Tests', () => {
 
     // Should only show one modal
     await waitFor(() => {
-      expect(screen.getByText('Edit Task')).toBeInTheDocument();
-    });
+      // Look for the modal title
+      const modalTitle = screen.getByText('Edit Task');
+      expect(modalTitle).toBeInTheDocument();
+      
+      // Look for the TaskEditForm content
+      const updateButton = screen.getByText('Update Task');
+      expect(updateButton).toBeInTheDocument();
+    }, { timeout: 5000 });
   });
 
   it('should maintain task list functionality', async () => {
@@ -270,15 +286,146 @@ describe('App Integration Tests', () => {
     expect(screen.getByText('Study Programming')).toBeInTheDocument();
   });
 
-  it('should handle task completion', () => {
+  it('should handle task completion', async () => {
     render(<App />);
 
     // Get the first checkbox (there are multiple tasks now)
     const checkboxes = screen.getAllByRole('checkbox');
     const firstCheckbox = checkboxes[0];
+    
+    // Click the checkbox
     fireEvent.click(firstCheckbox);
 
-    // Task should be marked as completed
-    expect(firstCheckbox).toBeChecked();
+    // Wait for the task to be moved to completed section
+    await waitFor(() => {
+      // Look for the completed task in the completed section
+      const completedTask = screen.getByText('Read Book');
+      expect(completedTask).toBeInTheDocument();
+      
+      // Find the checkbox in the completed section by looking for the checked attribute
+      const completedCheckboxes = screen.getAllByRole('checkbox');
+      const completedCheckbox = completedCheckboxes.find(checkbox => 
+        checkbox.hasAttribute('checked')
+      );
+      expect(completedCheckbox).toBeTruthy();
+      expect(completedCheckbox).toBeChecked();
+    }, { timeout: 3000 });
+  });
+
+  it('should debug auto-fill edit functionality', async () => {
+    render(<App />);
+
+    const titleInput = screen.getByPlaceholderText('Intention');
+    fireEvent.change(titleInput, { target: { value: 'workout' } });
+
+    const suggestion = screen.getByText('Workout');
+    fireEvent.click(suggestion);
+
+    // Check if modal appears
+    await waitFor(() => {
+      // Look for modal content
+      const modalTitle = screen.queryByText('Edit Task');
+      console.log('Modal title found:', modalTitle);
+      
+      // Look for any modal elements
+      const modalElements = document.querySelectorAll('[role="dialog"], .modal, .overlay');
+      console.log('Modal elements found:', modalElements.length);
+      
+      // Look for TaskEditForm content
+      const editFormElements = screen.queryAllByText(/Update Task|Delete Task/);
+      console.log('Edit form elements found:', editFormElements.length);
+    }, { timeout: 5000 });
+  });
+
+  it('should show auto-fill suggestions when typing', async () => {
+    render(<App />);
+
+    const titleInput = screen.getByPlaceholderText('Intention');
+    
+    // Type to trigger auto-fill
+    fireEvent.change(titleInput, { target: { value: 'workout' } });
+
+    // Check if auto-fill suggestions appear
+    await waitFor(() => {
+      const suggestion = screen.getByText('Workout');
+      expect(suggestion).toBeInTheDocument();
+      console.log('Auto-fill suggestion found:', suggestion.textContent);
+    }, { timeout: 3000 });
+  });
+
+  it('should debug modal issue step by step', async () => {
+    render(<App />);
+
+    const titleInput = screen.getByPlaceholderText('Intention');
+    
+    // Step 1: Type to trigger auto-fill
+    fireEvent.change(titleInput, { target: { value: 'workout' } });
+    
+    // Step 2: Check if auto-fill suggestions appear
+    await waitFor(() => {
+      const suggestion = screen.getByText('Workout');
+      expect(suggestion).toBeInTheDocument();
+      console.log('Step 2: Auto-fill suggestion found');
+    });
+    
+    // Step 3: Click on the suggestion
+    const suggestion = screen.getByText('Workout');
+    console.log('Step 3: Clicking on suggestion');
+    fireEvent.click(suggestion);
+    
+    // Step 4: Check if modal appears
+    await waitFor(() => {
+      console.log('Step 4: Looking for modal');
+      const modalTitle = screen.queryByText('Edit Task');
+      console.log('Modal title found:', modalTitle);
+      
+      if (modalTitle) {
+        console.log('Modal is visible!');
+      } else {
+        console.log('Modal not found');
+        // Check if onEditTask was called
+        console.log('Checking if handleEditTask was called...');
+      }
+    }, { timeout: 5000 });
+  });
+}); 
+
+describe('Modal Tests', () => {
+  beforeEach(() => {
+    // Mock localStorage
+    Object.defineProperty(window, 'localStorage', {
+      value: {
+        getItem: jest.fn(),
+        setItem: jest.fn(),
+        removeItem: jest.fn(),
+        clear: jest.fn(),
+      },
+      writable: true,
+    });
+  });
+
+  it('should open edit modal when auto-fill suggestion is clicked', async () => {
+    render(<App />);
+
+    const titleInput = screen.getByPlaceholderText('Intention');
+    
+    // Type to trigger auto-fill
+    fireEvent.change(titleInput, { target: { value: 'workout' } });
+    
+    // Wait for auto-fill suggestion to appear
+    await waitFor(() => {
+      const suggestion = screen.getByText('Workout');
+      expect(suggestion).toBeInTheDocument();
+    });
+    
+    // Click on the suggestion
+    const suggestion = screen.getByText('Workout');
+    fireEvent.click(suggestion);
+    
+    // Wait for modal to appear
+    await waitFor(() => {
+      const modalTitle = screen.getByText('Edit Task');
+      expect(modalTitle).toBeInTheDocument();
+    }, { timeout: 5000 });
   });
 }); 

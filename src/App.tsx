@@ -156,6 +156,7 @@ function AppContent() {
   };
 
   const handleEditTask = (task: Task) => {
+    console.log('handleEditTask called with task:', task);
     setEditingTask(task);
   };
 
@@ -212,7 +213,7 @@ function AppContent() {
           onEditTask={handleEditTask}
           onTaskCreated={handleTaskCreated}
         />
-        <TaskList ref={taskListRef} />
+        <TaskList ref={taskListRef} onEditTask={handleEditTask} />
         <DataManager onDataChange={refreshTasks} />
       </main>
 
