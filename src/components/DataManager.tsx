@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { userService } from '../services/userService';
 import { categoryService } from '../services/categoryService';
+import { AutoSaveIndicator } from './AutoSaveIndicator';
 import styles from './DataManager.module.css';
 
 interface DataManagerProps {
@@ -14,6 +15,7 @@ export const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
     'info'
   );
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const showMessage = (
     msg: string,
@@ -25,6 +27,7 @@ export const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
   };
 
   const handleExport = () => {
+    setIsSaving(true);
     try {
       const data = userService.exportUserData();
       const blob = new Blob([data], { type: 'application/json' });
@@ -39,6 +42,8 @@ export const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
       showMessage('Exported!', 'success');
     } catch (error) {
       showMessage('Export failed', 'error');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -46,6 +51,7 @@ export const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    setIsSaving(true);
     const reader = new FileReader();
     reader.onload = (e) => {
       try {
@@ -63,22 +69,28 @@ export const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
         }
       } catch (error) {
         showMessage('Invalid file', 'error');
+      } finally {
+        setIsSaving(false);
       }
     };
     reader.readAsText(file);
   };
 
   const handleBackup = () => {
+    setIsSaving(true);
     try {
       const backup = userService.createBackup();
       userService.saveBackup(backup);
       showMessage('Backup saved!', 'success');
     } catch (error) {
       showMessage('Backup failed', 'error');
+    } finally {
+      setIsSaving(false);
     }
   };
 
   const handleRestore = () => {
+    setIsSaving(true);
     try {
       const backup = userService.getBackup();
       if (backup) {
@@ -98,6 +110,8 @@ export const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
       }
     } catch (error) {
       showMessage('Restore failed', 'error');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -106,21 +120,21 @@ export const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
   };
 
   const handleConfirmClearData = () => {
-    const success = userService.clearAllData();
-    categoryService.clearCustomCategories();
-    // Clear Start Here progress
-    localStorage.removeItem('startHereGivenTasks');
-    if (success) {
+    setIsSaving(true);
+    try {
+      userService.clearAllData();
       showMessage('Data cleared! Refreshing...', 'success');
       onDataChange?.();
-      // Refresh the page after a short delay to ensure complete reset
+      // Refresh the page after clearing data
       setTimeout(() => {
         window.location.reload();
       }, 1000);
-    } else {
+    } catch (error) {
       showMessage('Clear failed', 'error');
+    } finally {
+      setIsSaving(false);
+      setShowClearConfirm(false);
     }
-    setShowClearConfirm(false);
   };
 
   const handleCancelClearData = () => {
@@ -128,26 +142,26 @@ export const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
   };
 
   const getStorageStats = () => {
-    const stats = userService.getStorageStats();
-    return {
-      used: (stats.used / 1024).toFixed(1), // Convert to KB
-      percentage: stats.percentage,
-    };
+    const used = Math.round((JSON.stringify(localStorage).length / 1024) * 100) / 100;
+    const max = 5120; // 5MB limit
+    const percentage = Math.round((used / max) * 100);
+    return { used, percentage };
   };
 
   const stats = getStorageStats();
 
-
-
   return (
     <div className={styles.container}>
-      <button
-        className={styles.toggleButton}
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        <span>Data Manager</span>
-        <span>{isOpen ? '▼' : '▲'}</span>
-      </button>
+      <div className={styles.header}>
+        <button
+          className={styles.toggleButton}
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          <span>Data Manager</span>
+          <span>{isOpen ? '▼' : '▲'}</span>
+        </button>
+        <AutoSaveIndicator isSaving={isSaving} />
+      </div>
 
       {message && (
         <div className={`${styles.message} ${styles[messageType]}`}>

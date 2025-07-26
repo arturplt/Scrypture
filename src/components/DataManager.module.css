@@ -7,10 +7,18 @@
   overflow: hidden;
 }
 
-.toggleButton {
-  width: 100%;
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: var(--spacing-md);
   background: var(--color-bg-secondary);
+}
+
+.toggleButton {
+  flex: 1;
+  padding: 0;
+  background: transparent;
   border: none;
   cursor: pointer;
   font-size: var(--font-size-sm);

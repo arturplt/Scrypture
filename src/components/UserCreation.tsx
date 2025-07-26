@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useUser } from '../hooks/useUser';
+import { AutoSaveIndicator } from './AutoSaveIndicator';
 import styles from './UserCreation.module.css';
 
 interface UserCreationProps {
@@ -9,7 +10,7 @@ interface UserCreationProps {
 export const UserCreation: React.FC<UserCreationProps> = ({
   onUserCreated,
 }) => {
-  const { user, createUser } = useUser();
+  const { user, createUser, isSaving } = useUser();
   const [name, setName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -60,7 +61,10 @@ export const UserCreation: React.FC<UserCreationProps> = ({
   return (
     <div className={styles.container}>
       <div className={styles.content}>
-        <h2 className={styles.title}>Welcome to Scrypture</h2>
+        <div className={styles.header}>
+          <h2 className={styles.title}>Welcome to Scrypture</h2>
+          <AutoSaveIndicator isSaving={isSaving} />
+        </div>
         <p className={styles.subtitle}>
           Create your character to begin your journey
         </p>

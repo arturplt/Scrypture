@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTasks } from '../hooks/useTasks';
 import { useHabits } from '../hooks/useHabits';
-
+import { AutoSaveIndicator } from './AutoSaveIndicator';
 import styles from './StartHereSection.module.css';
 
 interface StartHereSectionProps {
@@ -27,8 +27,8 @@ interface HabitTemplate {
 }
 
 export const StartHereSection: React.FC<StartHereSectionProps> = ({ isVisible, onClose }) => {
-  const { addTask, tasks } = useTasks();
-  const { addHabit } = useHabits();
+  const { addTask, tasks, isSaving: tasksSaving } = useTasks();
+  const { addHabit, isSaving: habitsSaving } = useHabits();
   const [givenTasks, setGivenTasks] = useState<Set<string>>(new Set());
   const [givenHabits, setGivenHabits] = useState<Set<string>>(new Set());
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
@@ -1189,6 +1189,7 @@ export const StartHereSection: React.FC<StartHereSectionProps> = ({ isVisible, o
     <div className={styles.container}>
       <div className={styles.header}>
         <h2>Start Here</h2>
+        <AutoSaveIndicator isSaving={tasksSaving || habitsSaving} />
         <button className={styles.closeButton} onClick={onClose}>
           ×
         </button>
@@ -1206,28 +1207,26 @@ export const StartHereSection: React.FC<StartHereSectionProps> = ({ isVisible, o
             const progress = getProgressForCategory(category);
             const completedTasks = getCompletedTasksForCategory(category);
             
-                          return (
-                <div 
-                  key={category} 
-                  className={`${styles.categoryCard} ${expandedCategories.has(category) ? styles.expanded : ''}`}
-                  onClick={() => handleCategoryExpand(category)}
-                >
-                  <div className={styles.categoryHeader}>
-                    <h3 className={styles.categoryTitle}>
-                      {category.charAt(0).toUpperCase() + category.slice(1)}
-                    </h3>
-                    <div className={styles.progress}>
-                      <div className={styles.progressBar}>
-                        <div 
-                          className={styles.progressFill} 
-                          style={{ width: `${progress}%` }}
-                        />
-                      </div>
-                      <span className={styles.progressText}>{progress}%</span>
+            return (
+              <div 
+                key={category} 
+                className={`${styles.categoryCard} ${expandedCategories.has(category) ? styles.expanded : ''}`}
+                onClick={() => handleCategoryExpand(category)}
+              >
+                <div className={styles.categoryHeader}>
+                  <h3 className={styles.categoryTitle}>
+                    {category.charAt(0).toUpperCase() + category.slice(1)}
+                  </h3>
+                  <div className={styles.progress}>
+                    <div className={styles.progressBar}>
+                      <div 
+                        className={styles.progressFill} 
+                        style={{ width: `${progress}%` }}
+                      />
                     </div>
+                    <span className={styles.progressText}>{progress}%</span>
                   </div>
-                  
-
+                </div>
                 
                 {expandedCategories.has(category) && (
                   <>
@@ -1317,7 +1316,6 @@ export const StartHereSection: React.FC<StartHereSectionProps> = ({ isVisible, o
                     <span className={styles.progressText}>{progress}%</span>
                   </div>
                 </div>
-                
                 
                 {expandedCategories.has(`habit-${category}`) && (
                   <>

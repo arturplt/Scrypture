@@ -1,9 +1,10 @@
 import React from 'react';
 import { useUser } from '../hooks/useUser';
+import { AutoSaveIndicator } from './AutoSaveIndicator';
 import styles from './StatsDisplay.module.css';
 
 export const StatsDisplay: React.FC = () => {
-  const { user } = useUser();
+  const { user, isSaving } = useUser();
 
   if (!user) {
     return (
@@ -13,8 +14,6 @@ export const StatsDisplay: React.FC = () => {
       </div>
     );
   }
-
-
 
   const calculateProgress = (value: number) => {
     // Calculate progress as percentage (0-100)
@@ -35,7 +34,10 @@ export const StatsDisplay: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      <h3 className={styles.title}>Core Attributes</h3>
+      <div className={styles.header}>
+        <h3 className={styles.title}>Core Attributes</h3>
+        <AutoSaveIndicator isSaving={isSaving} />
+      </div>
 
       <div className={styles.statsGrid}>
         <div className={styles.statCard}>
