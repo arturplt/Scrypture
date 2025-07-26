@@ -16,9 +16,19 @@ const mockCategoryService = categoryService as jest.Mocked<
   typeof categoryService
 >;
 
+// Mock the AutoSaveIndicator component
+jest.mock('../AutoSaveIndicator', () => ({
+  AutoSaveIndicator: ({ isSaving }: { isSaving: boolean }) => (
+    <div data-testid="auto-save-indicator">
+      {isSaving ? 'Saving...' : 'Saved'}
+    </div>
+  ),
+}));
+
 // Mock the useTasks hook
 const mockAddTask = jest.fn();
 const mockUpdateTask = jest.fn();
+const mockIsSaving = false;
 const mockTasks = [
   {
     id: '1',
@@ -67,6 +77,19 @@ jest.mock('../../hooks/useTasks', () => ({
     addTask: mockAddTask,
     updateTask: mockUpdateTask,
     tasks: mockTasks,
+    isSaving: mockIsSaving,
+  }),
+}));
+
+// Mock the useHabits hook
+jest.mock('../../hooks/useHabits', () => ({
+  useHabits: () => ({
+    addHabit: jest.fn(),
+    updateHabit: jest.fn(),
+    deleteHabit: jest.fn(),
+    completeHabit: jest.fn(),
+    habits: [],
+    isSaving: false,
   }),
 }));
 
@@ -138,7 +161,7 @@ describe('TaskForm (new system)', () => {
     const titleInput = screen.getByPlaceholderText('Intention');
     fireEvent.click(titleInput);
     fireEvent.change(titleInput, { target: { value: 'Test Task' } });
-    const submitBtn = screen.getByText('Add Task');
+    const submitBtn = screen.getByText('Create Task');
     fireEvent.click(submitBtn);
     expect(mockAddTask).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -152,7 +175,7 @@ describe('TaskForm (new system)', () => {
     render(<TaskForm />);
     const titleInput = screen.getByPlaceholderText('Intention');
     fireEvent.click(titleInput);
-    const submitBtn = screen.getByText('Add Task');
+    const submitBtn = screen.getByText('Create Task');
     fireEvent.click(submitBtn);
     expect(screen.getByText('Please fill this field')).toBeInTheDocument();
   });
@@ -164,5 +187,81 @@ describe('TaskForm (new system)', () => {
     expect(screen.getByText('Category:')).toBeInTheDocument();
     expect(screen.getByText('Priority:')).toBeInTheDocument();
     expect(screen.getByText('Core Attributes:')).toBeInTheDocument();
+  });
+
+  it('shows auto-save indicator when form is expanded', () => {
+    render(<TaskForm />);
+    const titleInput = screen.getByPlaceholderText('Intention');
+    fireEvent.click(titleInput);
+    
+    expect(screen.getAllByTestId('auto-save-indicator')).toHaveLength(2);
+    expect(screen.getAllByText('Saved')).toHaveLength(2);
+  });
+
+  it('shows saving state when isSaving is true', () => {
+    // Temporarily mock isSaving as true
+    const originalUseTasks = require('../../hooks/useTasks').useTasks;
+    require('../../hooks/useTasks').useTasks = () => ({
+      addTask: mockAddTask,
+      updateTask: mockUpdateTask,
+      tasks: mockTasks,
+      isSaving: true,
+    });
+
+    render(<TaskForm />);
+    const titleInput = screen.getByPlaceholderText('Intention');
+    fireEvent.click(titleInput);
+    
+    expect(screen.getAllByText('Saving...')).toHaveLength(2);
+    
+    // Restore original mock
+    require('../../hooks/useTasks').useTasks = originalUseTasks;
+  });
+
+  it('creates task and triggers auto-save', async () => {
+    render(<TaskForm />);
+    const titleInput = screen.getByPlaceholderText('Intention');
+    fireEvent.click(titleInput);
+    fireEvent.change(titleInput, { target: { value: 'Test Task' } });
+    
+    const submitBtn = screen.getByText('Create Task');
+    fireEvent.click(submitBtn);
+    
+    await waitFor(() => {
+      expect(mockAddTask).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Test Task',
+          priority: 'medium',
+        })
+      );
+    });
+  });
+
+  it('updates task and triggers auto-save in edit mode', async () => {
+    const taskToEdit = {
+      id: '1',
+      title: 'Original Task',
+      description: 'Original description',
+      completed: false,
+      createdAt: new Date('2024-01-01'),
+      updatedAt: new Date('2024-01-01'),
+      priority: 'medium' as const,
+      categories: ['body'],
+    };
+
+    render(<TaskForm taskToEdit={taskToEdit} />);
+    
+    const titleInput = screen.getByDisplayValue('Original Task');
+    fireEvent.change(titleInput, { target: { value: 'Updated Task' } });
+    
+    const submitBtn = screen.getByText('Update Task');
+    fireEvent.click(submitBtn);
+    
+    await waitFor(() => {
+      expect(mockUpdateTask).toHaveBeenCalledWith('1', expect.objectContaining({
+        title: 'Updated Task',
+        description: 'Original description',
+      }));
+    });
   });
 });

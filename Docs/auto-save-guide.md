@@ -291,6 +291,69 @@ Auto-save is triggered on the following task operations:
 - **Real-time Status**: Users can see when task changes are being saved
 - **Consistent Feedback**: Both sections show the same auto-save state for unified experience
 
+## TaskForm Auto-Save Implementation
+
+### Features Implemented
+
+1. **Form Expansion Auto-Save**: The TaskForm component displays auto-save indicators when the form is expanded
+2. **Task Creation Feedback**: Users can see when new tasks are being created and saved
+3. **Task Editing Feedback**: Real-time feedback when editing existing tasks
+4. **Form Validation Integration**: Auto-save works alongside form validation
+5. **Dual Auto-Save Indicators**: Auto-save indicators appear in both the form header and footer
+
+### Technical Implementation
+
+#### Component Structure
+```tsx
+// TaskForm.tsx
+import { AutoSaveIndicator } from './AutoSaveIndicator';
+import { useTasks } from '../hooks/useTasks';
+
+export const TaskForm: React.FC<TaskFormProps> = ({
+  taskToEdit,
+  onCancel,
+  onSave,
+  onNavigateToTask,
+  onEditTask,
+  onTaskCreated,
+}) => {
+  const { addTask, updateTask, tasks, isSaving } = useTasks();
+  
+  return (
+    <form className={`${styles.form} ${isExpanded ? styles.expanded : ''}`}>
+      <div className={styles.inputGroup}>
+        {isExpanded && (
+          <div className={styles.autoSaveContainer}>
+            <AutoSaveIndicator isSaving={isSaving} />
+          </div>
+        )}
+        {/* Form content */}
+      </div>
+      {/* Additional auto-save indicator at form end */}
+      <AutoSaveIndicator isSaving={isSaving} />
+    </form>
+  );
+};
+```
+
+#### Auto-Save Triggers
+
+Auto-save is triggered on the following task operations:
+
+1. **Task Creation** - When new tasks are created via form submission
+2. **Task Updates** - When existing tasks are modified and saved
+3. **Form Validation** - Auto-save works alongside required field validation
+4. **Form Expansion** - Auto-save indicators appear when form is expanded
+5. **Task Properties** - Auto-save for priority, categories, difficulty, and stat rewards
+
+### User Experience
+
+- **Expansion-Based Feedback**: Auto-save indicators only appear when form is expanded
+- **Task Creation Integration**: Auto-save works seamlessly with task creation workflow
+- **Task Editing Integration**: Real-time feedback during task editing operations
+- **Validation Integration**: Auto-save works alongside form validation requirements
+- **Dual Indicator Support**: Auto-save indicators in both form header and footer
+
 ## Testing
 
 ### Test Coverage
@@ -402,6 +465,29 @@ describe('TaskList', () => {
 
   it('handles auto-save state changes', () => {
     // Tests auto-save state transitions
+  });
+
+  // Additional test cases...
+});
+```
+
+```tsx
+// TaskForm.test.tsx
+describe('TaskForm', () => {
+  it('shows auto-save indicator when form is expanded', () => {
+    // Tests that auto-save indicator is present when form is expanded
+  });
+
+  it('shows saving state when isSaving is true', () => {
+    // Tests that "Saving..." state is displayed
+  });
+
+  it('creates task and triggers auto-save', () => {
+    // Tests task creation with auto-save integration
+  });
+
+  it('updates task and triggers auto-save in edit mode', () => {
+    // Tests task editing with auto-save integration
   });
 
   // Additional test cases...

@@ -3,6 +3,7 @@ import { useTasks } from '../hooks/useTasks';
 import { useHabits } from '../hooks/useHabits';
 import { categoryService } from '../services/categoryService';
 import { CategoryModal } from './CategoryModal';
+import { AutoSaveIndicator } from './AutoSaveIndicator';
 import { Task } from '../types';
 import styles from './TaskForm.module.css';
 
@@ -23,7 +24,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   onEditTask,
   onTaskCreated,
 }) => {
-  const { addTask, updateTask, tasks } = useTasks();
+  const { addTask, updateTask, tasks, isSaving } = useTasks();
   const { addHabit } = useHabits();
   
   // Test if useHabits is working
@@ -582,6 +583,11 @@ export const TaskForm: React.FC<TaskFormProps> = ({
       onClick={handleFormClick}
     >
       <div className={styles.inputGroup}>
+        {isExpanded && (
+          <div className={styles.autoSaveContainer}>
+            <AutoSaveIndicator isSaving={isSaving} />
+          </div>
+        )}
         <div
           className={
             isExpanded ? styles.titleContainerExpanded : styles.titleContainer
@@ -889,6 +895,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
         onClose={() => setIsCategoryModalOpen(false)}
         onCategoryAdded={handleCategoryAdded}
       />
+      <AutoSaveIndicator isSaving={isSaving} />
     </form>
   );
 };
