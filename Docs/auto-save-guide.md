@@ -123,6 +123,56 @@ Auto-save is triggered on the following form actions:
 - **Complex Operations**: Handles multi-step operations (convert to task)
 - **Animation Support**: Maintains smooth animations during save operations
 
+## HabitCard Auto-Save Implementation
+
+### Features Implemented
+
+1. **Auto-Save Indicator**: The HabitCard component displays an auto-save indicator in the card header
+2. **Real-time Feedback**: Users can see when habit completion is being saved
+3. **Completion Integration**: Auto-save works seamlessly with habit completion and reward distribution
+4. **Edit Integration**: Auto-save indicator shows status during edit operations
+
+### Technical Implementation
+
+#### Component Structure
+```tsx
+// HabitCard.tsx
+import { AutoSaveIndicator } from './AutoSaveIndicator';
+import { useHabits } from '../hooks/useHabits';
+
+export const HabitCard: React.FC<HabitCardProps> = ({ habit }) => {
+  const { completeHabit, isSaving } = useHabits();
+  
+  return (
+    <div className={styles.habitCard}>
+      <div className={styles.header}>
+        <div className={styles.content}>
+          <div className={styles.autoSaveContainer}>
+            <AutoSaveIndicator isSaving={isSaving} />
+          </div>
+          {/* Card content */}
+        </div>
+      </div>
+    </div>
+  );
+};
+```
+
+#### Auto-Save Triggers
+
+Auto-save is triggered on the following card actions:
+
+1. **Habit Completion** - Marks habit as complete and awards rewards
+2. **Edit Operations** - When editing habit through HabitEditForm
+3. **Reward Distribution** - When stat rewards and XP are awarded
+
+### User Experience
+
+- **Card Header Indicator**: Auto-save status visible at the top of each habit card
+- **Completion Animation**: Smooth completion animation with auto-save feedback
+- **Reward Integration**: Auto-save works with reward distribution system
+- **Edit Mode Integration**: Auto-save indicator shows status during edit operations
+
 ## Testing
 
 ### Test Coverage
@@ -165,6 +215,29 @@ describe('HabitEditForm', () => {
 
   it('converts habit to task and triggers auto-save', () => {
     // Tests complex operation with auto-save
+  });
+
+  // Additional test cases...
+});
+```
+
+```tsx
+// HabitCard.test.tsx
+describe('HabitCard', () => {
+  it('renders habit card with auto-save indicator', () => {
+    // Tests that auto-save indicator is present
+  });
+
+  it('completes habit and triggers auto-save', () => {
+    // Tests habit completion with auto-save
+  });
+
+  it('shows completion animation when completing habit', () => {
+    // Tests completion animation with auto-save
+  });
+
+  it('opens edit form when edit button is clicked', () => {
+    // Tests edit integration with auto-save
   });
 
   // Additional test cases...

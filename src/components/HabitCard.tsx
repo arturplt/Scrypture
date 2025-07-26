@@ -3,6 +3,7 @@ import { Habit } from '../types';
 import { useHabits } from '../hooks/useHabits';
 import { useUser } from '../hooks/useUser';
 import { HabitEditForm } from './HabitEditForm';
+import { AutoSaveIndicator } from './AutoSaveIndicator';
 import { habitService } from '../services/habitService';
 import styles from './HabitCard.module.css';
 
@@ -11,7 +12,7 @@ interface HabitCardProps {
 }
 
 export const HabitCard: React.FC<HabitCardProps> = ({ habit }) => {
-  const { completeHabit } = useHabits();
+  const { completeHabit, isSaving } = useHabits();
   const { addStatRewards, addExperience } = useUser();
   const [isCompleting, setIsCompleting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -66,6 +67,9 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit }) => {
     <div className={`${styles.habitCard} ${isCompletedToday ? styles.completed : ''} ${isActive ? styles.active : ''}`}>
       <div className={styles.header}>
         <div className={styles.content}>
+          <div className={styles.autoSaveContainer}>
+            <AutoSaveIndicator isSaving={isSaving} />
+          </div>
           <h3 className={styles.title}>{habit.name}</h3>
           {habit.description && (
             <p className={styles.description}>{habit.description}</p>
