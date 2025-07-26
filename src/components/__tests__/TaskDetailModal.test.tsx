@@ -41,6 +41,7 @@ jest.mock('../../hooks/useTasks', () => ({
   useTasks: () => ({
     toggleTask: jest.fn(),
     bringTaskToTop: jest.fn(),
+    isSaving: false,
   }),
   TaskProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
@@ -52,6 +53,24 @@ jest.mock('../../hooks/useUser', () => ({
     removeStatRewards: jest.fn(),
   }),
   UserProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+}));
+
+// Mock the AutoSaveIndicator component
+jest.mock('../AutoSaveIndicator', () => ({
+  AutoSaveIndicator: ({ isSaving }: { isSaving: boolean }) => (
+    <div data-testid="auto-save-indicator">
+      {isSaving ? 'Saving...' : 'Saved'}
+    </div>
+  ),
+}));
+
+// Mock the useHabits hook
+jest.mock('../../hooks/useHabits', () => ({
+  useHabits: () => ({
+    addHabit: jest.fn(),
+    habits: [],
+  }),
+  HabitProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
 describe('TaskDetailModal', () => {
@@ -205,5 +224,74 @@ describe('TaskDetailModal', () => {
     // Should not show navigation buttons
     expect(screen.queryByText('Previous')).not.toBeInTheDocument();
     expect(screen.queryByText('Next')).not.toBeInTheDocument();
+  });
+
+  describe('Auto-Save Functionality', () => {
+    it('should display auto-save indicator in modal header', () => {
+      renderWithProviders(<TaskDetailModal {...defaultProps} />);
+
+      expect(screen.getByTestId('auto-save-indicator')).toBeInTheDocument();
+      expect(screen.getByText('Saved')).toBeInTheDocument();
+    });
+
+    it('should show saving state when isSaving is true', () => {
+      // Temporarily mock isSaving as true
+      const originalUseTasks = require('../../hooks/useTasks').useTasks;
+      require('../../hooks/useTasks').useTasks = () => ({
+        toggleTask: jest.fn(),
+        bringTaskToTop: jest.fn(),
+        isSaving: true,
+      });
+
+      renderWithProviders(<TaskDetailModal {...defaultProps} />);
+
+      expect(screen.getByText('Saving...')).toBeInTheDocument();
+
+      // Restore original mock
+      require('../../hooks/useTasks').useTasks = originalUseTasks;
+    });
+
+    it('should show auto-save indicator during task editing', () => {
+      renderWithProviders(<TaskDetailModal {...defaultProps} />);
+
+      const editButton = screen.getByLabelText('Edit task');
+      fireEvent.click(editButton);
+
+      // Auto-save indicator should still be visible during editing
+      expect(screen.getAllByTestId('auto-save-indicator')).toHaveLength(2);
+    });
+
+    it('should show auto-save indicator during navigation', () => {
+      renderWithProviders(<TaskDetailModal {...defaultProps} />);
+
+      const nextButton = screen.getByText('Next →');
+      fireEvent.click(nextButton);
+
+      // Auto-save indicator should be visible during navigation
+      expect(screen.getByTestId('auto-save-indicator')).toBeInTheDocument();
+    });
+
+    it('should handle auto-save state changes', () => {
+      const { rerender } = renderWithProviders(<TaskDetailModal {...defaultProps} />);
+
+      // Initially should show "Saved"
+      expect(screen.getByText('Saved')).toBeInTheDocument();
+
+      // Temporarily mock isSaving as true
+      const originalUseTasks = require('../../hooks/useTasks').useTasks;
+      require('../../hooks/useTasks').useTasks = () => ({
+        toggleTask: jest.fn(),
+        bringTaskToTop: jest.fn(),
+        isSaving: true,
+      });
+
+      rerender(<TaskDetailModal {...defaultProps} />);
+
+      // Should show "Saving..."
+      expect(screen.getByText('Saving...')).toBeInTheDocument();
+
+      // Restore original mock
+      require('../../hooks/useTasks').useTasks = originalUseTasks;
+    });
   });
 });

@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Task } from '../types';
 import { Modal } from './Modal';
-
 import { TaskEditForm } from './TaskEditForm';
+import { AutoSaveIndicator } from './AutoSaveIndicator';
+import { useTasks } from '../hooks/useTasks';
 import { formatRelativeTime } from '../utils/dateUtils';
 import styles from './TaskDetailModal.module.css';
 
@@ -25,6 +26,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   hasNext = false,
   hasPrevious = false,
 }) => {
+  const { isSaving } = useTasks();
   // Navigation state for swipe/drag functionality
   const [dragStart, setDragStart] = useState<number | null>(null);
   const [dragEnd, setDragEnd] = useState<number | null>(null);
@@ -224,6 +226,10 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                   ))}
                 </div>
               )}
+            </div>
+
+            <div className={styles.autoSaveContainer}>
+              <AutoSaveIndicator isSaving={isSaving} />
             </div>
 
             <div className={styles.headerActions}>

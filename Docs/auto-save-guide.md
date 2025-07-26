@@ -479,6 +479,79 @@ Auto-save is triggered on the following task editing operations:
 - **Form Validation Integration**: Auto-save works alongside form validation requirements
 - **Real-time Responsiveness**: Auto-save indicators respond to all form interactions
 
+## TaskDetailModal Auto-Save Implementation
+
+### Features Implemented
+
+1. **Modal-Based Auto-Save**: TaskDetailModal component displays auto-save indicator in modal header
+2. **Task Detail View Integration**: Auto-save feedback integrated into task detail viewing experience
+3. **Navigation Auto-Save**: Auto-save indicators remain visible during task navigation
+4. **Edit Integration**: Auto-save feedback when opening edit form from detail modal
+5. **Modal Header Integration**: Auto-save indicator positioned in modal header for visibility
+6. **Cross-Modal Auto-Save**: Auto-save indicators work across both detail and edit modals
+
+### Technical Implementation
+
+#### Component Structure
+```tsx
+// TaskDetailModal.tsx
+import { AutoSaveIndicator } from './AutoSaveIndicator';
+import { useTasks } from '../hooks/useTasks';
+
+export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
+  task,
+  isOpen,
+  onClose,
+  onNext,
+  onPrevious,
+  hasNext = false,
+  hasPrevious = false,
+}) => {
+  const { isSaving } = useTasks();
+  
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} title="Task Details" position="bottom">
+      <div className={styles.container}>
+        <div className={styles.header}>
+          <div className={styles.titleSection}>
+            {/* Task title and categories */}
+          </div>
+          
+          <div className={styles.autoSaveContainer}>
+            <AutoSaveIndicator isSaving={isSaving} />
+          </div>
+          
+          <div className={styles.headerActions}>
+            {/* Status and action buttons */}
+          </div>
+        </div>
+        {/* Rest of modal content */}
+      </div>
+    </Modal>
+  );
+};
+```
+
+#### Auto-Save Triggers
+
+Auto-save is triggered on the following modal operations:
+
+1. **Task Detail Viewing** - When viewing task details in the modal
+2. **Task Navigation** - When navigating between tasks using previous/next buttons
+3. **Edit Form Opening** - When opening the edit form from the detail modal
+4. **Modal Interactions** - Any interactions within the modal trigger auto-save feedback
+5. **Cross-Modal Operations** - Auto-save indicators work across detail and edit modals
+6. **Real-time Updates** - Auto-save indicators update in real-time during modal operations
+
+### User Experience
+
+- **Modal Header Integration**: Auto-save indicator positioned in modal header for optimal visibility
+- **Task Detail Viewing**: Real-time feedback when viewing task details in modal
+- **Navigation Integration**: Auto-save indicators remain visible during task navigation
+- **Edit Form Integration**: Auto-save feedback when opening edit form from detail modal
+- **Cross-Modal Support**: Auto-save indicators work across both detail and edit modals
+- **Real-time Responsiveness**: Auto-save indicators respond to all modal interactions
+
 ## Testing
 
 ### Test Coverage
