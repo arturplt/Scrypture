@@ -12,7 +12,7 @@ interface HabitCardProps {
 }
 
 export const HabitCard: React.FC<HabitCardProps> = ({ habit }) => {
-  const { completeHabit, isSaving } = useHabits();
+  const { completeHabit, updateHabit, isSaving } = useHabits();
   const { addStatRewards, addExperience } = useUser();
   const [isCompleting, setIsCompleting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -26,7 +26,6 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit }) => {
     if (!habit.lastCompleted) return '';
     
     const now = new Date();
-    const lastCompleted = new Date(habit.lastCompleted);
     let nextReset: Date;
     
     switch (habit.targetFrequency) {
@@ -63,6 +62,38 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit }) => {
       return `${hours}h ${minutes}m`;
     } else {
       return `${minutes}m`;
+    }
+  };
+
+  const checkAndResetHabit = () => {
+    if (!habit.lastCompleted) return;
+    
+    const now = new Date();
+    let nextReset: Date;
+    
+    switch (habit.targetFrequency) {
+      case 'daily':
+        nextReset = new Date(now);
+        nextReset.setHours(24, 0, 0, 0);
+        break;
+      case 'weekly':
+        nextReset = new Date(now);
+        const daysUntilSunday = (7 - nextReset.getDay()) % 7;
+        nextReset.setDate(nextReset.getDate() + daysUntilSunday);
+        nextReset.setHours(0, 0, 0, 0);
+        break;
+      case 'monthly':
+        nextReset = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        nextReset.setHours(0, 0, 0, 0);
+        break;
+      default:
+        return;
+    }
+    
+    // If current time is past the reset time, reset the habit
+    if (now >= nextReset) {
+      console.log(`🔄 Resetting habit "${habit.name}" - cooldown expired`);
+      updateHabit(habit.id, { lastCompleted: undefined });
     }
   };
 
@@ -103,9 +134,14 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit }) => {
   const bestStreakDisplay = habit.bestStreak && habit.bestStreak > 0 ? `Best: ${habit.bestStreak}` : null;
 
   useEffect(() => {
+    // Check if habit should be reset when cooldown expires
+    checkAndResetHabit();
+    
     if (isCompletedToday) {
       const updateCooldown = () => {
         setCooldownTime(calculateCooldownTime());
+        // Also check for reset on each update
+        checkAndResetHabit();
       };
       
       updateCooldown();

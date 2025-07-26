@@ -105,6 +105,175 @@ describe('HabitCard', () => {
     expect(screen.getByText('Saved')).toBeInTheDocument();
   });
 
+  it('auto-resets habit when cooldown timer reaches zero for daily frequency', async () => {
+    // Mock a habit that was completed yesterday (should be reset)
+    const completedHabit = {
+      ...mockHabit,
+      lastCompleted: new Date(Date.now() - 24 * 60 * 60 * 1000), // Yesterday
+      streak: 3,
+    };
+
+    const mockUpdateHabit = jest.fn();
+    mockUseHabits.mockReturnValue({
+      habits: [completedHabit],
+      isSaving: false,
+      addHabit: jest.fn(),
+      updateHabit: mockUpdateHabit,
+      deleteHabit: jest.fn(),
+      completeHabit: jest.fn(() => true),
+    });
+
+    mockHabitService.isCompletedToday.mockReturnValue(true);
+
+    render(<HabitCard habit={completedHabit} />);
+
+    // Wait for the useEffect to run and check for reset
+    await waitFor(() => {
+      expect(mockUpdateHabit).toHaveBeenCalledWith(completedHabit.id, { lastCompleted: undefined });
+    });
+  });
+
+  it('auto-resets habit when cooldown timer reaches zero for weekly frequency', async () => {
+    // Mock a habit that was completed last week (should be reset)
+    const completedHabit = {
+      ...mockHabit,
+      targetFrequency: 'weekly' as const,
+      lastCompleted: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000), // 8 days ago
+      streak: 2,
+    };
+
+    const mockUpdateHabit = jest.fn();
+    mockUseHabits.mockReturnValue({
+      habits: [completedHabit],
+      isSaving: false,
+      addHabit: jest.fn(),
+      updateHabit: mockUpdateHabit,
+      deleteHabit: jest.fn(),
+      completeHabit: jest.fn(() => true),
+    });
+
+    mockHabitService.isCompletedToday.mockReturnValue(true);
+
+    render(<HabitCard habit={completedHabit} />);
+
+    // Wait for the useEffect to run and check for reset
+    await waitFor(() => {
+      expect(mockUpdateHabit).toHaveBeenCalledWith(completedHabit.id, { lastCompleted: undefined });
+    });
+  });
+
+  it('auto-resets habit when cooldown timer reaches zero for monthly frequency', async () => {
+    // Mock a habit that was completed last month (should be reset)
+    const lastMonth = new Date();
+    lastMonth.setMonth(lastMonth.getMonth() - 1);
+    
+    const completedHabit = {
+      ...mockHabit,
+      targetFrequency: 'monthly' as const,
+      lastCompleted: lastMonth,
+      streak: 1,
+    };
+
+    const mockUpdateHabit = jest.fn();
+    mockUseHabits.mockReturnValue({
+      habits: [completedHabit],
+      isSaving: false,
+      addHabit: jest.fn(),
+      updateHabit: mockUpdateHabit,
+      deleteHabit: jest.fn(),
+      completeHabit: jest.fn(() => true),
+    });
+
+    mockHabitService.isCompletedToday.mockReturnValue(true);
+
+    render(<HabitCard habit={completedHabit} />);
+
+    // Wait for the useEffect to run and check for reset
+    await waitFor(() => {
+      expect(mockUpdateHabit).toHaveBeenCalledWith(completedHabit.id, { lastCompleted: undefined });
+    });
+  });
+
+  it('allows multiple completions after auto-reset for streak building', async () => {
+    // Mock a habit that was completed yesterday (should be reset)
+    const completedHabit = {
+      ...mockHabit,
+      lastCompleted: new Date(Date.now() - 24 * 60 * 60 * 1000), // Yesterday
+      streak: 5,
+    };
+
+    const mockUpdateHabit = jest.fn();
+    const mockCompleteHabit = jest.fn(() => true);
+    
+    mockUseHabits.mockReturnValue({
+      habits: [completedHabit],
+      isSaving: false,
+      addHabit: jest.fn(),
+      updateHabit: mockUpdateHabit,
+      deleteHabit: jest.fn(),
+      completeHabit: mockCompleteHabit,
+    });
+
+    mockHabitService.isCompletedToday.mockReturnValue(true);
+
+    const { rerender } = render(<HabitCard habit={completedHabit} />);
+
+    // Wait for auto-reset
+    await waitFor(() => {
+      expect(mockUpdateHabit).toHaveBeenCalledWith(completedHabit.id, { lastCompleted: undefined });
+    });
+
+    // Now simulate the habit being reset (no lastCompleted)
+    const resetHabit = {
+      ...completedHabit,
+      lastCompleted: undefined,
+    };
+
+    mockHabitService.isCompletedToday.mockReturnValue(false);
+
+    // Re-render with reset habit
+    rerender(<HabitCard habit={resetHabit} />);
+
+    // Should now show checkbox instead of cooldown timer
+    expect(screen.getByRole('checkbox')).toBeInTheDocument();
+    expect(screen.queryByTestId('cooldown-timer')).not.toBeInTheDocument();
+
+    // Should be able to complete the habit again
+    const checkbox = screen.getByRole('checkbox');
+    fireEvent.click(checkbox);
+
+    expect(mockCompleteHabit).toHaveBeenCalledWith(resetHabit.id);
+  });
+
+  it('does not auto-reset habit that was completed today', async () => {
+    // Mock a habit that was completed today (should NOT be reset)
+    const completedHabit = {
+      ...mockHabit,
+      lastCompleted: new Date(), // Today
+      streak: 3,
+    };
+
+    const mockUpdateHabit = jest.fn();
+    mockUseHabits.mockReturnValue({
+      habits: [completedHabit],
+      isSaving: false,
+      addHabit: jest.fn(),
+      updateHabit: mockUpdateHabit,
+      deleteHabit: jest.fn(),
+      completeHabit: jest.fn(() => true),
+    });
+
+    mockHabitService.isCompletedToday.mockReturnValue(true);
+
+    render(<HabitCard habit={completedHabit} />);
+
+    // Wait a bit to ensure useEffect runs
+    await waitFor(() => {
+      // Should NOT call updateHabit since it was completed today
+      expect(mockUpdateHabit).not.toHaveBeenCalled();
+    });
+  });
+
   it('shows saving state when isSaving is true', () => {
     mockUseHabits.mockReturnValue({
       habits: [mockHabit],
