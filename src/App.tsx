@@ -4,6 +4,7 @@ import { UserProvider, useUser } from './hooks/useUser';
 import { HabitProvider, useHabits } from './hooks/useHabits';
 import { TaskForm } from './components/TaskForm';
 import { TaskList, TaskListRef } from './components/TaskList';
+import { HabitList } from './components/HabitList';
 import { TaskCounter } from './components/TaskCounter';
 import { StatsDisplay } from './components/StatsDisplay';
 import { DataManager } from './components/DataManager';
@@ -218,6 +219,7 @@ function AppContent() {
           onTaskCreated={handleTaskCreated}
         />
         <TaskList ref={taskListRef} onEditTask={handleEditTask} />
+        <HabitList />
         <DataManager onDataChange={refreshTasks} />
       </main>
 

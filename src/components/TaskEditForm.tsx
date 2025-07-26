@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Task } from '../types';
 import { useTasks } from '../hooks/useTasks';
+import { useHabits } from '../hooks/useHabits';
 import { categoryService } from '../services/categoryService';
 import { ConfirmationModal } from './ConfirmationModal';
 import { CategoryModal } from './CategoryModal';
@@ -16,6 +17,7 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({
   onCancel,
 }) => {
   const { updateTask, deleteTask, tasks } = useTasks();
+  const { addHabit } = useHabits();
   const [title, setTitle] = useState(task.title);
   const [description, setDescription] = useState(task.description || '');
   const [categories, setCategories] = useState<string[]>(task.categories || ['body']);
@@ -26,6 +28,8 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [isCanceling, setIsCanceling] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [makeItHabit, setMakeItHabit] = useState(false);
+  const [selectedFrequency, setSelectedFrequency] = useState<'daily' | 'weekly' | 'monthly' | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Auto-resize textarea function
@@ -76,6 +80,7 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({
       soul: soulReward || undefined,
       xp: priorityXp + fibonacciXp[difficulty],
     };
+    // Update the existing task
     updateTask(task.id, {
       title: title.trim(),
       description: description.trim() || undefined,
@@ -84,6 +89,23 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({
       statRewards,
       difficulty,
     });
+
+    // Create habit if "Make it a Habit" is selected and frequency is chosen
+    // (This creates a separate habit based on the task, but keeps the original task)
+    if (makeItHabit && selectedFrequency) {
+      addHabit({
+        name: title.trim(),
+        description: description.trim() || undefined,
+        targetFrequency: selectedFrequency,
+        statRewards: {
+          body: bodyReward || undefined,
+          mind: mindReward || undefined,
+          soul: soulReward || undefined,
+          xp: Math.floor((priorityXp + fibonacciXp[difficulty]) / 2), // Half XP for habits
+        },
+      });
+    }
+
     // Use the same smooth transition when submitting
     onCancel();
   };
@@ -366,9 +388,53 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({
           </div>
         </div>
 
+        {/* Make it a Habit section */}
+        <div className={styles.habitSection}>
+          <button
+            type="button"
+            className={`${styles.habitToggleButton} ${makeItHabit ? styles.habitToggleButtonActive : ''}`}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setMakeItHabit(!makeItHabit);
+              if (!makeItHabit) {
+                setSelectedFrequency(null);
+              }
+            }}
+          >
+            🔄 Make it a Habit
+          </button>
+          
+          {makeItHabit && (
+            <div className={styles.frequencySelection}>
+              <label className={styles.frequencyLabel}>Choose frequency:</label>
+              <div className={styles.frequencyButtons}>
+                {(['daily', 'weekly', 'monthly'] as const).map((freq) => (
+                  <button
+                    key={freq}
+                    type="button"
+                    className={`${styles.frequencyButton} ${selectedFrequency === freq ? styles.frequencyButtonActive : ''}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setSelectedFrequency(freq);
+                    }}
+                  >
+                    {freq.charAt(0).toUpperCase() + freq.slice(1)}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
         <div className={styles.buttonGroup}>
-          <button type="submit" className={styles.submitButton}>
-            Update Task
+          <button 
+            type="submit" 
+            className={styles.submitButton}
+            disabled={makeItHabit && !selectedFrequency}
+          >
+            {makeItHabit && selectedFrequency ? 'Update Task & Create Habit' : 'Update Task'}
           </button>
           <button
             type="button"

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTasks } from '../hooks/useTasks';
+import { useHabits } from '../hooks/useHabits';
 import { categoryService } from '../services/categoryService';
 import { CategoryModal } from './CategoryModal';
 import { Task } from '../types';
@@ -23,6 +24,15 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   onTaskCreated,
 }) => {
   const { addTask, updateTask, tasks } = useTasks();
+  const { addHabit } = useHabits();
+  
+  // Test if useHabits is working
+  useEffect(() => {
+    console.log('🔍 TaskForm useHabits check - addHabit function:', typeof addHabit);
+    if (!addHabit) {
+      console.error('❌ addHabit function is not available!');
+    }
+  }, [addHabit]);
   const [title, setTitle] = useState(taskToEdit?.title || '');
   const [description, setDescription] = useState(taskToEdit?.description || '');
   const [categories, setCategories] = useState<string[]>(
@@ -37,6 +47,8 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   const [showAutoFill, setShowAutoFill] = useState(false);
   const [selectedAutoFillIndex, setSelectedAutoFillIndex] = useState(0);
   const [isCollapsing, setIsCollapsing] = useState(false);
+  const [makeItHabit, setMakeItHabit] = useState(false);
+  const [selectedFrequency, setSelectedFrequency] = useState<'daily' | 'weekly' | 'monthly' | null>(null);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const titleInputRef = useRef<HTMLInputElement>(null);
@@ -176,6 +188,12 @@ export const TaskForm: React.FC<TaskFormProps> = ({
       return;
     }
 
+    // Additional validation for habit creation
+    if (makeItHabit && !selectedFrequency) {
+      alert('Please select a frequency for your habit (Daily, Weekly, or Monthly)');
+      return;
+    }
+
     const statRewards = {
       body: bodyReward || undefined,
       mind: mindReward || undefined,
@@ -194,22 +212,61 @@ export const TaskForm: React.FC<TaskFormProps> = ({
       });
       onSave?.();
     } else {
-      // Create new task
-      const newTask = addTask({
-        title: title.trim(),
-        description: description.trim() || undefined,
-        categories,
-        completed: false,
-        priority,
-        statRewards,
-        difficulty,
-      });
-      
-      // Minimize the form after creating a task
-      setIsExpanded(false);
-      
-      // Call the callback to highlight the newly created task
-      onTaskCreated?.(newTask.id);
+      // Check if "Make it a Habit" is selected - if so, create ONLY habit
+      if (makeItHabit && selectedFrequency) {
+        console.log('🔄 Creating habit with data:', {
+          name: title.trim(),
+          targetFrequency: selectedFrequency,
+          body: bodyReward,
+          mind: mindReward,
+          soul: soulReward,
+        });
+        
+        try {
+          // Create habit only (no task)
+          const result = addHabit({
+            name: title.trim(),
+            description: description.trim() || undefined,
+            targetFrequency: selectedFrequency,
+            categories: categories, // Include categories
+            statRewards: {
+              body: bodyReward || undefined,
+              mind: mindReward || undefined,
+              soul: soulReward || undefined,
+              xp: Math.floor((priorityXp + fibonacciXp[difficulty]) / 2), // Half XP for habits
+            },
+          });
+          
+          if (result) {
+            console.log('✅ Habit created successfully');
+            // Minimize the form after creating a habit
+            setIsExpanded(false);
+          } else {
+            console.error('❌ Habit creation failed');
+            alert('Failed to create habit. Check console for details.');
+          }
+        } catch (error) {
+          console.error('❌ Error creating habit:', error);
+          alert('Failed to create habit. Check console for details.');
+        }
+      } else {
+        // Create regular task only (no habit)
+        const newTask = addTask({
+          title: title.trim(),
+          description: description.trim() || undefined,
+          categories,
+          completed: false,
+          priority,
+          statRewards,
+          difficulty,
+        });
+        
+        // Minimize the form after creating a task
+        setIsExpanded(false);
+        
+        // Call the callback to highlight the newly created task
+        onTaskCreated?.(newTask.id);
+      }
     }
 
     // Reset form only if not in edit mode
@@ -217,6 +274,8 @@ export const TaskForm: React.FC<TaskFormProps> = ({
       setTitle('');
       setDescription('');
       setCategories(['body']);
+      setMakeItHabit(false);
+      setSelectedFrequency(null);
       setPriority('medium');
       setBodyReward(0);
       setMindReward(0);
@@ -763,12 +822,56 @@ export const TaskForm: React.FC<TaskFormProps> = ({
               </div>
             </div>
           )}
-          <button
+          
+          {/* Make it a Habit section - only show when creating new tasks */}
+          {!isEditMode && (
+            <div className={styles.habitSection}>
+              <button
+                type="button"
+                className={`${styles.habitToggleButton} ${makeItHabit ? styles.habitToggleButtonActive : ''}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setMakeItHabit(!makeItHabit);
+                  if (!makeItHabit) {
+                    setSelectedFrequency(null);
+                  }
+                }}
+              >
+                🔄 Make it a Habit
+              </button>
+              
+              {makeItHabit && (
+                <div className={styles.frequencySelection}>
+                  <label className={styles.frequencyLabel}>Choose frequency:</label>
+                  <div className={styles.frequencyButtons}>
+                    {(['daily', 'weekly', 'monthly'] as const).map((freq) => (
+                      <button
+                        key={freq}
+                        type="button"
+                        className={`${styles.frequencyButton} ${selectedFrequency === freq ? styles.frequencyButtonActive : ''}`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setSelectedFrequency(freq);
+                        }}
+                      >
+                        {freq.charAt(0).toUpperCase() + freq.slice(1)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+                    <button
             type="submit"
-            className={styles.submitButton}
+            className={`${styles.submitButton} ${makeItHabit && selectedFrequency ? styles.submitButtonHabit : ''}`}
             onClick={(e) => e.stopPropagation()}
+            disabled={makeItHabit && !selectedFrequency}
           >
-            {isEditMode ? 'Update Task' : 'Add Task'}
+            {isEditMode ? 'Update Task' : makeItHabit && selectedFrequency ? 'Create Habit' : 'Create Task'}
           </button>
           {onCancel && (
             <button

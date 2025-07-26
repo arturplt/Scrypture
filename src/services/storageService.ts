@@ -25,14 +25,17 @@ const validateTask = (task: unknown): task is Task => {
 };
 
 const validateHabit = (habit: unknown): habit is Habit => {
+  if (!habit || typeof habit !== 'object') return false;
+  
+  const h = habit as Habit;
   return (
-    typeof habit === 'object' &&
-    habit !== null &&
-    typeof (habit as Habit).id === 'string' &&
-    typeof (habit as Habit).name === 'string' &&
-    typeof (habit as Habit).streak === 'number' &&
-    (habit as Habit).createdAt instanceof Date &&
-    ['daily', 'weekly', 'monthly'].includes((habit as Habit).targetFrequency)
+    typeof h.id === 'string' &&
+    typeof h.name === 'string' &&
+    typeof h.streak === 'number' &&
+    (h.bestStreak === undefined || typeof h.bestStreak === 'number') &&
+    h.createdAt instanceof Date &&
+    ['daily', 'weekly', 'monthly'].includes(h.targetFrequency) &&
+    Array.isArray(h.categories)
   );
 };
 

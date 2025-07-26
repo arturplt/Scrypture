@@ -9,6 +9,7 @@ interface TaskCardProps {
   task: Task;
   isHighlighted?: boolean;
   triggerEdit?: boolean; // New prop to trigger inline edit
+  onEditTask?: (task: Task) => void;
 }
 
 export const TaskCard: React.FC<TaskCardProps> = ({ 

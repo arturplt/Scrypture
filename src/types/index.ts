@@ -21,9 +21,11 @@ export interface Habit {
   name: string;
   description?: string;
   streak: number;
+  bestStreak?: number;
   lastCompleted?: Date;
   createdAt: Date;
   targetFrequency: 'daily' | 'weekly' | 'monthly';
+  categories: string[]; // Added categories for grouping
   statRewards?: {
     body?: number;
     mind?: number;
@@ -64,10 +66,10 @@ export interface TaskContextType {
 
 export interface HabitContextType {
   habits: Habit[];
-  addHabit: (habit: Omit<Habit, 'id' | 'createdAt' | 'streak'>) => void;
+  addHabit: (habit: Omit<Habit, 'id' | 'createdAt' | 'streak' | 'bestStreak'>) => Habit | null;
   updateHabit: (id: string, updates: Partial<Habit>) => void;
   deleteHabit: (id: string) => void;
-  completeHabit: (id: string) => void;
+  completeHabit: (id: string) => boolean;
   isSaving: boolean;
 }
 

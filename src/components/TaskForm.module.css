@@ -1854,6 +1854,37 @@
   }
 }
 
+/* Special styling for habit creation button */
+.submitButtonHabit {
+  background: #4A90E2 !important;
+  border-color: #4A90E2 !important;
+  color: white !important;
+}
+
+.submitButtonHabit:hover {
+  background: #357ABD !important;
+  border-color: #357ABD !important;
+}
+
+.submitButtonHabit:disabled {
+  background: #cccccc !important;
+  border-color: #cccccc !important;
+  color: #666666 !important;
+  cursor: not-allowed !important;
+}
+
+/* Task button styling for habit conversion */
+.submitButtonTask {
+  background: var(--color-accent-gold) !important;
+  border-color: var(--color-accent-gold) !important;
+  color: var(--color-bg-primary) !important;
+}
+
+.submitButtonTask:hover {
+  background: var(--color-accent-beaver) !important;
+  border-color: var(--color-accent-beaver) !important;
+}
+
 /* Disable animations on mobile devices for better performance */
 @media (max-width: 768px) {
   /* Disable all animations on mobile */
@@ -1981,4 +2012,147 @@
   .deleteButton:hover {
     opacity: 1 !important;
   }
+}
+
+/* Habit section styles - matching design system */
+.habitSection {
+  margin: var(--spacing-md) 0;
+  padding: var(--spacing-md);
+  background: var(--color-bg-secondary);
+  border: 2px solid var(--color-border-primary);
+  border-radius: 0px;
+  transition: all var(--transition-normal);
+  box-shadow: var(--shadow-button);
+  animation: smoothIn 0.8s ease-in-out;
+  animation-delay: 0.6s;
+  opacity: 0;
+  animation-fill-mode: forwards;
+}
+
+.habitToggleButton {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: #4A90E2;
+  color: white;
+  border: 2px solid #4A90E2;
+  border-radius: 0px;
+  font-size: var(--font-size-sm);
+  font-weight: normal;
+  font-family: 'Press Start 2P', monospace;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  box-shadow: var(--shadow-button);
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+}
+
+.habitToggleButton:hover {
+  background: #357ABD;
+  border-color: #357ABD;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-active);
+}
+
+.habitToggleButtonActive {
+  background: #2E5F95;
+  border-color: #2E5F95;
+  box-shadow: var(--shadow-active);
+}
+
+.habitToggleButtonActive:hover {
+  background: #357ABD;
+  border-color: #357ABD;
+}
+
+.frequencySelection {
+  margin-top: var(--spacing-md);
+  animation: slideDown 0.5s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.frequencyLabel {
+  display: block;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-family: 'Press Start 2P', monospace;
+  font-weight: normal;
+  margin-bottom: var(--spacing-md);
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+}
+
+.frequencyButtons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-sm);
+}
+
+.frequencyButton {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-bg-primary);
+  color: var(--color-text-secondary);
+  border: 2px solid var(--color-border-primary);
+  border-radius: 0px;
+  font-size: var(--font-size-xs);
+  font-family: 'Press Start 2P', monospace;
+  font-weight: normal;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  text-transform: capitalize;
+  box-shadow: var(--shadow-button);
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+}
+
+.frequencyButton:hover {
+  border-color: var(--color-border-secondary);
+  color: var(--color-text-primary);
+  background: var(--color-bg-secondary);
+  transform: translateY(-1px);
+}
+
+.frequencyButtonActive {
+  background: var(--color-accent-gold);
+  color: var(--color-bg-primary);
+  border-color: var(--color-accent-gold);
+  box-shadow: var(--shadow-active);
+}
+
+.frequencyButtonActive:hover {
+  background: var(--color-accent-beaver);
+  border-color: var(--color-accent-beaver);
+  transform: translateY(-2px);
+}
+
+/* Submit button disabled state for habit selection */
+.submitButton:disabled {
+  background: var(--color-border-primary);
+  border-color: var(--color-border-primary);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.submitButton:disabled:hover {
+  background: var(--color-border-primary);
+  border-color: var(--color-border-primary);
+  transform: none;
+  box-shadow: var(--shadow-button);
 }

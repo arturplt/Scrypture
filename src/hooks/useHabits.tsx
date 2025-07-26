@@ -42,15 +42,27 @@ export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
     }
   };
 
-  const addHabit = (habitData: Omit<Habit, 'id' | 'createdAt' | 'streak'>) => {
-    const newHabit = habitService.addHabit(habitData);
-    if (newHabit) {
-      setHabits((prev) => {
-        const updated = [...prev, newHabit];
-        saveHabitsWithFeedback(updated);
-        return updated;
-      });
-      console.log('Habit created and auto-saved');
+  const addHabit = (habitData: Omit<Habit, 'id' | 'createdAt' | 'streak' | 'bestStreak'>) => {
+    console.log('🔄 useHabits.addHabit called with:', habitData);
+    try {
+      const newHabit = habitService.addHabit(habitData);
+      console.log('📦 habitService.addHabit returned:', newHabit);
+      if (newHabit) {
+        setHabits((prev) => {
+          const updated = [...prev, newHabit];
+          console.log('✅ Updating habits state, new count:', updated.length);
+          saveHabitsWithFeedback(updated);
+          return updated;
+        });
+        console.log('Habit created and auto-saved');
+        return newHabit; // Return the habit for success confirmation
+      } else {
+        console.error('❌ Failed to create habit - service returned null');
+        return null;
+      }
+    } catch (error) {
+      console.error('❌ Error in addHabit:', error);
+      return null;
     }
   };
 
@@ -80,23 +92,13 @@ export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
     }
   };
 
-  const completeHabit = (id: string) => {
+  const completeHabit = (id: string): boolean => {
     const success = habitService.completeHabit(id);
     if (success) {
-      setHabits((prev) => {
-        const updated = prev.map((habit) => {
-          if (habit.id === id) {
-            return {
-              ...habit,
-              streak: habit.streak + 1,
-              lastCompleted: new Date(),
-            };
-          }
-          return habit;
-        });
-        saveHabitsWithFeedback(updated);
-        return updated;
-      });
+      // Reload habits from service to get updated streak and bestStreak
+      const updatedHabits = habitService.getHabits();
+      setHabits(updatedHabits);
+      saveHabitsWithFeedback(updatedHabits);
       console.log('Habit completed and auto-saved');
     }
     return success;
