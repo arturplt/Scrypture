@@ -26,6 +26,7 @@ export const TaskList = forwardRef<TaskListRef, TaskListProps>((props, ref) => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchKeyword, setSearchKeyword] = useState<string>('');
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
+  const [collapsedCompletedSection, setCollapsedCompletedSection] = useState<boolean>(false);
   const [highlightedTaskId, setHighlightedTaskId] = useState<string | null>(null);
   const [triggerEditTaskId, setTriggerEditTaskId] = useState<string | null>(null); // New state for triggering edit
   const taskRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -195,6 +196,10 @@ export const TaskList = forwardRef<TaskListRef, TaskListProps>((props, ref) => {
     setCollapsedCategories(newCollapsed);
   };
 
+  const toggleCompletedSection = () => {
+    setCollapsedCompletedSection(prev => !prev);
+  };
+
   const getCategoryIcon = (categoryName: string) => {
     const category = allCategories.find(cat => cat.name === categoryName);
     return category?.icon || '📝';
@@ -349,19 +354,30 @@ export const TaskList = forwardRef<TaskListRef, TaskListProps>((props, ref) => {
       {completedTasks.length > 0 && (
         <div className={styles.section}>
           <div className={styles.sectionHeader}>
-            <div className={styles.headerContent}>
-              <h2 className={styles.title}>Completed Tasks</h2>
+            <div 
+              className={styles.headerContent}
+              onClick={toggleCompletedSection}
+              style={{ cursor: 'pointer' }}
+            >
+              <h2 className={styles.title}>
+                Completed Tasks ({completedTasks.length})
+              </h2>
               <AutoSaveIndicator isSaving={isSaving} />
+              <span className={styles.collapseIcon}>
+                {collapsedCompletedSection ? '▼' : '▲'}
+              </span>
             </div>
           </div>
-          <div className={styles.taskGrid}>
-            {completedTasks.map((task, index) => (
-              <TaskCard
-                key={task.id}
-                task={task}
-              />
-            ))}
-          </div>
+          {!collapsedCompletedSection && (
+            <div className={styles.taskGrid}>
+              {completedTasks.map((task, index) => (
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                />
+              ))}
+            </div>
+          )}
         </div>
       )}
 

@@ -33,6 +33,17 @@
   gap: var(--spacing-sm);
 }
 
+.headerContent {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  transition: all var(--transition-normal);
+}
+
+.headerContent:hover {
+  opacity: 0.8;
+}
+
 .controls {
   display: flex;
   gap: var(--spacing-sm);

@@ -558,5 +558,30 @@ describe('TaskList', () => {
       // Should show "Saving..."
       expect(screen.getAllByText('Saving...')).toHaveLength(2);
     });
+
+    it('shows completed tasks count in header', () => {
+      render(<TaskList />);
+      
+      // Should show completed tasks count in the header
+      expect(screen.getByText(/Completed Tasks \(1\)/)).toBeInTheDocument();
+    });
+
+    it('toggles completed tasks section when header is clicked', () => {
+      render(<TaskList />);
+      
+      // Initially should show completed tasks
+      expect(screen.getByText('Meditation')).toBeInTheDocument();
+      
+      // Click on the completed tasks header
+      const completedHeader = screen.getByText(/Completed Tasks \(1\)/).closest('div');
+      fireEvent.click(completedHeader!);
+      
+      // Should hide completed tasks
+      expect(screen.queryByText('Meditation')).not.toBeInTheDocument();
+      
+      // Click again to show
+      fireEvent.click(completedHeader!);
+      expect(screen.getByText('Meditation')).toBeInTheDocument();
+    });
   });
 });
