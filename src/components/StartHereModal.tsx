@@ -21,6 +21,7 @@ export const StartHereModal: React.FC<StartHereModalProps> = ({ isOpen, onClose 
   const { addTask, tasks } = useTasks();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [givenTasks, setGivenTasks] = useState<Set<string>>(new Set());
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
 
   // Load given tasks from localStorage on component mount
   useEffect(() => {
@@ -1074,6 +1075,23 @@ export const StartHereModal: React.FC<StartHereModalProps> = ({ isOpen, onClose 
     return getNextTask(category);
   };
 
+  const getCompletedTasksForCategory = (category: string): TaskTemplate[] => {
+    const tasks = taskTemplates[category];
+    if (!tasks) return [];
+    
+    const categoryKey = `${category}_`;
+    const completedTasks: TaskTemplate[] = [];
+    
+    for (const task of tasks) {
+      const taskKey = `${categoryKey}${task.difficulty}`;
+      if (givenTasks.has(taskKey)) {
+        completedTasks.push(task);
+      }
+    }
+    
+    return completedTasks;
+  };
+
   const handleCategoryToggle = (category: string) => {
     setSelectedCategories(prev => {
       if (prev.includes(category)) {
@@ -1081,6 +1099,19 @@ export const StartHereModal: React.FC<StartHereModalProps> = ({ isOpen, onClose 
       } else {
         return [...prev, category];
       }
+    });
+  };
+
+  const handleCategoryExpand = (category: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setExpandedCategories(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(category)) {
+        newSet.delete(category);
+      } else {
+        newSet.add(category);
+      }
+      return newSet;
     });
   };
 
@@ -1129,10 +1160,12 @@ export const StartHereModal: React.FC<StartHereModalProps> = ({ isOpen, onClose 
               const isCompleted = progress === 100;
               const isSelected = selectedCategories.includes(category);
               
+              const completedTasks = getCompletedTasksForCategory(category);
+              
               return (
                 <div 
                   key={category} 
-                  className={`${styles.categoryCard} ${isSelected ? styles.selected : ''}`}
+                  className={`${styles.categoryCard} ${isSelected ? styles.selected : ''} ${expandedCategories.has(category) ? styles.expanded : ''}`}
                   onClick={() => handleCategoryToggle(category)}
                 >
                   <div className={styles.categoryHeader}>
@@ -1150,25 +1183,50 @@ export const StartHereModal: React.FC<StartHereModalProps> = ({ isOpen, onClose 
                     </div>
                   </div>
                   
-                  {nextTask ? (
-                    <div className={styles.taskPreview}>
-                      <h4>Next Task (Difficulty {nextTask.difficulty})</h4>
-                      <p className={styles.taskTitle}>{nextTask.title}</p>
-                      <p className={styles.taskDescription}>{nextTask.description}</p>
-                      <button 
-                        className={styles.addButton}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleAddTask(category);
-                        }}
-                      >
-                        Add This Task
-                      </button>
-                    </div>
-                  ) : (
-                    <div className={styles.completedMessage}>
-                      <p>✅ All tasks completed for this category!</p>
-                    </div>
+                  <button 
+                    className={styles.expandButton}
+                    onClick={(e) => handleCategoryExpand(category, e)}
+                  >
+                    {expandedCategories.has(category) ? '▼' : '▶'}
+                  </button>
+                  
+                  {expandedCategories.has(category) && (
+                    <>
+                      {completedTasks.length > 0 && (
+                        <div className={styles.completedTasksSection}>
+                          <h4 className={styles.completedTasksTitle}>Completed Tasks</h4>
+                          <div className={styles.completedTasksList}>
+                            {completedTasks.map((task, index) => (
+                              <div key={index} className={styles.completedTaskItem}>
+                                <span className={styles.completedTaskTitle}>✅ {task.title}</span>
+                                <span className={styles.completedTaskDifficulty}>(Difficulty {task.difficulty})</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {nextTask ? (
+                        <div className={styles.taskPreview}>
+                          <h4>Next Task (Difficulty {nextTask.difficulty})</h4>
+                          <p className={styles.taskTitle}>{nextTask.title}</p>
+                          <p className={styles.taskDescription}>{nextTask.description}</p>
+                          <button 
+                            className={styles.addButton}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleAddTask(category);
+                            }}
+                          >
+                            Add This Task
+                          </button>
+                        </div>
+                      ) : (
+                        <div className={styles.completedMessage}>
+                          <p>✅ All tasks completed for this category!</p>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               );

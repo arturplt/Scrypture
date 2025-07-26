@@ -8,7 +8,7 @@ import { HabitList } from './components/HabitList';
 import { TaskCounter } from './components/TaskCounter';
 import { StatsDisplay } from './components/StatsDisplay';
 import { DataManager } from './components/DataManager';
-import { StartHereModal } from './components/StartHereModal';
+import { StartHereSection } from './components/StartHereSection';
 import { AutoSaveIndicator } from './components/AutoSaveIndicator';
 import { InstallPrompt } from './components/InstallPrompt';
 import { UserCreation } from './components/UserCreation';
@@ -203,14 +203,21 @@ function AppContent() {
       </header>
 
       <main className={styles.main}>
-        <div className={styles.startHereSection}>
-          <button 
-            className={styles.startHereButton}
-            onClick={() => setShowStartHere(true)}
-          >
-            Start Here
-          </button>
-        </div>
+        {!showStartHere ? (
+          <div className={styles.startHereSection}>
+            <button 
+              className={styles.startHereButton}
+              onClick={() => setShowStartHere(true)}
+            >
+              Start Here
+            </button>
+          </div>
+        ) : (
+          <StartHereSection 
+            isVisible={true}
+            onClose={() => setShowStartHere(false)}
+          />
+        )}
         <TaskCounter className={styles.taskCounter} />
         <StatsDisplay />
         <TaskForm 
@@ -222,11 +229,6 @@ function AppContent() {
         <HabitList />
         <DataManager onDataChange={refreshTasks} />
       </main>
-
-      <StartHereModal 
-        isOpen={showStartHere}
-        onClose={() => setShowStartHere(false)}
-      />
 
       {/* Edit Task Modal */}
       {editingTask && (
