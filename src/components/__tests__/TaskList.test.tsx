@@ -9,6 +9,15 @@ jest.mock('../../hooks/useTasks', () => ({
   useTasks: jest.fn(),
 }));
 
+// Mock the AutoSaveIndicator component
+jest.mock('../AutoSaveIndicator', () => ({
+  AutoSaveIndicator: ({ isSaving }: { isSaving: boolean }) => (
+    <div data-testid="auto-save-indicator">
+      {isSaving ? 'Saving...' : 'Saved'}
+    </div>
+  ),
+}));
+
 jest.mock('../TaskCard', () => ({
   TaskCard: ({
     task,
@@ -101,12 +110,22 @@ describe('TaskList', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseTasks.mockReturnValue({ tasks: mockTasks });
+    mockUseTasks.mockReturnValue({ 
+      tasks: mockTasks,
+      isSaving: false,
+      deleteTask: jest.fn(),
+      refreshTasks: jest.fn(),
+    });
   });
 
   describe('Rendering', () => {
     it('renders empty state when no tasks exist', () => {
-      mockUseTasks.mockReturnValue({ tasks: [] });
+      mockUseTasks.mockReturnValue({ 
+        tasks: [],
+        isSaving: false,
+        deleteTask: jest.fn(),
+        refreshTasks: jest.fn(),
+      });
 
       render(<TaskList />);
 
@@ -115,6 +134,27 @@ describe('TaskList', () => {
         screen.getByText('Create your first task to begin your journey')
       ).toBeInTheDocument();
       expect(screen.getByText('✨')).toBeInTheDocument();
+    });
+
+    it('renders task list with auto-save indicator', () => {
+      render(<TaskList />);
+
+      expect(screen.getByText('Active Tasks')).toBeInTheDocument();
+      expect(screen.getAllByTestId('auto-save-indicator')).toHaveLength(2);
+      expect(screen.getAllByText('Saved')).toHaveLength(2);
+    });
+
+    it('shows saving state when isSaving is true', () => {
+      mockUseTasks.mockReturnValue({ 
+        tasks: mockTasks,
+        isSaving: true,
+        deleteTask: jest.fn(),
+        refreshTasks: jest.fn(),
+      });
+
+      render(<TaskList />);
+
+      expect(screen.getAllByText('Saving...')).toHaveLength(2);
     });
 
     it('renders active tasks section', () => {
@@ -478,12 +518,45 @@ describe('TaskList', () => {
           category: 'body',
         },
       ];
-      mockUseTasks.mockReturnValue({ tasks: newTasks });
+      mockUseTasks.mockReturnValue({ 
+        tasks: newTasks,
+        isSaving: false,
+        deleteTask: jest.fn(),
+        refreshTasks: jest.fn(),
+      });
 
       rerender(<TaskList />);
 
       expect(screen.getByText('New Task')).toBeInTheDocument();
       expect(screen.queryByText('Workout')).not.toBeInTheDocument();
+    });
+
+    it('shows auto-save indicator in both active and completed sections', () => {
+      render(<TaskList />);
+
+      // Should have auto-save indicators in both sections
+      const autoSaveIndicators = screen.getAllByTestId('auto-save-indicator');
+      expect(autoSaveIndicators).toHaveLength(2); // One for Active Tasks, one for Completed Tasks
+    });
+
+    it('handles auto-save state changes', () => {
+      const { rerender } = render(<TaskList />);
+
+      // Initially should show "Saved"
+      expect(screen.getAllByText('Saved')).toHaveLength(2);
+
+      // Change to saving state
+      mockUseTasks.mockReturnValue({ 
+        tasks: mockTasks,
+        isSaving: true,
+        deleteTask: jest.fn(),
+        refreshTasks: jest.fn(),
+      });
+
+      rerender(<TaskList />);
+
+      // Should show "Saving..."
+      expect(screen.getAllByText('Saving...')).toHaveLength(2);
     });
   });
 });

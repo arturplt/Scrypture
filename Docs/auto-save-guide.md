@@ -225,6 +225,72 @@ Auto-save is triggered on the following form actions:
 - **Dual Mode Support**: Seamlessly handles both creation and editing modes
 - **Error Handling**: Clear error messages with auto-save feedback
 
+## TaskList Auto-Save Implementation
+
+### Features Implemented
+
+1. **Dual Section Auto-Save**: The TaskList component displays auto-save indicators in both Active Tasks and Completed Tasks sections
+2. **Real-time Feedback**: Users can see when their task operations are being saved
+3. **Section-specific Indicators**: Each section (Active/Completed) has its own auto-save indicator
+4. **Task Organization Integration**: Auto-save works alongside task filtering, sorting, and categorization
+
+### Technical Implementation
+
+#### Component Structure
+```tsx
+// TaskList.tsx
+import { AutoSaveIndicator } from './AutoSaveIndicator';
+import { useTasks } from '../hooks/useTasks';
+
+export const TaskList = forwardRef<TaskListRef, TaskListProps>((props, ref) => {
+  const { tasks, deleteTask, refreshTasks, isSaving } = useTasks();
+  
+  return (
+    <div className={styles.container}>
+      {/* Active Tasks Section */}
+      <div className={styles.section}>
+        <div className={styles.sectionHeader}>
+          <div className={styles.headerContent}>
+            <h2 className={styles.title}>Active Tasks</h2>
+            <AutoSaveIndicator isSaving={isSaving} />
+          </div>
+          {/* Controls */}
+        </div>
+        {/* Task content */}
+      </div>
+
+      {/* Completed Tasks Section */}
+      <div className={styles.section}>
+        <div className={styles.sectionHeader}>
+          <div className={styles.headerContent}>
+            <h2 className={styles.title}>Completed Tasks</h2>
+            <AutoSaveIndicator isSaving={isSaving} />
+          </div>
+        </div>
+        {/* Task content */}
+      </div>
+    </div>
+  );
+};
+```
+
+#### Auto-Save Triggers
+
+Auto-save is triggered on the following task operations:
+
+1. **Task Completion** - When tasks are marked as complete
+2. **Task Updates** - When task properties are modified
+3. **Task Deletion** - When tasks are removed
+4. **Task Creation** - When new tasks are added
+5. **Task Organization** - When tasks are filtered, sorted, or categorized
+
+### User Experience
+
+- **Dual Section Feedback**: Auto-save status visible in both Active and Completed task sections
+- **Task Operations Integration**: Auto-save works alongside all task management operations
+- **Real-time Status**: Users can see when task changes are being saved
+- **Consistent Feedback**: Both sections show the same auto-save state for unified experience
+
 ## Testing
 
 ### Test Coverage
@@ -313,6 +379,29 @@ describe('HabitForm', () => {
 
   it('handles form validation with auto-save', () => {
     // Tests validation integration with auto-save
+  });
+
+  // Additional test cases...
+});
+```
+
+```tsx
+// TaskList.test.tsx
+describe('TaskList', () => {
+  it('renders task list with auto-save indicator', () => {
+    // Tests that auto-save indicators are present in both sections
+  });
+
+  it('shows saving state when isSaving is true', () => {
+    // Tests that "Saving..." state is displayed in both sections
+  });
+
+  it('shows auto-save indicator in both active and completed sections', () => {
+    // Tests dual section auto-save indicators
+  });
+
+  it('handles auto-save state changes', () => {
+    // Tests auto-save state transitions
   });
 
   // Additional test cases...

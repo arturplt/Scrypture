@@ -3,6 +3,7 @@ import { useTasks } from '../hooks/useTasks';
 import { TaskCard } from './TaskCard';
 import { TaskForm } from './TaskForm';
 import { Task } from '../types';
+import { AutoSaveIndicator } from './AutoSaveIndicator';
 import styles from './TaskList.module.css';
 import { categoryService } from '../services/categoryService';
 
@@ -17,7 +18,7 @@ interface TaskListProps {
 
 export const TaskList = forwardRef<TaskListRef, TaskListProps>((props, ref) => {
   const { onEditTask } = props;
-  const { tasks, deleteTask, refreshTasks } = useTasks();
+  const { tasks, deleteTask, refreshTasks, isSaving } = useTasks();
   const [isEditMode, setIsEditMode] = useState(false);
   const [taskToEdit, setTaskToEdit] = useState<Task | null>(null);
   const [sortBy, setSortBy] = useState<'priority' | 'date' | 'xp'>('priority');
@@ -217,7 +218,10 @@ export const TaskList = forwardRef<TaskListRef, TaskListProps>((props, ref) => {
       {activeTasks.length > 0 && (
         <div className={styles.section}>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.title}>Active Tasks</h2>
+            <div className={styles.headerContent}>
+              <h2 className={styles.title}>Active Tasks</h2>
+              <AutoSaveIndicator isSaving={isSaving} />
+            </div>
             <div className={styles.controls}>
               {/* Search Input */}
               <div className={styles.searchContainer}>
@@ -344,7 +348,12 @@ export const TaskList = forwardRef<TaskListRef, TaskListProps>((props, ref) => {
       {/* Completed Tasks Section */}
       {completedTasks.length > 0 && (
         <div className={styles.section}>
-          <h2 className={styles.title}>Completed Tasks</h2>
+          <div className={styles.sectionHeader}>
+            <div className={styles.headerContent}>
+              <h2 className={styles.title}>Completed Tasks</h2>
+              <AutoSaveIndicator isSaving={isSaving} />
+            </div>
+          </div>
           <div className={styles.taskGrid}>
             {completedTasks.map((task, index) => (
               <TaskCard
