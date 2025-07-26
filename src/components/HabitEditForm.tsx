@@ -30,6 +30,7 @@ export const HabitEditForm: React.FC<HabitEditFormProps> = ({
   const [convertToTask, setConvertToTask] = useState(false);
   const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
   const [difficulty, setDifficulty] = useState<number>(0);
+  const [categories, setCategories] = useState<string[]>(habit.categories || ['body']);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Stat rewards
@@ -57,6 +58,7 @@ export const HabitEditForm: React.FC<HabitEditFormProps> = ({
     setName(habit.name);
     setDescription(habit.description || '');
     setTargetFrequency(habit.targetFrequency);
+    setCategories(habit.categories || ['body']);
     setBodyReward(habit.statRewards?.body || 0);
     setMindReward(habit.statRewards?.mind || 0);
     setSoulReward(habit.statRewards?.soul || 0);
@@ -101,7 +103,7 @@ export const HabitEditForm: React.FC<HabitEditFormProps> = ({
         name: name.trim(),
         description: description.trim() || undefined,
         targetFrequency,
-        categories: ['body'], // Default category for habits
+        categories: categories,
         statRewards,
       });
     }
@@ -170,6 +172,8 @@ export const HabitEditForm: React.FC<HabitEditFormProps> = ({
     { value: 'monthly', label: 'MONTHLY' },
   ];
 
+  const allCategories = categoryService.getAllCategories();
+
   const handleCategoryAdded = (newCategory: {
     name: string;
     icon: string;
@@ -213,70 +217,7 @@ export const HabitEditForm: React.FC<HabitEditFormProps> = ({
           />
         </div>
 
-        {!convertToTask && (
-          <div className={styles.prioritySelector}>
-            <label className={styles.priorityLabel}>Frequency:</label>
-            <div className={styles.priorityButtons}>
-              {frequencyOptions.map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  className={`${styles.priorityButton} ${targetFrequency === option.value ? styles.priorityButtonActive : ''}`}
-                  onClick={() =>
-                    setTargetFrequency(option.value as 'daily' | 'weekly' | 'monthly')
-                  }
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {convertToTask && (
-          <>
-            <div className={styles.prioritySelector}>
-              <label className={styles.priorityLabel}>Priority:</label>
-              <div className={styles.priorityButtons}>
-                {priorityOptions.map((option) => (
-                  <button
-                    key={option.value}
-                    type="button"
-                    className={`${styles.priorityButton} ${priority === option.value ? styles.priorityButtonActive : ''}`}
-                    onClick={() =>
-                      setPriority(option.value as 'low' | 'medium' | 'high')
-                    }
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className={styles.difficultySelector}>
-              <label className={styles.difficultyLabel}>Difficulty:</label>
-              <div className={styles.difficultyButtons}>
-                {fibonacciXp.map((_, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    className={`${styles.difficultyButton} ${difficulty === idx ? styles.difficultyButtonActive : ''}`}
-                    style={{
-                      background:
-                        difficulty === idx
-                          ? `var(--difficulty-${idx + 1})`
-                          : undefined,
-                    }}
-                    onClick={() => setDifficulty(idx)}
-                  >
-                    {idx}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </>
-        )}
-
+        {/* Core Attributes - First */}
         <div className={styles.coreAttributesSection}>
           <label className={styles.coreAttributesLabel}>Core Attributes:</label>
           <div className={styles.coreAttributesInputs}>
@@ -326,6 +267,118 @@ export const HabitEditForm: React.FC<HabitEditFormProps> = ({
           </div>
         </div>
 
+        {/* Category Selector - Second */}
+        <div className={styles.categorySelector}>
+          <div className={styles.categoryHeader}>
+            <div className={styles.categoryHeaderContent}>
+              <label className={styles.categoryLabel}>Category:</label>
+              <button
+                type="button"
+                className={styles.addCategoryButton}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsCategoryModalOpen(true);
+                }}
+              >
+                + Add Category
+              </button>
+            </div>
+          </div>
+          <div className={styles.categoryButtons}>
+            {allCategories.map((option) => (
+              <button
+                key={option.name}
+                type="button"
+                className={`${styles.categoryButton} ${categories.includes(option.name) ? styles.categoryButtonActive : ''}`}
+                style={{
+                  borderColor: option.color,
+                  backgroundColor:
+                    categories.includes(option.name) ? option.color : 'transparent',
+                  color:
+                    categories.includes(option.name)
+                      ? 'var(--color-bg-primary)'
+                      : 'var(--color-text-primary)',
+                }}
+                onClick={() => {
+                  const newCategories = [...categories];
+                  if (newCategories.includes(option.name)) {
+                    newCategories.splice(newCategories.indexOf(option.name), 1);
+                  } else {
+                    newCategories.push(option.name);
+                  }
+                  setCategories(newCategories);
+                }}
+              >
+                {option.icon}{' '}
+                {option.name.charAt(0).toUpperCase() + option.name.slice(1)}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Priority Selector - Third */}
+        <div className={styles.prioritySelector}>
+          <label className={styles.priorityLabel}>Priority:</label>
+          <div className={styles.priorityButtons}>
+            {priorityOptions.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                className={`${styles.priorityButton} ${priority === option.value ? styles.priorityButtonActive : ''}`}
+                onClick={() =>
+                  setPriority(option.value as 'low' | 'medium' | 'high')
+                }
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Difficulty Selector - Fourth */}
+        <div className={styles.difficultySelector}>
+          <label className={styles.difficultyLabel}>Difficulty:</label>
+          <div className={styles.difficultyButtons}>
+            {fibonacciXp.map((_, idx) => (
+              <button
+                key={idx}
+                type="button"
+                className={`${styles.difficultyButton} ${difficulty === idx ? styles.difficultyButtonActive : ''}`}
+                style={{
+                  background:
+                    difficulty === idx
+                      ? `var(--difficulty-${idx + 1})`
+                      : undefined,
+                }}
+                onClick={() => setDifficulty(idx)}
+              >
+                {idx}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Frequency Selector - Last (only visible when not converting to task) */}
+        {!convertToTask && (
+          <div className={styles.prioritySelector}>
+            <label className={styles.priorityLabel}>Frequency:</label>
+            <div className={styles.priorityButtons}>
+              {frequencyOptions.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  className={`${styles.priorityButton} ${targetFrequency === option.value ? styles.priorityButtonActive : ''}`}
+                  onClick={() =>
+                    setTargetFrequency(option.value as 'daily' | 'weekly' | 'monthly')
+                  }
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Convert to Task section */}
         <div className={styles.habitSection}>
           <button
@@ -337,17 +390,17 @@ export const HabitEditForm: React.FC<HabitEditFormProps> = ({
               setConvertToTask(!convertToTask);
             }}
           >
-            🔄 Convert to Task
+            🔄 Make it a Habit
           </button>
         </div>
 
         <div className={styles.buttonGroup}>
-          <button 
-            type="submit" 
-            className={`${styles.submitButton} ${convertToTask ? styles.submitButtonTask : styles.submitButtonHabit}`}
-          >
-            {convertToTask ? 'Add Task' : 'Update Habit'}
-          </button>
+                            <button 
+                    type="submit" 
+                    className={`${styles.submitButton} ${convertToTask ? styles.submitButtonTask : styles.submitButtonHabit}`}
+                  >
+                    {convertToTask ? 'Convert to Task' : 'Update Habit'}
+                  </button>
           <button
             type="button"
             className={`${styles.cancelButton} ${isCanceling ? styles.animating : ''}`}

@@ -3,6 +3,7 @@ import { Habit } from '../types';
 import { useHabits } from '../hooks/useHabits';
 import { useUser } from '../hooks/useUser';
 import { HabitEditForm } from './HabitEditForm';
+import { habitService } from '../services/habitService';
 import styles from './HabitCard.module.css';
 
 interface HabitCardProps {
@@ -10,20 +11,13 @@ interface HabitCardProps {
 }
 
 export const HabitCard: React.FC<HabitCardProps> = ({ habit }) => {
-  const { completeHabit, deleteHabit } = useHabits();
+  const { completeHabit } = useHabits();
   const { addStatRewards, addExperience } = useUser();
   const [isCompleting, setIsCompleting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
   const canCompleteToday = () => {
-    if (!habit.lastCompleted) return true;
-    
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const lastCompleted = new Date(habit.lastCompleted);
-    lastCompleted.setHours(0, 0, 0, 0);
-    
-    return today.getTime() !== lastCompleted.getTime();
+    return !habitService.isCompletedToday(habit);
   };
 
   const handleComplete = async () => {
@@ -44,12 +38,6 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit }) => {
       }
       setIsCompleting(false);
     }, 300);
-  };
-
-  const handleDelete = () => {
-    if (window.confirm(`Are you sure you want to delete the habit "${habit.name}"?`)) {
-      deleteHabit(habit.id);
-    }
   };
 
   const handleEdit = () => {
@@ -114,14 +102,6 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit }) => {
             title="Edit habit"
           >
             ✏
-          </button>
-
-          <button
-            onClick={handleDelete}
-            className={styles.deleteButton}
-            title="Delete habit"
-          >
-            🗑
           </button>
         </div>
       </div>

@@ -97,6 +97,7 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({
         name: title.trim(),
         description: description.trim() || undefined,
         targetFrequency: selectedFrequency,
+        categories: categories,
         statRewards: {
           body: bodyReward || undefined,
           mind: mindReward || undefined,
@@ -252,93 +253,7 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({
           />
         </div>
 
-        <div className={styles.categorySelector}>
-          <div className={styles.categoryHeader}>
-            <div className={styles.categoryHeaderContent}>
-              <label className={styles.categoryLabel}>Category:</label>
-              <button
-                type="button"
-                className={styles.addCategoryButton}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsCategoryModalOpen(true);
-                }}
-              >
-                + Add Category
-              </button>
-            </div>
-          </div>
-          <div className={styles.categoryButtons}>
-            {categoriesForTaskEditing.map((option) => (
-              <button
-                key={option.name}
-                type="button"
-                className={`${styles.categoryButton} ${categories.includes(option.name) ? styles.categoryButtonActive : ''}`}
-                style={{
-                  borderColor: option.color,
-                  backgroundColor:
-                    categories.includes(option.name) ? option.color : 'transparent',
-                  color:
-                    categories.includes(option.name)
-                      ? 'var(--color-bg-primary)'
-                      : 'var(--color-text-primary)',
-                }}
-                onClick={() => {
-                  const newCategories = [...categories];
-                  if (newCategories.includes(option.name)) {
-                    newCategories.splice(newCategories.indexOf(option.name), 1);
-                  } else {
-                    newCategories.push(option.name);
-                  }
-                  setCategories(newCategories);
-                }}
-              >
-                {option.icon}{' '}
-                {option.name.charAt(0).toUpperCase() + option.name.slice(1)}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className={styles.prioritySelector}>
-          <label className={styles.priorityLabel}>Priority:</label>
-          <div className={styles.priorityButtons}>
-            {priorityOptions.map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                className={`${styles.priorityButton} ${priority === option.value ? styles.priorityButtonActive : ''}`}
-                onClick={() =>
-                  setPriority(option.value as 'low' | 'medium' | 'high')
-                }
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className={styles.difficultySelector}>
-          <label className={styles.difficultyLabel}>Difficulty:</label>
-          <div className={styles.difficultyButtons}>
-            {fibonacciXp.map((_, idx) => (
-              <button
-                key={idx}
-                type="button"
-                className={`${styles.difficultyButton} ${difficulty === idx ? styles.difficultyButtonActive : ''}`}
-                style={{
-                  background:
-                    difficulty === idx
-                      ? `var(--difficulty-${idx + 1})`
-                      : undefined,
-                }}
-                onClick={() => setDifficulty(idx)}
-              >
-                {idx}
-              </button>
-            ))}
-          </div>
-        </div>
-
+        {/* Core Attributes - First */}
         <div className={styles.coreAttributesSection}>
           <label className={styles.coreAttributesLabel}>Core Attributes:</label>
           <div className={styles.coreAttributesInputs}>
@@ -388,6 +303,120 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({
           </div>
         </div>
 
+        {/* Category Selector - Second */}
+        <div className={styles.categorySelector}>
+          <div className={styles.categoryHeader}>
+            <div className={styles.categoryHeaderContent}>
+              <label className={styles.categoryLabel}>Category:</label>
+              <button
+                type="button"
+                className={styles.addCategoryButton}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsCategoryModalOpen(true);
+                }}
+              >
+                + Add Category
+              </button>
+            </div>
+          </div>
+          <div className={styles.categoryButtons}>
+            {categoriesForTaskEditing.map((option) => (
+              <button
+                key={option.name}
+                type="button"
+                className={`${styles.categoryButton} ${categories.includes(option.name) ? styles.categoryButtonActive : ''}`}
+                style={{
+                  borderColor: option.color,
+                  backgroundColor:
+                    categories.includes(option.name) ? option.color : 'transparent',
+                  color:
+                    categories.includes(option.name)
+                      ? 'var(--color-bg-primary)'
+                      : 'var(--color-text-primary)',
+                }}
+                onClick={() => {
+                  const newCategories = [...categories];
+                  if (newCategories.includes(option.name)) {
+                    newCategories.splice(newCategories.indexOf(option.name), 1);
+                  } else {
+                    newCategories.push(option.name);
+                  }
+                  setCategories(newCategories);
+                }}
+              >
+                {option.icon}{' '}
+                {option.name.charAt(0).toUpperCase() + option.name.slice(1)}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Priority Selector - Third */}
+        <div className={styles.prioritySelector}>
+          <label className={styles.priorityLabel}>Priority:</label>
+          <div className={styles.priorityButtons}>
+            {priorityOptions.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                className={`${styles.priorityButton} ${priority === option.value ? styles.priorityButtonActive : ''}`}
+                onClick={() =>
+                  setPriority(option.value as 'low' | 'medium' | 'high')
+                }
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Difficulty Selector - Fourth */}
+        <div className={styles.difficultySelector}>
+          <label className={styles.difficultyLabel}>Difficulty:</label>
+          <div className={styles.difficultyButtons}>
+            {fibonacciXp.map((_, idx) => (
+              <button
+                key={idx}
+                type="button"
+                className={`${styles.difficultyButton} ${difficulty === idx ? styles.difficultyButtonActive : ''}`}
+                style={{
+                  background:
+                    difficulty === idx
+                      ? `var(--difficulty-${idx + 1})`
+                      : undefined,
+                }}
+                onClick={() => setDifficulty(idx)}
+              >
+                {idx}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Frequency Selection - Only visible when Make it a Habit is selected */}
+        {makeItHabit && (
+          <div className={styles.frequencySelection}>
+            <label className={styles.frequencyLabel}>Choose frequency:</label>
+            <div className={styles.frequencyButtons}>
+              {(['daily', 'weekly', 'monthly'] as const).map((freq) => (
+                <button
+                  key={freq}
+                  type="button"
+                  className={`${styles.frequencyButton} ${selectedFrequency === freq ? styles.frequencyButtonActive : ''}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setSelectedFrequency(freq);
+                  }}
+                >
+                  {freq.charAt(0).toUpperCase() + freq.slice(1)}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Make it a Habit section */}
         <div className={styles.habitSection}>
           <button
@@ -404,34 +433,12 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({
           >
             🔄 Make it a Habit
           </button>
-          
-          {makeItHabit && (
-            <div className={styles.frequencySelection}>
-              <label className={styles.frequencyLabel}>Choose frequency:</label>
-              <div className={styles.frequencyButtons}>
-                {(['daily', 'weekly', 'monthly'] as const).map((freq) => (
-                  <button
-                    key={freq}
-                    type="button"
-                    className={`${styles.frequencyButton} ${selectedFrequency === freq ? styles.frequencyButtonActive : ''}`}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setSelectedFrequency(freq);
-                    }}
-                  >
-                    {freq.charAt(0).toUpperCase() + freq.slice(1)}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
         <div className={styles.buttonGroup}>
           <button 
             type="submit" 
-            className={styles.submitButton}
+            className={`${styles.submitButton} ${makeItHabit && selectedFrequency ? styles.submitButtonHabit : ''}`}
             disabled={makeItHabit && !selectedFrequency}
           >
             {makeItHabit && selectedFrequency ? 'Update Task & Create Habit' : 'Update Task'}

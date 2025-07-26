@@ -1,205 +1,232 @@
-# Scrypture 🚀
+# Scrypture - Habit & Task Management System
 
-*A mystical habit-tracking app with AI companion Bóbr*
+A modern, gamified habit and task management application built with React, TypeScript, and CSS Modules.
 
-![Version](https://img.shields.io/badge/version-1.1.0-blue)
-![Status](https://img.shields.io/badge/status-MVP_Development-yellow)
-![Auto-Save](https://img.shields.io/badge/auto--save-Enabled-green)
-![Last Updated](https://img.shields.io/badge/last_updated-2024-01-15-orange)
+## 🎯 Features
 
-## ✨ Features
+### Core Functionality
+- **Habit Management**: Create, edit, complete, and track habits with streak counting
+- **Task Management**: Create, edit, and complete tasks with priority and difficulty levels
+- **Category System**: Organize habits and tasks with customizable categories
+- **Stat Rewards**: Earn Body, Mind, and Soul stats through habit completion
+- **XP System**: Gain experience points based on task priority and difficulty
+- **Data Persistence**: All data saved to localStorage for offline functionality
 
-- **Task Management**: Create, edit, delete, and track tasks with auto-save
-- **Habit Tracking**: Daily habit check-ins with streak counting and persistence
-- **Progress System**: Experience points and level progression with real-time saving
-- **Bóbr Companion**: AI-powered guidance and motivation
-- **Mystical Theme**: Beautiful UI with magical aesthetics
-- **Auto-Save**: Real-time data persistence with visual feedback
-- **Data Management**: Backup, restore, export, and import functionality
+### Habit System
+- **Frequency Options**: Daily, Weekly, Monthly habits
+- **Streak Tracking**: Automatic streak calculation and best streak recording
+- **Stat Rewards**: Earn Body, Mind, and Soul stats on completion
+- **Convert to Task**: Transform habits into one-time tasks
+- **Visual Feedback**: Gold borders for active habits, blue habit buttons
 
-## 🛠️ Tech Stack
-
-- **Frontend**: React 18 + TypeScript
-- **Styling**: CSS Modules + CSS Variables
-- **State Management**: React Context + Enhanced Local Storage
-- **Data Persistence**: Auto-save system with visual feedback
-- **Build Tool**: Vite
-- **Testing**: Jest + React Testing Library
-
-## 🚀 Quick Start
-
-### Prerequisites
-
-- Node.js (v18 or higher)
-- npm (v9 or higher)
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/your-org/scrypture.git
-   cd scrypture
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Start development server**
-   ```bash
-   npm run dev -- --host
-   ```
-
-4. **Open your browser**
-   Navigate to `http://localhost:3000`
-
-## 🔄 Auto-Save System
-
-Scrypture features a comprehensive auto-save system that ensures your data is never lost:
-
-### **Real-Time Persistence**
-- ✅ **Instant Saves**: All changes are saved immediately
-- ✅ **Visual Feedback**: See save status in real-time
-- ✅ **Non-blocking**: UI remains responsive during saves
-- ✅ **Error Handling**: Graceful handling of save failures
-
-### **Auto-Save Triggers**
-- **Task Operations**: Create, update, toggle, delete tasks
-- **Habit Operations**: Create, update, complete, delete habits
-- **User Operations**: Profile updates, experience points, achievements
-
-### **Data Management**
-- **Backup/Restore**: Create and restore from backups
-- **Export/Import**: Download and upload data as JSON
-- **Storage Monitoring**: Track usage and limits
-- **Clear Data**: Reset all data when needed
-
-## 📚 Documentation
-
-- [Quick Start Guide](Docs/quick-start-guide.md) - Get started in 30 minutes
-- [Database Setup Guide](Docs/database-setup-guide.md) - Complete persistence guide
-- [Development Guide](Docs/06-development-guide.md) - Detailed development instructions
-- [API Reference](Docs/04-api-reference.md) - Component and service documentation
-- [MVP Features](Docs/02-mvp-features.md) - Feature specifications
+### Task System
+- **Priority Levels**: Low, Medium, High priority tasks
+- **Difficulty Scale**: 0-9 difficulty levels with Fibonacci XP rewards
+- **Category Assignment**: Organize tasks by custom categories
+- **Completion Tracking**: Mark tasks as complete with rewards
 
 ## 🧪 Testing
 
-Scrypture includes comprehensive testing tools for the service layer, ensuring data persistence and auto-save functionality are rock-solid.
+### Comprehensive Test Suite
+The application includes a complete test suite covering all major functionality:
 
-### **Test Coverage: 95% Complete**
-- ✅ **Task Service Tests** - 25 tests (100% passing)
-- ✅ **Habit Service Tests** - 25 tests (100% passing)  
-- ✅ **User Service Tests** - 30 tests (100% passing)
-- ✅ **Storage Service Tests** - 20 tests (90% passing)
-- ✅ **Integration Tests** - 15 tests (80% passing)
-- ✅ **Component Tests** - 16 tests (100% passing)
+#### Test Coverage
+- **17 Test Cases** covering all core functionality
+- **Habit Creation**: TaskForm integration, frequency selection, list verification
+- **Habit Completion**: Streak tracking, stat rewards, frequency limits
+- **Habit Editing**: Name/description updates, category changes, priority/difficulty modification
+- **Form Consistency**: Field ordering and validation
+- **UI/UX Testing**: Visual elements, responsive design, animations
+- **Data Persistence**: localStorage integration, data recovery
+- **Error Handling**: Invalid inputs, missing fields, edge cases
+- **Performance**: Large dataset handling, smooth animations
 
-### **Critical Functionality Tested**
-- 🎯 **Auto-save System** - Real-time data persistence
-- 🎯 **Error Handling** - Storage failures, quota exceeded
-- 🎯 **Performance** - Large datasets (1000+ items)
-- 🎯 **Data Validation** - Structure validation and sanitization
-- 🎯 **Cross-service Integration** - Multi-service workflows
+#### Test Files
+- `src/__tests__/habit-system-simple.test.tsx` - Comprehensive habit system tests
+- `src/__tests__/habit-system.test.tsx` - Additional habit functionality tests
 
-### **Running Tests**
+#### Running Tests
 ```bash
-# Run all tests
-npm run test
-
-# Run service layer tests only
-npm test -- --testPathPattern="services"
-
-# Run specific service tests
-npm test -- --testPathPattern="taskService"
-npm test -- --testPathPattern="habitService"
-npm test -- --testPathPattern="userService"
-
-# Run with coverage
-npm test -- --coverage --testPathPattern="services"
-
-# Watch mode
-npm run test:watch
+npm test                    # Run all tests
+npm test -- --watch        # Run tests in watch mode
+npm test habit-system      # Run specific test file
 ```
 
-### **Test Documentation**
-See [Testing Documentation](src/__tests__/README.md) for detailed information about the testing tools and best practices.
+## 🚀 Getting Started
 
-## 🔧 Development
+### Prerequisites
+- Node.js (v14 or higher)
+- npm or yarn
 
+### Installation
 ```bash
-npm run dev          # Start development server
-npm run build        # Build for production
-npm run lint         # Check code quality
-npm run type-check   # TypeScript check
-npm run format       # Format code
+git clone <repository-url>
+cd Scrypture
+npm install
+```
+
+### Development
+```bash
+npm start
+```
+The application will open at `http://localhost:3000`
+
+### Building for Production
+```bash
+npm run build
 ```
 
 ## 📁 Project Structure
 
 ```
-scrypture/
-├── src/
-│   ├── components/     # React components
-│   │   ├── DataManager.tsx        # Data management UI
-│   │   ├── AutoSaveIndicator.tsx  # Save status feedback
-│   │   └── ...                    # Other components
-│   ├── hooks/         # Custom React hooks with auto-save
-│   │   ├── useTasks.tsx           # Task management
-│   │   ├── useHabits.tsx          # Habit tracking
-│   │   └── useUser.tsx            # User data
-│   ├── services/      # Business logic and persistence
-│   │   ├── storageService.ts      # Enhanced storage
-│   │   ├── taskService.ts         # Task operations
-│   │   ├── habitService.ts        # Habit operations
-│   │   └── userService.ts         # User operations
-│   ├── types/         # TypeScript definitions
-│   ├── utils/         # Helper functions
-│   └── styles/        # CSS modules
-├── public/            # Static assets
-├── docs/              # Documentation
-└── tests/             # Test files
+src/
+├── components/           # React components
+│   ├── HabitEditForm.tsx    # Habit editing interface
+│   ├── HabitCard.tsx        # Individual habit display
+│   ├── HabitList.tsx        # Habit list with categories
+│   ├── TaskForm.tsx         # Task/habit creation form
+│   └── ...
+├── hooks/               # Custom React hooks
+│   ├── useHabits.tsx       # Habit state management
+│   ├── useTasks.tsx        # Task state management
+│   └── useUser.tsx         # User state management
+├── services/            # Business logic services
+│   ├── habitService.ts     # Habit CRUD operations
+│   ├── taskService.ts      # Task CRUD operations
+│   ├── categoryService.ts  # Category management
+│   └── storageService.ts   # localStorage operations
+├── types/               # TypeScript type definitions
+│   └── index.ts            # Habit, Task interfaces
+└── __tests__/           # Test files
+    ├── habit-system-simple.test.tsx
+    └── habit-system.test.tsx
 ```
 
-## 🔄 Data Persistence Features
+## 🎮 Usage Guide
 
-### **Enhanced Local Storage**
-- **Data Validation**: All data is validated before storage
-- **Error Handling**: Graceful handling of storage errors
-- **Cross-browser Support**: Works across different browsers
-- **Type Safety**: Full TypeScript support
+### Creating Habits
+1. Click "Create Task" button
+2. Fill in habit name and description
+3. Select "Make it a Habit" toggle
+4. Choose frequency (Daily/Weekly/Monthly)
+5. Set categories, priority, and difficulty
+6. Click "Create Task" to save
 
-### **Auto-Save System**
-- **Immediate Persistence**: All changes saved instantly
-- **Visual Feedback**: Real-time save status indicators
-- **Performance Optimized**: Non-blocking save operations
-- **State Consistency**: UI remains responsive during saves
+### Completing Habits
+1. Click the complete button (✓) on any habit
+2. Verify the gold border disappears
+3. Check that streak increases
+4. Confirm stat rewards are awarded
 
-### **Data Management**
-- **Backup System**: Automatic and manual backup creation
-- **Export/Import**: JSON data export and import
-- **Storage Monitoring**: Usage statistics and limits
-- **Clear Data**: Reset functionality with confirmation
+### Editing Habits
+1. Click the edit button on any habit
+2. Modify name, description, or attributes
+3. Change categories, priority, or difficulty
+4. Update frequency or convert to task
+5. Click "Update Habit" to save changes
+
+### Managing Categories
+1. Click "+ Add Category" in any form
+2. Enter category name, icon, and color
+3. Categories are automatically saved and available
+
+## 🔧 Technical Details
+
+### State Management
+- **React Context**: Global state management for habits, tasks, and user data
+- **Local State**: Component-level state for forms and UI interactions
+- **Persistence**: Automatic localStorage synchronization
+
+### Data Models
+```typescript
+interface Habit {
+  id: string;
+  name: string;
+  description?: string;
+  streak: number;
+  bestStreak: number;
+  lastCompleted?: Date;
+  createdAt: Date;
+  targetFrequency: 'daily' | 'weekly' | 'monthly';
+  categories: string[];
+  statRewards?: {
+    body?: number;
+    mind?: number;
+    soul?: number;
+    xp?: number;
+  };
+}
+```
+
+### Performance Optimizations
+- **Memoization**: React.memo for expensive components
+- **Lazy Loading**: Component lazy loading for large lists
+- **Efficient Rendering**: Optimized re-renders with proper dependencies
+- **Memory Management**: Proper cleanup of event listeners and timers
+
+## 🎨 Styling
+
+### CSS Modules
+- Modular CSS for component-specific styling
+- CSS custom properties for theming
+- Responsive design with mobile-first approach
+- Smooth animations and transitions
+
+### Design System
+- **Colors**: CSS custom properties for consistent theming
+- **Typography**: Consistent font hierarchy and spacing
+- **Components**: Reusable UI components with consistent styling
+- **Animations**: Smooth transitions and micro-interactions
+
+## 🐛 Troubleshooting
+
+### Common Issues
+1. **Tests Failing**: Ensure all dependencies are installed with `npm install`
+2. **Data Not Persisting**: Check browser localStorage support and permissions
+3. **Performance Issues**: Verify large datasets are handled efficiently
+4. **Styling Issues**: Ensure CSS modules are properly configured
+
+### Debug Mode
+```bash
+npm start -- --debug
+```
+
+## 📈 Future Enhancements
+
+### Planned Features
+- **Data Export/Import**: Backup and restore functionality
+- **Advanced Analytics**: Detailed habit and task statistics
+- **Social Features**: Share habits and achievements
+- **Mobile App**: Native mobile application
+- **Cloud Sync**: Multi-device synchronization
+
+### Performance Improvements
+- **Virtual Scrolling**: For large habit/task lists
+- **Service Workers**: Offline functionality
+- **Progressive Web App**: Installable web application
 
 ## 🤝 Contributing
 
+### Development Setup
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'feat: add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+2. Create a feature branch
+3. Make your changes
+4. Add tests for new functionality
+5. Submit a pull request
+
+### Testing Guidelines
+- Write tests for all new features
+- Ensure existing tests continue to pass
+- Follow the established testing patterns
+- Test both success and error scenarios
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## 🙏 Acknowledgments
 
-- Inspired by the mystical and magical
-- Built with modern web technologies
-- Designed for developer productivity
-- Enhanced with robust data persistence
-
----
-
-*"Every great developer started with their first commit. Welcome to the Scrypture community!"* 🚀✨ 
+- React team for the amazing framework
+- TypeScript for type safety
+- Testing Library for excellent testing utilities
+- CSS Modules for modular styling 
