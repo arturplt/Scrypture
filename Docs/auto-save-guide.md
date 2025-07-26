@@ -173,6 +173,58 @@ Auto-save is triggered on the following card actions:
 - **Reward Integration**: Auto-save works with reward distribution system
 - **Edit Mode Integration**: Auto-save indicator shows status during edit operations
 
+## HabitForm Auto-Save Implementation
+
+### Features Implemented
+
+1. **Auto-Save Indicator**: The HabitForm component displays an auto-save indicator in the form header
+2. **Real-time Feedback**: Users can see when their habit creation/editing is being saved
+3. **Form Validation Integration**: Auto-save works alongside comprehensive form validation
+4. **Dual Mode Support**: Handles both new habit creation and existing habit editing
+
+### Technical Implementation
+
+#### Component Structure
+```tsx
+// HabitForm.tsx
+import { AutoSaveIndicator } from './AutoSaveIndicator';
+import { useHabits } from '../hooks/useHabits';
+
+export const HabitForm: React.FC<HabitFormProps> = ({ onClose, habit }) => {
+  const { addHabit, updateHabit, isSaving } = useHabits();
+  
+  return (
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <div className={styles.headerContent}>
+          <h2 className={styles.title}>
+            {isEditing ? 'Edit Habit' : 'Create New Habit'}
+          </h2>
+          <AutoSaveIndicator isSaving={isSaving} />
+        </div>
+        {/* Close button */}
+      </div>
+      {/* Form content */}
+    </div>
+  );
+};
+```
+
+#### Auto-Save Triggers
+
+Auto-save is triggered on the following form actions:
+
+1. **New Habit Creation** - `addHabit()` function with validation
+2. **Existing Habit Updates** - `updateHabit()` function with validation
+3. **Form Validation** - Prevents submission with invalid data while maintaining auto-save
+
+### User Experience
+
+- **Form Header Indicator**: Auto-save status visible at the top of the form
+- **Validation Integration**: Auto-save works alongside comprehensive form validation
+- **Dual Mode Support**: Seamlessly handles both creation and editing modes
+- **Error Handling**: Clear error messages with auto-save feedback
+
 ## Testing
 
 ### Test Coverage
@@ -238,6 +290,29 @@ describe('HabitCard', () => {
 
   it('opens edit form when edit button is clicked', () => {
     // Tests edit integration with auto-save
+  });
+
+  // Additional test cases...
+});
+```
+
+```tsx
+// HabitForm.test.tsx
+describe('HabitForm', () => {
+  it('renders habit form with auto-save indicator for new habit', () => {
+    // Tests that auto-save indicator is present
+  });
+
+  it('creates new habit and triggers auto-save', () => {
+    // Tests habit creation with auto-save
+  });
+
+  it('updates existing habit and triggers auto-save', () => {
+    // Tests habit editing with auto-save
+  });
+
+  it('handles form validation with auto-save', () => {
+    // Tests validation integration with auto-save
   });
 
   // Additional test cases...

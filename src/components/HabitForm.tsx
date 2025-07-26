@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useHabits } from '../hooks/useHabits';
 import { Habit } from '../types';
+import { AutoSaveIndicator } from './AutoSaveIndicator';
 import styles from './HabitForm.module.css';
 
 interface HabitFormProps {
@@ -9,7 +10,7 @@ interface HabitFormProps {
 }
 
 export const HabitForm: React.FC<HabitFormProps> = ({ onClose, habit }) => {
-  const { addHabit, updateHabit } = useHabits();
+  const { addHabit, updateHabit, isSaving } = useHabits();
   const isEditing = !!habit;
 
   const [formData, setFormData] = useState({
@@ -54,6 +55,7 @@ export const HabitForm: React.FC<HabitFormProps> = ({ onClose, habit }) => {
       name: formData.name.trim(),
       description: formData.description.trim() || undefined,
       targetFrequency: formData.targetFrequency,
+      categories: habit?.categories || ['body'], // Default to body category
       statRewards: {
         body: formData.statRewards.body || undefined,
         mind: formData.statRewards.mind || undefined,
@@ -100,9 +102,12 @@ export const HabitForm: React.FC<HabitFormProps> = ({ onClose, habit }) => {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h2 className={styles.title}>
-          {isEditing ? 'Edit Habit' : 'Create New Habit'}
-        </h2>
+        <div className={styles.headerContent}>
+          <h2 className={styles.title}>
+            {isEditing ? 'Edit Habit' : 'Create New Habit'}
+          </h2>
+          <AutoSaveIndicator isSaving={isSaving} />
+        </div>
         <button
           onClick={onClose}
           className={styles.closeButton}
