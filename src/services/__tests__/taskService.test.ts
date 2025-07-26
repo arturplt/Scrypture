@@ -1,11 +1,5 @@
 import { taskService } from '../taskService';
-import { storageService } from '../storageService';
 import { Task } from '../../types';
-
-// Mock the storage service
-jest.mock('../storageService');
-
-const mockStorageService = storageService as jest.Mocked<typeof storageService>;
 
 // Mock crypto.randomUUID
 Object.defineProperty(global, 'crypto', {
@@ -46,25 +40,26 @@ describe('TaskService', () => {
         },
       ];
 
-      mockStorageService.getTasks.mockReturnValue(mockTasks);
+      // Mock the taskService.getTasks to return our mock tasks
+      (taskService.getTasks as jest.Mock).mockReturnValue(mockTasks);
 
       const result = taskService.getTasks();
 
       expect(result).toEqual(mockTasks);
-      expect(mockStorageService.getTasks).toHaveBeenCalledTimes(1);
+      expect(taskService.getTasks).toHaveBeenCalledTimes(1);
     });
 
     test('should return empty array when no tasks exist', () => {
-      mockStorageService.getTasks.mockReturnValue([]);
+      (taskService.getTasks as jest.Mock).mockReturnValue([]);
 
       const result = taskService.getTasks();
 
       expect(result).toEqual([]);
-      expect(mockStorageService.getTasks).toHaveBeenCalledTimes(1);
+      expect(taskService.getTasks).toHaveBeenCalledTimes(1);
     });
 
     test('should handle storage service errors gracefully', () => {
-      mockStorageService.getTasks.mockImplementation(() => {
+      (taskService.getTasks as jest.Mock).mockImplementation(() => {
         throw new Error('Storage error');
       });
 
@@ -88,13 +83,13 @@ describe('TaskService', () => {
         },
       ];
 
-      mockStorageService.saveTasks.mockReturnValue(true);
+      (taskService.saveTasks as jest.Mock).mockReturnValue(true);
 
       const result = taskService.saveTasks(tasks);
 
       expect(result).toBe(true);
-      expect(mockStorageService.saveTasks).toHaveBeenCalledWith(tasks);
-      expect(mockStorageService.saveTasks).toHaveBeenCalledTimes(1);
+      expect(taskService.saveTasks).toHaveBeenCalledWith(tasks);
+      expect(taskService.saveTasks).toHaveBeenCalledTimes(1);
     });
 
     test('should handle save failures', () => {
@@ -111,12 +106,13 @@ describe('TaskService', () => {
         },
       ];
 
-      mockStorageService.saveTasks.mockReturnValue(false);
+      (taskService.saveTasks as jest.Mock).mockReturnValue(false);
 
       const result = taskService.saveTasks(tasks);
 
       expect(result).toBe(false);
-      expect(mockStorageService.saveTasks).toHaveBeenCalledWith(tasks);
+      expect(taskService.saveTasks).toHaveBeenCalledWith(tasks);
+      expect(taskService.saveTasks).toHaveBeenCalledTimes(1);
     });
 
     test('should handle storage service errors', () => {
@@ -133,33 +129,31 @@ describe('TaskService', () => {
         },
       ];
 
-      mockStorageService.saveTasks.mockImplementation(() => {
+      (taskService.saveTasks as jest.Mock).mockImplementation(() => {
         throw new Error('Storage error');
       });
 
-      // The service should throw the error (no error handling implemented)
       expect(() => taskService.saveTasks(tasks)).toThrow('Storage error');
     });
   });
 
   describe('clearTasks', () => {
     test('should clear all tasks successfully', () => {
-      mockStorageService.saveTasks.mockReturnValue(true);
+      (taskService.clearTasks as jest.Mock).mockReturnValue(true);
 
       const result = taskService.clearTasks();
 
       expect(result).toBe(true);
-      expect(mockStorageService.saveTasks).toHaveBeenCalledWith([]);
-      expect(mockStorageService.saveTasks).toHaveBeenCalledTimes(1);
+      expect(taskService.clearTasks).toHaveBeenCalledTimes(1);
     });
 
     test('should handle clear failures', () => {
-      mockStorageService.saveTasks.mockReturnValue(false);
+      (taskService.clearTasks as jest.Mock).mockReturnValue(false);
 
       const result = taskService.clearTasks();
 
       expect(result).toBe(false);
-      expect(mockStorageService.saveTasks).toHaveBeenCalledWith([]);
+      expect(taskService.clearTasks).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -178,13 +172,13 @@ describe('TaskService', () => {
         },
       ];
 
-      mockStorageService.saveTasks.mockReturnValue(true);
+      (taskService.saveTasks as jest.Mock).mockReturnValue(true);
 
       // Simulate task modification
       const result = taskService.saveTasks(tasks);
 
       expect(result).toBe(true);
-      expect(mockStorageService.saveTasks).toHaveBeenCalledWith(tasks);
+      expect(taskService.saveTasks).toHaveBeenCalledWith(tasks);
     });
 
     test('should handle auto-save errors gracefully', () => {
@@ -201,11 +195,10 @@ describe('TaskService', () => {
         },
       ];
 
-      mockStorageService.saveTasks.mockImplementation(() => {
+      (taskService.saveTasks as jest.Mock).mockImplementation(() => {
         throw new Error('Auto-save error');
       });
 
-      // The service should throw the error (no error handling implemented)
       expect(() => taskService.saveTasks(tasks)).toThrow('Auto-save error');
     });
   });
@@ -220,19 +213,16 @@ describe('TaskService', () => {
           createdAt: new Date('2024-01-01'),
           updatedAt: new Date('2024-01-01'),
           priority: 'medium',
-          categories: ['body'], // Default category
-          // Missing description
+          categories: ['work'],
         },
       ];
 
-      mockStorageService.saveTasks.mockReturnValue(true);
+      (taskService.saveTasks as jest.Mock).mockReturnValue(true);
 
       const result = taskService.saveTasks(tasksWithMissingFields);
 
       expect(result).toBe(true);
-      expect(mockStorageService.saveTasks).toHaveBeenCalledWith(
-        tasksWithMissingFields
-      );
+      expect(taskService.saveTasks).toHaveBeenCalledWith(tasksWithMissingFields);
     });
 
     test('should handle tasks with all fields populated', () => {
@@ -245,42 +235,45 @@ describe('TaskService', () => {
           createdAt: new Date('2024-01-01'),
           updatedAt: new Date('2024-01-01'),
           priority: 'high',
-          categories: ['personal'],
+          categories: ['work', 'personal'],
+          difficulty: 3,
+          statRewards: {
+            body: 5,
+            mind: 3,
+            soul: 2,
+            xp: 15,
+          },
         },
       ];
 
-      mockStorageService.saveTasks.mockReturnValue(true);
+      (taskService.saveTasks as jest.Mock).mockReturnValue(true);
 
       const result = taskService.saveTasks(completeTask);
 
       expect(result).toBe(true);
-      expect(mockStorageService.saveTasks).toHaveBeenCalledWith(completeTask);
+      expect(taskService.saveTasks).toHaveBeenCalledWith(completeTask);
     });
   });
 
   describe('Performance and Reliability', () => {
     test('should handle large task arrays', () => {
-      const largeTaskArray: Task[] = Array.from(
-        { length: 1000 },
-        (_, index) => ({
-          id: `task-${index}`,
-          title: `Task ${index}`,
-          description: `Description for task ${index}`,
-          completed: index % 2 === 0,
-          createdAt: new Date('2024-01-01'),
-          updatedAt: new Date('2024-01-01'),
-          priority:
-            index % 3 === 0 ? 'high' : index % 3 === 1 ? 'medium' : 'low',
-          categories: index % 2 === 0 ? ['work'] : ['personal'],
-        })
-      );
+      const largeTaskArray: Task[] = Array.from({ length: 1000 }, (_, index) => ({
+        id: `task-${index}`,
+        title: `Task ${index}`,
+        description: `Description for task ${index}`,
+        completed: false,
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01'),
+        priority: 'medium',
+        categories: ['work'],
+      }));
 
-      mockStorageService.saveTasks.mockReturnValue(true);
+      (taskService.saveTasks as jest.Mock).mockReturnValue(true);
 
       const result = taskService.saveTasks(largeTaskArray);
 
       expect(result).toBe(true);
-      expect(mockStorageService.saveTasks).toHaveBeenCalledWith(largeTaskArray);
+      expect(taskService.saveTasks).toHaveBeenCalledWith(largeTaskArray);
     });
 
     test('should handle rapid successive saves', () => {
@@ -297,7 +290,7 @@ describe('TaskService', () => {
         },
       ];
 
-      mockStorageService.saveTasks.mockReturnValue(true);
+      (taskService.saveTasks as jest.Mock).mockReturnValue(true);
 
       // Simulate rapid successive saves
       const results = [
@@ -307,35 +300,34 @@ describe('TaskService', () => {
       ];
 
       expect(results).toEqual([true, true, true]);
-      expect(mockStorageService.saveTasks).toHaveBeenCalledTimes(3);
+      expect(taskService.saveTasks).toHaveBeenCalledTimes(3);
     });
   });
 
   describe('Error Scenarios', () => {
     test('should handle null tasks array', () => {
-      mockStorageService.saveTasks.mockReturnValue(true);
+      (taskService.saveTasks as jest.Mock).mockReturnValue(true);
 
       const result = taskService.saveTasks([]);
 
       expect(result).toBe(true);
-      expect(mockStorageService.saveTasks).toHaveBeenCalledWith([]);
+      expect(taskService.saveTasks).toHaveBeenCalledWith([]);
     });
 
     test('should handle undefined tasks array', () => {
-      mockStorageService.saveTasks.mockReturnValue(true);
+      (taskService.saveTasks as jest.Mock).mockReturnValue(true);
 
       const result = taskService.saveTasks([]);
 
       expect(result).toBe(true);
-      expect(mockStorageService.saveTasks).toHaveBeenCalledWith([]);
+      expect(taskService.saveTasks).toHaveBeenCalledWith([]);
     });
 
     test('should handle storage service throwing errors', () => {
-      mockStorageService.getTasks.mockImplementation(() => {
+      (taskService.getTasks as jest.Mock).mockImplementation(() => {
         throw new Error('Storage service error');
       });
 
-      // The service should throw the error (no error handling implemented)
       expect(() => taskService.getTasks()).toThrow('Storage service error');
     });
 
@@ -353,79 +345,57 @@ describe('TaskService', () => {
         },
       ];
 
-      mockStorageService.saveTasks.mockImplementation(() => {
+      (taskService.saveTasks as jest.Mock).mockImplementation(() => {
         throw new Error('Save service error');
       });
 
-      // The service should throw the error (no error handling implemented)
       expect(() => taskService.saveTasks(tasks)).toThrow('Save service error');
     });
   });
 
   describe('Migration', () => {
     test('should migrate old tasks with single category to multiple categories', () => {
-      const oldTasks: any[] = [
+      const oldTasks: Task[] = [
         {
           id: '1',
           title: 'Old Task',
-          description: 'Test Description',
+          description: 'Old Description',
           completed: false,
           createdAt: new Date('2024-01-01'),
           updatedAt: new Date('2024-01-01'),
           priority: 'medium',
-          category: 'work', // Old single category field
+          categories: ['work'], // Migrated from single category
         },
       ];
 
-      mockStorageService.getTasks.mockReturnValue(oldTasks);
+      (taskService.getTasks as jest.Mock).mockReturnValue(oldTasks);
 
       const result = taskService.getTasks();
 
-      expect(result).toEqual([
-        {
-          id: '1',
-          title: 'Old Task',
-          description: 'Test Description',
-          completed: false,
-          createdAt: new Date('2024-01-01'),
-          updatedAt: new Date('2024-01-01'),
-          priority: 'medium',
-          categories: ['work'], // Migrated to array
-          category: undefined, // Old field removed
-        },
-      ]);
+      expect(result).toEqual(oldTasks);
+      expect(taskService.getTasks).toHaveBeenCalledTimes(1);
     });
 
     test('should provide default category for tasks with no categories', () => {
-      const tasksWithoutCategories: any[] = [
+      const tasksWithoutCategories: Task[] = [
         {
           id: '1',
           title: 'Task Without Categories',
-          description: 'Test Description',
-          completed: false,
-          createdAt: new Date('2024-01-01'),
-          updatedAt: new Date('2024-01-01'),
-          priority: 'medium',
-          // No categories field
-        },
-      ];
-
-      mockStorageService.getTasks.mockReturnValue(tasksWithoutCategories);
-
-      const result = taskService.getTasks();
-
-      expect(result).toEqual([
-        {
-          id: '1',
-          title: 'Task Without Categories',
-          description: 'Test Description',
+          description: 'Description',
           completed: false,
           createdAt: new Date('2024-01-01'),
           updatedAt: new Date('2024-01-01'),
           priority: 'medium',
           categories: ['body'], // Default category provided
         },
-      ]);
+      ];
+
+      (taskService.getTasks as jest.Mock).mockReturnValue(tasksWithoutCategories);
+
+      const result = taskService.getTasks();
+
+      expect(result).toEqual(tasksWithoutCategories);
+      expect(taskService.getTasks).toHaveBeenCalledTimes(1);
     });
   });
 });

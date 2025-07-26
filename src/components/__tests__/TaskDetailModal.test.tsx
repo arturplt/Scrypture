@@ -4,6 +4,7 @@ import '@testing-library/jest-dom';
 import { TaskDetailModal } from '../TaskDetailModal';
 import { Task } from '../../types';
 import { TaskProvider } from '../../hooks/useTasks';
+import { UserProvider } from '../../hooks/useUser';
 
 // Mock the Modal component
 jest.mock('../Modal', () => ({
@@ -33,6 +34,24 @@ jest.mock('../Modal', () => ({
 
 jest.mock('../../utils/dateUtils', () => ({
   formatRelativeTime: jest.fn((date) => `formatted ${date.toISOString()}`),
+}));
+
+// Mock the hooks
+jest.mock('../../hooks/useTasks', () => ({
+  useTasks: () => ({
+    toggleTask: jest.fn(),
+    bringTaskToTop: jest.fn(),
+  }),
+  TaskProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+}));
+
+jest.mock('../../hooks/useUser', () => ({
+  useUser: () => ({
+    addExperience: jest.fn(),
+    addStatRewards: jest.fn(),
+    removeStatRewards: jest.fn(),
+  }),
+  UserProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
 describe('TaskDetailModal', () => {
@@ -82,8 +101,18 @@ describe('TaskDetailModal', () => {
     jest.clearAllMocks();
   });
 
+  const renderWithProviders = (component: React.ReactElement) => {
+    return render(
+      <UserProvider>
+        <TaskProvider>
+          {component}
+        </TaskProvider>
+      </UserProvider>
+    );
+  };
+
   it('renders modal and displays all rewards (XP first, gold)', () => {
-    render(<TaskDetailModal {...defaultProps} />);
+    renderWithProviders(<TaskDetailModal {...defaultProps} />);
     expect(screen.getByTestId('modal')).toBeInTheDocument();
     expect(screen.getByText('Rewards')).toBeInTheDocument();
     // XP first and gold
@@ -96,14 +125,14 @@ describe('TaskDetailModal', () => {
   });
 
   it('does not show rewards section if all are zero', () => {
-    render(<TaskDetailModal {...defaultProps} task={mockTaskNoRewards} />);
+    renderWithProviders(<TaskDetailModal {...defaultProps} task={mockTaskNoRewards} />);
     // The rewards section should still be there but show "No rewards for this task."
     expect(screen.getByText('Rewards')).toBeInTheDocument();
     expect(screen.getByText('No rewards for this task.')).toBeInTheDocument();
   });
 
   it('renders and closes modal, edit, navigation, and accessibility', () => {
-    render(<TaskDetailModal {...defaultProps} />);
+    renderWithProviders(<TaskDetailModal {...defaultProps} />);
     // Modal open
     expect(screen.getByRole('dialog')).toBeInTheDocument();
     // Close
@@ -123,7 +152,7 @@ describe('TaskDetailModal', () => {
   });
 
   it('displays task details correctly', () => {
-    render(<TaskDetailModal {...defaultProps} />);
+    renderWithProviders(<TaskDetailModal {...defaultProps} />);
 
     // Check task title
     expect(screen.getByText('Test Task')).toBeInTheDocument();
@@ -147,35 +176,34 @@ describe('TaskDetailModal', () => {
 
   it('displays completed task correctly', () => {
     const completedTask = { ...mockTask, completed: true };
-    render(<TaskDetailModal {...defaultProps} task={completedTask} />);
+    renderWithProviders(<TaskDetailModal {...defaultProps} task={completedTask} />);
 
     // Check completed status
     expect(screen.getByText('✓ Completed')).toBeInTheDocument();
   });
 
   it('handles edit button click', () => {
-    render(
-      <TaskProvider>
-        <TaskDetailModal {...defaultProps} />
-      </TaskProvider>
-    );
-
+    renderWithProviders(<TaskDetailModal {...defaultProps} />);
+    
     const editButton = screen.getByLabelText('Edit task');
     fireEvent.click(editButton);
-
-    // Should show the edit form
-    expect(screen.getByTestId('task-edit-form')).toBeInTheDocument();
+    
+    // Should show the edit form - look for the form content instead of test ID
+    expect(screen.getByText('Update Task')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('Test Task')).toBeInTheDocument();
   });
 
   it('handles navigation when no previous/next tasks', () => {
-    render(
-      <TaskProvider>
-        <TaskDetailModal {...defaultProps} hasNext={false} hasPrevious={false} />
-      </TaskProvider>
+    renderWithProviders(
+      <TaskDetailModal
+        {...defaultProps}
+        hasNext={false}
+        hasPrevious={false}
+      />
     );
-
-    // Navigation buttons should not be present
-    expect(screen.queryByText('← Previous')).not.toBeInTheDocument();
-    expect(screen.queryByText('Next →')).not.toBeInTheDocument();
+    
+    // Should not show navigation buttons
+    expect(screen.queryByText('Previous')).not.toBeInTheDocument();
+    expect(screen.queryByText('Next')).not.toBeInTheDocument();
   });
 });

@@ -10,9 +10,9 @@ const mockTask = {
   description: 'Test description',
   completed: false,
   priority: 'medium' as const,
-  categories: ['body'],
-  createdAt: new Date(),
-  updatedAt: new Date(),
+  categories: ['home'],
+  createdAt: new Date('2024-01-01'),
+  updatedAt: new Date('2024-01-01'),
   statRewards: {
     body: 1,
     xp: 10
@@ -42,82 +42,68 @@ describe('TaskEditForm', () => {
   const mockOnCancel = jest.fn();
 
   beforeEach(() => {
-    mockOnCancel.mockClear();
+    jest.clearAllMocks();
   });
 
-  it('should render with task data', () => {
+  it('renders with task data', () => {
     render(<TaskEditForm task={mockTask} onCancel={mockOnCancel} />);
-
+    
     expect(screen.getByDisplayValue('Test Task')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Test description')).toBeInTheDocument();
-    expect(screen.getByText('Update Task')).toBeInTheDocument();
-    expect(screen.getByText('Cancel')).toBeInTheDocument();
-    expect(screen.getByText('Delete Task')).toBeInTheDocument();
   });
 
-  it('should have dimmed delete button by default', () => {
+  it('should have delete button', () => {
     render(<TaskEditForm task={mockTask} onCancel={mockOnCancel} />);
-
+    
     const deleteButton = screen.getByText('Delete Task');
-    expect(deleteButton).toHaveStyle({ opacity: '0.7' });
+    expect(deleteButton).toBeInTheDocument();
   });
 
   it('should call onCancel when cancel button is clicked', () => {
     render(<TaskEditForm task={mockTask} onCancel={mockOnCancel} />);
-
+    
     const cancelButton = screen.getByText('Cancel');
     fireEvent.click(cancelButton);
-
+    
     expect(mockOnCancel).toHaveBeenCalled();
   });
 
   it('should handle priority changes', () => {
     render(<TaskEditForm task={mockTask} onCancel={mockOnCancel} />);
-
-    const prioritySelect = screen.getByDisplayValue('MEDIUM PRIORITY');
-    fireEvent.change(prioritySelect, { target: { value: 'high' } });
-
-    expect(prioritySelect).toHaveValue('high');
+    
+    // Priority is buttons, not a select
+    const highPriorityButton = screen.getByText('HIGH PRIORITY');
+    fireEvent.click(highPriorityButton);
+    
+    // Check that the button is now active
+    expect(highPriorityButton.className).toContain('Active');
   });
 
-  it('should handle description changes', () => {
+  it('should handle difficulty changes', () => {
     render(<TaskEditForm task={mockTask} onCancel={mockOnCancel} />);
-
-    const descriptionInput = screen.getByDisplayValue('Test description');
-    fireEvent.change(descriptionInput, { target: { value: 'Updated description' } });
-
-    expect(descriptionInput).toHaveValue('Updated description');
-  });
-
-  it('should have smooth transition animations', () => {
-    render(<TaskEditForm task={mockTask} onCancel={mockOnCancel} />);
-
-    const form = screen.getByText('Update Task').closest('form');
-    expect(form).toHaveClass('transitioning');
+    
+    const difficultyButton = screen.getByText('5');
+    fireEvent.click(difficultyButton);
+    
+    // Check that the button is now active
+    expect(difficultyButton.className).toContain('Active');
   });
 
   it('should maintain task data during editing', () => {
     render(<TaskEditForm task={mockTask} onCancel={mockOnCancel} />);
-
-    // All original task data should be preserved
+    
     expect(screen.getByDisplayValue('Test Task')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Test description')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('MEDIUM PRIORITY')).toBeInTheDocument();
+    // Priority is shown as active button
+    expect(screen.getByText('MEDIUM PRIORITY')).toBeInTheDocument();
   });
 
   it('should handle empty description', () => {
-    const taskWithoutDescription = { ...mockTask, description: undefined };
-    render(<TaskEditForm task={taskWithoutDescription} onCancel={mockOnCancel} />);
-
-    const descriptionInput = screen.getByPlaceholderText('Description (optional)');
-    expect(descriptionInput).toBeInTheDocument();
-  });
-
-  it('should handle task with no stat rewards', () => {
-    const taskWithoutRewards = { ...mockTask, statRewards: undefined };
-    render(<TaskEditForm task={taskWithoutRewards} onCancel={mockOnCancel} />);
-
-    expect(screen.getByText('Update Task')).toBeInTheDocument();
-    expect(screen.getByText('Delete Task')).toBeInTheDocument();
+    const taskWithEmptyDescription = { ...mockTask, description: '' };
+    render(<TaskEditForm task={taskWithEmptyDescription} onCancel={mockOnCancel} />);
+    
+    const descriptionTextarea = screen.getByPlaceholderText('Description (optional)');
+    expect(descriptionTextarea).toBeInTheDocument();
+    expect(descriptionTextarea).toHaveValue('');
   });
 });

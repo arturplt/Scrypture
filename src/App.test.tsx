@@ -258,8 +258,7 @@ describe('App Integration Tests', () => {
 
     // Should only show one modal
     await waitFor(() => {
-      const modals = screen.getAllByText('Edit Task');
-      expect(modals).toHaveLength(1);
+      expect(screen.getByText('Edit Task')).toBeInTheDocument();
     });
   });
 
@@ -271,15 +270,15 @@ describe('App Integration Tests', () => {
     expect(screen.getByText('Study Programming')).toBeInTheDocument();
   });
 
-  it('should handle task completion', async () => {
+  it('should handle task completion', () => {
     render(<App />);
 
-    const checkbox = screen.getByRole('checkbox');
-    fireEvent.click(checkbox);
+    // Get the first checkbox (there are multiple tasks now)
+    const checkboxes = screen.getAllByRole('checkbox');
+    const firstCheckbox = checkboxes[0];
+    fireEvent.click(firstCheckbox);
 
     // Task should be marked as completed
-    await waitFor(() => {
-      expect(checkbox).toBeChecked();
-    });
+    expect(firstCheckbox).toBeChecked();
   });
 }); 

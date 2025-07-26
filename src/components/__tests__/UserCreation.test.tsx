@@ -1,21 +1,29 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import { UserCreation } from '../UserCreation';
-import { UserProvider } from '../../hooks/useUser';
 
-// Mock the storage service
-jest.mock('../../services/storageService', () => ({
-  storageService: {
-    getUser: jest.fn(() => null),
-    saveUser: jest.fn(() => true),
-  },
-}));
-
-const renderWithProvider = (component: React.ReactNode) => {
-  return render(<UserProvider>{component}</UserProvider>);
+// Mock the useUser hook
+const mockCreateUser = jest.fn();
+const mockUseUser = {
+  user: null as any,
+  createUser: mockCreateUser,
 };
 
+jest.mock('../../hooks/useUser', () => ({
+  useUser: () => mockUseUser,
+}));
+
 describe('UserCreation', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseUser.user = null;
+  });
+
+  const renderWithProvider = (component: React.ReactElement) => {
+    return render(component);
+  };
+
   it('renders user creation form when no user exists', () => {
     renderWithProvider(<UserCreation />);
 
@@ -33,22 +41,14 @@ describe('UserCreation', () => {
     const input = screen.getByLabelText('Character Name');
     const submitButton = screen.getByText('Begin Your Journey');
 
-    // Enter a single character to enable the button
-    fireEvent.change(input, { target: { value: 'A' } });
-
-    // Clear the input to trigger validation
-    fireEvent.change(input, { target: { value: '' } });
-
-    // The button should be disabled when input is empty
-    expect(submitButton).toBeDisabled();
-
-    // Enter a character to enable the button, then submit
-    fireEvent.change(input, { target: { value: 'A' } });
+    // Enter text to enable the button, then submit with empty value
+    fireEvent.change(input, { target: { value: 'Test' } });
+    fireEvent.change(input, { target: { value: '   ' } }); // Only whitespace
     fireEvent.click(submitButton);
 
     await waitFor(() => {
       expect(
-        screen.getByText('Name must be at least 2 characters long')
+        screen.getByText('Please enter a name for your character')
       ).toBeInTheDocument();
     });
   });
@@ -95,7 +95,7 @@ describe('UserCreation', () => {
 
     expect(submitButton).toBeDisabled();
 
-    fireEvent.change(input, { target: { value: 'TestUser' } });
+    fireEvent.change(input, { target: { value: 'ValidName' } });
 
     expect(submitButton).toBeEnabled();
   });
@@ -120,6 +120,17 @@ describe('UserCreation', () => {
 
   it('calls onUserCreated callback when user is created', async () => {
     const mockOnUserCreated = jest.fn();
+    mockCreateUser.mockReturnValue({
+      id: '1',
+      name: 'TestUser',
+      level: 1,
+      experience: 0,
+      body: 0,
+      mind: 0,
+      soul: 0,
+      achievements: [],
+    });
+
     renderWithProvider(<UserCreation onUserCreated={mockOnUserCreated} />);
 
     const input = screen.getByLabelText('Character Name');
@@ -129,7 +140,70 @@ describe('UserCreation', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
+      expect(mockCreateUser).toHaveBeenCalledWith('TestUser');
       expect(mockOnUserCreated).toHaveBeenCalled();
     });
+  });
+
+  it('does not render when user already exists', () => {
+    mockUseUser.user = {
+      id: '1',
+      name: 'ExistingUser',
+      level: 1,
+      experience: 0,
+      body: 0,
+      mind: 0,
+      soul: 0,
+      achievements: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    const { container } = renderWithProvider(<UserCreation />);
+    expect(container.firstChild).toBeNull();
+  });
+
+  it('handles creation errors gracefully', async () => {
+    mockCreateUser.mockImplementation(() => {
+      throw new Error('Creation failed');
+    });
+
+    renderWithProvider(<UserCreation />);
+
+    const input = screen.getByLabelText('Character Name');
+    const submitButton = screen.getByText('Begin Your Journey');
+
+    fireEvent.change(input, { target: { value: 'TestUser' } });
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText('Failed to create user. Please try again.')
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('clears error when user starts typing', async () => {
+    renderWithProvider(<UserCreation />);
+
+    const input = screen.getByLabelText('Character Name');
+    const submitButton = screen.getByText('Begin Your Journey');
+
+    // First create an error
+    fireEvent.change(input, { target: { value: 'A' } });
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText('Name must be at least 2 characters long')
+      ).toBeInTheDocument();
+    });
+
+    // Then start typing to clear the error
+    fireEvent.change(input, { target: { value: 'AB' } });
+
+    expect(
+      screen.queryByText('Name must be at least 2 characters long')
+    ).not.toBeInTheDocument();
   });
 });
