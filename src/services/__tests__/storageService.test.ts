@@ -1,240 +1,363 @@
 import { StorageService } from '../storageService';
+import { Task, User, Habit } from '../../types';
 
-// Mock localStorage
-const localStorageMock = {
-  getItem: jest.fn(),
-  setItem: jest.fn(),
-  removeItem: jest.fn(),
-  clear: jest.fn(),
+// Create test-specific storage keys
+const TEST_STORAGE_KEYS = {
+  TASKS: 'test_scrypture_tasks',
+  USER: 'test_scrypture_user',
+  SETTINGS: 'test_scrypture_settings',
+  HABITS: 'test_scrypture_habits',
+  STATS: 'test_scrypture_stats',
+  CATEGORIES: 'test_scrypture_categories',
+  ACHIEVEMENTS: 'test_scrypture_achievements',
+  BACKUPS: 'test_scrypture_backups'
 };
-
-Object.defineProperty(window, 'localStorage', {
-  value: localStorageMock,
-});
 
 describe('StorageService', () => {
   let storageService: StorageService;
 
+  // Helper function to clear all test data
+  const clearAllTestData = () => {
+    Object.values(TEST_STORAGE_KEYS).forEach(key => {
+      localStorage.removeItem(key);
+    });
+  };
+
   beforeEach(() => {
-    jest.clearAllMocks();
+    // Clear all test data before each test
+    clearAllTestData();
+    
+    // Reset singleton instance
+    (StorageService as any).instance = undefined;
+    
+    // Get fresh instance
     storageService = StorageService.getInstance();
   });
 
-  // Temporarily commented out to improve test pass rate
-  /*
+  afterEach(() => {
+    // Clean up test data after each test
+    clearAllTestData();
+    (StorageService as any).instance = undefined;
+  });
+
   describe('Basic Operations', () => {
-    it('should set and get items', () => {
+    it('should set and get generic items', () => {
       const key = 'test_key';
       const value = 'test_value';
 
-      storageService.setItem(key, value);
-      const result = storageService.getItem(key);
+      const setResult = storageService.setGenericItem(key, value);
+      const getResult = storageService.getGenericItem(key);
 
-      expect(result).toBe(value);
-      expect(localStorageMock.setItem).toHaveBeenCalledWith(key, value);
-      expect(localStorageMock.getItem).toHaveBeenCalledWith(key);
+      expect(setResult).toBe(true);
+      expect(getResult).toBe(value);
     });
 
     it('should return null for non-existent items', () => {
-      const key = 'non_existent_key';
-      localStorageMock.getItem.mockReturnValue(null);
-
-      const result = storageService.getItem(key);
-
+      const result = storageService.getGenericItem('non_existent_key');
       expect(result).toBeNull();
-      expect(localStorageMock.getItem).toHaveBeenCalledWith(key);
     });
 
-    it('should remove items', () => {
+    it('should remove generic items', () => {
       const key = 'test_key';
+      const value = 'test_value';
 
-      storageService.removeItem(key);
+      storageService.setGenericItem(key, value);
+      const removeResult = storageService.removeGenericItem(key);
+      const getResult = storageService.getGenericItem(key);
 
-      expect(localStorageMock.removeItem).toHaveBeenCalledWith(key);
+      expect(removeResult).toBe(true);
+      expect(getResult).toBeNull();
     });
 
-    it('should clear all items', () => {
-      storageService.clear();
-
-      expect(localStorageMock.clear).toHaveBeenCalled();
-    });
-  });
-
-  describe('Task Operations', () => {
-    it('should save and get tasks', () => {
-      const tasks = [
-        { id: '1', title: 'Test Task', completed: false },
-        { id: '2', title: 'Another Task', completed: true },
-      ];
-
-      storageService.saveTasks(tasks);
-      const result = storageService.getTasks();
-
-      expect(result).toEqual(tasks);
-      expect(localStorageMock.setItem).toHaveBeenCalledWith('scrypture_tasks', JSON.stringify(tasks));
-      expect(localStorageMock.getItem).toHaveBeenCalledWith('scrypture_tasks');
-    });
-
-    it('should return empty array when no tasks exist', () => {
-      localStorageMock.getItem.mockReturnValue(null);
-
-      const result = storageService.getTasks();
-
-      expect(result).toEqual([]);
-    });
-  });
-
-  describe('Habit Operations', () => {
-    it('should save and get habits', () => {
-      const habits = [
-        { id: '1', name: 'Exercise', frequency: 'daily' },
-        { id: '2', name: 'Read', frequency: 'weekly' },
-      ];
-
-      storageService.saveHabits(habits);
-      const result = storageService.getHabits();
-
-      expect(result).toEqual(habits);
-      expect(localStorageMock.setItem).toHaveBeenCalledWith('scrypture_habits', JSON.stringify(habits));
-      expect(localStorageMock.getItem).toHaveBeenCalledWith('scrypture_habits');
-    });
-
-    it('should return empty array when no habits exist', () => {
-      localStorageMock.getItem.mockReturnValue(null);
-
-      const result = storageService.getHabits();
-
-      expect(result).toEqual([]);
-    });
-  });
-
-  describe('User Operations', () => {
-    it('should save and get user data', () => {
-      const user = {
-        name: 'Test User',
-        level: 5,
-        experience: 250,
-        body: 10,
-        mind: 15,
-        soul: 8,
+    it('should clear all data', () => {
+      // Set some scrypture-specific data
+      const testTask: Task = {
+        id: '1',
+        title: 'Test Task',
+        description: 'Test Description',
+        completed: false,
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01'),
+        priority: 'medium' as const,
+        difficulty: 2,
+        categories: ['test'],
+        statRewards: { mind: 1, xp: 10 }
       };
-
-      storageService.saveUser(user);
-      const result = storageService.getUser();
-
-      expect(result).toEqual(user);
-      expect(localStorageMock.setItem).toHaveBeenCalledWith('scrypture_user', JSON.stringify(user));
-      expect(localStorageMock.getItem).toHaveBeenCalledWith('scrypture_user');
-    });
-
-    it('should return default user when no user exists', () => {
-      localStorageMock.getItem.mockReturnValue(null);
-
-      const result = storageService.getUser();
-
-      expect(result).toEqual({
+      
+      const testUser: User = {
+        id: '1',
         name: 'Test User',
         level: 1,
         experience: 0,
         body: 0,
         mind: 0,
         soul: 0,
-      });
-    });
-  });
-
-  describe('Settings Operations', () => {
-    it('should save and get settings', () => {
-      const settings = {
-        theme: 'dark',
-        notifications: true,
-        autoSave: false,
+        achievements: [],
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01')
       };
 
-      storageService.saveSettings(settings);
-      const result = storageService.getSettings();
+      storageService.saveTasks([testTask]);
+      storageService.saveUser(testUser);
 
-      expect(result).toEqual(settings);
-      expect(localStorageMock.setItem).toHaveBeenCalledWith('scrypture_settings', JSON.stringify(settings));
-      expect(localStorageMock.getItem).toHaveBeenCalledWith('scrypture_settings');
-    });
-
-    it('should return default settings when no settings exist', () => {
-      localStorageMock.getItem.mockReturnValue(null);
-
-      const result = storageService.getSettings();
-
-      expect(result).toEqual({
-        theme: 'light',
-        notifications: true,
-        autoSave: true,
-      });
-    });
-  });
-
-  describe('Backup and Restore', () => {
-    it('should create backup with all data', () => {
-      const mockData = {
-        tasks: [{ id: '1', title: 'Test Task' }],
-        habits: [{ id: '1', name: 'Exercise' }],
-        user: { name: 'Test User', level: 1 },
-        settings: { theme: 'light' },
-      };
-
-      // Mock the individual get methods
-      jest.spyOn(storageService, 'getTasks').mockReturnValue(mockData.tasks);
-      jest.spyOn(storageService, 'getHabits').mockReturnValue(mockData.habits);
-      jest.spyOn(storageService, 'getUser').mockReturnValue(mockData.user);
-      jest.spyOn(storageService, 'getSettings').mockReturnValue(mockData.settings);
-
-      const backup = storageService.createBackup();
-
-      expect(backup).toEqual(mockData);
-    });
-
-    it('should restore from backup', () => {
-      const backup = {
-        tasks: [{ id: '1', title: 'Test Task' }],
-        habits: [{ id: '1', name: 'Exercise' }],
-        user: { name: 'Test User', level: 1 },
-        settings: { theme: 'light' },
-      };
-
-      // Mock the individual save methods
-      jest.spyOn(storageService, 'saveTasks').mockReturnValue(true);
-      jest.spyOn(storageService, 'saveHabits').mockReturnValue(true);
-      jest.spyOn(storageService, 'saveUser').mockReturnValue(true);
-      jest.spyOn(storageService, 'saveSettings').mockReturnValue(true);
-
-      const result = storageService.restoreFromBackup(backup);
+      // Clear all data
+      const result = storageService.clearAllData();
 
       expect(result).toBe(true);
-      expect(storageService.saveTasks).toHaveBeenCalledWith(backup.tasks);
-      expect(storageService.saveHabits).toHaveBeenCalledWith(backup.habits);
-      expect(storageService.saveUser).toHaveBeenCalledWith(backup.user);
-      expect(storageService.saveSettings).toHaveBeenCalledWith(backup.settings);
+      // Verify scrypture data is cleared
+      expect(storageService.getTasks()).toEqual([]);
+      expect(storageService.getUser()).toBeNull();
     });
   });
 
-  describe('Storage Statistics', () => {
-    it('should call getItem for every storage key', () => {
-      const keys = [
-        'scrypture_tasks',
-        'scrypture_habits',
-        'scrypture_user',
-        'scrypture_settings',
+  describe('Task Operations', () => {
+    it('should save and get tasks', () => {
+      const tasks: Task[] = [
+        {
+          id: '1',
+          title: 'Test Task',
+          description: 'Test Description',
+          completed: false,
+          createdAt: new Date('2024-01-01'),
+          updatedAt: new Date('2024-01-01'),
+          priority: 'medium' as const,
+          difficulty: 2,
+          categories: ['test'],
+          statRewards: { mind: 1, xp: 10 }
+        },
+        {
+          id: '2',
+          title: 'Another Task',
+          description: 'Another Description',
+          completed: true,
+          createdAt: new Date('2024-01-02'),
+          updatedAt: new Date('2024-01-02'),
+          priority: 'high' as const,
+          difficulty: 3,
+          categories: ['test2'],
+          statRewards: { body: 1, xp: 15 }
+        }
       ];
 
-      storageService.getStorageStats();
-      keys.forEach((key) => {
-        expect(localStorageMock.getItem).toHaveBeenCalledWith(key);
+      // Use test storage keys by mocking localStorage
+      const originalSetItem = localStorage.setItem;
+      const originalGetItem = localStorage.getItem;
+      
+      const mockStorage: { [key: string]: string } = {};
+      
+      localStorage.setItem = jest.fn((key: string, value: string) => {
+        if (key === 'scrypture_tasks') {
+          mockStorage[TEST_STORAGE_KEYS.TASKS] = value;
+        } else {
+          mockStorage[key] = value;
+        }
       });
+      
+      localStorage.getItem = jest.fn((key: string) => {
+        if (key === 'scrypture_tasks') {
+          return mockStorage[TEST_STORAGE_KEYS.TASKS] || null;
+        }
+        return mockStorage[key] || null;
+      });
+
+      const saveResult = storageService.saveTasks(tasks);
+      const getTasks = storageService.getTasks();
+
+      expect(saveResult).toBe(true);
+      expect(getTasks).toHaveLength(2);
+      expect(getTasks[0].title).toBe('Test Task');
+      expect(getTasks[1].title).toBe('Another Task');
+
+      // Restore original methods
+      localStorage.setItem = originalSetItem;
+      localStorage.getItem = originalGetItem;
+    });
+
+    it('should return empty array when no tasks exist', () => {
+      const result = storageService.getTasks();
+      expect(result).toEqual([]);
+    });
+
+    it('should handle corrupted JSON data gracefully', () => {
+      // Manually set corrupted data
+      localStorage.setItem('scrypture_tasks', 'invalid json');
+
+      const result = storageService.getTasks();
+      expect(result).toEqual([]);
+    });
+
+    it('should filter out invalid task objects', () => {
+      const mixedData = [
+        {
+          id: '1',
+          title: 'Valid Task',
+          description: 'Valid Description',
+          completed: false,
+          createdAt: new Date('2024-01-01'),
+          updatedAt: new Date('2024-01-01'),
+          priority: 'medium' as const,
+          difficulty: 2,
+          categories: ['test'],
+          statRewards: { mind: 1, xp: 10 }
+        },
+        { invalid: 'object' }, // Invalid task
+        {
+          id: '2',
+          title: 'Another Valid Task',
+          description: 'Another Valid Description',
+          completed: false,
+          createdAt: new Date('2024-01-02'),
+          updatedAt: new Date('2024-01-02'),
+          priority: 'low' as const,
+          difficulty: 1,
+          categories: ['test2'],
+          statRewards: { soul: 1, xp: 5 }
+        }
+      ];
+
+      localStorage.setItem('scrypture_tasks', JSON.stringify(mixedData));
+
+      const result = storageService.getTasks();
+
+      expect(result).toHaveLength(2);
+      expect(result[0].title).toBe('Valid Task');
+      expect(result[1].title).toBe('Another Valid Task');
+    });
+
+    it('should handle invalid date strings', () => {
+      const taskWithInvalidDate = {
+        id: '1',
+        title: 'Task with Invalid Date',
+        createdAt: 'invalid-date',
+        updatedAt: 'invalid-date'
+      };
+
+      localStorage.setItem('scrypture_tasks', JSON.stringify([taskWithInvalidDate]));
+
+      const result = storageService.getTasks();
+      expect(result).toEqual([]);
     });
   });
-  */
 
-  // Placeholder test to keep the describe block
-  it('placeholder test', () => {
-    expect(true).toBe(true);
+  describe('Integration Tests', () => {
+    it('should handle complete workflow', () => {
+      // Create test user
+      const testUser: User = {
+        id: '1',
+        name: 'Test User',
+        level: 1,
+        experience: 0,
+        body: 0,
+        mind: 0,
+        soul: 0,
+        achievements: [],
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01')
+      };
+
+      // Create test task
+      const testTask: Task = {
+        id: '1',
+        title: 'Integration Test Task',
+        description: 'Test Description',
+        completed: false,
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01'),
+        priority: 'medium' as const,
+        difficulty: 2,
+        categories: ['integration'],
+        statRewards: { mind: 1, xp: 10 }
+      };
+
+      // Save data
+      storageService.saveUser(testUser);
+      storageService.saveTasks([testTask]);
+
+      // Retrieve data
+      const retrievedUser = storageService.getUser();
+      const retrievedTasks = storageService.getTasks();
+
+      // Verify retrieval
+      expect(retrievedUser?.name).toBe('Test User');
+      expect(retrievedTasks).toHaveLength(1);
+      expect(retrievedTasks[0].title).toBe('Integration Test Task');
+    });
+
+    it('should handle backup and restore', () => {
+      // Create and save test data
+      const testTasks: Task[] = [{
+        id: '1',
+        title: 'Backup Test Task',
+        description: 'Test Description',
+        completed: false,
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01'),
+        priority: 'medium' as const,
+        difficulty: 2,
+        categories: ['backup'],
+        statRewards: { mind: 1, xp: 10 }
+      }];
+
+      storageService.saveTasks(testTasks);
+
+      // Create backup
+      const backup = storageService.createBackup();
+      expect(backup).toBeDefined();
+
+      // Clear data
+      storageService.clearAllData();
+
+      // Verify data is cleared
+      expect(storageService.getTasks()).toEqual([]);
+
+      // Restore from backup
+      const restored = storageService.restoreFromBackup(backup);
+      expect(restored).toBe(true);
+
+      // Verify data is restored
+      const restoredTasks = storageService.getTasks();
+      expect(restoredTasks).toHaveLength(1);
+      expect(restoredTasks[0].title).toBe('Backup Test Task');
+    });
+  });
+
+  describe('Performance and Edge Cases', () => {
+    it('should handle large datasets efficiently', () => {
+      // Create large dataset
+      const largeTasks: Task[] = Array.from({ length: 50 }, (_, i) => ({
+        id: `task-${i}`,
+        title: `Task ${i}`,
+        description: `Description ${i}`,
+        completed: false,
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01'),
+        priority: 'medium' as const,
+        difficulty: 2,
+        categories: ['performance'],
+        statRewards: { mind: 1, xp: 10 }
+      }));
+
+      const startTime = performance.now();
+      storageService.saveTasks(largeTasks);
+      const saveTime = performance.now() - startTime;
+
+      const retrieveStartTime = performance.now();
+      const retrievedTasks = storageService.getTasks();
+      const retrieveTime = performance.now() - retrieveStartTime;
+
+      expect(retrievedTasks).toHaveLength(50);
+      expect(saveTime).toBeLessThan(100); // Should complete within 100ms
+      expect(retrieveTime).toBeLessThan(50); // Should complete within 50ms
+    });
+
+    it('should handle corrupted data gracefully', () => {
+      // Set corrupted data in multiple keys
+      localStorage.setItem('scrypture_tasks', 'corrupted json');
+      localStorage.setItem('scrypture_user', '{"incomplete": true');
+
+      const result = storageService.getTasks();
+
+      expect(result).toEqual([]);
+    });
   });
 });
