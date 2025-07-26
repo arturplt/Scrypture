@@ -25,6 +25,7 @@ jest.mock('../../hooks/useTasks', () => ({
   useTasks: () => ({
     updateTask: jest.fn(),
     deleteTask: jest.fn(),
+    isSaving: false,
   }),
   TaskProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
@@ -36,6 +37,24 @@ jest.mock('../../hooks/useUser', () => ({
     removeStatRewards: jest.fn(),
   }),
   UserProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+}));
+
+// Mock the useHabits hook
+jest.mock('../../hooks/useHabits', () => ({
+  useHabits: () => ({
+    addHabit: jest.fn(),
+    habits: [],
+  }),
+  HabitProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+}));
+
+// Mock the AutoSaveIndicator component
+jest.mock('../AutoSaveIndicator', () => ({
+  AutoSaveIndicator: ({ isSaving }: { isSaving: boolean }) => (
+    <div data-testid="auto-save-indicator">
+      {isSaving ? 'Saving...' : 'Saved'}
+    </div>
+  ),
 }));
 
 describe('TaskEditForm', () => {
@@ -108,5 +127,74 @@ describe('TaskEditForm', () => {
     const descriptionTextarea = screen.getByPlaceholderText('Description (optional)');
     expect(descriptionTextarea).toBeInTheDocument();
     expect(descriptionTextarea).toHaveValue('');
+  });
+
+  describe('Auto-Save Functionality', () => {
+    it('should display auto-save indicator in edit form', () => {
+      render(<TaskEditForm task={mockTask} onCancel={mockOnCancel} />);
+
+      expect(screen.getByTestId('auto-save-indicator')).toBeInTheDocument();
+      expect(screen.getByText('Saved')).toBeInTheDocument();
+    });
+
+    it('should show saving state when isSaving is true', () => {
+      // Temporarily mock isSaving as true
+      const originalUseTasks = require('../../hooks/useTasks').useTasks;
+      require('../../hooks/useTasks').useTasks = () => ({
+        updateTask: jest.fn(),
+        deleteTask: jest.fn(),
+        isSaving: true,
+      });
+
+      render(<TaskEditForm task={mockTask} onCancel={mockOnCancel} />);
+
+      expect(screen.getAllByText('Saving...')).toHaveLength(1);
+
+      // Restore original mock
+      require('../../hooks/useTasks').useTasks = originalUseTasks;
+    });
+
+    it('should show auto-save indicator during task updates', () => {
+      render(<TaskEditForm task={mockTask} onCancel={mockOnCancel} />);
+
+      const titleInput = screen.getByDisplayValue('Test Task');
+      fireEvent.change(titleInput, { target: { value: 'Updated Task' } });
+
+      // Auto-save indicator should still be visible during updates
+      expect(screen.getAllByTestId('auto-save-indicator')).toHaveLength(1);
+    });
+
+    it('should show auto-save indicator during task deletion', () => {
+      render(<TaskEditForm task={mockTask} onCancel={mockOnCancel} />);
+
+      const deleteButton = screen.getByText('Delete Task');
+      fireEvent.click(deleteButton);
+
+      // Auto-save indicator should be visible during deletion process
+      expect(screen.getAllByTestId('auto-save-indicator')).toHaveLength(1);
+    });
+
+    it('should handle auto-save state changes', () => {
+      const { rerender } = render(<TaskEditForm task={mockTask} onCancel={mockOnCancel} />);
+
+      // Initially should show "Saved"
+      expect(screen.getAllByText('Saved')).toHaveLength(1);
+
+      // Temporarily mock isSaving as true
+      const originalUseTasks = require('../../hooks/useTasks').useTasks;
+      require('../../hooks/useTasks').useTasks = () => ({
+        updateTask: jest.fn(),
+        deleteTask: jest.fn(),
+        isSaving: true,
+      });
+
+      rerender(<TaskEditForm task={mockTask} onCancel={mockOnCancel} />);
+
+      // Should show "Saving..."
+      expect(screen.getAllByText('Saving...')).toHaveLength(1);
+
+      // Restore original mock
+      require('../../hooks/useTasks').useTasks = originalUseTasks;
+    });
   });
 });

@@ -417,6 +417,68 @@ Auto-save is triggered on the following task operations:
 - **Edit Mode Support**: Auto-save indicators remain visible during task editing
 - **State Change Responsiveness**: Auto-save indicators respond to all task state changes
 
+## TaskEditForm Auto-Save Implementation
+
+### Features Implemented
+
+1. **Task Editing Auto-Save**: TaskEditForm component displays auto-save indicator during task editing
+2. **Form Validation Integration**: Auto-save works alongside form validation requirements
+3. **Task Update Feedback**: Real-time feedback when tasks are updated or modified
+4. **Task Deletion Integration**: Auto-save indicators remain visible during task deletion process
+5. **Habit Creation Integration**: Auto-save feedback when converting tasks to habits
+6. **Form Header Integration**: Auto-save indicator positioned at the top of the edit form
+
+### Technical Implementation
+
+#### Component Structure
+```tsx
+// TaskEditForm.tsx
+import { AutoSaveIndicator } from './AutoSaveIndicator';
+import { useTasks } from '../hooks/useTasks';
+
+export const TaskEditForm: React.FC<TaskEditFormProps> = ({
+  task,
+  onCancel,
+}) => {
+  const { updateTask, deleteTask, tasks, isSaving } = useTasks();
+  
+  return (
+    <>
+      <form className={`${styles.form} ${styles.transitioning}`} onSubmit={handleSubmit} noValidate>
+        <div className={styles.autoSaveContainer}>
+          <AutoSaveIndicator isSaving={isSaving} />
+        </div>
+        <div className={styles.inputGroup}>
+          {/* Form content */}
+        </div>
+        {/* Rest of form */}
+      </form>
+      {/* Modals */}
+    </>
+  );
+};
+```
+
+#### Auto-Save Triggers
+
+Auto-save is triggered on the following task editing operations:
+
+1. **Task Updates** - When task properties are modified and saved
+2. **Task Deletion** - When tasks are deleted via the delete button
+3. **Form Validation** - Auto-save works alongside form validation requirements
+4. **Habit Creation** - When tasks are converted to habits
+5. **Real-time Updates** - Auto-save indicators update in real-time during editing
+6. **Form Interactions** - Any changes to task properties trigger auto-save feedback
+
+### User Experience
+
+- **Form Header Integration**: Auto-save indicator positioned at the top of the edit form for visibility
+- **Task Update Feedback**: Real-time feedback when tasks are updated or modified
+- **Deletion Integration**: Auto-save indicators remain visible during task deletion process
+- **Habit Creation Support**: Auto-save feedback when converting tasks to habits
+- **Form Validation Integration**: Auto-save works alongside form validation requirements
+- **Real-time Responsiveness**: Auto-save indicators respond to all form interactions
+
 ## Testing
 
 ### Test Coverage

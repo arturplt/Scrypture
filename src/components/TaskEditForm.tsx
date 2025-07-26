@@ -5,6 +5,7 @@ import { useHabits } from '../hooks/useHabits';
 import { categoryService } from '../services/categoryService';
 import { ConfirmationModal } from './ConfirmationModal';
 import { CategoryModal } from './CategoryModal';
+import { AutoSaveIndicator } from './AutoSaveIndicator';
 import styles from './TaskForm.module.css';
 
 interface TaskEditFormProps {
@@ -16,7 +17,7 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({
   task,
   onCancel,
 }) => {
-  const { updateTask, deleteTask, tasks } = useTasks();
+  const { updateTask, deleteTask, tasks, isSaving } = useTasks();
   const { addHabit } = useHabits();
   const [title, setTitle] = useState(task.title);
   const [description, setDescription] = useState(task.description || '');
@@ -226,6 +227,9 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({
   return (
     <>
       <form className={`${styles.form} ${styles.transitioning}`} onSubmit={handleSubmit} noValidate>
+        <div className={styles.autoSaveContainer}>
+          <AutoSaveIndicator isSaving={isSaving} />
+        </div>
         <div className={styles.inputGroup}>
           <div style={{ flex: 1, position: 'relative' }}>
             <input
