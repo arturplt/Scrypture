@@ -74,6 +74,55 @@ Auto-save is triggered automatically on the following actions:
 - **Error Handling**: Failed saves are logged for debugging
 - **Consistent State**: UI reflects the current save status accurately
 
+## HabitEditForm Auto-Save Implementation
+
+### Features Implemented
+
+1. **Auto-Save Indicator**: The HabitEditForm component displays an auto-save indicator in the form header
+2. **Real-time Feedback**: Users can see when their edits are being saved
+3. **Form Validation**: Prevents submission with invalid data while maintaining auto-save functionality
+4. **Complex Operations**: Handles habit updates, deletions, and conversions to tasks with auto-save
+
+### Technical Implementation
+
+#### Component Structure
+```tsx
+// HabitEditForm.tsx
+import { AutoSaveIndicator } from './AutoSaveIndicator';
+import { useHabits } from '../hooks/useHabits';
+
+export const HabitEditForm: React.FC<HabitEditFormProps> = ({
+  habit,
+  onCancel,
+}) => {
+  const { updateHabit, deleteHabit, isSaving } = useHabits();
+  
+  return (
+    <form onSubmit={handleSubmit}>
+      <div className={styles.formHeader}>
+        <AutoSaveIndicator isSaving={isSaving} />
+      </div>
+      {/* Form fields */}
+    </form>
+  );
+};
+```
+
+#### Auto-Save Triggers
+
+Auto-save is triggered on the following form actions:
+
+1. **Form Submission** - Updates habit with new data
+2. **Delete Confirmation** - Removes habit from storage
+3. **Convert to Task** - Creates new task and deletes original habit
+
+### User Experience
+
+- **Form Header Indicator**: Auto-save status visible at the top of the form
+- **Validation Integration**: Auto-save works alongside form validation
+- **Complex Operations**: Handles multi-step operations (convert to task)
+- **Animation Support**: Maintains smooth animations during save operations
+
 ## Testing
 
 ### Test Coverage
@@ -93,6 +142,29 @@ describe('HabitList', () => {
 
   it('separates completed and incomplete habits', () => {
     // Tests habit organization with auto-save
+  });
+
+  // Additional test cases...
+});
+```
+
+```tsx
+// HabitEditForm.test.tsx
+describe('HabitEditForm', () => {
+  it('renders habit edit form with auto-save indicator', () => {
+    // Tests that auto-save indicator is present
+  });
+
+  it('updates habit and triggers auto-save on form submission', () => {
+    // Tests form submission with auto-save
+  });
+
+  it('deletes habit and triggers auto-save on delete confirmation', () => {
+    // Tests delete operation with auto-save
+  });
+
+  it('converts habit to task and triggers auto-save', () => {
+    // Tests complex operation with auto-save
   });
 
   // Additional test cases...

@@ -5,6 +5,7 @@ import { useTasks } from '../hooks/useTasks';
 import { categoryService } from '../services/categoryService';
 import { ConfirmationModal } from './ConfirmationModal';
 import { CategoryModal } from './CategoryModal';
+import { AutoSaveIndicator } from './AutoSaveIndicator';
 import styles from './TaskForm.module.css';
 
 interface HabitEditFormProps {
@@ -16,7 +17,7 @@ export const HabitEditForm: React.FC<HabitEditFormProps> = ({
   habit,
   onCancel,
 }) => {
-  const { updateHabit, deleteHabit } = useHabits();
+  const { updateHabit, deleteHabit, isSaving } = useHabits();
   const { addTask } = useTasks();
   const [name, setName] = useState(habit.name);
   const [description, setDescription] = useState(habit.description || '');
@@ -190,6 +191,9 @@ export const HabitEditForm: React.FC<HabitEditFormProps> = ({
   return (
     <>
       <form className={`${styles.form} ${styles.transitioning}`} onSubmit={handleSubmit} noValidate>
+        <div className={styles.formHeader}>
+          <AutoSaveIndicator isSaving={isSaving} />
+        </div>
         <div className={styles.inputGroup}>
           <div style={{ flex: 1, position: 'relative' }}>
             <input
