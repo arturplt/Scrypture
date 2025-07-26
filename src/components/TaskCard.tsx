@@ -10,13 +10,15 @@ interface TaskCardProps {
   onOpenModal?: () => void;
   isHighlighted?: boolean;
   onEditTask?: (task: Task) => void;
+  triggerEdit?: boolean; // New prop to trigger inline edit
 }
 
 export const TaskCard: React.FC<TaskCardProps> = ({ 
   task, 
   onOpenModal, 
   isHighlighted,
-  onEditTask 
+  onEditTask,
+  triggerEdit 
 }) => {
   const { toggleTask, bringTaskToTop } = useTasks();
   const [isEditing, setIsEditing] = useState(false);
@@ -29,6 +31,20 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   const [isTransitioningToEdit, setIsTransitioningToEdit] = useState(false);
   const [isExitingEdit, setIsExitingEdit] = useState(false);
   const [isReentering, setIsReentering] = useState(false);
+
+  // Handle triggerEdit prop - automatically start edit transition
+  useEffect(() => {
+    if (triggerEdit && !isEditing && !isTransitioningToEdit) {
+      // Start transition animation
+      setIsTransitioningToEdit(true);
+      
+      // After transition animation completes, show edit form
+      setTimeout(() => {
+        setIsTransitioningToEdit(false);
+        setIsEditing(true);
+      }, 200);
+    }
+  }, [triggerEdit, isEditing, isTransitioningToEdit]);
 
   const handleToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.stopPropagation();

@@ -108,6 +108,30 @@ describe('TaskCard', () => {
       expect(cardContainer).toHaveClass('editing');
     });
 
+    it('should trigger edit automatically when triggerEdit prop is true', async () => {
+      render(<TaskCard task={mockTask} triggerEdit={true} />);
+
+      // Should automatically start transitioning to edit
+      const cardContainer = screen.getByText('Test Task').closest('div');
+      expect(cardContainer).toHaveClass('transitioningToEdit');
+
+      // Fast forward 200ms to complete transition
+      act(() => {
+        jest.advanceTimersByTime(200);
+      });
+
+      // Should now be in editing state
+      expect(cardContainer).toHaveClass('editing');
+    });
+
+    it('should not trigger edit when triggerEdit prop is false', () => {
+      render(<TaskCard task={mockTask} triggerEdit={false} />);
+
+      const cardContainer = screen.getByText('Test Task').closest('div');
+      expect(cardContainer).not.toHaveClass('transitioningToEdit');
+      expect(cardContainer).not.toHaveClass('editing');
+    });
+
     it('should prevent multiple rapid edit clicks during transition', () => {
       render(<TaskCard task={mockTask} />);
 

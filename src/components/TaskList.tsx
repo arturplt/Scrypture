@@ -26,6 +26,7 @@ export const TaskList = forwardRef<TaskListRef, TaskListProps>((props, ref) => {
   const [searchKeyword, setSearchKeyword] = useState<string>('');
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
   const [highlightedTaskId, setHighlightedTaskId] = useState<string | null>(null);
+  const [triggerEditTaskId, setTriggerEditTaskId] = useState<string | null>(null); // New state for triggering edit
   const taskRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   // Core attributes are now separate from categories - no filtering needed
@@ -74,11 +75,16 @@ export const TaskList = forwardRef<TaskListRef, TaskListProps>((props, ref) => {
         setIsEditMode(false);
         // Also highlight the task
         setHighlightedTaskId(taskId);
+        // Trigger inline edit for the task
+        setTriggerEditTaskId(taskId);
         const el = taskRefs.current[taskId];
         if (el) {
           el.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
-        setTimeout(() => setHighlightedTaskId(null), 3000);
+        setTimeout(() => {
+          setHighlightedTaskId(null);
+          setTriggerEditTaskId(null); // Clear trigger after a delay
+        }, 3000);
       }
     },
     highlightTask: (taskId: string) => {
@@ -321,6 +327,7 @@ export const TaskList = forwardRef<TaskListRef, TaskListProps>((props, ref) => {
                               task={task}
                               isHighlighted={highlightedTaskId === task.id}
                               onEditTask={onEditTask}
+                              triggerEdit={triggerEditTaskId === task.id}
                             />
                           </div>
                         );

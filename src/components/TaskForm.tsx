@@ -114,12 +114,9 @@ export const TaskForm: React.FC<TaskFormProps> = ({
     console.log('handleAutoFillSelect called with task:', task);
     setShowAutoFill(false);
     
-    // If onEditTask is provided, use it to open the edit modal
-    if (onEditTask) {
-      console.log('Calling onEditTask with task:', task);
-      onEditTask(task);
-    } else if (onNavigateToTask) {
-      // Fall back to navigation behavior
+    // Always use navigation to the task in the list instead of modal
+    if (onNavigateToTask) {
+      console.log('Calling onNavigateToTask with task ID:', task.id);
       onNavigateToTask(task.id);
     }
   };
