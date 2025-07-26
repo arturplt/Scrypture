@@ -13,6 +13,8 @@
   -webkit-backface-visibility: hidden;
   -webkit-transform: translateZ(0);
   transform: translateZ(0);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .habitCard:hover {
@@ -27,9 +29,13 @@
   border-color: var(--color-border-dark);
 }
 
+.habitCard.completing {
+  transform: scale(0.98);
+  box-shadow: var(--shadow-active);
+}
+
 .habitCard.active {
-  border: 4px solid var(--color-accent-gold);
-  box-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
+  border-color: var(--color-border-secondary);
 }
 
 .header {
@@ -41,67 +47,249 @@
 
 .content {
   flex: 1;
-  min-width: 0;
+  margin-right: 20px;
+}
+
+.titleSection {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
 .title {
+  font-size: var(--font-size-md);
+  font-weight: normal;
+  margin: 0 0 var(--spacing-xs) 0;
   color: var(--color-text-primary);
-  font-size: var(--font-size-lg);
-  font-weight: 600;
-  margin: 0 0 8px 0;
-  line-height: 1.3;
-  word-wrap: break-word;
-  font-family: 'Press Start 2P', monospace;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  word-break: break-word;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: color var(--transition-normal);
+}
+
+.title:hover {
+  color: var(--color-accent-gold);
+}
+
+.titleCompleted {
+  text-decoration: line-through;
+  color: var(--color-text-secondary);
+}
+
+.autoSaveContainer {
+  flex-shrink: 0;
 }
 
 .description {
-  color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
-  margin: 0 0 12px 0;
-  line-height: 1.4;
-  opacity: 0.9;
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--spacing-sm) 0;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+.descriptionCompleted {
+  text-decoration: line-through;
+  opacity: 0.6;
 }
 
 .meta {
   display: flex;
+  gap: var(--spacing-md);
+  align-items: center;
   flex-wrap: wrap;
-  gap: 12px;
-  font-size: 12px;
-  margin-top: 8px;
 }
 
 .frequency {
-  background: var(--color-accent-gold);
-  color: var(--color-bg-primary);
-  padding: 4px 8px;
+  font-size: var(--font-size-xs);
+  font-weight: normal;
+  padding: var(--spacing-xs) var(--spacing-sm);
   border-radius: 0px;
-  font-weight: 500;
   text-transform: uppercase;
-  font-size: 11px;
   letter-spacing: 0.5px;
-  font-family: 'Press Start 2P', monospace;
-  border: 1px solid var(--color-accent-gold);
+  border: 2px solid;
+  box-shadow: var(--shadow-button);
+}
+
+.frequency.daily {
+  background: var(--color-accent-green);
+  color: var(--color-text-primary);
+  border-color: var(--color-accent-green-dark);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.frequency.weekly {
+  background: var(--color-accent-blue);
+  color: var(--color-text-primary);
+  border-color: var(--color-accent-blue-dark);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.frequency.monthly {
+  background: var(--color-accent-purple);
+  color: var(--color-text-primary);
+  border-color: var(--color-accent-purple-dark);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .streak {
-  color: var(--color-accent-orange);
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-family: 'Press Start 2P', monospace;
-  font-size: 11px;
+  font-size: var(--font-size-xs);
+  font-weight: normal;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: 0px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 2px solid var(--color-accent-gold-dark);
+  box-shadow: var(--shadow-button);
+  background: var(--color-accent-gold);
+  color: var(--color-text-primary);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .bestStreak {
-  color: var(--color-accent-gold);
+  font-size: var(--font-size-xs);
+  font-weight: normal;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: 0px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 2px solid var(--color-accent-orange-dark);
+  box-shadow: var(--shadow-button);
+  background: var(--color-accent-orange);
+  color: var(--color-text-primary);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.rewards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+}
+
+.habitCard:hover .rewards {
+  opacity: 1;
+}
+
+.reward {
+  font-size: var(--font-size-xs);
   font-weight: 600;
+  padding: 4px 8px;
+  border-radius: var(--border-radius-sm);
+  border: 2px solid transparent;
+}
+
+.rewardXP {
+  background: var(--color-accent-gold);
+  color: var(--color-bg-primary);
+}
+
+.rewardBody {
+  background: var(--color-body);
+  color: var(--color-bg-primary);
+}
+
+.rewardMind {
+  background: var(--color-mind);
+  color: var(--color-bg-primary);
+}
+
+.rewardSoul {
+  background: var(--color-soul);
+  color: var(--color-bg-primary);
+}
+
+.rightSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  margin-left: auto;
+  align-self: flex-start;
+  margin-top: 0;
+}
+
+.checkboxContainer {
+  flex-shrink: 0;
+  margin-top: 0;
+  order: 1;
+}
+
+.checkbox {
+  width: 48px;
+  height: 48px;
+  accent-color: var(--color-accent-gold);
+  cursor: pointer;
+  border: 4px solid var(--color-border-primary);
+  border-radius: 0px;
+  transition: all var(--transition-normal);
+  background: var(--color-bg-primary);
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  position: relative;
+}
+
+.checkbox:hover {
+  border-color: var(--color-border-secondary);
+  transform: scale(1.05);
+}
+
+.checkbox:checked {
+  background: var(--color-accent-gold);
+  border-color: var(--color-accent-gold);
+  box-shadow: var(--shadow-active);
+}
+
+.checkbox:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--color-bg-primary);
+  font-size: 24px;
+  font-weight: bold;
+  text-shadow: 2px 2px 0px var(--color-shadow);
+}
+
+.checkbox:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cooldownTimer {
+  width: 80px;
+  height: 48px;
+  background: var(--color-accent-gold);
+  border: 4px solid var(--color-accent-gold);
+  border-radius: 0px;
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 11px;
+  justify-content: center;
+  box-shadow: var(--shadow-active);
+  position: relative;
+  cursor: default;
+}
+
+.cooldownText {
+  color: var(--color-bg-primary);
+  font-size: var(--font-size-xl);
+  font-weight: bold;
+  text-align: center;
+  line-height: 1.2;
+  text-shadow: 2px 2px 0px var(--color-shadow);
   font-family: 'Press Start 2P', monospace;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
 }
 
 .actions {
@@ -109,123 +297,35 @@
   flex-direction: column;
   gap: 8px;
   align-items: center;
-}
-
-.completeButton {
-  width: 40px;
-  height: 40px;
-  border: 2px solid var(--color-accent-green);
-  background: transparent;
-  border-radius: 0px;
-  color: var(--color-accent-green);
-  font-size: 18px;
-  cursor: pointer;
-  transition: all var(--transition-normal);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Press Start 2P', monospace;
-}
-
-.completeButton:hover:not(:disabled) {
-  background: var(--color-accent-green);
-  color: white;
-  transform: scale(1.1);
-}
-
-.completeButton:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-.completedButton {
-  background: var(--color-accent-green);
-  color: white;
-  border-color: var(--color-accent-green);
-}
-
-.completing {
-  animation: pulse 0.5s ease-in-out;
+  order: 2;
 }
 
 .editButton {
-  width: 40px;
-  height: 40px;
-  border: 2px solid var(--color-accent-gold);
-  background: transparent;
-  border-radius: 0px;
-  color: var(--color-accent-gold);
-  font-size: 18px;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  border: none;
+  padding: 8px;
+  font-size: 16px;
   cursor: pointer;
+  border-radius: var(--border-radius-sm);
   transition: all var(--transition-normal);
+  box-shadow: var(--shadow-button);
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Press Start 2P', monospace;
 }
 
 .editButton:hover {
-  background: var(--color-accent-gold);
-  border-color: var(--color-accent-gold);
-  color: var(--color-bg-primary);
-  transform: scale(1.1);
+  background: var(--color-bg-secondary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-active);
 }
 
-.deleteButton {
-  width: 40px;
-  height: 40px;
-  border: 2px solid var(--color-error);
-  background: transparent;
-  border-radius: 0px;
-  color: var(--color-error);
-  font-size: 18px;
-  cursor: pointer;
-  transition: all var(--transition-normal);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Press Start 2P', monospace;
-}
-
-.deleteButton:hover {
-  background: var(--color-error);
-  border-color: var(--color-error);
-  color: white;
-  transform: scale(1.1);
-}
-
-.rewards {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid var(--color-border-primary);
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
-}
-
-.rewardsLabel {
-  color: var(--color-text-secondary);
-  font-size: 12px;
-  font-weight: 500;
-  font-family: 'Press Start 2P', monospace;
-}
-
-.reward {
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-primary);
-  padding: 4px 8px;
-  border-radius: 0px;
-  font-size: 12px;
-  font-weight: 500;
-  border: 1px solid var(--color-border-primary);
-  font-family: 'Press Start 2P', monospace;
-}
-
-@keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.2); }
-  100% { transform: scale(1); }
+.editButton:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-button);
 }
 
 /* Responsive design */
@@ -239,10 +339,12 @@
     align-items: stretch;
   }
   
-  .actions {
-    flex-direction: row;
-    justify-content: space-between;
+  .rightSection {
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
     margin-top: 12px;
+    align-self: flex-end;
   }
   
   .title {

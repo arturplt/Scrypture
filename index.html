@@ -50,14 +50,10 @@
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     
-    <!-- Force address bar hiding script -->
+    <!-- Mobile address bar hiding script -->
     <script>
-      // Force address bar hiding on mobile
-      function hideAddressBar() {
-        if (document.documentElement.requestFullscreen) {
-          document.documentElement.requestFullscreen();
-        }
-        
+      // Handle mobile address bar hiding without automatic fullscreen
+      function handleMobileOptimization() {
         // iOS Safari specific
         if (window.navigator.standalone) {
           document.body.style.height = '100vh';
@@ -73,9 +69,9 @@
       }
       
       // Run on load and orientation change
-      window.addEventListener('load', hideAddressBar);
-      window.addEventListener('orientationchange', hideAddressBar);
-      window.addEventListener('resize', hideAddressBar);
+      window.addEventListener('load', handleMobileOptimization);
+      window.addEventListener('orientationchange', handleMobileOptimization);
+      window.addEventListener('resize', handleMobileOptimization);
       
       // iOS Safari specific
       if (window.navigator.standalone) {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Habit } from '../types';
 import { useHabits } from '../hooks/useHabits';
 import { useUser } from '../hooks/useUser';
@@ -16,12 +16,59 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit }) => {
   const { addStatRewards, addExperience } = useUser();
   const [isCompleting, setIsCompleting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [cooldownTime, setCooldownTime] = useState<string>('');
 
   const canCompleteToday = () => {
     return !habitService.isCompletedToday(habit);
   };
 
-  const handleComplete = async () => {
+  const calculateCooldownTime = () => {
+    if (!habit.lastCompleted) return '';
+    
+    const now = new Date();
+    const lastCompleted = new Date(habit.lastCompleted);
+    let nextReset: Date;
+    
+    switch (habit.targetFrequency) {
+      case 'daily':
+        // Next reset at midnight
+        nextReset = new Date(now);
+        nextReset.setHours(24, 0, 0, 0);
+        break;
+      case 'weekly':
+        // Next reset at midnight on Sunday
+        nextReset = new Date(now);
+        const daysUntilSunday = (7 - nextReset.getDay()) % 7;
+        nextReset.setDate(nextReset.getDate() + daysUntilSunday);
+        nextReset.setHours(0, 0, 0, 0);
+        break;
+      case 'monthly':
+        // Next reset at midnight on the last day of the month
+        nextReset = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        nextReset.setHours(0, 0, 0, 0);
+        break;
+      default:
+        return '';
+    }
+    
+    const timeDiff = nextReset.getTime() - now.getTime();
+    const hours = Math.floor(timeDiff / (1000 * 60 * 60));
+    const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+    
+    if (hours > 24) {
+      const days = Math.floor(hours / 24);
+      const remainingHours = hours % 24;
+      return `${days}d ${remainingHours}h`;
+    } else if (hours > 0) {
+      return `${hours}h ${minutes}m`;
+    } else {
+      return `${minutes}m`;
+    }
+  };
+
+  const handleComplete = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.stopPropagation();
+    
     if (!canCompleteToday() || isCompleting) return;
     
     setIsCompleting(true);
@@ -41,7 +88,8 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit }) => {
     }, 300);
   };
 
-  const handleEdit = () => {
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
     setIsEditing(true);
   };
 
@@ -54,6 +102,19 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit }) => {
   const streakDisplay = habit.streak > 0 ? `${habit.streak} day${habit.streak !== 1 ? 's' : ''}` : 'No streak';
   const bestStreakDisplay = habit.bestStreak && habit.bestStreak > 0 ? `Best: ${habit.bestStreak}` : null;
 
+  useEffect(() => {
+    if (isCompletedToday) {
+      const updateCooldown = () => {
+        setCooldownTime(calculateCooldownTime());
+      };
+      
+      updateCooldown();
+      const interval = setInterval(updateCooldown, 60000); // Update every minute
+      
+      return () => clearInterval(interval);
+    }
+  }, [habit.lastCompleted, habit.targetFrequency, isCompletedToday]);
+
   if (isEditing) {
     return (
       <HabitEditForm
@@ -64,19 +125,26 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit }) => {
   }
 
   return (
-    <div className={`${styles.habitCard} ${isCompletedToday ? styles.completed : ''} ${isActive ? styles.active : ''}`}>
+    <div className={`${styles.habitCard} ${isCompletedToday ? styles.completed : ''} ${isActive ? styles.active : ''} ${isCompleting ? styles.completing : ''}`}>
       <div className={styles.header}>
         <div className={styles.content}>
-          <div className={styles.autoSaveContainer}>
-            <AutoSaveIndicator isSaving={isSaving} />
+          <div className={styles.titleSection}>
+            <h3 className={`${styles.title} ${isCompletedToday ? styles.titleCompleted : ''}`}>
+              {habit.name}
+            </h3>
+            <div className={styles.autoSaveContainer}>
+              <AutoSaveIndicator isSaving={isSaving} />
+            </div>
           </div>
-          <h3 className={styles.title}>{habit.name}</h3>
+          
           {habit.description && (
-            <p className={styles.description}>{habit.description}</p>
+            <p className={`${styles.description} ${isCompletedToday ? styles.descriptionCompleted : ''}`}>
+              {habit.description}
+            </p>
           )}
           
           <div className={styles.meta}>
-            <span className={styles.frequency}>
+            <span className={`${styles.frequency} ${styles[habit.targetFrequency]}`}>
               {habit.targetFrequency.charAt(0).toUpperCase() + habit.targetFrequency.slice(1)}
             </span>
             <span className={styles.streak}>
@@ -88,45 +156,66 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit }) => {
               </span>
             )}
           </div>
+
+          {/* Rewards details - hidden until hover */}
+          {habit.statRewards &&
+            ((habit.statRewards.xp ?? 0) > 0 ||
+              (habit.statRewards.body ?? 0) > 0 ||
+              (habit.statRewards.mind ?? 0) > 0 ||
+              (habit.statRewards.soul ?? 0) > 0) && (
+              <div className={styles.rewards}>
+                {(habit.statRewards.xp ?? 0) > 0 && (
+                  <span className={`${styles.reward} ${styles.rewardXP}`}>
+                    XP: +{habit.statRewards.xp}
+                  </span>
+                )}
+                {(habit.statRewards.body ?? 0) > 0 && (
+                  <span className={`${styles.reward} ${styles.rewardBody}`}>
+                    💪 Body: +{habit.statRewards.body}
+                  </span>
+                )}
+                {(habit.statRewards.mind ?? 0) > 0 && (
+                  <span className={`${styles.reward} ${styles.rewardMind}`}>
+                    🧠 Mind: +{habit.statRewards.mind}
+                  </span>
+                )}
+                {(habit.statRewards.soul ?? 0) > 0 && (
+                  <span className={`${styles.reward} ${styles.rewardSoul}`}>
+                    ✨ Soul: +{habit.statRewards.soul}
+                  </span>
+                )}
+              </div>
+            )}
         </div>
 
-        <div className={styles.actions}>
-          <button
-            onClick={handleComplete}
-            disabled={isCompletedToday || isCompleting}
-            className={`${styles.completeButton} ${isCompletedToday ? styles.completedButton : ''} ${isCompleting ? styles.completing : ''}`}
-            title={isCompletedToday ? 'Completed today!' : 'Mark as complete'}
-          >
-            {isCompletedToday ? '✓' : isCompleting ? '⏳' : '○'}
-          </button>
+        <div className={styles.rightSection} onClick={(e) => e.stopPropagation()}>
+          <div className={styles.checkboxContainer} onClick={(e) => e.stopPropagation()}>
+            {isCompletedToday ? (
+              <div className={styles.cooldownTimer}>
+                <span className={styles.cooldownText}>{cooldownTime}</span>
+              </div>
+            ) : (
+              <input
+                type="checkbox"
+                checked={isCompletedToday}
+                onChange={handleComplete}
+                disabled={isCompleting}
+                className={styles.checkbox}
+              />
+            )}
+          </div>
 
-          <button
-            onClick={handleEdit}
-            className={styles.editButton}
-            title="Edit habit"
-          >
-            ✏
-          </button>
+          <div className={styles.actions} onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={handleEdit}
+              className={styles.editButton}
+              aria-label="Edit habit"
+            >
+              🖍
+            </button>
+          </div>
         </div>
       </div>
-
-      {habit.statRewards && (
-        <div className={styles.rewards}>
-          <span className={styles.rewardsLabel}>Rewards:</span>
-          {habit.statRewards.body && (
-            <span className={styles.reward}>💪 +{habit.statRewards.body} Body</span>
-          )}
-          {habit.statRewards.mind && (
-            <span className={styles.reward}>🧠 +{habit.statRewards.mind} Mind</span>
-          )}
-          {habit.statRewards.soul && (
-            <span className={styles.reward}>✨ +{habit.statRewards.soul} Soul</span>
-          )}
-          {habit.statRewards.xp && (
-            <span className={styles.reward}>⭐ +{habit.statRewards.xp} XP</span>
-          )}
-        </div>
-      )}
     </div>
   );
 }; 

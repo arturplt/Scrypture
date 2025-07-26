@@ -19,7 +19,54 @@
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
+/* Frequency-based sections */
+.frequencySection {
+  margin-bottom: 32px;
+}
 
+.frequencyTitle {
+  color: #ffffff;
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.frequencyContent {
+  overflow: hidden;
+  transition: all 0.3s ease-in-out;
+  padding-left: 0;
+  margin-left: 0;
+}
+
+/* Category sections within frequency */
+.categorySection {
+  margin-bottom: 16px;
+}
+
+.categoryTitle {
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.categoryContent {
+  overflow: hidden;
+  transition: all 0.3s ease-in-out;
+  padding-left: 0;
+  margin-left: 0;
+}
+
+.categoryIcon {
+  font-size: 16px;
+  opacity: 0.8;
+}
 
 .section {
   margin-bottom: 32px;
@@ -98,7 +145,7 @@
 .habitGrid {
   display: grid;
   gap: 16px;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  grid-template-columns: 1fr;
   padding: 4px;
 }
 
@@ -140,8 +187,6 @@
   text-rendering: optimizeSpeed;
 }
 
-
-
 /* Responsive design */
 @media (max-width: 768px) {
   .container {
@@ -159,6 +204,14 @@
     text-align: center;
   }
   
+  .frequencyTitle {
+    font-size: 18px;
+  }
+  
+  .categoryTitle {
+    font-size: 16px;
+  }
+  
   .habitGrid {
     grid-template-columns: 1fr;
     gap: 4px;
@@ -166,7 +219,7 @@
   
   .emptyState {
     padding: 40px 16px;
-    margin: 4px 0;
+    margin: 20px 0;
   }
   
   .emptyIcon {

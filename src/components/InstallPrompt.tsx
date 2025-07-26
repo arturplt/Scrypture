@@ -16,6 +16,7 @@ export const InstallPrompt: React.FC<InstallPromptProps> = ({ onClose }) => {
   const [isStandalone, setIsStandalone] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
   const [isAndroid, setIsAndroid] = useState(false);
+  const [isFullscreenSupported, setIsFullscreenSupported] = useState(false);
 
   useEffect(() => {
     // Check if app is already installed (standalone mode)
@@ -26,6 +27,9 @@ export const InstallPrompt: React.FC<InstallPromptProps> = ({ onClose }) => {
     const userAgent = navigator.userAgent.toLowerCase();
     setIsIOS(/iphone|ipad|ipod/.test(userAgent));
     setIsAndroid(/android/.test(userAgent));
+    
+    // Check if fullscreen is supported
+    setIsFullscreenSupported(!!document.documentElement.requestFullscreen);
   }, []);
 
   // Don't show if already in standalone mode
@@ -37,6 +41,16 @@ export const InstallPrompt: React.FC<InstallPromptProps> = ({ onClose }) => {
     // Mark that install prompt has been shown
     localStorage.setItem('installPromptShown', 'true');
     onClose();
+  };
+
+  const handleFullscreenRequest = async () => {
+    try {
+      if (document.documentElement.requestFullscreen) {
+        await document.documentElement.requestFullscreen();
+      }
+    } catch (error) {
+      console.log('Fullscreen request failed:', error);
+    }
   };
 
   const getInstallInstructions = () => {
@@ -106,6 +120,14 @@ export const InstallPrompt: React.FC<InstallPromptProps> = ({ onClose }) => {
         </div>
         
         <div className={styles.actions}>
+          {isFullscreenSupported && (
+            <button 
+              className={styles.fullscreenButton}
+              onClick={handleFullscreenRequest}
+            >
+              🖥️ Enter Fullscreen
+            </button>
+          )}
           <button 
             className={styles.primaryButton}
             onClick={handleClose}
