@@ -1,7 +1,5 @@
 .container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
+  margin-top: var(--spacing-md);
 }
 
 .header {
@@ -147,7 +145,7 @@
 /* Responsive design */
 @media (max-width: 768px) {
   .container {
-    padding: 16px;
+    padding: 2px;
   }
   
   .header {
@@ -163,12 +161,12 @@
   
   .habitGrid {
     grid-template-columns: 1fr;
-    gap: 12px;
+    gap: 4px;
   }
   
   .emptyState {
     padding: 40px 16px;
-    margin: 20px 0;
+    margin: 4px 0;
   }
   
   .emptyIcon {
