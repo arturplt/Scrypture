@@ -36,25 +36,42 @@ A modern, gamified habit and task management application built with React, TypeS
 
 ## 🏆 Achievement Rewards System
 
-**✅ CONNECTED**: Achievements now properly reward players with XP and core attribute stats!
+The achievement system now properly rewards players with XP and core attributes when achievements are unlocked. When an achievement is unlocked, the system automatically:
 
-### How It Works:
-1. **Complete Tasks/Reach Milestones** → Triggers achievement checking
-2. **Achievement Unlocked** → Automatically applies rewards:
-   - **XP**: Increases experience and potentially levels up the user
-   - **Body/Mind/Soul**: Directly increases core attribute stats  
-   - **Bóbr Evolution**: May trigger companion evolution based on progress
-3. **User Stats Updated** → Changes are immediately reflected in the UI
+- **Applies XP rewards** that may trigger level-ups
+- **Boosts core attributes** (Body, Mind, Soul) 
+- **Integrates with Bóbr evolution** - high XP gains can trigger companion evolution
+- **Updates dam progress** based on completed tasks
+- **Provides detailed console logging** for debugging
 
 ### Example Achievement Rewards:
-- **"First Steps"** (Complete 1 task): +50 XP
-- **"Dam Builder"** (Complete 10 tasks): +100 XP, +5 Body, +5 Mind, +5 Soul
-- **"Ancient Wisdom"** (Reach level 5): +200 XP, +15 Soul
+- **First Steps**: +50 XP
+- **Dam Builder**: +100 XP, +5 Body/Mind/Soul
+- **Ancient Wisdom**: +200 XP, +15 Soul
 
-### Implementation:
-- `userService.applyAchievementRewards()`: Applies rewards when achievements unlock
-- `useAchievements.checkAchievements()`: Automatically calls reward application
-- Full integration with Bóbr companion evolution system
+### Auto-Save and Refresh System
+
+The achievement system includes robust auto-save and refresh functionality:
+
+#### Auto-Save Features:
+- **Debounced saving** (500ms delay) prevents excessive storage writes
+- **Real persistence** to localStorage via `achievementService.saveAchievements()` and `achievementService.saveProgress()`
+- **Visual feedback** with save indicators and timestamps
+- **Error handling** for storage failures with console logging
+
+#### Refresh Features:
+- **Manual refresh** via refresh button (🔄) in AchievementGrid header
+- **Auto-refresh** every 30 seconds to sync with storage
+- **Real-time updates** when achievements unlock
+- **Progress synchronization** across browser tabs/windows
+
+#### Technical Implementation:
+- **Debounced auto-save** prevents performance issues from rapid saves
+- **Periodic refresh** ensures data consistency across sessions
+- **Error recovery** with graceful fallbacks
+- **Console logging** for debugging and monitoring
+
+The system ensures achievements are always up-to-date and properly persisted, providing a reliable and responsive user experience.
 
 ---
 

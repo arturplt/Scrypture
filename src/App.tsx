@@ -124,7 +124,7 @@ function AppContent() {
   const { tasks, isSaving, lastSaved, refreshTasks } = useTasks();
   const { user, isSaving: userIsSaving } = useUser();
   const { habits, isSaving: habitsIsSaving } = useHabits();
-  const { achievements, achievementProgress, checkAchievements } = useAchievements();
+  const { achievements, achievementProgress, checkAchievements, refreshAchievements } = useAchievements();
   const { shouldShowStep, markStepComplete, startTutorial, skipTutorial } = useTutorial();
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [showTutorialCompletion, setShowTutorialCompletion] = useState(false);
@@ -330,6 +330,7 @@ function AppContent() {
             achievements={achievements}
             achievementProgress={achievementProgress}
             onAchievementClick={handleAchievementClick}
+            onRefresh={refreshAchievements}
           />
         )}
         <TaskForm 

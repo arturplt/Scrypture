@@ -42,18 +42,20 @@ class AchievementService {
   }
 
   // Save achievements to storage
-  private saveAchievements(): void {
+  saveAchievements(): void {
     try {
       storageService.setGenericItem(this.STORAGE_KEY, this.achievements);
+      console.log('🏆 Achievements saved to storage');
     } catch (error) {
       console.error('Failed to save achievements:', error);
     }
   }
 
   // Save achievement progress to storage
-  private saveProgress(): void {
+  saveProgress(): void {
     try {
       storageService.setGenericItem(this.PROGRESS_STORAGE_KEY, this.achievementProgress);
+      console.log('📊 Achievement progress saved to storage');
     } catch (error) {
       console.error('Failed to save achievement progress:', error);
     }

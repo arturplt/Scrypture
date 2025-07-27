@@ -10,6 +10,7 @@ interface AchievementGridProps {
   isSaving?: boolean;
   lastSaved?: Date;
   onAchievementClick?: (achievement: Achievement) => void;
+  onRefresh?: () => void;
 }
 
 type FilterType = 'all' | 'unlocked' | 'locked' | 'progression' | 'mastery' | 'consistency' | 'exploration' | 'special';
@@ -20,6 +21,7 @@ export const AchievementGrid: React.FC<AchievementGridProps> = ({
   isSaving = false,
   lastSaved,
   onAchievementClick,
+  onRefresh,
 }) => {
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
 
@@ -138,6 +140,15 @@ export const AchievementGrid: React.FC<AchievementGridProps> = ({
             <span className={styles.statIcon}>📊</span>
             <span>{stats.percentage}%</span>
           </div>
+          {onRefresh && (
+            <button
+              className={styles.refreshButton}
+              onClick={onRefresh}
+              title="Refresh achievements"
+            >
+              🔄
+            </button>
+          )}
           <AutoSaveIndicator isSaving={isSaving} lastSaved={lastSaved} />
         </div>
       </div>

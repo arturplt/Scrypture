@@ -151,6 +151,7 @@ export interface AchievementContextType {
   achievementProgress: AchievementProgress[];
   checkAchievements: (user: User, tasks: Task[], habits: Habit[]) => Achievement[];
   getAchievementProgress: (achievementId: string) => AchievementProgress | null;
+  refreshAchievements: () => void;
   isSaving: boolean;
   lastSaved?: Date;
 }

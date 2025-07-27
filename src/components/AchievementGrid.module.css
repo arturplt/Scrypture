@@ -42,7 +42,30 @@
 .statItem {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
+  gap: 4px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.refreshButton {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  color: var(--text-secondary);
+}
+
+.refreshButton:hover {
+  background-color: var(--background-hover);
+  color: var(--text-primary);
+  transform: scale(1.1);
+}
+
+.refreshButton:active {
+  transform: scale(0.95);
 }
 
 .statIcon {
