@@ -20,6 +20,8 @@ import BobrPen from './components/BobrPen';
 import BobrIntroduction from './components/BobrIntroduction';
 import { FirstTaskWizard } from './components/FirstTaskWizard';
 import { TutorialCompletionCelebration } from './components/TutorialCompletionCelebration';
+import WelcomeScreen from './components/WelcomeScreen';
+import AnalyticsDashboard from './components/AnalyticsDashboard';
 import { Task, Achievement } from './types';
 import styles from './App.module.css';
 import { Modal } from './components/Modal';
@@ -131,6 +133,7 @@ function AppContent() {
   const [showStartHere, setShowStartHere] = useState(false);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const [showAchievements, setShowAchievements] = useState(false);
+  const [showAnalytics, setShowAnalytics] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [achievementNotifications, setAchievementNotifications] = useState<Achievement[]>([]);
   const lastLevel = useRef<number | null>(null);
@@ -233,6 +236,21 @@ function AppContent() {
     }} />;
   }
 
+  // Show welcome screen for new users
+  if (shouldShowStep('welcome')) {
+    return (
+      <WelcomeScreen
+        onContinue={() => {
+          markStepComplete('welcome');
+        }}
+        onSkip={() => {
+          console.log('Skipping entire tutorial from welcome screen');
+          skipTutorial();
+        }}
+      />
+    );
+  }
+
   // Show onboarding flow for new users
   if (shouldShowStep('bobrIntroduction')) {
     return (
@@ -267,6 +285,23 @@ function AppContent() {
     );
   }
 
+  // Show task completion step (this happens automatically when first task is completed)
+  if (shouldShowStep('taskCompletion')) {
+    // This step is handled automatically in the task completion logic
+    // We'll mark it complete and move to next step
+    markStepComplete('taskCompletion');
+    markStepComplete('hatchlingEvolution');
+    markStepComplete('completion');
+  }
+
+  // Show hatchling evolution step (this happens automatically when Bóbr evolves)
+  if (shouldShowStep('hatchlingEvolution')) {
+    // This step is handled automatically in the Bóbr evolution logic
+    // We'll mark it complete and move to next step
+    markStepComplete('hatchlingEvolution');
+    markStepComplete('completion');
+  }
+
   return (
     <div className={styles.app}>
       {(userIsSaving || habitsIsSaving) && <SpinnerOverlay />}
@@ -291,6 +326,13 @@ function AppContent() {
         <div className={styles.userInfo}>
           <span className={styles.userName}>{user.name}</span>
           <span className={styles.userLevel}>Level {user.level}</span>
+          <button 
+            className={styles.analyticsButton}
+            onClick={() => setShowAnalytics(true)}
+            title="View Analytics"
+          >
+            📊
+          </button>
           <button 
             className={styles.achievementsButton}
             onClick={() => setShowAchievements(!showAchievements)}
@@ -342,6 +384,12 @@ function AppContent() {
         <HabitList />
         <DataManager onDataChange={refreshTasks} />
       </main>
+
+      {/* Analytics Dashboard */}
+      <AnalyticsDashboard
+        isOpen={showAnalytics}
+        onClose={() => setShowAnalytics(false)}
+      />
 
       {/* Edit Task Modal */}
       {editingTask && (

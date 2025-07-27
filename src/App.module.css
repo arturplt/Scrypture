@@ -58,6 +58,28 @@
   border-radius: 0px;
 }
 
+.analyticsButton {
+  background: var(--color-bg-primary);
+  border: 2px solid var(--color-border-primary);
+  border-radius: 0px;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--font-size-xs);
+  font-family: 'Press Start 2P', monospace;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+}
+
+.analyticsButton:hover {
+  border-color: var(--color-accent-gold);
+  color: var(--color-accent-gold);
+  transform: translateY(-1px);
+  box-shadow: 0 0 8px rgba(182, 164, 50, 0.3);
+}
+
 .achievementsButton {
   background: var(--color-bg-primary);
   border: 2px solid var(--color-border-primary);
