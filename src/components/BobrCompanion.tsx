@@ -9,6 +9,7 @@ interface BobrCompanionProps {
   className?: string;
   showEvolutionNotification?: boolean;
   onEvolutionComplete?: () => void;
+  onBobrClick?: () => void;
 }
 
 const BobrCompanion: React.FC<BobrCompanionProps> = ({
@@ -16,7 +17,8 @@ const BobrCompanion: React.FC<BobrCompanionProps> = ({
   completedTasksCount: _completedTasksCount,
   className = '',
   showEvolutionNotification = false,
-  onEvolutionComplete
+  onEvolutionComplete,
+  onBobrClick
 }) => {
   const [currentMessage, setCurrentMessage] = useState<BobrMessage | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -111,9 +113,11 @@ const BobrCompanion: React.FC<BobrCompanionProps> = ({
 
       {/* Bóbr Character */}
       <div 
-        className={`${styles.bobrCharacter} ${isAnimating ? styles[`${animationType}ing`] : ''}`}
+        className={`${styles.bobrCharacter} ${isAnimating ? styles[`${animationType}ing`] : ''} ${onBobrClick ? styles.clickable : ''}`}
         role="img" 
         aria-label={`Bóbr companion in ${user.bobrStage} stage`}
+        onClick={onBobrClick}
+        title={onBobrClick ? "Click to talk to Bobr!" : undefined}
       >
         {getBobrAppearance(user.bobrStage)}
       </div>

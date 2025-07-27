@@ -15,9 +15,13 @@ class AchievementService {
   // Load achievements from storage or initialize with defaults
   private loadAchievements(): void {
     try {
-      const stored = storageService.getGenericItem<Achievement[]>(this.STORAGE_KEY);
+      const stored = storageService.getGenericItem<unknown[]>(this.STORAGE_KEY);
       if (stored && Array.isArray(stored)) {
-        this.achievements = stored;
+        // Convert date strings back to Date objects
+        this.achievements = stored.map((achievement: any) => ({
+          ...achievement,
+          unlockedAt: achievement.unlockedAt ? new Date(achievement.unlockedAt) : undefined,
+        })) as Achievement[];
       } else {
         this.achievements = this.getDefaultAchievements();
         this.saveAchievements();
@@ -31,9 +35,13 @@ class AchievementService {
   // Load achievement progress from storage
   private loadProgress(): void {
     try {
-      const stored = storageService.getGenericItem<AchievementProgress[]>(this.PROGRESS_STORAGE_KEY);
+      const stored = storageService.getGenericItem<unknown[]>(this.PROGRESS_STORAGE_KEY);
       if (stored && Array.isArray(stored)) {
-        this.achievementProgress = stored;
+        // Convert date strings back to Date objects
+        this.achievementProgress = stored.map((progress: any) => ({
+          ...progress,
+          lastUpdated: progress.lastUpdated ? new Date(progress.lastUpdated) : undefined,
+        })) as AchievementProgress[];
       }
     } catch (error) {
       console.warn('Failed to load achievement progress:', error);

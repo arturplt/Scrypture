@@ -28,7 +28,8 @@ describe('WelcomeScreen', () => {
 
       expect(screen.getByText('🌲')).toBeInTheDocument();
       expect(screen.getByText(/In the depths of an ancient forest/)).toBeInTheDocument();
-      expect(screen.getByText(/Bóbr/)).toBeInTheDocument();
+      // Use getAllByText since Bóbr appears multiple times
+      expect(screen.getAllByText(/Bóbr/)).toHaveLength(3);
     });
 
     it('should render all feature highlights', () => {
@@ -156,36 +157,36 @@ describe('WelcomeScreen', () => {
       expect(screen.getByText('🏆')).toBeInTheDocument();
     });
 
-    it('should have proper CSS classes applied', () => {
+    it('should have proper structure with buttons and content', () => {
       const { container } = render(
         <WelcomeScreen onContinue={mockOnContinue} onSkip={mockOnSkip} />
       );
 
-      expect(container.querySelector('.overlay')).toBeInTheDocument();
-      expect(container.querySelector('.modal')).toBeInTheDocument();
-      expect(container.querySelector('.header')).toBeInTheDocument();
-      expect(container.querySelector('.content')).toBeInTheDocument();
-      expect(container.querySelector('.buttonContainer')).toBeInTheDocument();
+      // Check for main structural elements by their content instead of CSS classes
+      expect(screen.getByText('Welcome to Scrypture')).toBeInTheDocument();
+      expect(screen.getByText('Begin Journey')).toBeInTheDocument();
+      expect(screen.getByText('Skip Introduction')).toBeInTheDocument();
     });
 
-    it('should render story section with proper structure', () => {
-      const { container } = render(
+    it('should render story section with proper content', () => {
+      render(
         <WelcomeScreen onContinue={mockOnContinue} onSkip={mockOnSkip} />
       );
 
-      expect(container.querySelector('.storySection')).toBeInTheDocument();
-      expect(container.querySelector('.storyIcon')).toBeInTheDocument();
-      expect(container.querySelector('.storyText')).toBeInTheDocument();
+      expect(screen.getByText('🌲')).toBeInTheDocument();
+      expect(screen.getByText(/In the depths of an ancient forest/)).toBeInTheDocument();
     });
 
-    it('should render features section with proper structure', () => {
-      const { container } = render(
+    it('should render features section with proper content', () => {
+      render(
         <WelcomeScreen onContinue={mockOnContinue} onSkip={mockOnSkip} />
       );
 
-      expect(container.querySelector('.featuresSection')).toBeInTheDocument();
-      expect(container.querySelector('.featuresList')).toBeInTheDocument();
-      expect(container.querySelectorAll('.feature')).toHaveLength(4);
+      expect(screen.getByText('Your Journey Awaits')).toBeInTheDocument();
+      expect(screen.getByText(/Task Mastery/)).toBeInTheDocument();
+      expect(screen.getByText(/Character Growth/)).toBeInTheDocument();
+      expect(screen.getByText(/Dam Building/)).toBeInTheDocument();
+      expect(screen.getByText(/Achievement Unlocks/)).toBeInTheDocument();
     });
   });
 

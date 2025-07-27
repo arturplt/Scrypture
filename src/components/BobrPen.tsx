@@ -2,22 +2,26 @@ import React, { useState } from 'react';
 import { User } from '../types';
 import BobrCompanion from './BobrCompanion';
 import DamVisualization from './DamVisualization';
+import { BobrInteraction } from './BobrInteraction';
 import styles from './BobrPen.module.css';
 
 interface BobrPenProps {
   user: User;
   completedTasksCount: number;
   className?: string;
+  onTaskCreated?: (taskId: string) => void;
 }
 
 const BobrPen: React.FC<BobrPenProps> = ({
   user,
   completedTasksCount,
-  className = ''
+  className = '',
+  onTaskCreated
 }) => {
   const [showEvolutionNotification, setShowEvolutionNotification] = useState(false);
   const [activeView, setActiveView] = useState<'dam' | 'bobr'>('bobr');
   const [isCollapsed, setIsCollapsed] = useState(true);
+  const [showBobrInteraction, setShowBobrInteraction] = useState(false);
 
   // Get stage progress for visual indicators
   const getStageProgress = (level: number): { current: number; stages: string[] } => {
@@ -114,12 +118,20 @@ const BobrPen: React.FC<BobrPenProps> = ({
                   completedTasksCount={completedTasksCount}
                   showEvolutionNotification={showEvolutionNotification}
                   onEvolutionComplete={() => setShowEvolutionNotification(false)}
+                  onBobrClick={() => setShowBobrInteraction(true)}
                 />
               </div>
             )}
           </div>
         </>
       )}
+
+      {/* Bobr Interaction Modal */}
+      <BobrInteraction 
+        isOpen={showBobrInteraction}
+        onClose={() => setShowBobrInteraction(false)}
+        onTaskCreated={onTaskCreated}
+      />
     </div>
   );
 };

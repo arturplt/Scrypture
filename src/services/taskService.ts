@@ -28,7 +28,33 @@ export const taskService = {
   getTasks(): Task[] {
     const tasks = storageService.getTasks();
     // Migrate any old tasks to the new format
-    return tasks.map(migrateTaskCategories);
+    const migratedTasks = tasks.map(migrateTaskCategories);
+    
+    // Add default stat rewards to tasks that don't have them
+    const tasksWithRewards = migratedTasks.map(task => {
+      if (!task.statRewards) {
+        console.log('🔧 Adding default stat rewards to task:', task.title);
+        return {
+          ...task,
+          statRewards: {
+            body: task.categories.includes('body') ? 1 : 0,
+            mind: task.categories.includes('mind') ? 1 : 0,
+            soul: task.categories.includes('soul') ? 1 : 0,
+            xp: 10
+          }
+        };
+      }
+      return task;
+    });
+    
+    // Save the updated tasks if any were modified
+    if (tasksWithRewards.length !== migratedTasks.length || 
+        tasksWithRewards.some((task, index) => task.statRewards !== migratedTasks[index]?.statRewards)) {
+      console.log('🔧 Saving tasks with added stat rewards');
+      this.saveTasks(tasksWithRewards);
+    }
+    
+    return tasksWithRewards;
   },
 
   saveTasks(tasks: Task[]): boolean {

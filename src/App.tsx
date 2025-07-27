@@ -22,11 +22,12 @@ import { FirstTaskWizard } from './components/FirstTaskWizard';
 import { TutorialCompletionCelebration } from './components/TutorialCompletionCelebration';
 import WelcomeScreen from './components/WelcomeScreen';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
+
 import { Task, Achievement } from './types';
 import styles from './App.module.css';
 import { Modal } from './components/Modal';
 import { TaskEditForm } from './components/TaskEditForm';
-import { LoadingDebug } from './components/LoadingDebug';
+
 
 function LevelUpModal({
   level,
@@ -240,9 +241,10 @@ function AppContent() {
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const [showAchievements, setShowAchievements] = useState(false);
   const [showAnalytics, setShowAnalytics] = useState(false);
+
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [achievementNotifications, setAchievementNotifications] = useState<Achievement[]>([]);
-  const [debugLoading, setDebugLoading] = useState(false);
+
   const lastLevel = useRef<number | null>(null);
   const taskListRef = useRef<TaskListRef | null>(null);
 
@@ -255,17 +257,7 @@ function AppContent() {
     }
   }, [user]);
 
-  // Debug loading states
-  useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Loading States:', {
-        userIsSaving,
-        habitsIsSaving,
-        debugLoading,
-        showLoading: userIsSaving || habitsIsSaving || debugLoading
-      });
-    }
-  }, [userIsSaving, habitsIsSaving, debugLoading]);
+
 
   // Check for achievement unlocks when user data, tasks, or habits change
   useEffect(() => {
@@ -347,10 +339,7 @@ function AppContent() {
     console.log('Achievement clicked:', achievement);
   };
 
-  const handleDebugLoading = (duration: number) => {
-    setDebugLoading(true);
-    setTimeout(() => setDebugLoading(false), duration);
-  };
+
 
   // Show user creation if no user exists
   if (!user) {
@@ -428,7 +417,7 @@ function AppContent() {
 
   return (
     <div className={styles.app}>
-      {(userIsSaving || habitsIsSaving || debugLoading) && <SpinnerOverlay />}
+      {(userIsSaving || habitsIsSaving) && <SpinnerOverlay />}
       {showLevelUp && (
         <LevelUpModal
           level={user.level}
@@ -464,27 +453,7 @@ function AppContent() {
           >
             🏆 {achievements.filter(a => a.unlocked).length}/{achievements.length}
           </button>
-          {process.env.NODE_ENV === 'development' && (
-            <button 
-              style={{
-                background: 'var(--color-bg-secondary)',
-                border: '2px solid var(--color-accent-gold)',
-                color: 'var(--color-text-primary)',
-                padding: 'var(--spacing-xs) var(--spacing-sm)',
-                fontFamily: 'Press Start 2P, monospace',
-                fontSize: 'var(--font-size-xs)',
-                cursor: 'pointer',
-                marginLeft: 'var(--spacing-sm)',
-              }}
-              onClick={() => {
-                setDebugLoading(true);
-                setTimeout(() => setDebugLoading(false), 3000);
-              }}
-              title="Test Loading Screen (3s)"
-            >
-              🔄
-            </button>
-          )}
+
         </div>
       </header>
 
@@ -493,6 +462,7 @@ function AppContent() {
         <BobrPen 
           user={user}
           completedTasksCount={tasks.filter(task => task.completed).length}
+          onTaskCreated={handleTaskCreated}
         />
         
         {!showStartHere ? (
@@ -536,6 +506,8 @@ function AppContent() {
         onClose={() => setShowAnalytics(false)}
       />
 
+
+
       {/* Edit Task Modal */}
       {editingTask && (
         <Modal
@@ -566,13 +538,7 @@ function AppContent() {
         />
       ))}
 
-      {/* Debug Component - Only in development */}
-      {process.env.NODE_ENV === 'development' && (
-        <LoadingDebug
-          onTriggerLoading={handleDebugLoading}
-          isVisible={true}
-        />
-      )}
+
     </div>
   );
 }

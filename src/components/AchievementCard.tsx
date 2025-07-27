@@ -52,14 +52,28 @@ export const AchievementCard: React.FC<AchievementCardProps> = ({
     }
   };
 
-  const formatDate = (date: Date) => {
-    return new Intl.DateTimeFormat('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    }).format(date);
+  const formatDate = (date: Date | string | undefined) => {
+    if (!date) return '';
+    
+    try {
+      const dateObj = date instanceof Date ? date : new Date(date);
+      
+      // Check if the date is valid
+      if (isNaN(dateObj.getTime())) {
+        return '';
+      }
+      
+      return new Intl.DateTimeFormat('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      }).format(dateObj);
+    } catch (error) {
+      console.error('Error formatting date:', error, date);
+      return '';
+    }
   };
 
   const cardClasses = [

@@ -24,6 +24,20 @@
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
+.bobrCharacter.clickable {
+  cursor: pointer;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.bobrCharacter.clickable:hover {
+  transform: scale(1.05);
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
+}
+
+.bobrCharacter.clickable:active {
+  transform: scale(0.95);
+}
+
 .bobrImage {
   width: 64px;
   height: 64px;

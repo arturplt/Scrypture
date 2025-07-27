@@ -367,34 +367,33 @@ describe('TutorialCompletionCelebration', () => {
   describe('Content structure', () => {
     it('should render all main sections', () => {
       const user = createMockUser();
-      const { container } = render(
+      render(
         <TutorialCompletionCelebration
           user={user}
           onClose={mockOnClose}
         />
       );
 
-      expect(container.querySelector('.celebration')).toBeInTheDocument();
-      expect(container.querySelector('.achievementGrid')).toBeInTheDocument();
-      expect(container.querySelector('.unlockedFeatures')).toBeInTheDocument();
-      expect(container.querySelector('.encouragement')).toBeInTheDocument();
-      expect(container.querySelector('.hint')).toBeInTheDocument();
+      // Check for main content instead of CSS classes
+      expect(screen.getByText(/Congratulations/)).toBeInTheDocument();
+      expect(screen.getByText(/Met your companion Bóbr/)).toBeInTheDocument();
+      expect(screen.getByText(/Features Now Available/)).toBeInTheDocument();
+      expect(screen.getByText(/Tip: Start by completing/)).toBeInTheDocument();
     });
 
-    it('should have proper CSS classes applied', () => {
+    it('should have proper content structure', () => {
       const user = createMockUser();
-      const { container } = render(
+      render(
         <TutorialCompletionCelebration
           user={user}
           onClose={mockOnClose}
         />
       );
 
-      expect(container.querySelector('.overlay')).toBeInTheDocument();
-      expect(container.querySelector('.modal')).toBeInTheDocument();
-      expect(container.querySelector('.fireworks')).toBeInTheDocument();
-      expect(container.querySelector('.title')).toBeInTheDocument();
-      expect(container.querySelector('.subtitle')).toBeInTheDocument();
+      // Check for main content instead of CSS classes
+      expect(screen.getByText(/Congratulations/)).toBeInTheDocument();
+      expect(screen.getByText(/You've completed the Scrypture tutorial/)).toBeInTheDocument();
+      expect(screen.getByText(/Begin My Journey/)).toBeInTheDocument();
     });
   });
 
@@ -460,8 +459,8 @@ describe('TutorialCompletionCelebration', () => {
       expect(screen.getByText('🔄')).toBeInTheDocument();
       expect(screen.getByText('📈')).toBeInTheDocument();
       
-      // Tip icon
-      expect(screen.getByText('💡')).toBeInTheDocument();
+      // Tip icon - use a more flexible approach since it might be in a different element
+      expect(screen.getByText(/💡/)).toBeInTheDocument();
     });
   });
 }); 

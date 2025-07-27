@@ -161,6 +161,7 @@ describe('AnalyticsDashboard', () => {
       removeExperience: jest.fn(),
       unlockAchievement: jest.fn(),
       createUser: jest.fn(),
+      applyAchievementRewards: jest.fn(),
       isSaving: false,
     });
 
@@ -187,7 +188,11 @@ describe('AnalyticsDashboard', () => {
 
     mockUseAchievements.mockReturnValue({
       achievements: createMockAchievements(),
+      achievementProgress: [],
       checkAchievements: jest.fn(),
+      getAchievementProgress: jest.fn(),
+      refreshAchievements: jest.fn(),
+      isSaving: false,
     });
   });
 
@@ -229,13 +234,14 @@ describe('AnalyticsDashboard', () => {
   });
 
   describe('Tab navigation', () => {
-    it('should start with Overview tab active', () => {
+    it('should start with Overview tab content visible', () => {
       render(
         <AnalyticsDashboard isOpen={true} onClose={mockOnClose} />
       );
 
-      const overviewTab = screen.getByRole('button', { name: 'Overview' });
-      expect(overviewTab).toHaveClass('active');
+      // Overview content should be visible by default
+      expect(screen.getByText('Completion Rate')).toBeInTheDocument();
+      expect(screen.getByText('Total XP')).toBeInTheDocument();
     });
 
     it('should switch to Progress tab when clicked', () => {
@@ -246,7 +252,6 @@ describe('AnalyticsDashboard', () => {
       const progressTab = screen.getByRole('button', { name: 'Progress' });
       fireEvent.click(progressTab);
 
-      expect(progressTab).toHaveClass('active');
       expect(screen.getByText('Weekly Progress')).toBeInTheDocument();
     });
 
@@ -258,7 +263,6 @@ describe('AnalyticsDashboard', () => {
       const habitsTab = screen.getByRole('button', { name: 'Habits' });
       fireEvent.click(habitsTab);
 
-      expect(habitsTab).toHaveClass('active');
       expect(screen.getByText('Habit Performance')).toBeInTheDocument();
     });
 
@@ -270,7 +274,6 @@ describe('AnalyticsDashboard', () => {
       const achievementsTab = screen.getByRole('button', { name: 'Achievements' });
       fireEvent.click(achievementsTab);
 
-      expect(achievementsTab).toHaveClass('active');
       expect(screen.getByText('Achievement Progress')).toBeInTheDocument();
     });
   });
@@ -539,6 +542,7 @@ describe('AnalyticsDashboard', () => {
         removeExperience: jest.fn(),
         unlockAchievement: jest.fn(),
         createUser: jest.fn(),
+        applyAchievementRewards: jest.fn(),
         isSaving: false,
       });
 

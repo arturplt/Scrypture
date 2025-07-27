@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useUser } from '../hooks/useUser';
 import { AutoSaveIndicator } from './AutoSaveIndicator';
 import styles from './StatsDisplay.module.css';
@@ -7,7 +7,7 @@ export const StatsDisplay: React.FC = () => {
   const { user, isSaving } = useUser();
 
   // Debug logging to track user state changes
-  React.useEffect(() => {
+  useEffect(() => {
     console.log('📊 StatsDisplay: User state changed:', {
       level: user?.level,
       experience: user?.experience,

@@ -33,19 +33,56 @@ export const StartHereSection: React.FC<StartHereSectionProps> = ({ isVisible, o
   const [givenHabits, setGivenHabits] = useState<Set<string>>(new Set());
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [collapsedCompletedSections, setCollapsedCompletedSections] = useState<Set<string>>(new Set());
+  const [isSavingProgress, setIsSavingProgress] = useState(false);
+  const [isSavingUI, setIsSavingUI] = useState(false);
 
-  // Load given tasks from localStorage on component mount
+  // Load given tasks and habits from localStorage on component mount
   useEffect(() => {
-    const saved = localStorage.getItem('startHereGivenTasks');
-    if (saved) {
-      setGivenTasks(new Set(JSON.parse(saved)));
+    const savedTasks = localStorage.getItem('startHereGivenTasks');
+    if (savedTasks) {
+      setGivenTasks(new Set(JSON.parse(savedTasks)));
+    }
+    
+    const savedHabits = localStorage.getItem('startHereGivenHabits');
+    if (savedHabits) {
+      setGivenHabits(new Set(JSON.parse(savedHabits)));
+    }
+    
+    const savedExpandedCategories = localStorage.getItem('startHereExpandedCategories');
+    if (savedExpandedCategories) {
+      setExpandedCategories(new Set(JSON.parse(savedExpandedCategories)));
+    }
+    
+    const savedCollapsedSections = localStorage.getItem('startHereCollapsedSections');
+    if (savedCollapsedSections) {
+      setCollapsedCompletedSections(new Set(JSON.parse(savedCollapsedSections)));
     }
   }, []);
 
   // Save given tasks to localStorage whenever it changes
   useEffect(() => {
+    setIsSavingProgress(true);
     localStorage.setItem('startHereGivenTasks', JSON.stringify(Array.from(givenTasks)));
+    // Simulate a brief saving delay for better UX
+    setTimeout(() => setIsSavingProgress(false), 300);
   }, [givenTasks]);
+
+  // Save given habits to localStorage whenever it changes
+  useEffect(() => {
+    setIsSavingProgress(true);
+    localStorage.setItem('startHereGivenHabits', JSON.stringify(Array.from(givenHabits)));
+    // Simulate a brief saving delay for better UX
+    setTimeout(() => setIsSavingProgress(false), 300);
+  }, [givenHabits]);
+
+  // Save UI state to localStorage whenever it changes
+  useEffect(() => {
+    setIsSavingUI(true);
+    localStorage.setItem('startHereExpandedCategories', JSON.stringify(Array.from(expandedCategories)));
+    localStorage.setItem('startHereCollapsedSections', JSON.stringify(Array.from(collapsedCompletedSections)));
+    // Simulate a brief saving delay for better UX
+    setTimeout(() => setIsSavingUI(false), 200);
+  }, [expandedCategories, collapsedCompletedSections]);
 
   const taskTemplates: Record<string, TaskTemplate[]> = {
     mind: [
@@ -1123,6 +1160,11 @@ export const StartHereSection: React.FC<StartHereSectionProps> = ({ isVisible, o
       
       // Mark this habit as given
       setGivenHabits(prev => new Set([...prev, habit.name]));
+      
+      // Auto-save given habits
+      setIsSavingProgress(true);
+      localStorage.setItem('startHereGivenHabits', JSON.stringify(Array.from([...givenHabits, habit.name])));
+      setTimeout(() => setIsSavingProgress(false), 300);
     }
   };
 
@@ -1189,7 +1231,7 @@ export const StartHereSection: React.FC<StartHereSectionProps> = ({ isVisible, o
     <div className={styles.container}>
       <div className={styles.header}>
         <h2>Start Here</h2>
-        <AutoSaveIndicator isSaving={tasksSaving || habitsSaving} />
+        <AutoSaveIndicator isSaving={tasksSaving || habitsSaving || isSavingProgress || isSavingUI} />
         <button className={styles.closeButton} onClick={onClose}>
           ×
         </button>

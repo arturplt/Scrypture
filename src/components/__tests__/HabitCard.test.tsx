@@ -95,6 +95,7 @@ describe('HabitCard', () => {
       removeExperience: jest.fn(),
       unlockAchievement: jest.fn(),
       createUser: jest.fn(),
+      applyAchievementRewards: jest.fn(),
       isSaving: false,
     });
 
@@ -332,6 +333,7 @@ describe('HabitCard', () => {
       removeExperience: jest.fn(),
       unlockAchievement: jest.fn(),
       createUser: jest.fn(),
+      applyAchievementRewards: jest.fn(),
       isSaving: false,
     });
 
@@ -557,6 +559,7 @@ describe('HabitCard', () => {
       removeExperience: jest.fn(),
       unlockAchievement: jest.fn(),
       createUser: jest.fn(),
+      applyAchievementRewards: jest.fn(),
       isSaving: false,
     });
     
