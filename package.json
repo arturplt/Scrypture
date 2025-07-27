@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
+    "deploy": "npm run build && gh-pages -d dist",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
@@ -35,6 +36,7 @@
     "eslint": "^8.55.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
+    "gh-pages": "^6.3.0",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
@@ -59,10 +61,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-org/scrypture.git"
+    "url": "https://github.com/arturplt/Scrypture.git"
   },
   "bugs": {
-    "url": "https://github.com/your-org/scrypture/issues"
+    "url": "https://github.com/arturplt/Scrypture/issues"
   },
-  "homepage": "https://github.com/your-org/scrypture#readme"
+  "homepage": "https://arturplt.github.io/Scrypture/"
 }

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { TaskProvider, useTasks } from './hooks/useTasks';
 import { UserProvider, useUser } from './hooks/useUser';
 import { HabitProvider, useHabits } from './hooks/useHabits';

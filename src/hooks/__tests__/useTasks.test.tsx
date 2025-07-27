@@ -74,7 +74,7 @@ const TestComponent = () => {
           addTask({
             title: 'Test Task',
             description: 'Test Description',
-            category: 'body',
+            categories: ['body'],
             completed: false,
             priority: 'medium',
           })
