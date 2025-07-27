@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { HabitForm } from '../HabitForm';
 import { useHabits } from '../../hooks/useHabits';
+import { Habit } from '../../types';
 
 // Mock the hooks
 jest.mock('../../hooks/useHabits', () => ({
@@ -315,6 +316,107 @@ describe('HabitForm', () => {
     
     const descriptionInput = screen.getByLabelText('Description (Optional)');
     expect(descriptionInput).toHaveValue('');
+  });
+
+  it('prevents creating new habit when there are incomplete habits', async () => {
+    const incompleteHabit: Habit = {
+      id: 'incomplete-habit-1',
+      name: 'Morning Exercise',
+      description: 'Daily exercise routine',
+      streak: 0,
+      bestStreak: 0,
+      createdAt: new Date(),
+      targetFrequency: 'daily',
+      categories: ['body'],
+      statRewards: { body: 1, xp: 5 },
+      // No lastCompleted date, so it's incomplete
+    };
+
+    const mockAddHabit = jest.fn().mockReturnValue(null); // Simulate failure due to incomplete habit
+    mockUseHabits.mockReturnValue({
+      habits: [incompleteHabit],
+      isSaving: false,
+      addHabit: mockAddHabit,
+      updateHabit: jest.fn(),
+      deleteHabit: jest.fn(),
+      completeHabit: jest.fn(),
+    });
+
+    render(<HabitForm onClose={mockOnClose} />);
+    
+    const nameInput = screen.getByLabelText('Habit Name *');
+    fireEvent.change(nameInput, { target: { value: 'New Habit' } });
+    
+    const submitButton = screen.getByText('Create Habit');
+    fireEvent.click(submitButton);
+    
+    await waitFor(() => {
+      expect(screen.getByText(/Please complete your current habit "Morning Exercise" before creating a new one/)).toBeInTheDocument();
+    });
+    
+    expect(mockAddHabit).toHaveBeenCalled();
+  });
+
+  it('allows creating new habit when all existing habits are completed', async () => {
+    const completedHabit: Habit = {
+      id: 'completed-habit-1',
+      name: 'Morning Exercise',
+      description: 'Daily exercise routine',
+      streak: 1,
+      bestStreak: 1,
+      createdAt: new Date(),
+      targetFrequency: 'daily',
+      categories: ['body'],
+      statRewards: { body: 1, xp: 5 },
+      lastCompleted: new Date(), // Completed today
+    };
+
+    const mockAddHabit = jest.fn().mockReturnValue({
+      id: 'new-habit-1',
+      name: 'New Habit',
+      description: 'A new habit',
+      streak: 0,
+      bestStreak: 0,
+      createdAt: new Date(),
+      targetFrequency: 'daily',
+      categories: ['body'],
+      statRewards: { body: 1, xp: 5 },
+    });
+    
+    mockUseHabits.mockReturnValue({
+      habits: [completedHabit],
+      isSaving: false,
+      addHabit: mockAddHabit,
+      updateHabit: jest.fn(),
+      deleteHabit: jest.fn(),
+      completeHabit: jest.fn(),
+    });
+
+    render(<HabitForm onClose={mockOnClose} />);
+    
+    const nameInput = screen.getByLabelText('Habit Name *');
+    fireEvent.change(nameInput, { target: { value: 'New Habit' } });
+    
+    const submitButton = screen.getByText('Create Habit');
+    fireEvent.click(submitButton);
+    
+    await waitFor(() => {
+      expect(mockAddHabit).toHaveBeenCalledWith({
+        name: 'New Habit',
+        description: undefined,
+        targetFrequency: 'daily',
+        categories: ['body'],
+        statRewards: {
+          body: undefined,
+          mind: undefined,
+          soul: undefined,
+          xp: undefined,
+        },
+      });
+    });
+    
+    // Should not show error message
+    expect(screen.queryByText(/Please complete your current habit/)).not.toBeInTheDocument();
   });
 
   it('handles habit without stat rewards', () => {

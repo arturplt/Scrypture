@@ -6,6 +6,7 @@ import { CategoryModal } from './CategoryModal';
 import { AutoSaveIndicator } from './AutoSaveIndicator';
 import { Task } from '../types';
 import styles from './TaskForm.module.css';
+import { habitService } from '../services/habitService';
 
 interface TaskFormProps {
   taskToEdit?: Task;
@@ -244,7 +245,13 @@ export const TaskForm: React.FC<TaskFormProps> = ({
             setIsExpanded(false);
           } else {
             console.error('❌ Habit creation failed');
-            alert('Failed to create habit. Check console for details.');
+            // Check if there are incomplete habits
+            const incompleteHabit = habitService.getFirstIncompleteHabit();
+            if (incompleteHabit) {
+              alert(`Please complete your current habit "${incompleteHabit.name}" before creating a new one.`);
+            } else {
+              alert('Failed to create habit. Please try again.');
+            }
           }
         } catch (error) {
           console.error('❌ Error creating habit:', error);

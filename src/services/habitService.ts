@@ -10,6 +10,51 @@ export const habitService = {
     return storageService.saveHabits(habits);
   },
 
+  /**
+   * Check if there are any incomplete habits
+   * A habit is considered incomplete if it hasn't been completed today
+   */
+  hasIncompleteHabits(): boolean {
+    const habits = this.getHabits();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    return habits.some(habit => {
+      if (!habit.lastCompleted) {
+        // Habit has never been completed
+        return true;
+      }
+      
+      const lastCompleted = new Date(habit.lastCompleted);
+      lastCompleted.setHours(0, 0, 0, 0);
+      
+      // Check if habit was completed today
+      return lastCompleted.getTime() !== today.getTime();
+    });
+  },
+
+  /**
+   * Get the first incomplete habit
+   */
+  getFirstIncompleteHabit(): Habit | null {
+    const habits = this.getHabits();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    return habits.find(habit => {
+      if (!habit.lastCompleted) {
+        // Habit has never been completed
+        return true;
+      }
+      
+      const lastCompleted = new Date(habit.lastCompleted);
+      lastCompleted.setHours(0, 0, 0, 0);
+      
+      // Check if habit was completed today
+      return lastCompleted.getTime() !== today.getTime();
+    }) || null;
+  },
+
   addHabit(
     habit: Omit<Habit, 'id' | 'createdAt' | 'streak' | 'bestStreak'> & {
       statRewards?: {
@@ -22,6 +67,14 @@ export const habitService = {
   ): Habit | null {
     try {
       console.log('🏪 habitService.addHabit called with:', habit);
+      
+      // Check if there are incomplete habits
+      if (this.hasIncompleteHabits()) {
+        const incompleteHabit = this.getFirstIncompleteHabit();
+        console.log('❌ Cannot create new habit - incomplete habit exists:', incompleteHabit?.name);
+        return null;
+      }
+      
       const habits = this.getHabits();
       console.log('📊 Current habits in storage:', habits.length);
       

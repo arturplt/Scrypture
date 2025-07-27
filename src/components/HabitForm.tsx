@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useHabits } from '../hooks/useHabits';
 import { Habit } from '../types';
+import { habitService } from '../services/habitService';
 import { AutoSaveIndicator } from './AutoSaveIndicator';
 import styles from './HabitForm.module.css';
 
@@ -10,8 +11,9 @@ interface HabitFormProps {
 }
 
 export const HabitForm: React.FC<HabitFormProps> = ({ onClose, habit }) => {
-  const { addHabit, updateHabit, isSaving } = useHabits();
+  const { addHabit, updateHabit, isSaving, habits } = useHabits();
   const isEditing = !!habit;
+  const [incompleteHabit, setIncompleteHabit] = useState<Habit | null>(null);
 
   const [formData, setFormData] = useState({
     name: habit?.name || '',
@@ -27,6 +29,14 @@ export const HabitForm: React.FC<HabitFormProps> = ({ onClose, habit }) => {
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
+  // Check for incomplete habits when component mounts or habits change
+  useEffect(() => {
+    if (!isEditing) {
+      const incomplete = habitService.getFirstIncompleteHabit();
+      setIncompleteHabit(incomplete);
+    }
+  }, [isEditing, habits]);
+
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
     
@@ -40,6 +50,11 @@ export const HabitForm: React.FC<HabitFormProps> = ({ onClose, habit }) => {
     
     if (formData.description && formData.description.length > 500) {
       newErrors.description = 'Description must be 500 characters or less';
+    }
+
+    // Check for incomplete habits (only for new habits, not editing)
+    if (!isEditing && incompleteHabit) {
+      newErrors.general = `Please complete your current habit "${incompleteHabit.name}" before creating a new one.`;
     }
 
     setErrors(newErrors);
@@ -67,7 +82,17 @@ export const HabitForm: React.FC<HabitFormProps> = ({ onClose, habit }) => {
     if (isEditing && habit) {
       updateHabit(habit.id, habitData);
     } else {
-      addHabit(habitData);
+      const result = addHabit(habitData);
+      if (!result) {
+        // If habit creation failed due to incomplete habits, show error
+        const incomplete = habitService.getFirstIncompleteHabit();
+        if (incomplete) {
+          setErrors({
+            general: `Please complete your current habit "${incomplete.name}" before creating a new one.`
+          });
+          return;
+        }
+      }
     }
     
     onClose();
@@ -118,6 +143,22 @@ export const HabitForm: React.FC<HabitFormProps> = ({ onClose, habit }) => {
       </div>
 
       <form onSubmit={handleSubmit} className={styles.form}>
+        {/* General Error Display */}
+        {errors.general && (
+          <div className={styles.generalError}>
+            <div className={styles.errorIcon}>⚠️</div>
+            <div className={styles.errorContent}>
+              <div className={styles.errorTitle}>Complete Your Current Habit First</div>
+              <div className={styles.errorMessage}>{errors.general}</div>
+              {incompleteHabit && (
+                <div className={styles.suggestion}>
+                  💡 Tip: Complete your current habit to unlock the ability to create new ones.
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Habit Name */}
         <div className={styles.fieldGroup}>
           <label htmlFor="habit-name" className={styles.label}>
