@@ -1,7 +1,24 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { TutorialCompletionCelebration } from '../TutorialCompletionCelebration';
-import { User } from '../../types';
+import { User, Achievement } from '../../types';
+
+// Mock CSS modules to return the class names
+jest.mock('../TutorialCompletionCelebration.module.css', () => ({
+  __esModule: true,
+  default: {
+    overlay: 'overlay',
+    modal: 'modal',
+    fireworks: 'fireworks',
+    celebration: 'celebration',
+    title: 'title',
+    description: 'description',
+    achievementGrid: 'achievementGrid',
+    unlockedFeatures: 'unlockedFeatures',
+    encouragement: 'encouragement',
+    button: 'button',
+  },
+}));
 
 describe('TutorialCompletionCelebration', () => {
   const mockOnClose = jest.fn();

@@ -3,6 +3,33 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { AchievementCard } from '../AchievementCard';
 import { Achievement, AchievementProgress } from '../../types';
 
+// Mock CSS modules to return the class names
+jest.mock('../AchievementCard.module.css', () => ({
+  __esModule: true,
+  default: {
+    card: 'card',
+    cardUnlocked: 'cardUnlocked',
+    cardLocked: 'cardLocked',
+    icon: 'icon',
+    iconUnlocked: 'iconUnlocked',
+    iconLocked: 'iconLocked',
+    name: 'name',
+    nameUnlocked: 'nameUnlocked',
+    description: 'description',
+    category: 'category',
+    rarity: 'rarity',
+    rarityCommon: 'rarityCommon',
+    rarityUncommon: 'rarityUncommon',
+    rarityRare: 'rarityRare',
+    rarityEpic: 'rarityEpic',
+    rarityLegendary: 'rarityLegendary',
+    progressContainer: 'progressContainer',
+    progressBar: 'progressBar',
+    progressFill: 'progressFill',
+    progressText: 'progressText',
+  },
+}));
+
 describe('AchievementCard', () => {
   const mockOnClick = jest.fn();
 
@@ -367,11 +394,11 @@ describe('AchievementCard', () => {
   describe('Edge cases', () => {
     it('should handle achievement without description', () => {
       const achievement = createMockAchievement({ description: '' });
-      render(<AchievementCard achievement={achievement} />);
+      const { container } = render(<AchievementCard achievement={achievement} />);
 
       expect(screen.getByText('Test Achievement')).toBeInTheDocument();
-      // Empty description should still render the element
-      const description = screen.getByText('');
+      // Empty description should still render the element - use querySelector instead
+      const description = container.querySelector('.description');
       expect(description).toBeInTheDocument();
     });
 

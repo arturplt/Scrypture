@@ -47,6 +47,8 @@ jest.mock('../services/storageService', () => ({
     })),
     backupData: jest.fn(() => ({ success: true })),
     restoreData: jest.fn(() => ({ success: true })),
+    getGenericItem: jest.fn(() => null),
+    setGenericItem: jest.fn(() => true),
   },
 }));
 

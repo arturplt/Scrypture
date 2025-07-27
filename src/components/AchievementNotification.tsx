@@ -12,19 +12,23 @@ interface AchievementNotificationProps {
 export const AchievementNotification: React.FC<AchievementNotificationProps> = ({
   achievement,
   onClose,
-  duration = 8000, // 8 seconds default
+  duration, // Remove default here to properly detect undefined
   showProgress = true,
 }) => {
   const [isClosing, setIsClosing] = useState(false);
   const [progress, setProgress] = useState(100);
 
+  // Use 8000 as default only if duration is undefined, but allow 0 to disable
+  const effectiveDuration = duration === undefined ? 8000 : duration;
+
   useEffect(() => {
-    if (!duration) return;
+    // Don't set up timers if duration is 0 or null
+    if (!effectiveDuration || effectiveDuration <= 0) return;
 
     // Progress countdown
     const progressInterval = setInterval(() => {
       setProgress(prev => {
-        const newProgress = prev - (100 / (duration / 100));
+        const newProgress = prev - (100 / (effectiveDuration / 100));
         return Math.max(0, newProgress);
       });
     }, 100);
@@ -32,15 +36,18 @@ export const AchievementNotification: React.FC<AchievementNotificationProps> = (
     // Auto-close timer
     const closeTimer = setTimeout(() => {
       handleClose();
-    }, duration);
+    }, effectiveDuration);
 
     return () => {
       clearInterval(progressInterval);
       clearTimeout(closeTimer);
     };
-  }, [duration]);
+  }, [effectiveDuration]);
 
   const handleClose = () => {
+    // Prevent multiple close calls
+    if (isClosing) return;
+    
     setIsClosing(true);
     // Wait for animation to complete before calling onClose
     setTimeout(() => {
@@ -118,13 +125,13 @@ export const AchievementNotification: React.FC<AchievementNotificationProps> = (
       </div>
 
       {/* Progress bar for auto-dismiss */}
-      {showProgress && duration && (
+      {showProgress && effectiveDuration && (
         <div className={styles.progressBar}>
           <div 
             className={styles.progressFill}
             style={{ 
               width: `${progress}%`,
-              animationDuration: `${duration}ms`
+              animationDuration: `${effectiveDuration}ms`
             }}
           />
         </div>

@@ -1,6 +1,8 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { Achievement, AchievementProgress, AchievementContextType, Task, Habit, User } from '../types';
 import { achievementService } from '../services/achievementService';
+import { userService } from '../services/userService';
+import { taskService } from '../services/taskService';
 
 const AchievementContext = createContext<AchievementContextType | undefined>(undefined);
 
@@ -50,7 +52,29 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
       const newlyUnlocked = achievementService.checkAchievements(user, tasks, habits);
       
       if (newlyUnlocked.length > 0) {
-        // Update local state
+        console.log('🏆 Achievement(s) unlocked:', newlyUnlocked.map(a => a.name));
+
+        // Apply achievement rewards to the user (XP, body, mind, soul)
+        const completedTasks = taskService.getTasks().filter(task => task.completed);
+        const completedTasksCount = completedTasks.length;
+        
+        const rewardResult = userService.applyAchievementRewards(newlyUnlocked, completedTasksCount);
+        
+        if (rewardResult.success) {
+          console.log('🏆 Achievement rewards applied successfully:', rewardResult.totalRewards);
+          
+          // Log Bóbr evolution status
+          if (rewardResult.evolved) {
+            console.log('🦫 Bóbr evolved from achievement rewards!');
+          }
+          if (rewardResult.damProgressChanged) {
+            console.log('🌊 Dam progress changed from achievement rewards!');
+          }
+        } else {
+          console.error('❌ Failed to apply achievement rewards');
+        }
+
+        // Update local achievement state
         const updatedAchievements = achievementService.getAchievements();
         const updatedProgress = achievementService.getAllProgress();
         

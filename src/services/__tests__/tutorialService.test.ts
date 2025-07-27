@@ -4,7 +4,7 @@ import { storageService } from '../storageService';
 // Mock the storage service
 jest.mock('../storageService', () => ({
   storageService: {
-    getGenericItem: jest.fn(),
+    getGenericItem: jest.fn(() => null), // Return null by default for clean state
     setGenericItem: jest.fn(),
   },
 }));
@@ -13,9 +13,14 @@ const mockStorageService = storageService as jest.Mocked<typeof storageService>;
 
 describe('tutorialService', () => {
   beforeEach(() => {
+    // Clear any mocked localStorage
     jest.clearAllMocks();
-    // Reset tutorial state
-    tutorialService.resetTutorial();
+    
+    // Ensure getGenericItem returns null for fresh state by default
+    mockStorageService.getGenericItem.mockReturnValue(null);
+    
+    // Completely reinitialize tutorial service for each test
+    tutorialService.reinitialize();
     
     // Mock window.dispatchEvent
     Object.defineProperty(window, 'dispatchEvent', {

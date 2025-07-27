@@ -268,6 +268,95 @@ export const userService = {
     return this.updateUser({ achievements: updatedAchievements });
   },
 
+  /**
+   * Apply achievement rewards to the user (XP, body, mind, soul stats)
+   * 
+   * Example: When "First Steps" achievement is unlocked (complete 1 task):
+   * - User gets +50 XP
+   * - User level may increase based on total XP
+   * - Bóbr companion may evolve based on progress
+   * - Achievement is added to user's achievement list
+   */
+  applyAchievementRewards(
+    achievements: Achievement[], 
+    completedTasksCount: number = 0
+  ): { 
+    success: boolean; 
+    evolved: boolean; 
+    damProgressChanged: boolean; 
+    totalRewards: { xp: number; body: number; mind: number; soul: number; };
+  } {
+    if (!achievements.length) {
+      return { 
+        success: true, 
+        evolved: false, 
+        damProgressChanged: false,
+        totalRewards: { xp: 0, body: 0, mind: 0, soul: 0 }
+      };
+    }
+
+    const user = this.getUser();
+    if (!user) {
+      console.error('❌ No user found for applying achievement rewards');
+      return { 
+        success: false, 
+        evolved: false, 
+        damProgressChanged: false,
+        totalRewards: { xp: 0, body: 0, mind: 0, soul: 0 }
+      };
+    }
+
+    // Calculate total rewards from all achievements
+    const totalRewards = achievements.reduce((total, achievement) => {
+      const rewards = achievement.rewards || {};
+      return {
+        xp: total.xp + (rewards.xp || 0),
+        body: total.body + (rewards.body || 0),
+        mind: total.mind + (rewards.mind || 0),
+        soul: total.soul + (rewards.soul || 0),
+      };
+    }, { xp: 0, body: 0, mind: 0, soul: 0 });
+
+    console.log('🏆 UserService: Applying achievement rewards:', totalRewards);
+    console.log('🏆 UserService: From achievements:', achievements.map(a => a.name));
+
+    // Add the unlocked achievements to user's achievement list
+    const newUserAchievements = achievements.filter(achievement => 
+      !user.achievements.some(userAch => userAch.id === achievement.id)
+    );
+
+    const updatedAchievements = [...user.achievements, ...newUserAchievements];
+
+    // Apply stat and XP rewards using the existing method
+    const rewardResult = this.addStatRewardsWithBobr(totalRewards, completedTasksCount);
+
+    // Update user's achievements list if rewards were applied successfully
+    if (rewardResult.success) {
+      const achievementUpdateSuccess = this.updateUser({ 
+        achievements: updatedAchievements,
+        updatedAt: new Date()
+      });
+
+      if (!achievementUpdateSuccess) {
+        console.error('❌ Failed to update user achievements list');
+      }
+    }
+
+    console.log('🏆 UserService: Achievement rewards result:', {
+      success: rewardResult.success,
+      evolved: rewardResult.evolved,
+      damProgressChanged: rewardResult.damProgressChanged,
+      totalRewards
+    });
+
+    return {
+      success: rewardResult.success,
+      evolved: rewardResult.evolved,
+      damProgressChanged: rewardResult.damProgressChanged,
+      totalRewards
+    };
+  },
+
   getSettings(): Record<string, unknown> {
     return storageService.getSettings();
   },

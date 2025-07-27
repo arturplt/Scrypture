@@ -28,12 +28,18 @@ jest.mock('../services/storageService', () => ({
     getTasks: jest.fn(() => []),
     saveUser: jest.fn(() => true),
     getUser: jest.fn(() => ({
-      id: '1',
+      id: 'test-user',
       name: 'Test User',
       level: 1,
       experience: 0,
+      body: 0,
+      mind: 0,
+      soul: 0,
       achievements: [],
+      bobrStage: 'hatchling',
+      damProgress: 0,
       createdAt: new Date('2024-01-01'),
+      updatedAt: new Date('2024-01-01'),
     })),
     getHabits: jest.fn(() => []),
     saveHabits: jest.fn(() => true),
@@ -44,6 +50,8 @@ jest.mock('../services/storageService', () => ({
     })),
     backupData: jest.fn(() => ({ success: true })),
     restoreData: jest.fn(() => ({ success: true })),
+    getGenericItem: jest.fn(() => null),
+    setGenericItem: jest.fn(() => true),
   },
 }));
 

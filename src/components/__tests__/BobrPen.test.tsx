@@ -3,6 +3,22 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import BobrPen from '../BobrPen';
 import { User } from '../../types';
 
+// Mock CSS modules to return the class names
+jest.mock('../BobrPen.module.css', () => ({
+  __esModule: true,
+  default: {
+    bobrPen: 'bobrPen',
+    collapsed: 'collapsed',
+    expanded: 'expanded',
+    toggleButton: 'toggleButton',
+    companionContainer: 'companionContainer',
+    activeSection: 'activeSection',
+    tabs: 'tabs',
+    tab: 'tab',
+    activeTab: 'activeTab',
+  },
+}));
+
 // Mock the child components
 jest.mock('../BobrCompanion', () => {
   return function MockBobrCompanion({ user, completedTasksCount }: any) {

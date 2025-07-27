@@ -34,6 +34,30 @@ A modern, gamified habit and task management application built with React, TypeS
 - **Mystical Theme**: Bóbr-themed unlock messages and descriptions
 - **Celebration Effects**: Animated notifications with rarity-based visual effects
 
+## 🏆 Achievement Rewards System
+
+**✅ CONNECTED**: Achievements now properly reward players with XP and core attribute stats!
+
+### How It Works:
+1. **Complete Tasks/Reach Milestones** → Triggers achievement checking
+2. **Achievement Unlocked** → Automatically applies rewards:
+   - **XP**: Increases experience and potentially levels up the user
+   - **Body/Mind/Soul**: Directly increases core attribute stats  
+   - **Bóbr Evolution**: May trigger companion evolution based on progress
+3. **User Stats Updated** → Changes are immediately reflected in the UI
+
+### Example Achievement Rewards:
+- **"First Steps"** (Complete 1 task): +50 XP
+- **"Dam Builder"** (Complete 10 tasks): +100 XP, +5 Body, +5 Mind, +5 Soul
+- **"Ancient Wisdom"** (Reach level 5): +200 XP, +15 Soul
+
+### Implementation:
+- `userService.applyAchievementRewards()`: Applies rewards when achievements unlock
+- `useAchievements.checkAchievements()`: Automatically calls reward application
+- Full integration with Bóbr companion evolution system
+
+---
+
 ## 🧪 Testing
 
 ### Comprehensive Test Suite

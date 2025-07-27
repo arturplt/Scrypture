@@ -345,15 +345,21 @@ export const FirstTaskWizard: React.FC<FirstTaskWizardProps> = ({
 
   return (
     <div className={styles.overlay} onClick={(e) => e.stopPropagation()}>
-      <div className={styles.wizard}>
+      <div className={styles.wizard} role="dialog" aria-labelledby="wizard-title" aria-describedby="wizard-description">
         {/* Header */}
         <div className={styles.header}>
-          <h1 className={styles.title}>{currentStep.title}</h1>
-          <p className={styles.description}>{currentStep.description}</p>
+          <h1 className={styles.title} id="wizard-title">{currentStep.title}</h1>
+          <p className={styles.description} id="wizard-description">{currentStep.description}</p>
           
           {/* Progress indicator */}
           <div className={styles.progress}>
-            <div className={styles.progressBar}>
+            <div 
+              className={styles.progressBar}
+              role="progressbar"
+              aria-valuenow={currentStepIndex + 1}
+              aria-valuemax={steps.length}
+              aria-label="Tutorial progress"
+            >
               <div 
                 className={styles.progressFill}
                 style={{ width: `${((currentStepIndex + 1) / steps.length) * 100}%` }}
@@ -376,6 +382,7 @@ export const FirstTaskWizard: React.FC<FirstTaskWizardProps> = ({
             className={styles.skipButton}
             onClick={handleSkip}
             disabled={isCreating}
+            aria-label="Close wizard"
           >
             Skip Tutorial
           </button>

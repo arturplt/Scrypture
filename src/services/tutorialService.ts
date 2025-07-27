@@ -195,6 +195,66 @@ class TutorialService {
   }
 
   /**
+   * Reinitialize the tutorial service completely (for testing)
+   */
+  reinitialize(): void {
+    // Reset to original template steps by creating fresh copies
+    this.tutorialSteps = {
+      welcome: { 
+        id: 'welcome', 
+        title: 'Welcome to Scrypture', 
+        completed: false, 
+        required: true 
+      },
+      bobrIntroduction: { 
+        id: 'bobrIntroduction', 
+        title: 'Meet your companion Bóbr', 
+        completed: false, 
+        required: true 
+      },
+      damMetaphor: { 
+        id: 'damMetaphor', 
+        title: 'Learn about the dam building metaphor', 
+        completed: false, 
+        required: true 
+      },
+      firstTask: { 
+        id: 'firstTask', 
+        title: 'Create your first task', 
+        completed: false, 
+        required: true 
+      },
+      taskCompletion: { 
+        id: 'taskCompletion', 
+        title: 'Complete your first task', 
+        completed: false, 
+        required: true 
+      },
+      hatchlingEvolution: { 
+        id: 'hatchlingEvolution', 
+        title: 'See Bóbr grow with your progress', 
+        completed: false, 
+        required: true 
+      },
+      completion: { 
+        id: 'completion', 
+        title: 'Tutorial completed', 
+        completed: false, 
+        required: true 
+      }
+    };
+    
+    this.currentState = {
+      completed: false,
+      currentStep: null,
+      steps: { ...this.tutorialSteps },
+      completedAt: undefined
+    };
+    
+    // Don't save to storage during reinitialization for tests
+  }
+
+  /**
    * Get tutorial progress percentage
    */
   getTutorialProgress(): number {

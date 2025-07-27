@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react';
 import { BobrMessage, User } from '../types';
 import { bobrService } from '../services/bobrService';
 import styles from './BobrCompanion.module.css';
@@ -157,7 +157,7 @@ const BobrCompanion: React.FC<BobrCompanionProps> = ({
 };
 
 // Forward ref version for imperative methods
-export const BobrCompanionRef = React.forwardRef<
+export const BobrCompanionRef = forwardRef<
   {
     celebrateTaskCompletion: (taskTitle: string, category: string) => void;
     showMotivation: () => void;
@@ -200,7 +200,7 @@ export const BobrCompanionRef = React.forwardRef<
     showMessage(damMessage);
   }, [props.user.bobrStage, props.user.damProgress, showMessage]);
 
-  React.useImperativeHandle(ref, () => ({
+  useImperativeHandle(ref, () => ({
     celebrateTaskCompletion,
     showMotivation,
     celebrateDamProgress

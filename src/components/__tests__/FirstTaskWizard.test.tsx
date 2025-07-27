@@ -246,7 +246,7 @@ describe('FirstTaskWizard', () => {
     });
 
     it('should show Create Task button on final step', () => {
-      expect(screen.getByText('Create Task')).toBeInTheDocument();
+      expect(screen.getByText('Create My First Task!')).toBeInTheDocument();
     });
 
     it('should create task when Create Task is clicked', async () => {
@@ -261,7 +261,7 @@ describe('FirstTaskWizard', () => {
         updatedAt: new Date(),
       });
 
-      fireEvent.click(screen.getByText('Create Task'));
+      fireEvent.click(screen.getByText('Create My First Task!'));
 
       await waitFor(() => {
         expect(mockAddTask).toHaveBeenCalledWith({
@@ -292,7 +292,7 @@ describe('FirstTaskWizard', () => {
         updatedAt: new Date(),
       });
 
-      fireEvent.click(screen.getByText('Create Task'));
+      fireEvent.click(screen.getByText('Create My First Task!'));
 
       await waitFor(() => {
         expect(mockTutorialService.markStepComplete).toHaveBeenCalledWith('firstTask');
@@ -311,7 +311,7 @@ describe('FirstTaskWizard', () => {
         updatedAt: new Date(),
       });
 
-      fireEvent.click(screen.getByText('Create Task'));
+      fireEvent.click(screen.getByText('Create My First Task!'));
 
       await waitFor(() => {
         expect(mockOnComplete).toHaveBeenCalled();
@@ -319,7 +319,7 @@ describe('FirstTaskWizard', () => {
     });
 
     it('should show loading state during task creation', () => {
-      fireEvent.click(screen.getByText('Create Task'));
+      fireEvent.click(screen.getByText('Create My First Task!'));
       
       expect(screen.getByText('Creating...')).toBeInTheDocument();
     });
@@ -357,7 +357,7 @@ describe('FirstTaskWizard', () => {
         updatedAt: new Date(),
       });
 
-      fireEvent.click(screen.getByText('Create Task'));
+      fireEvent.click(screen.getByText('Create My First Task!'));
 
       await waitFor(() => {
         expect(mockAddTask).toHaveBeenCalledWith(
@@ -395,13 +395,13 @@ describe('FirstTaskWizard', () => {
   });
 
   describe('Progress indicator', () => {
-    it('should show correct step numbers', () => {
+        it('should show correct step numbers', () => {
       renderWizard();
-      
-      expect(screen.getByText('Step 1 of 5')).toBeInTheDocument();
-      
+
+      expect(screen.getByText('Step 1 of 6')).toBeInTheDocument();
+
       fireEvent.click(screen.getByText('Next'));
-      expect(screen.getByText('Step 2 of 5')).toBeInTheDocument();
+      expect(screen.getByText('Step 2 of 6')).toBeInTheDocument();
     });
 
     it('should show progress bar', () => {
@@ -410,7 +410,7 @@ describe('FirstTaskWizard', () => {
       const progressBar = screen.getByRole('progressbar');
       expect(progressBar).toBeInTheDocument();
       expect(progressBar).toHaveAttribute('aria-valuenow', '1');
-      expect(progressBar).toHaveAttribute('aria-valuemax', '5');
+      expect(progressBar).toHaveAttribute('aria-valuemax', '6');
     });
   });
 }); 
