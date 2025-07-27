@@ -19,6 +19,7 @@
 8. **[06-development-guide.md](06-development-guide.md)** - Setup, implementation, and deployment (15 min read)
 9. **[07-mvp-checklist.md](07-mvp-checklist.md)** - Implementation tracking and status (5 min read)
 10. **[12-achievement-system.md](12-achievement-system.md)** - Complete Achievement system documentation (20 min read)
+11. **[bobr-companion-guide.md](bobr-companion-guide.md)** - Complete Bóbr Companion system documentation (15 min read)
 
 ### **For Specific Roles:**
 - **👤 New Users**: [quick-start-guide.md](quick-start-guide.md) → [01-overview.md](01-overview.md) → [02-mvp-features.md](02-mvp-features.md)
@@ -131,7 +132,7 @@ graph TD
 ## 🔍 **Search Index**
 
 ### **By Concept**
-- **Bóbr Companion**: [01-overview.md](01-overview.md), [02-mvp-features.md](02-mvp-features.md)
+- **Bóbr Companion**: [01-overview.md](01-overview.md), [02-mvp-features.md](02-mvp-features.md), [bobr-companion-guide.md](bobr-companion-guide.md)
 - **Tasks**: [02-mvp-features.md](02-mvp-features.md), [terminology-guide.md](terminology-guide.md)
 - **Habits**: [02-mvp-features.md](02-mvp-features.md)
 - **Terminology**: [terminology-guide.md](terminology-guide.md), [01-overview.md](01-overview.md)

@@ -46,6 +46,9 @@ export interface User {
   achievements: Achievement[];
   createdAt: Date;
   updatedAt: Date;
+  // Bóbr Companion fields
+  bobrStage: 'hatchling' | 'young' | 'mature';
+  damProgress: number; // 0-100 based on completed tasks
 }
 
 export interface AchievementCondition {
@@ -125,6 +128,22 @@ export interface UserContextType {
   unlockAchievement: (achievementId: string) => void;
   createUser: (name: string) => User;
   isSaving: boolean;
+  // Bóbr-integrated methods
+  addExperienceWithBobr: (amount: number) => { 
+    success: boolean; 
+    evolved: boolean; 
+    damProgressChanged: boolean; 
+  };
+  addStatRewardsWithBobr: (rewards: {
+    body?: number;
+    mind?: number;
+    soul?: number;
+    xp?: number;
+  }) => { 
+    success: boolean; 
+    evolved: boolean; 
+    damProgressChanged: boolean; 
+  };
 }
 
 export interface AchievementContextType {
@@ -134,4 +153,29 @@ export interface AchievementContextType {
   getAchievementProgress: (achievementId: string) => AchievementProgress | null;
   isSaving: boolean;
   lastSaved?: Date;
+}
+
+export interface BobrMessage {
+  id: string;
+  type: 'greeting' | 'task_completion' | 'level_up' | 'achievement' | 'motivation' | 'dam_progress';
+  stage: 'hatchling' | 'young' | 'mature';
+  context?: {
+    taskTitle?: string;
+    category?: string;
+    newLevel?: number;
+    achievementName?: string;
+    damPercentage?: number;
+  };
+  message: string;
+  animation?: 'idle' | 'celebrate' | 'build' | 'evolve';
+}
+
+export interface BobrState {
+  stage: 'hatchling' | 'young' | 'mature';
+  damProgress: number;
+  lastMessage?: BobrMessage;
+  evolutionHistory: {
+    stage: 'hatchling' | 'young' | 'mature';
+    evolvedAt: Date;
+  }[];
 }

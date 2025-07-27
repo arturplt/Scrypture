@@ -1,5 +1,6 @@
 import { User, Achievement } from '../types';
 import { storageService } from './storageService';
+import { bobrService } from './bobrService';
 
 export const userService = {
   getUser(): User | null {
@@ -22,6 +23,9 @@ export const userService = {
       achievements: [],
       createdAt: new Date(),
       updatedAt: new Date(),
+      // Bóbr Companion defaults
+      bobrStage: 'hatchling',
+      damProgress: 0,
     };
 
     this.saveUser(newUser);
@@ -46,6 +50,42 @@ export const userService = {
     return this.saveUser(updatedUser);
   },
 
+  /**
+   * Update user with Bóbr companion integration
+   */
+  updateUserWithBobr(updates: Partial<User>, completedTasksCount?: number): { 
+    user: User | null; 
+    evolved: boolean; 
+    damProgressChanged: boolean; 
+  } {
+    const user = this.getUser();
+    if (!user) return { user: null, evolved: false, damProgressChanged: false };
+
+    const updatedUser = { ...user, ...updates };
+    
+    // Update Bóbr status if completed tasks count is provided
+    if (completedTasksCount !== undefined) {
+      const bobrUpdate = bobrService.updateBobrStatus(updatedUser, completedTasksCount);
+      updatedUser.bobrStage = bobrUpdate.user.bobrStage;
+      updatedUser.damProgress = bobrUpdate.user.damProgress;
+      updatedUser.updatedAt = new Date();
+
+      const success = this.saveUser(updatedUser);
+      return { 
+        user: success ? updatedUser : null, 
+        evolved: bobrUpdate.evolved, 
+        damProgressChanged: bobrUpdate.damProgressChanged 
+      };
+    }
+
+    const success = this.updateUser(updates);
+    return { 
+      user: success ? updatedUser : null, 
+      evolved: false, 
+      damProgressChanged: false 
+    };
+  },
+
   addExperience(amount: number): boolean {
     const user = this.getUser();
 
@@ -61,6 +101,34 @@ export const userService = {
     };
 
     return this.updateUser(updates);
+  },
+
+  /**
+   * Add experience with Bóbr integration
+   */
+  addExperienceWithBobr(amount: number, completedTasksCount: number): { 
+    success: boolean; 
+    evolved: boolean; 
+    damProgressChanged: boolean; 
+  } {
+    const user = this.getUser();
+    if (!user) return { success: false, evolved: false, damProgressChanged: false };
+
+    const newExperience = user.experience + amount;
+    const newLevel = Math.floor(newExperience / 100) + 1;
+
+    const updates: Partial<User> = {
+      experience: newExperience,
+      level: newLevel,
+      updatedAt: new Date(),
+    };
+
+    const result = this.updateUserWithBobr(updates, completedTasksCount);
+    return { 
+      success: result.user !== null, 
+      evolved: result.evolved, 
+      damProgressChanged: result.damProgressChanged 
+    };
   },
 
   addStatRewards(rewards: {
@@ -80,6 +148,48 @@ export const userService = {
     };
 
     return this.updateUser(updates);
+  },
+
+  /**
+   * Add stat rewards with Bóbr integration
+   */
+  addStatRewardsWithBobr(
+    rewards: {
+      body?: number;
+      mind?: number;
+      soul?: number;
+      xp?: number;
+    },
+    completedTasksCount: number
+  ): { 
+    success: boolean; 
+    evolved: boolean; 
+    damProgressChanged: boolean; 
+  } {
+    const user = this.getUser();
+    if (!user) return { success: false, evolved: false, damProgressChanged: false };
+
+    const updates: Partial<User> = {
+      body: user.body + (rewards.body || 0),
+      mind: user.mind + (rewards.mind || 0),
+      soul: user.soul + (rewards.soul || 0),
+      updatedAt: new Date(),
+    };
+
+    // Also handle XP if provided
+    if (rewards.xp) {
+      const newExperience = user.experience + rewards.xp;
+      const newLevel = Math.floor(newExperience / 100) + 1;
+      updates.experience = newExperience;
+      updates.level = newLevel;
+    }
+
+    const result = this.updateUserWithBobr(updates, completedTasksCount);
+    return { 
+      success: result.user !== null, 
+      evolved: result.evolved, 
+      damProgressChanged: result.damProgressChanged 
+    };
   },
 
   removeStatRewards(rewards: {

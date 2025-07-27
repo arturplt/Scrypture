@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, UserContextType } from '../types';
 import { userService } from '../services/userService';
+import { taskService } from '../services/taskService';
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
@@ -68,6 +69,33 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
   };
 
+  /**
+   * Add experience with Bóbr integration - returns evolution status
+   */
+  const addExperienceWithBobr = (amount: number): { 
+    success: boolean; 
+    evolved: boolean; 
+    damProgressChanged: boolean; 
+  } => {
+    if (!user) return { success: false, evolved: false, damProgressChanged: false };
+
+    // Get completed tasks count
+    const completedTasks = taskService.getTasks().filter(task => task.completed);
+    const completedTasksCount = completedTasks.length;
+
+    const result = userService.addExperienceWithBobr(amount, completedTasksCount);
+    
+    if (result.success) {
+      const updatedUser = userService.getUser();
+      if (updatedUser) {
+        setUser(updatedUser);
+        saveUserWithFeedback(updatedUser);
+      }
+    }
+
+    return result;
+  };
+
   const addStatRewards = (rewards: {
     body?: number;
     mind?: number;
@@ -77,21 +105,11 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     const success = userService.addStatRewards(rewards);
 
     if (success && user) {
-      // Calculate new experience and level if XP is included
-      let newExperience = user.experience;
-      let newLevel = user.level;
-      if (rewards.xp) {
-        newExperience = user.experience + rewards.xp;
-        newLevel = Math.floor(newExperience / 100) + 1;
-      }
-
       const updatedUser = {
         ...user,
         body: user.body + (rewards.body || 0),
         mind: user.mind + (rewards.mind || 0),
         soul: user.soul + (rewards.soul || 0),
-        experience: newExperience,
-        level: newLevel,
         updatedAt: new Date(),
       };
       setUser(updatedUser);
@@ -99,35 +117,36 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
   };
 
-  const removeStatRewards = (rewards: {
+  /**
+   * Add stat rewards with Bóbr integration - returns evolution status
+   */
+  const addStatRewardsWithBobr = (rewards: {
     body?: number;
     mind?: number;
     soul?: number;
     xp?: number;
-  }) => {
-    const success = userService.removeStatRewards(rewards);
+  }): { 
+    success: boolean; 
+    evolved: boolean; 
+    damProgressChanged: boolean; 
+  } => {
+    if (!user) return { success: false, evolved: false, damProgressChanged: false };
 
-    if (success && user) {
-      // Calculate new experience and level if XP is included
-      let newExperience = user.experience;
-      let newLevel = user.level;
-      if (rewards.xp) {
-        newExperience = Math.max(0, user.experience - rewards.xp);
-        newLevel = Math.floor(newExperience / 100) + 1;
+    // Get completed tasks count
+    const completedTasks = taskService.getTasks().filter(task => task.completed);
+    const completedTasksCount = completedTasks.length;
+
+    const result = userService.addStatRewardsWithBobr(rewards, completedTasksCount);
+    
+    if (result.success) {
+      const updatedUser = userService.getUser();
+      if (updatedUser) {
+        setUser(updatedUser);
+        saveUserWithFeedback(updatedUser);
       }
-
-      const updatedUser = {
-        ...user,
-        body: Math.max(0, user.body - (rewards.body || 0)),
-        mind: Math.max(0, user.mind - (rewards.mind || 0)),
-        soul: Math.max(0, user.soul - (rewards.soul || 0)),
-        experience: newExperience,
-        level: newLevel,
-        updatedAt: new Date(),
-      };
-      setUser(updatedUser);
-      saveUserWithFeedback(updatedUser);
     }
+
+    return result;
   };
 
   const removeExperience = (amount: number) => {
@@ -147,27 +166,48 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
   };
 
+  const removeStatRewards = (rewards: {
+    body?: number;
+    mind?: number;
+    soul?: number;
+    xp?: number;
+  }) => {
+    const success = userService.removeStatRewards(rewards);
+
+    if (success && user) {
+      const updatedUser = {
+        ...user,
+        body: Math.max(0, user.body - (rewards.body || 0)),
+        mind: Math.max(0, user.mind - (rewards.mind || 0)),
+        soul: Math.max(0, user.soul - (rewards.soul || 0)),
+        updatedAt: new Date(),
+      };
+      setUser(updatedUser);
+      saveUserWithFeedback(updatedUser);
+    }
+  };
+
   const unlockAchievement = (achievementId: string) => {
     const success = userService.unlockAchievement(achievementId);
+
     if (success && user) {
-      // Reload user from storage to get the updated achievements
+      // This is a simplified implementation
+      // In practice, you'd fetch the full achievement data
       const updatedUser = userService.getUser();
       if (updatedUser) {
         setUser(updatedUser);
-        console.log('Achievement unlocked and auto-saved');
+        saveUserWithFeedback(updatedUser);
       }
     }
   };
 
-  const createUser = (name: string) => {
+  const createUser = (name: string): User => {
     const newUser = userService.createUser(name);
     setUser(newUser);
-    saveUserWithFeedback(newUser);
-    console.log('User created and auto-saved');
     return newUser;
   };
 
-  const value: UserContextType = {
+  const contextValue: UserContextType = {
     user,
     updateUser,
     addExperience,
@@ -177,7 +217,10 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     unlockAchievement,
     createUser,
     isSaving,
+    // Add Bóbr-integrated methods
+    addExperienceWithBobr,
+    addStatRewardsWithBobr,
   };
 
-  return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
+  return <UserContext.Provider value={contextValue}>{children}</UserContext.Provider>;
 };

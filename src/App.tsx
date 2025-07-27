@@ -15,6 +15,7 @@ import { InstallPrompt } from './components/InstallPrompt';
 import { UserCreation } from './components/UserCreation';
 import { AchievementGrid } from './components/AchievementGrid';
 import { AchievementNotification } from './components/AchievementNotification';
+import BobrPen from './components/BobrPen';
 import { Task, Achievement } from './types';
 import styles from './App.module.css';
 import { Modal } from './components/Modal';
@@ -238,6 +239,12 @@ function AppContent() {
       </header>
 
       <main className={styles.main}>
+        {/* Bóbr's Pen - positioned above start button */}
+        <BobrPen 
+          user={user}
+          completedTasksCount={tasks.filter(task => task.completed).length}
+        />
+        
         {!showStartHere ? (
           <div className={styles.startHereSection}>
             <button 
