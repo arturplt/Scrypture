@@ -230,35 +230,204 @@
   </head>
   <body>
     <div id="root">
-      <!-- Fallback loading state -->
+      <!-- Enhanced fallback loading state for mobile -->
       <div style="
         position: fixed;
         top: 0;
         left: 0;
         width: 100vw;
         height: 100vh;
-        background: #1a1a2e;
-        color: #ffffff;
+        background: #23211a;
+        color: #e8e5d2;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         font-family: 'Courier New', monospace;
         text-align: center;
+        font-size: 14px;
+        line-height: 1.4;
+        padding: 2rem;
+        box-sizing: border-box;
       ">
-        <div style="font-size: 2rem; margin-bottom: 1rem;">🔄</div>
-        <div>Loading Scrypture...</div>
-        <div style="font-size: 0.8rem; color: #999; margin-top: 1rem;">Please wait...</div>
+        <div style="
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 12px;
+          padding: 16px;
+          background: #2d2b22;
+          border: 4px solid #b6a432;
+          border-radius: 0px;
+          box-shadow: 0 0 20px rgba(182, 164, 50, 0.6);
+          animation: fadeIn 0.5s ease-out;
+          max-width: 90vw;
+        ">
+          <div style="
+            width: 64px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #b6a432;
+            border: 2px solid #b6a432;
+            border-radius: 0px;
+            animation: beaverBounce 2s ease-in-out infinite;
+          ">
+            <img 
+              src="/assets/Icons/beaver_32.png" 
+              alt="Bóbr" 
+              style="
+                width: 32px;
+                height: 32px;
+                filter: brightness(0) saturate(100%) invert(1);
+              "
+              onerror="this.style.display='none'; this.parentElement.innerHTML='🦫';"
+            />
+          </div>
+          
+          <div style="font-size: 12px; text-align: center; margin-bottom: 8px;">
+            Loading Scrypture...
+          </div>
+          
+          <div style="font-size: 8px; color: rgba(232, 229, 210, 0.8); margin-bottom: 8px;">
+            Initializing app...
+          </div>
+          
+          <div style="
+            width: 120px;
+            height: 4px;
+            background: #1a1812;
+            border-radius: 0px;
+            overflow: hidden;
+            position: relative;
+            margin-top: 8px;
+          ">
+            <div style="
+              height: 100%;
+              background: #b6a432;
+              border-radius: 0px;
+              animation: loadingProgress 2s ease-in-out infinite;
+            "></div>
+          </div>
+          
+          <div style="font-size: 6px; color: rgba(232, 229, 210, 0.5); margin-top: 8px;">
+            <span id="loadingStatus">Checking device compatibility...</span>
+          </div>
+        </div>
+        
+        <style>
+          @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+          }
+          
+          @keyframes beaverBounce {
+            0%, 100% {
+              transform: scale(1) rotate(0deg);
+              box-shadow: 0 0 8px rgba(182, 164, 50, 0.5);
+            }
+            25% {
+              transform: scale(1.1) rotate(-5deg);
+              box-shadow: 0 0 16px rgba(182, 164, 50, 0.8);
+            }
+            50% {
+              transform: scale(1.15) rotate(0deg);
+              box-shadow: 0 0 20px rgba(182, 164, 50, 1);
+            }
+            75% {
+              transform: scale(1.1) rotate(5deg);
+              box-shadow: 0 0 16px rgba(182, 164, 50, 0.8);
+            }
+          }
+          
+          @keyframes loadingProgress {
+            0% {
+              width: 0%;
+              opacity: 0.5;
+            }
+            50% {
+              width: 70%;
+              opacity: 1;
+            }
+            100% {
+              width: 100%;
+              opacity: 0.5;
+            }
+          }
+        </style>
       </div>
     </div>
     <script type="module" src="/src/main.tsx"></script>
     
-    <!-- Fallback error handling -->
+    <!-- Mobile debugging and status updates -->
     <script>
+      // Mobile debugging and status updates
+      const loadingStatus = document.getElementById('loadingStatus');
+      let statusStep = 0;
+      const statusMessages = [
+        'Checking device compatibility...',
+        'Initializing data structures...',
+        'Loading React application...',
+        'Setting up mobile optimizations...',
+        'Almost ready...'
+      ];
+      
+      function updateStatus() {
+        if (loadingStatus && statusStep < statusMessages.length) {
+          loadingStatus.textContent = statusMessages[statusStep];
+          statusStep++;
+        }
+      }
+      
+      // Update status every 2 seconds
+      const statusInterval = setInterval(updateStatus, 2000);
+      
+      // Mobile-specific checks
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      
+      console.log('Mobile Debug - HTML Load:', {
+        isMobile,
+        isIOS,
+        viewport: {
+          width: window.innerWidth,
+          height: window.innerHeight
+        },
+        screen: {
+          width: screen.width,
+          height: screen.height
+        },
+        devicePixelRatio: window.devicePixelRatio,
+        userAgent: navigator.userAgent
+      });
+      
+      // Mobile-specific viewport fixes
+      if (isMobile) {
+        // Fix for iOS Safari viewport issues
+        if (isIOS) {
+          const viewport = document.querySelector('meta[name="viewport"]');
+          if (viewport) {
+            viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover');
+          }
+        }
+        
+        // Ensure proper viewport height on mobile
+        const setViewportHeight = () => {
+          const vh = window.innerHeight * 0.01;
+          document.documentElement.style.setProperty('--vh', `${vh}px`);
+        };
+        
+        setViewportHeight();
+        window.addEventListener('resize', setViewportHeight);
+        window.addEventListener('orientationchange', setViewportHeight);
+      }
+      
       // If the app doesn't load within 10 seconds, show an error
       setTimeout(() => {
         const root = document.getElementById('root');
         if (root && root.children.length === 1 && root.children[0].textContent.includes('Loading Scrypture')) {
+          clearInterval(statusInterval);
           root.innerHTML = `
             <div style="
               position: fixed;
@@ -266,53 +435,128 @@
               left: 0;
               width: 100vw;
               height: 100vh;
-              background: #1a1a2e;
-              color: #ffffff;
+              background: #23211a;
+              color: #e8e5d2;
               display: flex;
               flex-direction: column;
               align-items: center;
               justify-content: center;
               font-family: 'Courier New', monospace;
               text-align: center;
+              font-size: 14px;
+              line-height: 1.4;
               padding: 2rem;
+              box-sizing: border-box;
             ">
-              <h1>⚠️ Loading Timeout</h1>
-              <p>The app is taking longer than expected to load.</p>
-              <p style="font-size: 0.9em; color: #999; margin-top: 1rem;">
-                This might be due to cache issues or network problems.
-              </p>
-              <button 
-                onclick="window.location.reload()"
-                style="
-                  margin-top: 1rem;
-                  padding: 0.5rem 1rem;
-                  background: #667eea;
-                  color: white;
-                  border: none;
-                  border-radius: 4px;
-                  cursor: pointer;
-                "
-              >
-                Reload Page
-              </button>
-              <button 
-                onclick="window.location.href='/clear-cache.html'"
-                style="
-                  margin-top: 0.5rem;
-                  padding: 0.5rem 1rem;
-                  background: #f44336;
-                  color: white;
-                  border: none;
-                  border-radius: 4px;
-                  cursor: pointer;
-                "
-              >
-                Clear Cache
-              </button>
+              <div style="
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 12px;
+                padding: 16px;
+                background: #2d2b22;
+                border: 4px solid #7b3b3b;
+                border-radius: 0px;
+                box-shadow: 0 0 20px rgba(123, 59, 59, 0.6);
+                animation: fadeIn 0.5s ease-out;
+                max-width: 90vw;
+              ">
+                <div style="
+                  width: 64px;
+                  height: 64px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  background: #7b3b3b;
+                  border: 2px solid #7b3b3b;
+                  border-radius: 0px;
+                  animation: errorPulse 2s ease-in-out infinite;
+                ">
+                  <div style="font-size: 24px;">🚨</div>
+                </div>
+                
+                <div style="font-size: 12px; text-align: center; margin-bottom: 8px;">
+                  Loading Timeout
+                </div>
+                
+                <div style="font-size: 8px; color: rgba(232, 229, 210, 0.8); margin-bottom: 12px;">
+                  The app is taking longer than expected to load.
+                </div>
+                
+                <div style="font-size: 6px; color: rgba(232, 229, 210, 0.6); margin-bottom: 12px;">
+                  <p>Device: ${isMobile ? 'Mobile' : 'Desktop'}</p>
+                  <p>Viewport: ${window.innerWidth} × ${window.innerHeight}</p>
+                  <p>Screen: ${screen.width} × ${screen.height}</p>
+                </div>
+                
+                <button 
+                  onclick="window.location.reload()"
+                  style="
+                    padding: 8px 16px;
+                    background: #b6a432;
+                    color: #23211a;
+                    border: none;
+                    border-radius: 0px;
+                    cursor: pointer;
+                    font-family: 'Courier New', monospace;
+                    font-size: 8px;
+                    transition: all 0.2s ease;
+                  "
+                  onmouseover="this.style.transform='scale(1.05)'"
+                  onmouseout="this.style.transform='scale(1)'"
+                >
+                  Reload App
+                </button>
+                
+                <button 
+                  onclick="window.location.href='/mobile-debug.html'"
+                  style="
+                    padding: 8px 16px;
+                    background: #3b4a6b;
+                    color: #e8e5d2;
+                    border: none;
+                    border-radius: 0px;
+                    cursor: pointer;
+                    font-family: 'Courier New', monospace;
+                    font-size: 8px;
+                    transition: all 0.2s ease;
+                    margin-top: 8px;
+                  "
+                  onmouseover="this.style.transform='scale(1.05)'"
+                  onmouseout="this.style.transform='scale(1)'"
+                >
+                  Debug Mobile
+                </button>
+              </div>
+              
+              <style>
+                @keyframes fadeIn {
+                  from { opacity: 0; transform: scale(0.9); }
+                  to { opacity: 1; transform: scale(1); }
+                }
+                
+                @keyframes errorPulse {
+                  0%, 100% {
+                    transform: scale(1);
+                    box-shadow: 0 0 8px rgba(123, 59, 59, 0.5);
+                  }
+                  50% {
+                    transform: scale(1.1);
+                    box-shadow: 0 0 16px rgba(123, 59, 59, 0.8);
+                  }
+                }
+              </style>
             </div>
           `;
         }
       }, 10000);
+      
+      // Clear status interval when app loads successfully
+      window.addEventListener('load', () => {
+        setTimeout(() => {
+          clearInterval(statusInterval);
+        }, 5000);
+      });
     </script>
   </body>
 </html> 

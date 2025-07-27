@@ -7,7 +7,7 @@ import { initializeGlobalData, logGlobalDataState } from './utils/htmlDataBridge
 // Initialize global data from HTML
 initializeGlobalData();
 
-// Error boundary for React app
+// Enhanced error boundary for React app with mobile-specific handling
 class ErrorBoundary extends React.Component<
   { children: React.ReactNode },
   { hasError: boolean; error?: Error }
@@ -23,6 +23,26 @@ class ErrorBoundary extends React.Component<
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('React Error Boundary caught an error:', error, errorInfo);
+    
+    // Log additional mobile-specific debugging info
+    console.log('Mobile Debug Info:', {
+      userAgent: navigator.userAgent,
+      viewport: {
+        width: window.innerWidth,
+        height: window.innerHeight,
+        devicePixelRatio: window.devicePixelRatio
+      },
+      screen: {
+        width: screen.width,
+        height: screen.height,
+        availWidth: screen.availWidth,
+        availHeight: screen.availHeight
+      },
+      orientation: screen.orientation?.type || 'unknown',
+      touchSupport: 'ontouchstart' in window,
+      localStorage: typeof localStorage !== 'undefined',
+      sessionStorage: typeof sessionStorage !== 'undefined'
+    });
   }
 
   render() {
@@ -42,13 +62,19 @@ class ErrorBoundary extends React.Component<
           justifyContent: 'center',
           fontFamily: 'Courier New, monospace',
           padding: '2rem',
-          textAlign: 'center'
+          textAlign: 'center',
+          fontSize: '14px',
+          lineHeight: '1.4'
         }}>
           <h1>🚨 App Error</h1>
           <p>Something went wrong with the app.</p>
-          <p style={{ fontSize: '0.9em', color: '#999' }}>
+          <p style={{ fontSize: '0.9em', color: '#999', marginTop: '1rem' }}>
             Error: {this.state.error?.message}
           </p>
+          <div style={{ marginTop: '1rem', fontSize: '0.8em', color: '#666' }}>
+            <p>Device: {navigator.userAgent.includes('Mobile') ? 'Mobile' : 'Desktop'}</p>
+            <p>Viewport: {window.innerWidth} × {window.innerHeight}</p>
+          </div>
           <button 
             onClick={() => window.location.reload()}
             style={{
@@ -58,7 +84,8 @@ class ErrorBoundary extends React.Component<
               color: 'white',
               border: 'none',
               borderRadius: '4px',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              fontSize: '14px'
             }}
           >
             Reload App
@@ -276,237 +303,174 @@ if ('serviceWorker' in navigator) {
 // Log global data state for debugging
 logGlobalDataState();
 
-// Add loading state
-const rootElement = document.getElementById('root');
-if (!rootElement) {
-  throw new Error('Root element not found');
-}
-
-// Show loading state
-rootElement.innerHTML = `
-  <div style="
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: #23211a;
-    color: #e8e5d2;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Press Start 2P', monospace;
-    text-align: center;
-    font-size: 12px;
-  ">
-    <div style="
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-      padding: 16px;
-      background: #2d2b22;
-      border: 4px solid #b6a432;
-      border-radius: 0px;
-      box-shadow: 0 0 20px rgba(182, 164, 50, 0.6);
-      animation: fadeIn 0.5s ease-out;
-    ">
-      <div style="
-        width: 64px;
-        height: 64px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #b6a432;
-        border: 2px solid #b6a432;
-        border-radius: 0px;
-        animation: beaverBounce 2s ease-in-out infinite;
-      ">
-        <img 
-          src="/assets/Icons/beaver_32.png" 
-          alt="Bóbr" 
-          style="
-            width: 32px;
-            height: 32px;
-            filter: brightness(0) saturate(100%) invert(1);
-          "
-        />
-      </div>
-      
-      <div style="font-size: 12px; text-align: center; margin-bottom: 8px;">
-        Loading Scrypture...
-      </div>
-      
-      <div style="font-size: 8px; color: rgba(232, 229, 210, 0.8);">
-        Initializing app...
-      </div>
-      
-      <div style="
-        width: 120px;
-        height: 4px;
-        background: #1a1812;
-        border-radius: 0px;
-        overflow: hidden;
-        position: relative;
-        margin-top: 8px;
-      ">
-        <div style="
-          height: 100%;
-          background: #b6a432;
-          border-radius: 0px;
-          animation: loadingProgress 2s ease-in-out infinite;
-        "></div>
-      </div>
-    </div>
-    
-    <style>
-      @keyframes fadeIn {
-        from { opacity: 0; transform: scale(0.9); }
-        to { opacity: 1; transform: scale(1); }
-      }
-      
-      @keyframes beaverBounce {
-        0%, 100% {
-          transform: scale(1) rotate(0deg);
-          box-shadow: 0 0 8px rgba(182, 164, 50, 0.5);
-        }
-        25% {
-          transform: scale(1.1) rotate(-5deg);
-          box-shadow: 0 0 16px rgba(182, 164, 50, 0.8);
-        }
-        50% {
-          transform: scale(1.15) rotate(0deg);
-          box-shadow: 0 0 20px rgba(182, 164, 50, 1);
-        }
-        75% {
-          transform: scale(1.1) rotate(5deg);
-          box-shadow: 0 0 16px rgba(182, 164, 50, 0.8);
-        }
-      }
-      
-      @keyframes loadingProgress {
-        0% {
-          width: 0%;
-          opacity: 0.5;
-        }
-        50% {
-          width: 70%;
-          opacity: 1;
-        }
-        100% {
-          width: 100%;
-          opacity: 0.5;
-        }
-      }
-    </style>
-  </div>
-`;
-
 // Initialize React app with error handling
 try {
-  ReactDOM.createRoot(rootElement).render(
+  // Check if root element exists
+  const rootElement = document.getElementById('root');
+  if (!rootElement) {
+    throw new Error('Root element not found');
+  }
+
+  // Check for mobile-specific issues
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  
+  console.log('Mobile Debug - Initialization:', {
+    isMobile,
+    isIOS,
+    viewport: {
+      width: window.innerWidth,
+      height: window.innerHeight
+    },
+    screen: {
+      width: screen.width,
+      height: screen.height
+    },
+    devicePixelRatio: window.devicePixelRatio,
+    userAgent: navigator.userAgent
+  });
+
+  // Mobile-specific viewport fixes
+  if (isMobile) {
+    // Fix for iOS Safari viewport issues
+    if (isIOS) {
+      const viewport = document.querySelector('meta[name="viewport"]');
+      if (viewport) {
+        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover');
+      }
+    }
+    
+    // Ensure proper viewport height on mobile
+    const setViewportHeight = () => {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    };
+    
+    setViewportHeight();
+    window.addEventListener('resize', setViewportHeight);
+    window.addEventListener('orientationchange', setViewportHeight);
+  }
+
+  // Create React root with error boundary
+  const root = ReactDOM.createRoot(rootElement);
+  root.render(
     <React.StrictMode>
       <ErrorBoundary>
         <App />
       </ErrorBoundary>
     </React.StrictMode>
   );
+  
+  console.log('React app initialized successfully');
+  
 } catch (error) {
   console.error('Failed to initialize React app:', error);
-  rootElement.innerHTML = `
-    <div style="
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: #23211a;
-      color: #e8e5d2;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Press Start 2P', monospace;
-      text-align: center;
-      font-size: 12px;
-    ">
+  
+  // Show a more detailed error screen
+  const rootElement = document.getElementById('root');
+  if (rootElement) {
+    rootElement.innerHTML = `
       <div style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: #23211a;
+        color: #e8e5d2;
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 12px;
-        padding: 16px;
-        background: #2d2b22;
-        border: 4px solid #7b3b3b;
-        border-radius: 0px;
-        box-shadow: 0 0 20px rgba(123, 59, 59, 0.6);
-        animation: fadeIn 0.5s ease-out;
+        justify-content: center;
+        font-family: 'Press Start 2P', monospace;
+        text-align: center;
+        font-size: 12px;
+        padding: 2rem;
       ">
         <div style="
-          width: 64px;
-          height: 64px;
           display: flex;
+          flex-direction: column;
           align-items: center;
-          justify-content: center;
-          background: #7b3b3b;
-          border: 2px solid #7b3b3b;
+          gap: 12px;
+          padding: 16px;
+          background: #2d2b22;
+          border: 4px solid #7b3b3b;
           border-radius: 0px;
-          animation: errorPulse 2s ease-in-out infinite;
+          box-shadow: 0 0 20px rgba(123, 59, 59, 0.6);
+          animation: fadeIn 0.5s ease-out;
+          max-width: 90vw;
         ">
-          <div style="font-size: 24px;">🚨</div>
-        </div>
-        
-        <div style="font-size: 12px; text-align: center; margin-bottom: 8px;">
-          Initialization Error
-        </div>
-        
-        <div style="font-size: 8px; color: rgba(232, 229, 210, 0.8); margin-bottom: 12px;">
-          Failed to load the app
-        </div>
-        
-        <div style="font-size: 6px; color: rgba(232, 229, 210, 0.6); margin-bottom: 12px; max-width: 300px; word-wrap: break-word;">
-          Error: ${error instanceof Error ? error.message : 'Unknown error'}
-        </div>
-        
-        <button 
-          onclick="window.location.reload()"
-          style="
-            padding: 8px 16px;
-            background: #b6a432;
-            color: #23211a;
-            border: none;
+          <div style="
+            width: 64px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #7b3b3b;
+            border: 2px solid #7b3b3b;
             border-radius: 0px;
-            cursor: pointer;
-            font-family: 'Press Start 2P', monospace;
-            font-size: 8px;
-            transition: all 0.2s ease;
-          "
-          onmouseover="this.style.transform='scale(1.05)'"
-          onmouseout="this.style.transform='scale(1)'"
-        >
-          Reload App
-        </button>
-      </div>
-      
-      <style>
-        @keyframes fadeIn {
-          from { opacity: 0; transform: scale(0.9); }
-          to { opacity: 1; transform: scale(1); }
-        }
+            animation: errorPulse 2s ease-in-out infinite;
+          ">
+            <div style="font-size: 24px;">🚨</div>
+          </div>
+          
+          <div style="font-size: 12px; text-align: center; margin-bottom: 8px;">
+            Initialization Error
+          </div>
+          
+          <div style="font-size: 8px; color: rgba(232, 229, 210, 0.8); margin-bottom: 12px;">
+            Failed to load the app
+          </div>
+          
+          <div style="font-size: 6px; color: rgba(232, 229, 210, 0.6); margin-bottom: 12px; max-width: 300px; word-wrap: break-word;">
+            Error: ${error instanceof Error ? error.message : 'Unknown error'}
+          </div>
+          
+          <div style="font-size: 6px; color: rgba(232, 229, 210, 0.5); margin-bottom: 12px;">
+            <p>Device: ${navigator.userAgent.includes('Mobile') ? 'Mobile' : 'Desktop'}</p>
+            <p>Viewport: ${window.innerWidth} × ${window.innerHeight}</p>
+            <p>Screen: ${screen.width} × ${screen.height}</p>
+          </div>
+          
+          <button 
+            onclick="window.location.reload()"
+            style="
+              padding: 8px 16px;
+              background: #b6a432;
+              color: #23211a;
+              border: none;
+              border-radius: 0px;
+              cursor: pointer;
+              font-family: 'Press Start 2P', monospace;
+              font-size: 8px;
+              transition: all 0.2s ease;
+            "
+            onmouseover="this.style.transform='scale(1.05)'"
+            onmouseout="this.style.transform='scale(1)'"
+          >
+            Reload App
+          </button>
+        </div>
         
-        @keyframes errorPulse {
-          0%, 100% {
-            transform: scale(1);
-            box-shadow: 0 0 8px rgba(123, 59, 59, 0.5);
+        <style>
+          @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
           }
-          50% {
-            transform: scale(1.1);
-            box-shadow: 0 0 16px rgba(123, 59, 59, 0.8);
+          
+          @keyframes errorPulse {
+            0%, 100% {
+              transform: scale(1);
+              box-shadow: 0 0 8px rgba(123, 59, 59, 0.5);
+            }
+            50% {
+              transform: scale(1.1);
+              box-shadow: 0 0 16px rgba(123, 59, 59, 0.8);
+            }
           }
-        }
-      </style>
-    </div>
-  `;
+        </style>
+      </div>
+    `;
+  }
 }
 
