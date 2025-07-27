@@ -13,7 +13,7 @@ interface BobrCompanionProps {
 
 const BobrCompanion: React.FC<BobrCompanionProps> = ({
   user,
-  completedTasksCount,
+  completedTasksCount: _completedTasksCount,
   className = '',
   showEvolutionNotification = false,
   onEvolutionComplete
@@ -78,22 +78,24 @@ const BobrCompanion: React.FC<BobrCompanionProps> = ({
   }, [showEvolutionNotification, user.bobrStage, showMessage, onEvolutionComplete]);
 
   // Public method to show task completion celebration
-  const celebrateTaskCompletion = useCallback((taskTitle: string, category: string) => {
+  const _celebrateTaskCompletion = useCallback((taskTitle: string, category: string) => {
     const celebrationMessage = bobrService.getTaskCelebrationMessage(user, taskTitle, category);
     showMessage(celebrationMessage);
   }, [user, showMessage]);
 
   // Public method to show motivational message
-  const showMotivation = useCallback(() => {
+  const _showMotivation = useCallback(() => {
     const motivationMessage = bobrService.getMotivationalMessage(user.bobrStage);
     showMessage(motivationMessage);
   }, [user.bobrStage, showMessage]);
 
   // Public method to show dam progress message
-  const celebrateDamProgress = useCallback(() => {
+  const _celebrateDamProgress = useCallback(() => {
     const damMessage = bobrService.getDamProgressMessage(user.bobrStage, user.damProgress);
     showMessage(damMessage);
   }, [user.bobrStage, user.damProgress, showMessage]);
+
+
 
   // Methods are available via props and callbacks
 

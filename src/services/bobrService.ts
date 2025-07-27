@@ -1,4 +1,4 @@
-import { BobrMessage, BobrState, User, Task, Achievement } from '../types';
+import { BobrMessage, BobrState, User } from '../types';
 import { storageService } from './storageService';
 
 class BobrService {

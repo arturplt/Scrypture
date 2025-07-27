@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { User } from '../types';
 import BobrCompanion from './BobrCompanion';
 import DamVisualization from './DamVisualization';

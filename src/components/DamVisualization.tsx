@@ -152,7 +152,7 @@ const DamVisualization: React.FC<DamVisualizationProps> = ({
 
       {/* Milestone Markers */}
       <div className={styles.milestones}>
-        {milestones.map((milestone, index) => (
+        {milestones.map((milestone) => (
           <div
             key={milestone}
             className={`${styles.milestone} ${damProgress >= milestone ? styles.reached : ''}`}
