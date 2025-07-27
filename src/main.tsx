@@ -123,13 +123,36 @@ const forceServiceWorkerUpdate = async (): Promise<void> => {
 // Register service worker for PWA functionality with better update handling
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    // Check if we're in development mode
-    const isDevelopment = process.env.NODE_ENV === 'development' || window.location.hostname === 'localhost';
+    // Check if we're in development mode - more reliable detection
+    const isDevelopment = 
+      window.location.hostname === 'localhost' || 
+      window.location.hostname === '127.0.0.1' ||
+      window.location.port === '3003' ||
+      window.location.port === '5173' ||
+      window.location.port === '3000';
+    
+    console.log('🔧 Environment check:', {
+      hostname: window.location.hostname,
+      port: window.location.port,
+      href: window.location.href,
+      isDevelopment
+    });
     
     if (isDevelopment) {
       console.log('🔧 Development mode detected - skipping service worker registration');
+      
+      // In development, unregister any existing service workers
+      navigator.serviceWorker.getRegistrations().then((registrations) => {
+        registrations.forEach((registration) => {
+          console.log('🔧 Unregistering service worker in dev mode:', registration.scope);
+          registration.unregister();
+        });
+      });
+      
       return;
     }
+    
+    console.log('🔧 Production mode detected - registering service worker');
     
     navigator.serviceWorker.register('/sw.js')
       .then((reg) => {

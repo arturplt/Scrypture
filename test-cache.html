@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cache Test - Scrypture</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a2e;
+            color: #eee;
+            padding: 2rem;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .section {
+            background: #16213e;
+            border: 2px solid #667eea;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 8px;
+        }
+        .button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 4px;
+        }
+        .log {
+            background: #0f1419;
+            border: 1px solid #333;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+            font-size: 0.9em;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Cache Test Page</h1>
+        
+        <div class="section">
+            <h2>Environment Check</h2>
+            <div id="envInfo"></div>
+        </div>
+        
+        <div class="section">
+            <h2>Service Worker Status</h2>
+            <div id="swInfo"></div>
+            <button class="button" onclick="checkServiceWorker()">Check Service Worker</button>
+            <button class="button" onclick="unregisterAllSW()">Unregister All SW</button>
+        </div>
+        
+        <div class="section">
+            <h2>Cache Status</h2>
+            <div id="cacheInfo"></div>
+            <button class="button" onclick="checkCaches()">Check Caches</button>
+            <button class="button" onclick="clearAllCaches()">Clear All Caches</button>
+        </div>
+        
+        <div class="section">
+            <h2>Storage Status</h2>
+            <div id="storageInfo"></div>
+            <button class="button" onclick="checkStorage()">Check Storage</button>
+            <button class="button" onclick="clearStorage()">Clear Storage</button>
+        </div>
+        
+        <div class="section">
+            <h2>Test Results</h2>
+            <div class="log" id="log"></div>
+        </div>
+        
+        <div class="section">
+            <h2>Actions</h2>
+            <button class="button" onclick="runFullTest()">Run Full Test</button>
+            <button class="button" onclick="window.location.href='/'">Go to App</button>
+            <button class="button" onclick="window.location.reload()">Reload Page</button>
+        </div>
+    </div>
+
+    <script>
+        const logEl = document.getElementById('log');
+        
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            logEl.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+        
+        function updateElement(id, content) {
+            document.getElementById(id).innerHTML = content;
+        }
+        
+        // Environment check
+        function checkEnvironment() {
+            const env = {
+                hostname: window.location.hostname,
+                port: window.location.port,
+                href: window.location.href,
+                userAgent: navigator.userAgent,
+                isLocalhost: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1',
+                isDevPort: ['3000', '3001', '3002', '3003', '5173'].includes(window.location.port)
+            };
+            
+            updateElement('envInfo', `
+                <strong>Hostname:</strong> ${env.hostname}<br>
+                <strong>Port:</strong> ${env.port}<br>
+                <strong>URL:</strong> ${env.href}<br>
+                <strong>Is Localhost:</strong> ${env.isLocalhost}<br>
+                <strong>Is Dev Port:</strong> ${env.isDevPort}<br>
+                <strong>User Agent:</strong> ${env.userAgent.substring(0, 50)}...
+            `);
+            
+            log(`Environment: ${env.hostname}:${env.port} (localhost: ${env.isLocalhost}, dev port: ${env.isDevPort})`);
+        }
+        
+        // Service Worker check
+        async function checkServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                const swInfo = registrations.map((reg, i) => 
+                    `${i + 1}. Scope: ${reg.scope}, Active: ${!!reg.active}, Waiting: ${!!reg.waiting}`
+                ).join('<br>');
+                
+                updateElement('swInfo', `
+                    <strong>Service Workers Found:</strong> ${registrations.length}<br>
+                    ${swInfo || 'No service workers found'}
+                `);
+                
+                log(`Service Workers: ${registrations.length} found`);
+            } else {
+                updateElement('swInfo', '<strong>Service Worker:</strong> Not supported');
+                log('Service Worker: Not supported');
+            }
+        }
+        
+        async function unregisterAllSW() {
+            if ('serviceWorker' in navigator) {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                for (const registration of registrations) {
+                    await registration.unregister();
+                    log(`Unregistered SW: ${registration.scope}`);
+                }
+                log(`Unregistered ${registrations.length} service workers`);
+                checkServiceWorker();
+            }
+        }
+        
+        // Cache check
+        async function checkCaches() {
+            if ('caches' in window) {
+                const cacheNames = await caches.keys();
+                const cacheInfo = cacheNames.map((name, i) => 
+                    `${i + 1}. ${name}`
+                ).join('<br>');
+                
+                updateElement('cacheInfo', `
+                    <strong>Caches Found:</strong> ${cacheNames.length}<br>
+                    ${cacheInfo || 'No caches found'}
+                `);
+                
+                log(`Caches: ${cacheNames.length} found`);
+            } else {
+                updateElement('cacheInfo', '<strong>Cache API:</strong> Not supported');
+                log('Cache API: Not supported');
+            }
+        }
+        
+        async function clearAllCaches() {
+            if ('caches' in window) {
+                const cacheNames = await caches.keys();
+                for (const cacheName of cacheNames) {
+                    await caches.delete(cacheName);
+                    log(`Deleted cache: ${cacheName}`);
+                }
+                log(`Cleared ${cacheNames.length} caches`);
+                checkCaches();
+            }
+        }
+        
+        // Storage check
+        function checkStorage() {
+            const localStorageCount = Object.keys(localStorage).length;
+            const sessionStorageCount = Object.keys(sessionStorage).length;
+            
+            updateElement('storageInfo', `
+                <strong>localStorage:</strong> ${localStorageCount} items<br>
+                <strong>sessionStorage:</strong> ${sessionStorageCount} items<br>
+                <strong>localStorage Keys:</strong> ${Object.keys(localStorage).join(', ') || 'None'}<br>
+                <strong>sessionStorage Keys:</strong> ${Object.keys(sessionStorage).join(', ') || 'None'}
+            `);
+            
+            log(`Storage: localStorage=${localStorageCount}, sessionStorage=${sessionStorageCount}`);
+        }
+        
+        function clearStorage() {
+            localStorage.clear();
+            sessionStorage.clear();
+            log('Cleared localStorage and sessionStorage');
+            checkStorage();
+        }
+        
+        // Full test
+        async function runFullTest() {
+            log('🧪 Starting full cache test...');
+            
+            checkEnvironment();
+            await checkServiceWorker();
+            await checkCaches();
+            checkStorage();
+            
+            log('✅ Full test completed');
+        }
+        
+        // Auto-run on page load
+        window.addEventListener('load', () => {
+            log('🚀 Cache test page loaded');
+            runFullTest();
+        });
+    </script>
+</body>
+</html> 
