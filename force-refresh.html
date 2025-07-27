@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scrypture - Force Refresh</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a2e;
+            color: #eee;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+        .container {
+            background: #16213e;
+            border: 2px solid #667eea;
+            padding: 2rem;
+            border-radius: 8px;
+            max-width: 500px;
+        }
+        .loading {
+            font-size: 1.2em;
+            margin-bottom: 1rem;
+        }
+        .progress {
+            background: #0f1419;
+            border: 1px solid #667eea;
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+        .progress-bar {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .log {
+            background: #0f1419;
+            border: 1px solid #333;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+            font-size: 0.9em;
+            text-align: left;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧹 Scrypture Cache Refresh</h1>
+        <div class="loading" id="status">Initializing cache clearing...</div>
+        <div class="progress">
+            <div class="progress-bar" id="progress"></div>
+        </div>
+        <div class="log" id="log"></div>
+    </div>
+
+    <script>
+        const statusEl = document.getElementById('status');
+        const progressEl = document.getElementById('progress');
+        const logEl = document.getElementById('log');
+        
+        let progress = 0;
+        
+        function updateStatus(message) {
+            statusEl.textContent = message;
+            logEl.innerHTML += `<div>${new Date().toLocaleTimeString()}: ${message}</div>`;
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+        
+        function updateProgress(percent) {
+            progress = percent;
+            progressEl.style.width = percent + '%';
+        }
+        
+        async function clearAllCaches() {
+            try {
+                updateStatus('🔍 Checking for service workers...');
+                updateProgress(10);
+                
+                // Unregister all service workers
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    updateStatus(`📋 Found ${registrations.length} service worker(s)`);
+                    
+                    for (const registration of registrations) {
+                        await registration.unregister();
+                        updateStatus(`🔧 Unregistered service worker: ${registration.scope}`);
+                    }
+                }
+                updateProgress(30);
+                
+                // Clear all caches
+                updateStatus('🗂️ Clearing browser caches...');
+                if ('caches' in window) {
+                    const cacheNames = await caches.keys();
+                    updateStatus(`📦 Found ${cacheNames.length} cache(s): ${cacheNames.join(', ')}`);
+                    
+                    for (const cacheName of cacheNames) {
+                        await caches.delete(cacheName);
+                        updateStatus(`🗑️ Deleted cache: ${cacheName}`);
+                    }
+                }
+                updateProgress(60);
+                
+                // Clear storage
+                updateStatus('💾 Clearing localStorage...');
+                localStorage.clear();
+                updateStatus('💾 Clearing sessionStorage...');
+                sessionStorage.clear();
+                updateProgress(80);
+                
+                updateStatus('✅ Cache clearing complete!');
+                updateProgress(100);
+                
+                // Redirect to main app
+                updateStatus('🔄 Redirecting to Scrypture in 3 seconds...');
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 3000);
+                
+            } catch (error) {
+                updateStatus(`❌ Error: ${error.message}`);
+                console.error('Cache clearing error:', error);
+            }
+        }
+        
+        // Start the process
+        setTimeout(clearAllCaches, 1000);
+    </script>
+</body>
+</html> 
