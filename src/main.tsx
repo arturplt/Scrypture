@@ -7,6 +7,70 @@ import { initializeGlobalData, logGlobalDataState } from './utils/htmlDataBridge
 // Initialize global data from HTML
 initializeGlobalData();
 
+// Error boundary for React app
+class ErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean; error?: Error }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('React Error Boundary caught an error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          background: '#1a1a2e',
+          color: '#ffffff',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontFamily: 'Courier New, monospace',
+          padding: '2rem',
+          textAlign: 'center'
+        }}>
+          <h1>🚨 App Error</h1>
+          <p>Something went wrong with the app.</p>
+          <p style={{ fontSize: '0.9em', color: '#999' }}>
+            Error: {this.state.error?.message}
+          </p>
+          <button 
+            onClick={() => window.location.reload()}
+            style={{
+              marginTop: '1rem',
+              padding: '0.5rem 1rem',
+              background: '#667eea',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
+          >
+            Reload App
+          </button>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
 // Service worker management functions
 let registration: ServiceWorkerRegistration | null = null;
 
@@ -212,9 +276,83 @@ if ('serviceWorker' in navigator) {
 // Log global data state for debugging
 logGlobalDataState();
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+// Add loading state
+const rootElement = document.getElementById('root');
+if (!rootElement) {
+  throw new Error('Root element not found');
+}
+
+// Show loading state
+rootElement.innerHTML = `
+  <div style="
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #1a1a2e;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Courier New', monospace;
+    text-align: center;
+  ">
+    <div style="font-size: 2rem; margin-bottom: 1rem;">🔄</div>
+    <div>Loading Scrypture...</div>
+    <div style="font-size: 0.8rem; color: #999; margin-top: 1rem;">Initializing app...</div>
+  </div>
+`;
+
+// Initialize React app with error handling
+try {
+  ReactDOM.createRoot(rootElement).render(
+    <React.StrictMode>
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
+    </React.StrictMode>
+  );
+} catch (error) {
+  console.error('Failed to initialize React app:', error);
+  rootElement.innerHTML = `
+    <div style="
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #1a1a2e;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Courier New', monospace;
+      text-align: center;
+      padding: 2rem;
+    ">
+      <h1>🚨 Initialization Error</h1>
+      <p>Failed to load the app.</p>
+      <p style="font-size: 0.9em; color: #999;">
+        Error: ${error instanceof Error ? error.message : 'Unknown error'}
+      </p>
+      <button 
+        onclick="window.location.reload()"
+        style="
+          margin-top: 1rem;
+          padding: 0.5rem 1rem;
+          background: #667eea;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+        "
+      >
+        Reload App
+      </button>
+    </div>
+  `;
+}
 

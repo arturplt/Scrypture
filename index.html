@@ -18,7 +18,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Scrypture - Your mystical habit-tracking companion with the Ancient Bóbr. Build habits, track progress, and grow alongside your beaver companion." />
     <meta name="theme-color" content="#667eea" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Scrypture" />
     <link rel="manifest" href="/manifest.json" />
@@ -229,7 +229,90 @@
     </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Fallback loading state -->
+      <div style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: #1a1a2e;
+        color: #ffffff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Courier New', monospace;
+        text-align: center;
+      ">
+        <div style="font-size: 2rem; margin-bottom: 1rem;">🔄</div>
+        <div>Loading Scrypture...</div>
+        <div style="font-size: 0.8rem; color: #999; margin-top: 1rem;">Please wait...</div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Fallback error handling -->
+    <script>
+      // If the app doesn't load within 10 seconds, show an error
+      setTimeout(() => {
+        const root = document.getElementById('root');
+        if (root && root.children.length === 1 && root.children[0].textContent.includes('Loading Scrypture')) {
+          root.innerHTML = `
+            <div style="
+              position: fixed;
+              top: 0;
+              left: 0;
+              width: 100vw;
+              height: 100vh;
+              background: #1a1a2e;
+              color: #ffffff;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              font-family: 'Courier New', monospace;
+              text-align: center;
+              padding: 2rem;
+            ">
+              <h1>⚠️ Loading Timeout</h1>
+              <p>The app is taking longer than expected to load.</p>
+              <p style="font-size: 0.9em; color: #999; margin-top: 1rem;">
+                This might be due to cache issues or network problems.
+              </p>
+              <button 
+                onclick="window.location.reload()"
+                style="
+                  margin-top: 1rem;
+                  padding: 0.5rem 1rem;
+                  background: #667eea;
+                  color: white;
+                  border: none;
+                  border-radius: 4px;
+                  cursor: pointer;
+                "
+              >
+                Reload Page
+              </button>
+              <button 
+                onclick="window.location.href='/clear-cache.html'"
+                style="
+                  margin-top: 0.5rem;
+                  padding: 0.5rem 1rem;
+                  background: #f44336;
+                  color: white;
+                  border: none;
+                  border-radius: 4px;
+                  cursor: pointer;
+                "
+              >
+                Clear Cache
+              </button>
+            </div>
+          `;
+        }
+      }, 10000);
+    </script>
   </body>
 </html> 
