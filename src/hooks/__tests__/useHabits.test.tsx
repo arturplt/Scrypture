@@ -95,6 +95,7 @@ describe('useHabits', () => {
           name: 'New Habit',
           description: 'A new habit to track',
           targetFrequency: 'daily',
+          categories: ['body'],
         })
       );
       await waitFor(() => expect(habitService.saveHabits).toHaveBeenCalled());
@@ -297,6 +298,7 @@ describe('useHabits', () => {
         name: 'New Habit',
         description: 'A new habit to track',
         targetFrequency: 'daily' as const,
+        categories: ['body'],
       };
 
       act(() => {
@@ -331,6 +333,7 @@ describe('useHabits', () => {
           name: 'Test Habit',
           description: 'Test description',
           targetFrequency: 'daily',
+          categories: ['body'],
         });
       });
 
@@ -360,6 +363,7 @@ describe('useHabits', () => {
           name: 'Test Habit',
           description: 'Test description',
           targetFrequency: 'daily',
+          categories: ['body'],
         });
       });
 

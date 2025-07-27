@@ -125,7 +125,7 @@ describe('📋 HABIT SYSTEM TESTING - SIMPLIFIED', () => {
       fireEvent.click(dailyButton);
 
       // Submit the form
-      const submitButton = screen.getByText(/Create Task/);
+      const submitButton = screen.getByText(/Create Habit/);
       fireEvent.click(submitButton);
 
       // Verify habit was created by checking the console logs

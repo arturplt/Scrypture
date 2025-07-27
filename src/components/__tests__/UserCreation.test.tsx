@@ -2,11 +2,12 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { UserCreation } from '../UserCreation';
+import { User } from '../../types';
 
 // Mock the useUser hook
 const mockCreateUser = jest.fn();
 const mockUseUser = {
-  user: null as any,
+  user: null as User | null,
   createUser: mockCreateUser,
 };
 

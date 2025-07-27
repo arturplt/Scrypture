@@ -2,7 +2,7 @@ import { Task } from '../types';
 import { storageService } from './storageService';
 
 // Migration function to handle old tasks with single category
-const migrateTaskCategories = (task: any): Task => {
+const migrateTaskCategories = (task: Partial<Task> & { category?: string }): Task => {
   // If task has the old category field but no categories field, migrate it
   if (task.category && !task.categories) {
     return {

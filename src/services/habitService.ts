@@ -75,9 +75,9 @@ export const habitService = {
     if (!habit) return false;
 
     const now = new Date();
-    const lastCompleted = habit.lastCompleted
-      ? new Date(habit.lastCompleted)
-      : null;
+    // const lastCompleted = habit.lastCompleted
+    //   ? new Date(habit.lastCompleted)
+    //   : null; // Unused variable
 
     // Check if habit can be completed based on frequency
     if (!this.canCompleteHabit(habit)) {
@@ -163,7 +163,7 @@ export const habitService = {
 
     habits.forEach(habit => {
       if (habit.lastCompleted) {
-        const lastCompleted = new Date(habit.lastCompleted);
+        // const lastCompleted = new Date(habit.lastCompleted); // Unused variable
         const isCompletedToday = this.isCompletedToday(habit, now);
         
         if (isCompletedToday) {

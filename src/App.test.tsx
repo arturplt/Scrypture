@@ -319,7 +319,7 @@ describe('App Integration Tests', () => {
 
     // Check if modal appears
     await waitFor(() => {
-      expect(screen.getByText('Edit Task')).toBeInTheDocument();
+      expect(screen.getByText('Update Task')).toBeInTheDocument();
     });
   });
 
