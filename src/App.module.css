@@ -3,6 +3,8 @@
   background: var(--color-bg-primary);
   color: var(--color-text-primary);
   font-family: 'Press Start 2P', monospace;
+  position: relative;
+  overflow-x: hidden;
 }
 
 .header {

@@ -4,6 +4,7 @@ import '@testing-library/jest-dom';
 import { DataManager } from '../DataManager';
 import { TaskProvider } from '../../hooks/useTasks';
 import { UserProvider } from '../../hooks/useUser';
+import { tutorialService } from '../../services/tutorialService';
 
 // Helper function to render DataManager with TaskProvider
 const renderWithTaskProvider = (ui: React.ReactElement) => {
@@ -74,6 +75,13 @@ jest.mock('../../services/categoryService', () => ({
     getCustomCategories: jest.fn(),
     addCustomCategory: jest.fn(),
     clearCustomCategories: jest.fn(),
+  },
+}));
+
+// Mock the tutorialService
+jest.mock('../../services/tutorialService', () => ({
+  tutorialService: {
+    resetTutorial: jest.fn(),
   },
 }));
 
@@ -180,6 +188,9 @@ describe('DataManager', () => {
     // Mock categoryService
     const { categoryService } = require('../../services/categoryService');
     categoryService.clearCustomCategories.mockReturnValue(true);
+
+    // Mock tutorialService
+    (tutorialService.resetTutorial as jest.Mock).mockClear();
   });
 
       it('renders data manager interface', () => {
@@ -420,6 +431,30 @@ describe('DataManager', () => {
 
       // Restore original confirm
       window.confirm = originalConfirm;
+    });
+
+    test('resets tutorial when clearing data', async () => {
+      const mockOnDataChange = jest.fn();
+      const { userService } = require('../../services/userService');
+      userService.clearAllData.mockReturnValue(true);
+      
+      renderWithTaskProvider(<DataManager />);
+      
+      // Open data manager
+      const toggleButton = screen.getByText('Data Manager');
+      fireEvent.click(toggleButton);
+      
+      // Click clear all button
+      const clearButton = screen.getByRole('button', { name: 'Clear All' });
+      fireEvent.click(clearButton);
+      
+      // Confirm clearing
+      const confirmDialog = screen.getByText('Clear All Data');
+      fireEvent.click(confirmDialog);
+      
+      // Verify tutorial reset was called
+      expect(tutorialService.resetTutorial).toHaveBeenCalledTimes(1);
+      expect(userService.clearAllData).toHaveBeenCalledTimes(1);
     });
   });
 

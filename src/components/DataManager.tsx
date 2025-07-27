@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { userService } from '../services/userService';
+import { tutorialService } from '../services/tutorialService';
 
 import { AutoSaveIndicator } from './AutoSaveIndicator';
 import styles from './DataManager.module.css';
@@ -123,6 +124,7 @@ export const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
     setIsSaving(true);
     try {
       userService.clearAllData();
+      tutorialService.resetTutorial();
       showMessage('Data cleared! Refreshing...', 'success');
       onDataChange?.();
       // Refresh the page after clearing data

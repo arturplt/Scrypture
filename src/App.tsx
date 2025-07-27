@@ -3,6 +3,7 @@ import { TaskProvider, useTasks } from './hooks/useTasks';
 import { UserProvider, useUser } from './hooks/useUser';
 import { HabitProvider, useHabits } from './hooks/useHabits';
 import { AchievementProvider, useAchievements } from './hooks/useAchievements';
+import { TutorialProvider, useTutorial } from './hooks/useTutorial';
 import { TaskForm } from './components/TaskForm';
 import { TaskList, TaskListRef } from './components/TaskList';
 import { HabitList } from './components/HabitList';
@@ -16,6 +17,9 @@ import { UserCreation } from './components/UserCreation';
 import { AchievementGrid } from './components/AchievementGrid';
 import { AchievementNotification } from './components/AchievementNotification';
 import BobrPen from './components/BobrPen';
+import BobrIntroduction from './components/BobrIntroduction';
+import { FirstTaskWizard } from './components/FirstTaskWizard';
+import { TutorialCompletionCelebration } from './components/TutorialCompletionCelebration';
 import { Task, Achievement } from './types';
 import styles from './App.module.css';
 import { Modal } from './components/Modal';
@@ -121,7 +125,9 @@ function AppContent() {
   const { user, isSaving: userIsSaving } = useUser();
   const { habits, isSaving: habitsIsSaving } = useHabits();
   const { achievements, achievementProgress, checkAchievements } = useAchievements();
+  const { shouldShowStep, markStepComplete, startTutorial, skipTutorial } = useTutorial();
   const [showLevelUp, setShowLevelUp] = useState(false);
+  const [showTutorialCompletion, setShowTutorialCompletion] = useState(false);
   const [showStartHere, setShowStartHere] = useState(false);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const [showAchievements, setShowAchievements] = useState(false);
@@ -149,6 +155,20 @@ function AppContent() {
       }
     }
   }, [user, tasks, habits, checkAchievements]);
+
+  // Listen for tutorial completion
+  useEffect(() => {
+    const handleTutorialCompleted = () => {
+      console.log('Tutorial completion event received in App');
+      setShowTutorialCompletion(true);
+    };
+
+    window.addEventListener('tutorialCompleted', handleTutorialCompleted);
+    
+    return () => {
+      window.removeEventListener('tutorialCompleted', handleTutorialCompleted);
+    };
+  }, []);
 
   // Show install prompt on mobile devices after a delay (only on first visit)
   useEffect(() => {
@@ -207,7 +227,44 @@ function AppContent() {
 
   // Show user creation if no user exists
   if (!user) {
-    return <UserCreation />;
+    return <UserCreation onUserCreated={() => {
+      console.log('User created, starting tutorial');
+      startTutorial();
+    }} />;
+  }
+
+  // Show onboarding flow for new users
+  if (shouldShowStep('bobrIntroduction')) {
+    return (
+      <BobrIntroduction
+        user={user}
+        onContinue={() => {
+          markStepComplete('bobrIntroduction');
+          // Mark dam metaphor as complete since it's covered in the intro
+          markStepComplete('damMetaphor');
+        }}
+        onSkip={() => {
+          console.log('Skipping entire tutorial from Bóbr introduction');
+          skipTutorial();
+        }}
+      />
+    );
+  }
+
+  // Show first task wizard
+  if (shouldShowStep('firstTask')) {
+    return (
+      <FirstTaskWizard
+        onComplete={() => {
+          console.log('First task wizard completed');
+          // The wizard handles marking the step complete internally
+        }}
+        onSkip={() => {
+          console.log('Skipping entire tutorial from task wizard');
+          skipTutorial();
+        }}
+      />
+    );
   }
 
   return (
@@ -221,6 +278,12 @@ function AppContent() {
       )}
       {showInstallPrompt && (
         <InstallPrompt onClose={() => setShowInstallPrompt(false)} />
+      )}
+      {showTutorialCompletion && (
+        <TutorialCompletionCelebration 
+          user={user}
+          onClose={() => setShowTutorialCompletion(false)}
+        />
       )}
       <header className={styles.header}>
         <h1 className={styles.title}>Scrypture</h1>
@@ -315,13 +378,15 @@ function AppContent() {
 function App() {
   return (
     <UserProvider>
-      <TaskProvider>
-        <HabitProvider>
-          <AchievementProvider>
-            <AppContent />
-          </AchievementProvider>
-        </HabitProvider>
-      </TaskProvider>
+      <TutorialProvider>
+        <TaskProvider>
+          <HabitProvider>
+            <AchievementProvider>
+              <AppContent />
+            </AchievementProvider>
+          </HabitProvider>
+        </TaskProvider>
+      </TutorialProvider>
     </UserProvider>
   );
 }

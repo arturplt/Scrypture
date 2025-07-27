@@ -14,6 +14,8 @@
   max-width: 400px;
   animation: notificationSlideIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   transform-origin: top right;
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 .notification.closing {
@@ -23,26 +25,26 @@
 @keyframes notificationSlideIn {
   0% {
     opacity: 0;
-    transform: translateX(100%) scale(0.8);
+    transform: translateX(100%) scale(0.8) translateZ(0);
   }
   50% {
     opacity: 0.8;
-    transform: translateX(-10px) scale(1.05);
+    transform: translateX(-10px) scale(1.05) translateZ(0);
   }
   100% {
     opacity: 1;
-    transform: translateX(0) scale(1);
+    transform: translateX(0) scale(1) translateZ(0);
   }
 }
 
 @keyframes notificationSlideOut {
   0% {
     opacity: 1;
-    transform: translateX(0) scale(1);
+    transform: translateX(0) scale(1) translateZ(0);
   }
   100% {
     opacity: 0;
-    transform: translateX(100%) scale(0.8);
+    transform: translateX(100%) scale(0.8) translateZ(0);
   }
 }
 

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Task, TaskContextType } from '../types';
 import { taskService } from '../services/taskService';
+import { tutorialService } from '../services/tutorialService';
 import { useUser } from './useUser';
 
 interface ExtendedTaskContextType extends TaskContextType {
@@ -30,7 +31,7 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
-  const { addExperience, addStatRewards, removeStatRewards } = useUser();
+  const { addExperienceWithBobr, addStatRewards, removeStatRewards } = useUser();
 
   useEffect(() => {
     // Load tasks from local storage on mount
@@ -110,13 +111,36 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
 
     // Award experience and stat rewards when completing a task
     if (isCompleting) {
-      // Fetch the latest task from storage to ensure up-to-date statRewards
-      const latestTasks = taskService.getTasks();
-      const updatedTask = latestTasks.find((t) => t.id === id);
-      if (updatedTask && updatedTask.statRewards) {
-        addStatRewards(updatedTask.statRewards);
+      // Use the task we already have in state - no need to fetch from storage
+      if (task && task.statRewards) {
+        console.log('🎯 Applying stat rewards:', task.statRewards);
+        
+        // Use addExperienceWithBobr to handle XP + Bóbr evolution
+        const xpAmount = task.statRewards.xp || 10;
+        addExperienceWithBobr(xpAmount);
+        
+        // Add the specific stat rewards (body, mind, soul)
+        if (task.statRewards.body || task.statRewards.mind || task.statRewards.soul) {
+          addStatRewards({
+            body: task.statRewards.body,
+            mind: task.statRewards.mind,
+            soul: task.statRewards.soul,
+          });
+        }
       } else {
-        addExperience(10);
+        console.log('⚠️  No stat rewards found, applying default XP');
+        // Fallback to base XP if no stat rewards
+        addExperienceWithBobr(10);
+      }
+
+      // Check if this is the first task completion for tutorial
+      if (tutorialService.shouldShowStep('taskCompletion')) {
+        console.log('First task completed! Marking tutorial step complete.');
+        tutorialService.markStepComplete('taskCompletion');
+        // Also mark hatchling evolution step as complete
+        tutorialService.markStepComplete('hatchlingEvolution');
+        // Mark completion step to finish tutorial
+        tutorialService.markStepComplete('completion');
       }
     }
   };

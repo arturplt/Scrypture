@@ -2,32 +2,33 @@
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
+  width: 100vw;
+  height: 100vh;
   background: rgba(0, 0, 0, 0.8);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: 1rem;
+  backdrop-filter: blur(4px);
 }
 
 .modal {
-  background: linear-gradient(135deg, #2a5d31 0%, #1a3d21 100%);
-  border: 3px solid #4a7c59;
-  border-radius: 16px;
-  padding: 2rem;
-  max-width: 500px;
-  width: 100%;
+  background: var(--color-bg-primary);
+  border: var(--border-width-normal) solid var(--color-accent-gold);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-2xl);
+  max-width: 600px;
+  width: 90vw;
   text-align: center;
   position: relative;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-  animation: modalEnter 0.8s ease-out;
+  box-shadow: var(--shadow-button);
+  animation: modalEnter 0.3s ease-out;
+  font-family: 'Press Start 2P', monospace;
 }
 
 @keyframes modalEnter {
   0% { 
-    transform: scale(0.8) translateY(30px); 
+    transform: scale(0.8) translateY(20px); 
     opacity: 0; 
   }
   100% { 
@@ -38,163 +39,169 @@
 
 .title {
   font-family: 'Press Start 2P', monospace;
-  font-size: 1.2rem;
-  color: #ffd700;
-  margin-bottom: 1rem;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  font-size: var(--font-size-lg);
+  color: var(--color-accent-gold);
+  margin-bottom: var(--spacing-lg);
+  line-height: 1.4;
 }
 
 .bobrDisplay {
-  font-size: 6rem;
-  margin: 1rem 0;
-  animation: bobrIntro 2s ease-in-out infinite;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  margin: var(--spacing-lg) 0;
+  animation: float 3s ease-in-out infinite;
 }
 
-.bobrDisplay img {
-  image-rendering: pixelated;
-  image-rendering: -moz-crisp-edges;
-  image-rendering: crisp-edges;
-}
-
-@keyframes bobrIntro {
-  0%, 100% { transform: translateY(0px) scale(1); }
-  50% { transform: translateY(-8px) scale(1.05); }
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
 }
 
 .description {
-  font-size: 0.9rem;
-  color: #e0e0e0;
+  font-family: 'Press Start 2P', monospace;
+  font-size: var(--font-size-xs);
   line-height: 1.6;
-  margin-bottom: 1.5rem;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-lg);
   text-align: left;
-  background: rgba(0, 0, 0, 0.3);
-  padding: 1rem;
-  border-radius: 8px;
-  border-left: 4px solid #c5a572;
-}
-
-.description strong {
-  color: #c5a572;
-  font-weight: bold;
 }
 
 .features {
   list-style: none;
   padding: 0;
-  margin: 1.5rem 0;
+  margin: 0;
   text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
 }
 
 .feature {
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem 0;
-  font-size: 0.8rem;
-  color: #b8b8b8;
+  align-items: flex-start;
+  padding: var(--spacing-sm);
+  background: var(--color-bg-secondary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
 }
 
 .featureIcon {
-  font-size: 1.2rem;
-  min-width: 1.5rem;
+  font-size: var(--font-size-lg);
+  margin-right: var(--spacing-md);
+  flex-shrink: 0;
+  width: 32px;
+  text-align: center;
 }
 
 .featureText {
-  flex: 1;
-  line-height: 1.4;
+  font-family: 'Press Start 2P', monospace;
+  font-size: var(--font-size-xs);
+  line-height: 1.6;
+  color: var(--color-text-primary);
 }
 
 .buttonContainer {
+  margin-top: var(--spacing-2xl);
   display: flex;
-  gap: 1rem;
+  gap: var(--spacing-md);
   justify-content: center;
-  margin-top: 2rem;
+  flex-wrap: wrap;
 }
 
 .button {
   font-family: 'Press Start 2P', monospace;
-  font-size: 0.7rem;
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 8px;
+  font-size: var(--font-size-xs);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border: var(--border-width-thin) solid var(--color-accent-gold);
   cursor: pointer;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
+  transition: all 0.2s ease;
+  background: var(--color-bg-primary);
+  box-shadow: var(--shadow-button);
+  min-width: 120px;
 }
 
 .primaryButton {
-  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
-  color: #1a3d21;
-  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
+  background: var(--color-accent-gold);
+  color: var(--color-bg-primary);
+  border-color: var(--color-accent-gold);
 }
 
 .primaryButton:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(255, 215, 0, 0.6);
+  background: var(--color-text-primary);
+  color: var(--color-bg-primary);
+  transform: translateY(-1px);
+}
+
+.primaryButton:active {
+  transform: translateY(1px);
 }
 
 .secondaryButton {
   background: transparent;
-  color: #c5a572;
-  border: 2px solid #c5a572;
+  color: var(--color-text-secondary);
+  border-color: var(--color-text-secondary);
 }
 
 .secondaryButton:hover {
-  background: rgba(197, 165, 114, 0.1);
+  background: var(--color-text-secondary);
+  color: var(--color-bg-primary);
   transform: translateY(-1px);
 }
 
-.button:active {
-  transform: translateY(0px);
+.secondaryButton:active {
+  transform: translateY(1px);
 }
 
 .skipText {
-  font-size: 0.6rem;
-  color: #888;
-  margin-top: 1rem;
-  font-style: italic;
+  margin-top: var(--spacing-md);
+  font-family: 'Press Start 2P', monospace;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  text-align: center;
 }
 
-/* Responsive Design */
+/* Responsive */
 @media (max-width: 768px) {
   .modal {
-    padding: 1.5rem;
-    margin: 1rem;
+    padding: var(--spacing-lg);
+    width: 95vw;
   }
   
   .title {
-    font-size: 1rem;
-  }
-  
-  .bobrDisplay {
-    font-size: 4rem;
+    font-size: var(--font-size-sm);
   }
   
   .description {
-    font-size: 0.8rem;
-    padding: 0.75rem;
+    font-size: var(--font-size-xs);
   }
   
-  .feature {
-    font-size: 0.75rem;
+  .featureText {
+    font-size: var(--font-size-xs);
+  }
+  
+  .button {
+    font-size: var(--font-size-xs);
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+  
+  .features {
+    gap: var(--spacing-sm);
+  }
+}
+
+@media (max-width: 480px) {
+  .modal {
+    padding: var(--spacing-md);
   }
   
   .buttonContainer {
     flex-direction: column;
-    gap: 0.75rem;
+    align-items: center;
   }
   
   .button {
-    font-size: 0.6rem;
-    padding: 0.625rem 1.25rem;
+    width: 100%;
+    max-width: 200px;
+  }
+  
+  .title {
+    font-size: var(--font-size-sm);
   }
 } 

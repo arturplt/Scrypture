@@ -138,7 +138,13 @@ export const userService = {
     xp?: number;
   }): boolean {
     const user = this.getUser();
-    if (!user) return false;
+    if (!user) {
+      console.error('❌ No user found for stat rewards');
+      return false;
+    }
+
+    console.log('🔧 UserService: Adding stat rewards:', rewards);
+    console.log('🔧 UserService: Current user stats:', { body: user.body, mind: user.mind, soul: user.soul });
 
     const updates: Partial<User> = {
       body: user.body + (rewards.body || 0),
@@ -147,7 +153,11 @@ export const userService = {
       updatedAt: new Date(),
     };
 
-    return this.updateUser(updates);
+    console.log('🔧 UserService: Updates to apply:', updates);
+    const success = this.updateUser(updates);
+    console.log('🔧 UserService: Update success:', success);
+    
+    return success;
   },
 
   /**

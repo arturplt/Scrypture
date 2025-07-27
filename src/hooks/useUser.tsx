@@ -79,6 +79,9 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   } => {
     if (!user) return { success: false, evolved: false, damProgressChanged: false };
 
+    console.log('⭐ Adding experience with Bóbr:', amount);
+    console.log('👤 Current user XP before:', user.experience);
+
     // Get completed tasks count
     const completedTasks = taskService.getTasks().filter(task => task.completed);
     const completedTasksCount = completedTasks.length;
@@ -88,9 +91,12 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     if (result.success) {
       const updatedUser = userService.getUser();
       if (updatedUser) {
+        console.log('👤 User XP after update:', updatedUser.experience);
         setUser(updatedUser);
         saveUserWithFeedback(updatedUser);
       }
+    } else {
+      console.error('❌ Failed to add experience');
     }
 
     return result;
@@ -102,6 +108,9 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     soul?: number;
     xp?: number;
   }) => {
+    console.log('💪 Adding stat rewards to user:', rewards);
+    console.log('👤 Current user stats before:', { body: user?.body, mind: user?.mind, soul: user?.soul });
+    
     const success = userService.addStatRewards(rewards);
 
     if (success && user) {
@@ -112,8 +121,11 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         soul: user.soul + (rewards.soul || 0),
         updatedAt: new Date(),
       };
+      console.log('👤 User stats after update:', { body: updatedUser.body, mind: updatedUser.mind, soul: updatedUser.soul });
       setUser(updatedUser);
       saveUserWithFeedback(updatedUser);
+    } else {
+      console.error('❌ Failed to add stat rewards');
     }
   };
 

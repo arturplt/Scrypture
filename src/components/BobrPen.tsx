@@ -16,6 +16,8 @@ const BobrPen: React.FC<BobrPenProps> = ({
   className = ''
 }) => {
   const [showEvolutionNotification, setShowEvolutionNotification] = useState(false);
+  const [activeView, setActiveView] = useState<'dam' | 'bobr'>('bobr');
+  const [isCollapsed, setIsCollapsed] = useState(true);
 
   // Get stage progress for visual indicators
   const getStageProgress = (level: number): { current: number; stages: string[] } => {
@@ -41,55 +43,83 @@ const BobrPen: React.FC<BobrPenProps> = ({
       {/* Pen Header */}
       <div className={styles.penHeader}>
         <span className={styles.penIcon}>🏡</span>
-        <h2 className={styles.penTitle}>Bóbr's Sanctuary</h2>
-        <span className={styles.penIcon}>🌲</span>
+        <h2 className={styles.penTitle}>Dam & Sanctuary</h2>
+        <button
+          className={styles.collapseButton}
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          title={isCollapsed ? 'Expand' : 'Collapse'}
+        >
+          {isCollapsed ? '▼' : '▲'}
+        </button>
       </div>
 
-      {/* Stage Indicator */}
-      <div className={styles.stageIndicator}>
-        <div className={styles.stageDots}>
-          {stages.map((stage, index) => (
-            <div
-              key={stage}
-              className={`${styles.stageDot} ${index <= currentStage ? styles.active : ''}`}
-              title={stage}
-            />
-          ))}
-        </div>
-        <div className={styles.stageLabel}>
-          {stages[currentStage]} Stage
-        </div>
-      </div>
+      {!isCollapsed && (
+        <>
+          {/* Stage Indicator */}
+          <div className={styles.stageIndicator}>
+            <div className={styles.stageDots}>
+              {stages.map((stage, index) => (
+                <div
+                  key={stage}
+                  className={`${styles.stageDot} ${index <= currentStage ? styles.active : ''}`}
+                  title={stage}
+                />
+              ))}
+            </div>
+            <div className={styles.stageLabel}>
+              {stages[currentStage]} Stage
+            </div>
+          </div>
 
-      {/* Evolution Progress */}
-      {nextEvolutionLevel && (
-        <div className={styles.evolutionProgress}>
-          Next evolution at Level {nextEvolutionLevel} 
-          ({nextEvolutionLevel - user.level} levels to go)
-        </div>
+          {/* Evolution Progress */}
+          {nextEvolutionLevel && (
+            <div className={styles.evolutionProgress}>
+              Next evolution at Level {nextEvolutionLevel} 
+              ({nextEvolutionLevel - user.level} levels to go)
+            </div>
+          )}
+
+          {/* View Toggle Buttons */}
+          <div className={styles.viewToggle}>
+            <button
+              className={`${styles.toggleButton} ${activeView === 'dam' ? styles.active : ''}`}
+              onClick={() => setActiveView('dam')}
+            >
+              🏗️ Dam
+            </button>
+            <button
+              className={`${styles.toggleButton} ${activeView === 'bobr' ? styles.active : ''}`}
+              onClick={() => setActiveView('bobr')}
+            >
+              🦫 Bóbr
+            </button>
+          </div>
+
+          {/* Main Content */}
+          <div className={styles.companionContainer}>
+            {activeView === 'dam' ? (
+              /* Dam Visualization Section */
+              <div className={styles.activeSection}>
+                <DamVisualization 
+                  completedTasks={completedTasksCount}
+                  damProgress={user.damProgress}
+                  showCelebration={false}
+                />
+              </div>
+            ) : (
+              /* Bóbr Companion Section */
+              <div className={styles.activeSection}>
+                <BobrCompanion 
+                  user={user}
+                  completedTasksCount={completedTasksCount}
+                  showEvolutionNotification={showEvolutionNotification}
+                  onEvolutionComplete={() => setShowEvolutionNotification(false)}
+                />
+              </div>
+            )}
+          </div>
+        </>
       )}
-
-      {/* Main Content */}
-      <div className={styles.companionContainer}>
-        {/* Bóbr Companion Section */}
-        <div className={styles.companionSection}>
-          <BobrCompanion 
-            user={user}
-            completedTasksCount={completedTasksCount}
-            showEvolutionNotification={showEvolutionNotification}
-            onEvolutionComplete={() => setShowEvolutionNotification(false)}
-          />
-        </div>
-
-        {/* Dam Visualization Section */}
-        <div className={styles.damSection}>
-          <DamVisualization 
-            completedTasks={completedTasksCount}
-            damProgress={user.damProgress}
-            showCelebration={false}
-          />
-        </div>
-      </div>
     </div>
   );
 };

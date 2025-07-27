@@ -2,8 +2,8 @@
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
+  width: 100vw;
+  height: 100vh;
   background: rgba(0, 0, 0, 0.8);
   display: flex;
   align-items: center;
@@ -29,6 +29,9 @@
   box-shadow: var(--shadow-active);
   animation: modalSlideIn 0.2s ease-out;
   z-index: 2001;
+  position: relative;
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 .modalBottom {
@@ -38,27 +41,30 @@
   border-radius: 0px;
   animation: modalSlideUp 0.3s ease-out;
   z-index: 2001;
+  position: relative;
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 @keyframes modalSlideIn {
   from {
     opacity: 0;
-    transform: translateY(-20px) scale(0.95);
+    transform: translateY(-20px) scale(0.95) translateZ(0);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0) scale(1) translateZ(0);
   }
 }
 
 @keyframes modalSlideUp {
   from {
     opacity: 0;
-    transform: translateY(100%);
+    transform: translateY(100%) translateZ(0);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) translateZ(0);
   }
 }
 
