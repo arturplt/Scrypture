@@ -12,6 +12,210 @@
     <meta name="apple-mobile-web-app-title" content="Scrypture" />
     <link rel="manifest" href="/manifest.json" />
     <title>Scrypture - Mystical Habit Tracking</title>
+    
+    <!-- TypeScript Type Definitions and Data Structures -->
+    <script>
+      // Global type definitions matching src/types/index.ts
+      window.ScryptureTypes = {
+        // Task interface
+        Task: {
+          id: '',
+          title: '',
+          description: '',
+          completed: false,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          completedAt: null,
+          priority: 'medium', // 'low' | 'medium' | 'high'
+          categories: [], // string[]
+          statRewards: {
+            body: 0,
+            mind: 0,
+            soul: 0,
+            xp: 0
+          },
+          difficulty: 0 // 0-9, Fibonacci scale
+        },
+
+        // Habit interface
+        Habit: {
+          id: '',
+          name: '',
+          description: '',
+          streak: 0,
+          bestStreak: 0,
+          lastCompleted: null,
+          createdAt: new Date(),
+          targetFrequency: 'daily', // 'daily' | 'weekly' | 'monthly'
+          categories: [], // string[]
+          statRewards: {
+            body: 0,
+            mind: 0,
+            soul: 0,
+            xp: 0
+          }
+        },
+
+        // User interface
+        User: {
+          id: '',
+          name: '',
+          level: 1,
+          experience: 0,
+          body: 0,
+          mind: 0,
+          soul: 0,
+          achievements: [],
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          bobrStage: 'hatchling', // 'hatchling' | 'young' | 'mature'
+          damProgress: 0 // 0-100 based on completed tasks
+        },
+
+        // Achievement interfaces
+        AchievementCondition: {
+          type: 'level_reach', // Various achievement types
+          value: 0,
+          category: '',
+          timeframe: 'daily', // 'daily' | 'weekly' | 'monthly'
+          stat: 'body', // 'body' | 'mind' | 'soul'
+          difficulty: 0
+        },
+
+        Achievement: {
+          id: '',
+          name: '',
+          description: '',
+          category: 'progression', // 'progression' | 'mastery' | 'consistency' | 'exploration' | 'special'
+          rarity: 'common', // 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary'
+          conditions: [],
+          rewards: {
+            xp: 0,
+            body: 0,
+            mind: 0,
+            soul: 0
+          },
+          icon: '',
+          unlockedMessage: '',
+          unlocked: false,
+          unlockedAt: null,
+          progress: 0 // 0-1 for partially completed achievements
+        },
+
+        AchievementProgress: {
+          achievementId: '',
+          progress: 0, // 0-1
+          currentValue: 0,
+          targetValue: 0,
+          lastUpdated: new Date()
+        },
+
+        // Bóbr interfaces
+        BobrMessage: {
+          id: '',
+          type: 'greeting', // 'greeting' | 'task_completion' | 'level_up' | 'achievement' | 'motivation' | 'dam_progress'
+          stage: 'hatchling', // 'hatchling' | 'young' | 'mature'
+          context: {
+            taskTitle: '',
+            category: '',
+            newLevel: 0,
+            achievementName: '',
+            damPercentage: 0
+          },
+          message: '',
+          animation: 'idle' // 'idle' | 'celebrate' | 'build' | 'evolve'
+        },
+
+        BobrState: {
+          stage: 'hatchling', // 'hatchling' | 'young' | 'mature'
+          damProgress: 0,
+          lastMessage: null,
+          evolutionHistory: []
+        }
+      };
+
+      // Global data storage for the application
+      window.ScryptureData = {
+        // Initialize with default data structures
+        tasks: [],
+        habits: [],
+        user: null,
+        achievements: [],
+        achievementProgress: [],
+        bobrState: {
+          stage: 'hatchling',
+          damProgress: 0,
+          lastMessage: null,
+          evolutionHistory: []
+        },
+
+        // Data validation functions
+        validateTask: function(task) {
+          return task && 
+                 typeof task.id === 'string' &&
+                 typeof task.title === 'string' &&
+                 typeof task.completed === 'boolean';
+        },
+
+        validateHabit: function(habit) {
+          return habit && 
+                 typeof habit.id === 'string' &&
+                 typeof habit.name === 'string' &&
+                 typeof habit.streak === 'number';
+        },
+
+        validateUser: function(user) {
+          return user && 
+                 typeof user.id === 'string' &&
+                 typeof user.name === 'string' &&
+                 typeof user.level === 'number';
+        },
+
+        // Data persistence helpers
+        saveToLocalStorage: function(key, data) {
+          try {
+            localStorage.setItem(`scrypture_${key}`, JSON.stringify(data));
+            return true;
+          } catch (error) {
+            console.error('Failed to save to localStorage:', error);
+            return false;
+          }
+        },
+
+        loadFromLocalStorage: function(key) {
+          try {
+            const data = localStorage.getItem(`scrypture_${key}`);
+            return data ? JSON.parse(data) : null;
+          } catch (error) {
+            console.error('Failed to load from localStorage:', error);
+            return null;
+          }
+        },
+
+        // Initialize data from localStorage
+        initialize: function() {
+          const savedTasks = this.loadFromLocalStorage('tasks');
+          const savedHabits = this.loadFromLocalStorage('habits');
+          const savedUser = this.loadFromLocalStorage('user');
+          const savedAchievements = this.loadFromLocalStorage('achievements');
+          const savedBobrState = this.loadFromLocalStorage('bobrState');
+
+          if (savedTasks) this.tasks = savedTasks;
+          if (savedHabits) this.habits = savedHabits;
+          if (savedUser) this.user = savedUser;
+          if (savedAchievements) this.achievements = savedAchievements;
+          if (savedBobrState) this.bobrState = savedBobrState;
+
+          console.log('Scrypture data initialized from localStorage');
+        }
+      };
+
+      // Initialize data when the script loads
+      window.ScryptureData.initialize();
+      
+      // Ensure the app is ready to load
+      console.log('Scrypture global data initialized');
+    </script>
   </head>
   <body>
     <div id="root"></div>

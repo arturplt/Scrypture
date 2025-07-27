@@ -2,6 +2,10 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './styles/globals.css';
+import { initializeGlobalData, logGlobalDataState } from './utils/htmlDataBridge';
+
+// Initialize global data from HTML
+initializeGlobalData();
 
 // Register service worker for PWA functionality
 if ('serviceWorker' in navigator) {
@@ -15,6 +19,9 @@ if ('serviceWorker' in navigator) {
       });
   });
 }
+
+// Log global data state for debugging
+logGlobalDataState();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

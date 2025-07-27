@@ -77,20 +77,21 @@ const BobrCompanion: React.FC<BobrCompanionProps> = ({
     }
   }, [showEvolutionNotification, user.bobrStage, showMessage, onEvolutionComplete]);
 
-  // Public method to show task completion celebration
-  const _celebrateTaskCompletion = useCallback((taskTitle: string, category: string) => {
+  // Public methods available via ref (used in forwardRef component)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const celebrateTaskCompletion = useCallback((taskTitle: string, category: string) => {
     const celebrationMessage = bobrService.getTaskCelebrationMessage(user, taskTitle, category);
     showMessage(celebrationMessage);
   }, [user, showMessage]);
 
-  // Public method to show motivational message
-  const _showMotivation = useCallback(() => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const showMotivation = useCallback(() => {
     const motivationMessage = bobrService.getMotivationalMessage(user.bobrStage);
     showMessage(motivationMessage);
   }, [user.bobrStage, showMessage]);
 
-  // Public method to show dam progress message
-  const _celebrateDamProgress = useCallback(() => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const celebrateDamProgress = useCallback(() => {
     const damMessage = bobrService.getDamProgressMessage(user.bobrStage, user.damProgress);
     showMessage(damMessage);
   }, [user.bobrStage, user.damProgress, showMessage]);
@@ -164,8 +165,11 @@ export const BobrCompanionRef = React.forwardRef<
   },
   BobrCompanionProps
 >((props, ref) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [currentMessage, setCurrentMessage] = useState<BobrMessage | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isAnimating, setIsAnimating] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [animationType, setAnimationType] = useState<'idle' | 'celebrate' | 'build' | 'evolve'>('idle');
 
   const showMessage = useCallback((message: BobrMessage) => {
