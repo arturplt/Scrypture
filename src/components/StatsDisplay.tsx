@@ -6,6 +6,17 @@ import styles from './StatsDisplay.module.css';
 export const StatsDisplay: React.FC = () => {
   const { user, isSaving } = useUser();
 
+  // Debug logging to track user state changes
+  React.useEffect(() => {
+    console.log('📊 StatsDisplay: User state changed:', {
+      level: user?.level,
+      experience: user?.experience,
+      body: user?.body,
+      mind: user?.mind,
+      soul: user?.soul
+    });
+  }, [user?.level, user?.experience, user?.body, user?.mind, user?.soul]);
+
   if (!user) {
     return (
       <div className={styles.container}>

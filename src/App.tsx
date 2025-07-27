@@ -237,25 +237,17 @@ function AppContent() {
 
   // Show user creation if no user exists
   if (!user) {
-    console.log('🔍 No user found, showing UserCreation');
     return <UserCreation onUserCreated={() => {
       console.log('✅ User created, starting tutorial');
       startTutorial();
     }} />;
   }
 
-  console.log('🔍 User exists:', user);
-  console.log('🔍 Tutorial completed:', isTutorialCompleted());
-  console.log('🔍 Current tutorial step:', getCurrentStep());
-  console.log('🔍 Should show welcome step:', shouldShowStep('welcome'));
-
   // Show welcome screen for new users
   if (shouldShowStep('welcome')) {
-    console.log('📱 Showing WelcomeScreen');
     return (
       <WelcomeScreen
         onContinue={() => {
-          console.log('➡️ Welcome screen continue clicked');
           markStepComplete('welcome');
         }}
         onSkip={() => {
@@ -268,7 +260,6 @@ function AppContent() {
 
   // Show onboarding flow for new users
   if (shouldShowStep('bobrIntroduction')) {
-    console.log('📱 Showing BobrIntroduction');
     return (
       <BobrIntroduction
         user={user}

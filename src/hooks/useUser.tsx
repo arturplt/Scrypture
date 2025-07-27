@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, UserContextType } from '../types';
 import { userService } from '../services/userService';
 import { taskService } from '../services/taskService';
+import { Achievement } from '../types';
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
@@ -219,6 +220,44 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     return newUser;
   };
 
+  /**
+   * Apply achievement rewards and update React state
+   */
+  const applyAchievementRewards = (
+    achievements: Achievement[], 
+    completedTasksCount: number = 0
+  ): { 
+    success: boolean; 
+    evolved: boolean; 
+    damProgressChanged: boolean; 
+    totalRewards: { xp: number; body: number; mind: number; soul: number; };
+  } => {
+    if (!user) {
+      return { 
+        success: false, 
+        evolved: false, 
+        damProgressChanged: false,
+        totalRewards: { xp: 0, body: 0, mind: 0, soul: 0 }
+      };
+    }
+
+    console.log('🏆 UserContext: Applying achievement rewards for:', achievements.map(a => a.name));
+    
+    const result = userService.applyAchievementRewards(achievements, completedTasksCount);
+    
+    if (result.success) {
+      // Force refresh the user state from storage to reflect the changes
+      const updatedUser = userService.getUser();
+      if (updatedUser) {
+        console.log('🏆 UserContext: Refreshing user state after achievement rewards');
+        setUser(updatedUser);
+        saveUserWithFeedback(updatedUser);
+      }
+    }
+
+    return result;
+  };
+
   const contextValue: UserContextType = {
     user,
     updateUser,
@@ -232,6 +271,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     // Add Bóbr-integrated methods
     addExperienceWithBobr,
     addStatRewardsWithBobr,
+    applyAchievementRewards,
   };
 
   return <UserContext.Provider value={contextValue}>{children}</UserContext.Provider>;

@@ -3,6 +3,9 @@ import { Achievement, AchievementProgress, AchievementContextType, Task, Habit, 
 import { achievementService } from '../services/achievementService';
 import { userService } from '../services/userService';
 import { taskService } from '../services/taskService';
+import { useUser } from './useUser';
+import { useTasks } from './useTasks';
+import { useHabits } from './useHabits';
 
 // Simple debounce utility
 const debounce = <T extends (...args: any[]) => any>(
@@ -27,6 +30,7 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
   const [achievementProgress, setAchievementProgress] = useState<AchievementProgress[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | undefined>();
+  const { applyAchievementRewards } = useUser();
 
   // Load achievements on mount
   useEffect(() => {
@@ -114,7 +118,7 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
         const completedTasks = taskService.getTasks().filter(task => task.completed);
         const completedTasksCount = completedTasks.length;
         
-        const rewardResult = userService.applyAchievementRewards(newlyUnlocked, completedTasksCount);
+        const rewardResult = applyAchievementRewards(newlyUnlocked, completedTasksCount);
         
         if (rewardResult.success) {
           console.log('🏆 Achievement rewards applied successfully:', rewardResult.totalRewards);
@@ -150,7 +154,7 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
       console.error('Failed to check achievements:', error);
       return [];
     }
-  }, [debouncedSave]);
+  }, [debouncedSave, applyAchievementRewards]);
 
   // Get achievement progress for a specific achievement
   const getAchievementProgress = useCallback((achievementId: string): AchievementProgress | null => {

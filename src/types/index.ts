@@ -144,6 +144,15 @@ export interface UserContextType {
     evolved: boolean; 
     damProgressChanged: boolean; 
   };
+  applyAchievementRewards: (
+    achievements: Achievement[], 
+    completedTasksCount?: number
+  ) => { 
+    success: boolean; 
+    evolved: boolean; 
+    damProgressChanged: boolean; 
+    totalRewards: { xp: number; body: number; mind: number; soul: number; };
+  };
 }
 
 export interface AchievementContextType {
