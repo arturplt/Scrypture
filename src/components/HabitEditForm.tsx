@@ -82,7 +82,7 @@ export const HabitEditForm: React.FC<HabitEditFormProps> = ({
       body: bodyReward || undefined,
       mind: mindReward || undefined,
       soul: soulReward || undefined,
-      xp: convertToTask ? priorityXp + fibonacciXp[difficulty] : Math.floor((priorityXp + fibonacciXp[difficulty]) / 2),
+      xp: priorityXp + fibonacciXp[difficulty],
     };
 
     if (convertToTask) {
@@ -105,7 +105,12 @@ export const HabitEditForm: React.FC<HabitEditFormProps> = ({
         description: description.trim() || undefined,
         targetFrequency,
         categories: categories,
-        statRewards,
+        statRewards: {
+          body: bodyReward || undefined,
+          mind: mindReward || undefined,
+          soul: soulReward || undefined,
+          xp: Math.floor((priorityXp + fibonacciXp[difficulty]) / 2), // Half XP for habits
+        },
       });
     }
 
@@ -266,7 +271,7 @@ export const HabitEditForm: React.FC<HabitEditFormProps> = ({
           </div>
           <div className={styles.coreAttributeXpLabelWrapper}>
             <span className={styles.coreAttributeXpLabel}>
-              +{convertToTask ? priorityXp + fibonacciXp[difficulty] : Math.floor((priorityXp + fibonacciXp[difficulty]) / 2)} XP
+              +{priorityXp + fibonacciXp[difficulty]} XP
             </span>
           </div>
         </div>
