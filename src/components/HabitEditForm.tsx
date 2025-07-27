@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Habit, Task } from '../types';
+import { Habit } from '../types';
 import { useHabits } from '../hooks/useHabits';
 import { useTasks } from '../hooks/useTasks';
 import { categoryService } from '../services/categoryService';

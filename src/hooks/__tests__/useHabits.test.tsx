@@ -26,6 +26,7 @@ describe('useHabits', () => {
       lastCompleted: new Date('2024-01-01'),
       createdAt: new Date('2024-01-01'),
       targetFrequency: 'daily',
+      categories: ['body'],
     },
     {
       id: '2',
@@ -35,6 +36,7 @@ describe('useHabits', () => {
       lastCompleted: new Date('2024-01-02'),
       createdAt: new Date('2024-01-01'),
       targetFrequency: 'daily',
+      categories: ['mind'],
     },
   ];
 
@@ -85,6 +87,7 @@ describe('useHabits', () => {
           name: 'New Habit',
           description: 'A new habit to track',
           targetFrequency: 'daily',
+          categories: ['body'],
         });
       });
       await waitFor(() =>
@@ -106,6 +109,7 @@ describe('useHabits', () => {
         name: 'New Habit',
         description: 'A new habit to track',
         targetFrequency: 'daily' as const,
+        categories: ['body'],
       };
 
       act(() => {

@@ -1,4 +1,4 @@
-import { StorageService } from './storageService';
+import { storageService } from './storageService';
 
 export interface CustomCategory {
   name: string;
@@ -7,8 +7,6 @@ export interface CustomCategory {
 }
 
 const STORAGE_KEY = 'scrypture_custom_categories';
-
-const storageService = StorageService.getInstance();
 
 export const categoryService = {
   getCustomCategories(): CustomCategory[] {

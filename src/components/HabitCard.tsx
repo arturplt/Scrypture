@@ -29,23 +29,26 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit }) => {
     let nextReset: Date;
     
     switch (habit.targetFrequency) {
-      case 'daily':
+      case 'daily': {
         // Next reset at midnight
         nextReset = new Date(now);
         nextReset.setHours(24, 0, 0, 0);
         break;
-      case 'weekly':
+      }
+      case 'weekly': {
         // Next reset at midnight on Sunday
         nextReset = new Date(now);
         const daysUntilSunday = (7 - nextReset.getDay()) % 7;
         nextReset.setDate(nextReset.getDate() + daysUntilSunday);
         nextReset.setHours(0, 0, 0, 0);
         break;
-      case 'monthly':
+      }
+      case 'monthly': {
         // Next reset at midnight on the last day of the month
         nextReset = new Date(now.getFullYear(), now.getMonth() + 1, 0);
         nextReset.setHours(0, 0, 0, 0);
         break;
+      }
       default:
         return '';
     }
@@ -69,31 +72,42 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit }) => {
     if (!habit.lastCompleted) return;
     
     const now = new Date();
-    let nextReset: Date;
+    const lastCompleted = new Date(habit.lastCompleted);
     
     switch (habit.targetFrequency) {
-      case 'daily':
-        nextReset = new Date(now);
-        nextReset.setHours(24, 0, 0, 0);
+      case 'daily': {
+        // Check if last completion was before today's start
+        const todayStart = new Date(now);
+        todayStart.setHours(0, 0, 0, 0);
+        if (lastCompleted < todayStart) {
+          console.log(`🔄 Resetting daily habit "${habit.name}" - completed before today`);
+          updateHabit(habit.id, { lastCompleted: undefined });
+        }
         break;
-      case 'weekly':
-        nextReset = new Date(now);
-        const daysUntilSunday = (7 - nextReset.getDay()) % 7;
-        nextReset.setDate(nextReset.getDate() + daysUntilSunday);
-        nextReset.setHours(0, 0, 0, 0);
+      }
+      case 'weekly': {
+        // Check if last completion was before this week's start (Sunday)
+        const thisWeekStart = new Date(now);
+        const daysSinceSunday = thisWeekStart.getDay();
+        thisWeekStart.setDate(thisWeekStart.getDate() - daysSinceSunday);
+        thisWeekStart.setHours(0, 0, 0, 0);
+        if (lastCompleted < thisWeekStart) {
+          console.log(`🔄 Resetting weekly habit "${habit.name}" - completed before this week`);
+          updateHabit(habit.id, { lastCompleted: undefined });
+        }
         break;
-      case 'monthly':
-        nextReset = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-        nextReset.setHours(0, 0, 0, 0);
+      }
+      case 'monthly': {
+        // Check if last completion was before this month's start
+        const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        if (lastCompleted < thisMonthStart) {
+          console.log(`🔄 Resetting monthly habit "${habit.name}" - completed before this month`);
+          updateHabit(habit.id, { lastCompleted: undefined });
+        }
         break;
+      }
       default:
         return;
-    }
-    
-    // If current time is past the reset time, reset the habit
-    if (now >= nextReset) {
-      console.log(`🔄 Resetting habit "${habit.name}" - cooldown expired`);
-      updateHabit(habit.id, { lastCompleted: undefined });
     }
   };
 
@@ -161,7 +175,10 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit }) => {
   }
 
   return (
-    <div className={`${styles.habitCard} ${isCompletedToday ? styles.completed : ''} ${isActive ? styles.active : ''} ${isCompleting ? styles.completing : ''}`}>
+    <div 
+      className={`${styles.habitCard} ${isCompletedToday ? styles.completed : ''} ${isActive ? styles.active : ''} ${isCompleting ? styles.completing : ''}`}
+      data-testid="habit-card"
+    >
       <div className={styles.header}>
         <div className={styles.content}>
           <div className={styles.titleSection}>

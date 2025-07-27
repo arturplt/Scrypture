@@ -328,7 +328,7 @@ describe('HabitCard', () => {
 
     render(<HabitCard habit={mockHabit} />);
     
-    const completeButton = screen.getByTitle('Mark as complete');
+    const completeButton = screen.getByRole('checkbox');
     fireEvent.click(completeButton);
     
     // Wait for the completion animation
@@ -346,8 +346,8 @@ describe('HabitCard', () => {
     
     render(<HabitCard habit={mockHabit} />);
     
-    expect(screen.getByTitle('Completed today!')).toBeInTheDocument();
-    expect(screen.getByText('✓')).toBeInTheDocument();
+    // When completed, it shows cooldown timer instead of completed message
+    expect(screen.getByText(/\d+h \d+m/)).toBeInTheDocument();
   });
 
   it('disables complete button when habit is completed today', () => {
@@ -355,29 +355,30 @@ describe('HabitCard', () => {
     
     render(<HabitCard habit={mockHabit} />);
     
-    const completeButton = screen.getByTitle('Completed today!');
-    expect(completeButton).toBeDisabled();
+    // When completed, checkbox is not present, cooldown timer is shown instead
+    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
+    expect(screen.getByText(/\d+h \d+m/)).toBeInTheDocument();
   });
 
   it('shows completion animation when completing habit', async () => {
     render(<HabitCard habit={mockHabit} />);
     
-    const completeButton = screen.getByTitle('Mark as complete');
+    const completeButton = screen.getByRole('checkbox');
     fireEvent.click(completeButton);
     
-    // Should show completion animation
-    expect(screen.getByText('⏳')).toBeInTheDocument();
+    // Should show disabled checkbox during completion
+    expect(completeButton).toBeDisabled();
     
-    // Wait for animation to complete
+    // Wait for animation to complete (checkbox becomes enabled again)
     await waitFor(() => {
-      expect(screen.getByText('○')).toBeInTheDocument();
+      expect(completeButton).not.toBeDisabled();
     }, { timeout: 1000 });
   });
 
   it('opens edit form when edit button is clicked', () => {
     render(<HabitCard habit={mockHabit} />);
     
-    const editButton = screen.getByTitle('Edit habit');
+    const editButton = screen.getByRole('button', { name: 'Edit habit' });
     fireEvent.click(editButton);
     
     expect(screen.getByTestId('habit-edit-form')).toBeInTheDocument();
@@ -388,7 +389,7 @@ describe('HabitCard', () => {
     render(<HabitCard habit={mockHabit} />);
     
     // Open edit form
-    const editButton = screen.getByTitle('Edit habit');
+    const editButton = screen.getByRole('button', { name: 'Edit habit' });
     fireEvent.click(editButton);
     
     expect(screen.getByTestId('habit-edit-form')).toBeInTheDocument();
@@ -417,9 +418,8 @@ describe('HabitCard', () => {
   it('displays rewards when available', () => {
     render(<HabitCard habit={mockHabit} />);
     
-    expect(screen.getByText('Rewards:')).toBeInTheDocument();
-    expect(screen.getByText('💪 +1 Body')).toBeInTheDocument();
-    expect(screen.getByText('⭐ +5 XP')).toBeInTheDocument();
+    expect(screen.getByText('💪 Body: +1')).toBeInTheDocument();
+    expect(screen.getByText('XP: +5')).toBeInTheDocument();
   });
 
   it('handles habit without description', () => {
@@ -483,8 +483,8 @@ describe('HabitCard', () => {
 
     render(<HabitCard habit={mockHabit} />);
     
-    const completeButton = screen.getByTitle('Mark as complete');
-    
+        const completeButton = screen.getByRole('checkbox');
+
     // Click multiple times rapidly
     fireEvent.click(completeButton);
     fireEvent.click(completeButton);
@@ -510,7 +510,7 @@ describe('HabitCard', () => {
 
     render(<HabitCard habit={mockHabit} />);
     
-    const completeButton = screen.getByTitle('Mark as complete');
+    const completeButton = screen.getByRole('checkbox');
     fireEvent.click(completeButton);
     
     await waitFor(() => {
@@ -567,9 +567,9 @@ describe('HabitCard', () => {
     
     render(<HabitCard habit={habitWithAllRewards} />);
     
-    expect(screen.getByText('💪 +2 Body')).toBeInTheDocument();
-    expect(screen.getByText('🧠 +1 Mind')).toBeInTheDocument();
-    expect(screen.getByText('✨ +3 Soul')).toBeInTheDocument();
-    expect(screen.getByText('⭐ +10 XP')).toBeInTheDocument();
+    expect(screen.getByText('💪 Body: +2')).toBeInTheDocument();
+    expect(screen.getByText('🧠 Mind: +1')).toBeInTheDocument();
+    expect(screen.getByText('✨ Soul: +3')).toBeInTheDocument();
+    expect(screen.getByText('XP: +10')).toBeInTheDocument();
   });
 }); 

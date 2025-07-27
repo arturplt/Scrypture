@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTasks } from '../hooks/useTasks';
-import { categoryService } from '../services/categoryService';
+
 import styles from './StartHereModal.module.css';
 
 interface StartHereModalProps {
@@ -18,10 +18,10 @@ interface TaskTemplate {
 }
 
 export const StartHereModal: React.FC<StartHereModalProps> = ({ isOpen, onClose }) => {
-  const { addTask, tasks } = useTasks();
+  const { addTask } = useTasks();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [givenTasks, setGivenTasks] = useState<Set<string>>(new Set());
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['mind', 'body', 'soul', 'home', 'free time', 'garden']));
 
   // Load given tasks from localStorage on component mount
   useEffect(() => {
@@ -1157,7 +1157,7 @@ export const StartHereModal: React.FC<StartHereModalProps> = ({ isOpen, onClose 
             {availableCategories.map((category) => {
               const nextTask = getNextTaskForCategory(category);
               const progress = getProgressForCategory(category);
-              const isCompleted = progress === 100;
+              // const isCompleted = progress === 100; // Unused variable
               const isSelected = selectedCategories.includes(category);
               
               const completedTasks = getCompletedTasksForCategory(category);

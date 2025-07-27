@@ -183,7 +183,7 @@ export class StorageService {
       ...userRecord,
       createdAt: new Date(userRecord.createdAt as string),
       updatedAt: new Date(userRecord.updatedAt as string),
-      achievements: (userRecord.achievements as Record<string, unknown>[]).map((achievement: Record<string, unknown>) => ({
+      achievements: (userRecord.achievements as Record<string, unknown>[] || []).map((achievement: Record<string, unknown>) => ({
         ...achievement,
         unlockedAt: achievement.unlockedAt
           ? new Date(achievement.unlockedAt as string)

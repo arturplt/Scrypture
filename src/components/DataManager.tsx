@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { userService } from '../services/userService';
-import { categoryService } from '../services/categoryService';
+
 import { AutoSaveIndicator } from './AutoSaveIndicator';
 import styles from './DataManager.module.css';
 

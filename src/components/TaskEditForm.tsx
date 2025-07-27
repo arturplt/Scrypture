@@ -17,7 +17,7 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({
   task,
   onCancel,
 }) => {
-  const { updateTask, deleteTask, tasks, isSaving } = useTasks();
+  const { updateTask, deleteTask, isSaving } = useTasks();
   const { addHabit } = useHabits();
   const [title, setTitle] = useState(task.title);
   const [description, setDescription] = useState(task.description || '');

@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { TaskList } from '../TaskList';
 import { Task } from '../../types';
@@ -169,7 +169,7 @@ describe('TaskList', () => {
     it('renders completed tasks section', () => {
       render(<TaskList />);
 
-      expect(screen.getByText('Completed Tasks')).toBeInTheDocument();
+      expect(screen.getByText(/Completed Tasks/)).toBeInTheDocument();
       expect(screen.getByText('Meditation')).toBeInTheDocument();
     });
 
@@ -381,7 +381,7 @@ describe('TaskList', () => {
       expect(screen.getByText('Study Programming')).toBeInTheDocument();
 
       // Completed tasks should be in Completed Tasks section
-      expect(screen.getByText('Completed Tasks')).toBeInTheDocument();
+      expect(screen.getByText(/Completed Tasks/)).toBeInTheDocument();
       expect(screen.getByText('Meditation')).toBeInTheDocument();
     });
 
@@ -402,7 +402,7 @@ describe('TaskList', () => {
       render(<TaskList />);
 
       expect(screen.queryByText('Active Tasks')).not.toBeInTheDocument();
-      expect(screen.getByText('Completed Tasks')).toBeInTheDocument();
+      expect(screen.getByText(/Completed Tasks/)).toBeInTheDocument();
     });
   });
 

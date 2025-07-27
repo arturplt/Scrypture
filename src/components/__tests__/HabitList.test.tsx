@@ -1,10 +1,7 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { HabitList } from '../HabitList';
 import { useHabits } from '../../hooks/useHabits';
-import { categoryService } from '../../services/categoryService';
-import { UserProvider } from '../../hooks/useUser';
-import { HabitProvider } from '../../hooks/useHabits';
 
 // Mock the services
 jest.mock('../../services/categoryService', () => ({
@@ -104,8 +101,8 @@ describe('HabitList', () => {
     renderWithProviders(<HabitList />);
     
     expect(screen.getByText('Habits')).toBeInTheDocument();
-    expect(screen.getByTestId('auto-save-indicator')).toBeInTheDocument();
-    expect(screen.getByText('Saved')).toBeInTheDocument();
+    expect(screen.getAllByTestId('auto-save-indicator')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('Saved')).toHaveLength(4); // One for main list + 3 habit cards
   });
 
   it('shows saving state when isSaving is true', () => {
@@ -120,7 +117,7 @@ describe('HabitList', () => {
 
     renderWithProviders(<HabitList />);
     
-    expect(screen.getByText('Saving...')).toBeInTheDocument();
+    expect(screen.getAllByText('Saving...')[0]).toBeInTheDocument();
   });
 
   it('separates completed and incomplete habits', () => {
@@ -136,8 +133,8 @@ describe('HabitList', () => {
     renderWithProviders(<HabitList />);
     
     // Should show regular categories for incomplete habits
-    expect(screen.getByText('Body Habits (1)')).toBeInTheDocument();
-    expect(screen.getByText('Home Habits (1)')).toBeInTheDocument();
+    expect(screen.getByText('Body (1)')).toBeInTheDocument();
+    expect(screen.getByText('Home (1)')).toBeInTheDocument();
     
     // Should show completed habits section
     expect(screen.getByText('Completed Habits (1)')).toBeInTheDocument();
@@ -172,7 +169,7 @@ describe('HabitList', () => {
 
     renderWithProviders(<HabitList />);
     
-    const bodySection = screen.getByText('Body Habits (1)');
+    const bodySection = screen.getByText('Body (1)');
     fireEvent.click(bodySection);
     
     // The section should be collapsible (implementation depends on CSS)
@@ -236,7 +233,7 @@ describe('HabitList', () => {
     renderWithProviders(<HabitList />);
     
     expect(screen.getByText('Habits')).toBeInTheDocument();
-    expect(screen.getByTestId('auto-save-indicator')).toBeInTheDocument();
+    expect(screen.getAllByTestId('auto-save-indicator')[0]).toBeInTheDocument();
   });
 
   it('handles habits without categories', () => {
@@ -267,7 +264,7 @@ describe('HabitList', () => {
     renderWithProviders(<HabitList />);
     
     // Should default to 'body' category
-    expect(screen.getByText('Body Habits (1)')).toBeInTheDocument();
+    expect(screen.getByText('Body (1)')).toBeInTheDocument();
     expect(screen.getByText('Uncategorized Habit')).toBeInTheDocument();
   });
 }); 

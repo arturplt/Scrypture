@@ -8,9 +8,7 @@ import { TaskForm } from '../components/TaskForm';
 import { HabitList } from '../components/HabitList';
 import { HabitCard } from '../components/HabitCard';
 import { habitService } from '../services/habitService';
-import { taskService } from '../services/taskService';
-import { categoryService } from '../services/categoryService';
-import { Habit, Task } from '../types';
+import { Habit } from '../types';
 
 // Mock localStorage
 const mockLocalStorage = {
@@ -104,7 +102,7 @@ describe('📋 HABIT SYSTEM TESTING - SIMPLIFIED', () => {
   });
 
   describe('1. HABIT CREATION', () => {
-    it('✓ Create habit via TaskForm', async () => {
+    it('✓ Create Task via TaskForm', async () => {
       render(
         <TestWrapper>
           <TaskForm />
@@ -127,7 +125,7 @@ describe('📋 HABIT SYSTEM TESTING - SIMPLIFIED', () => {
       fireEvent.click(dailyButton);
 
       // Submit the form
-      const submitButton = screen.getByText(/Create Habit/);
+      const submitButton = screen.getByText(/Create Task/);
       fireEvent.click(submitButton);
 
       // Verify habit was created by checking the console logs
@@ -215,7 +213,7 @@ describe('📋 HABIT SYSTEM TESTING - SIMPLIFIED', () => {
         </TestWrapper>
       );
 
-      const completeButton = screen.getByTitle('Mark as complete');
+      const completeButton = screen.getByRole('checkbox');
       fireEvent.click(completeButton);
 
       await waitFor(() => {
@@ -249,7 +247,7 @@ describe('📋 HABIT SYSTEM TESTING - SIMPLIFIED', () => {
       // Verify initial streak - the text is split across elements
       expect(screen.getByText(/5 days/)).toBeInTheDocument();
 
-      const completeButton = screen.getByTitle('Mark as complete');
+      const completeButton = screen.getByRole('checkbox');
       fireEvent.click(completeButton);
 
       await waitFor(() => {
@@ -284,7 +282,7 @@ describe('📋 HABIT SYSTEM TESTING - SIMPLIFIED', () => {
       );
 
       // Click edit button
-      const editButton = screen.getByTitle('Edit habit');
+      const editButton = screen.getByRole('button', { name: 'Edit habit' });
       fireEvent.click(editButton);
 
       // Verify edit form appears
@@ -567,8 +565,8 @@ describe('📋 HABIT SYSTEM TESTING - SIMPLIFIED', () => {
         </TestWrapper>
       );
 
-      const completeButton = screen.getByTitle('Mark as complete');
-      
+            const completeButton = screen.getByRole('checkbox');
+
       // Test animation by clicking the button
       fireEvent.click(completeButton);
 

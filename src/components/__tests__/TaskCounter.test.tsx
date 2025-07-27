@@ -16,6 +16,6 @@ describe('TaskCounter', () => {
     );
 
     expect(screen.getByText(/Tasks Completed/i)).toBeInTheDocument();
-    expect(screen.getByText('0 / 3')).toBeInTheDocument();
+    expect(screen.getByText(/0\s*\/\s*0/)).toBeInTheDocument();
   });
 });

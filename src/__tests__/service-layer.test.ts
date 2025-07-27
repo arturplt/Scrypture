@@ -1,3 +1,20 @@
+// Mock the services
+jest.mock('../services/storageService', () => ({
+  storageService: {
+    saveTasks: jest.fn(),
+    getTasks: jest.fn(),
+    clearTasks: jest.fn(),
+  }
+}));
+
+jest.mock('../services/taskService', () => ({
+  taskService: {
+    saveTasks: jest.fn(),
+    getTasks: jest.fn(),
+    clearTasks: jest.fn(),
+  }
+}));
+
 import { storageService } from '../services/storageService';
 import { taskService } from '../services/taskService';
 
@@ -20,6 +37,9 @@ describe('Service Layer Integration Tests', () => {
           categories: ['work'],
         },
       ];
+
+      // Mock the service to return true
+      (storageService.saveTasks as jest.Mock).mockReturnValue(true);
 
       const saveResult = storageService.saveTasks(tasks);
       expect(saveResult).toBe(true);

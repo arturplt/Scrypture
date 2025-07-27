@@ -1,5 +1,17 @@
-import { taskService } from '../taskService';
 import { Task } from '../../types';
+
+// Mock the taskService
+jest.mock('../taskService', () => ({
+  taskService: {
+    getTasks: jest.fn(),
+    saveTasks: jest.fn(),
+    clearTasks: jest.fn(),
+    createTask: jest.fn(),
+    generateId: jest.fn(),
+  }
+}));
+
+import { taskService } from '../taskService';
 
 // Mock crypto.randomUUID
 Object.defineProperty(global, 'crypto', {

@@ -1,30 +1,28 @@
 import { categoryService } from '../categoryService';
-import { StorageService } from '../storageService';
 
 // Mock the StorageService
-jest.mock('../storageService');
+jest.mock('../storageService', () => ({
+  storageService: {
+    getGenericItem: jest.fn(),
+    setGenericItem: jest.fn(),
+  }
+}));
 
-const mockStorageService = {
-  getGenericItem: jest.fn(),
-  setGenericItem: jest.fn(),
-};
+import { storageService } from '../storageService';
 
 describe('categoryService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (StorageService.getInstance as jest.Mock).mockReturnValue(mockStorageService);
   });
 
-  // Temporarily commented out to improve test pass rate
-  /*
   describe('getCustomCategories', () => {
     it('returns empty array when no categories exist', () => {
-      mockStorageService.getGenericItem.mockReturnValue(null);
+      (storageService.getGenericItem as jest.Mock).mockReturnValue(null);
 
       const result = categoryService.getCustomCategories();
 
       expect(result).toEqual([]);
-      expect(mockStorageService.getGenericItem).toHaveBeenCalledWith('scrypture_custom_categories');
+      expect(storageService.getGenericItem).toHaveBeenCalledWith('scrypture_custom_categories');
     });
 
     it('returns existing categories from storage', () => {
@@ -33,12 +31,12 @@ describe('categoryService', () => {
         { name: 'workout', icon: '💪', color: 'var(--color-body)' },
       ];
 
-      mockStorageService.getGenericItem.mockReturnValue(mockCategories);
+      (storageService.getGenericItem as jest.Mock).mockReturnValue(mockCategories);
 
       const result = categoryService.getCustomCategories();
 
       expect(result).toEqual(mockCategories);
-      expect(mockStorageService.getGenericItem).toHaveBeenCalledWith('scrypture_custom_categories');
+      expect(storageService.getGenericItem).toHaveBeenCalledWith('scrypture_custom_categories');
     });
   });
 
@@ -54,15 +52,15 @@ describe('categoryService', () => {
         color: 'var(--color-body)',
       };
 
-      mockStorageService.getGenericItem.mockReturnValue(existingCategories);
-      mockStorageService.setGenericItem.mockReturnValue(true);
+      (storageService.getGenericItem as jest.Mock).mockReturnValue(existingCategories);
+      (storageService.setGenericItem as jest.Mock).mockReturnValue(true);
 
       const result = categoryService.addCustomCategory(newCategory);
 
       expect(result).toBe(true);
-      expect(mockStorageService.setGenericItem).toHaveBeenCalledWith('scrypture_custom_categories', [
-        ...existingCategories,
-        newCategory,
+      expect((storageService.setGenericItem as jest.Mock)).toHaveBeenCalledWith('scrypture_custom_categories', [
+        { name: 'test', icon: '🎯', color: 'var(--color-skills)' },
+        { name: 'workout', icon: '💪', color: 'var(--color-body)' },
       ]);
     });
 
@@ -77,12 +75,12 @@ describe('categoryService', () => {
         color: 'var(--color-body)',
       };
 
-      mockStorageService.getGenericItem.mockReturnValue(existingCategories);
+      (storageService.getGenericItem as jest.Mock).mockReturnValue(existingCategories);
 
       const result = categoryService.addCustomCategory(duplicateCategory);
 
       expect(result).toBe(false);
-      expect(mockStorageService.setGenericItem).not.toHaveBeenCalled();
+      expect((storageService.setGenericItem as jest.Mock)).not.toHaveBeenCalled();
     });
 
     it('handles storage errors when adding category', () => {
@@ -92,8 +90,8 @@ describe('categoryService', () => {
         color: 'var(--color-body)',
       };
 
-      mockStorageService.getGenericItem.mockReturnValue([]);
-      mockStorageService.setGenericItem.mockReturnValue(false);
+      (storageService.getGenericItem as jest.Mock).mockReturnValue([]);
+      (storageService.setGenericItem as jest.Mock).mockReturnValue(false);
 
       const result = categoryService.addCustomCategory(newCategory);
 
@@ -108,13 +106,13 @@ describe('categoryService', () => {
         { name: 'workout', icon: '💪', color: 'var(--color-body)' },
       ];
 
-      mockStorageService.getGenericItem.mockReturnValue(existingCategories);
-      mockStorageService.setGenericItem.mockReturnValue(true);
+      (storageService.getGenericItem as jest.Mock).mockReturnValue(existingCategories);
+      (storageService.setGenericItem as jest.Mock).mockReturnValue(true);
 
       const result = categoryService.removeCustomCategory('workout');
 
       expect(result).toBe(true);
-      expect(mockStorageService.setGenericItem).toHaveBeenCalledWith('scrypture_custom_categories', [
+      expect((storageService.setGenericItem as jest.Mock)).toHaveBeenCalledWith('scrypture_custom_categories', [
         { name: 'test', icon: '🎯', color: 'var(--color-skills)' },
       ]);
     });
@@ -124,12 +122,12 @@ describe('categoryService', () => {
         { name: 'test', icon: '🎯', color: 'var(--color-skills)' },
       ];
 
-      mockStorageService.getGenericItem.mockReturnValue(existingCategories);
+      (storageService.getGenericItem as jest.Mock).mockReturnValue(existingCategories);
 
       const result = categoryService.removeCustomCategory('nonexistent');
 
       expect(result).toBe(false);
-      expect(mockStorageService.setGenericItem).not.toHaveBeenCalled();
+      expect((storageService.setGenericItem as jest.Mock)).not.toHaveBeenCalled();
     });
 
     it('handles case insensitive removal', () => {
@@ -138,13 +136,13 @@ describe('categoryService', () => {
         { name: 'workout', icon: '💪', color: 'var(--color-body)' },
       ];
 
-      mockStorageService.getGenericItem.mockReturnValue(existingCategories);
-      mockStorageService.setGenericItem.mockReturnValue(true);
+      (storageService.getGenericItem as jest.Mock).mockReturnValue(existingCategories);
+      (storageService.setGenericItem as jest.Mock).mockReturnValue(true);
 
       const result = categoryService.removeCustomCategory('WORKOUT');
 
       expect(result).toBe(true);
-      expect(mockStorageService.setGenericItem).toHaveBeenCalledWith('scrypture_custom_categories', [
+      expect((storageService.setGenericItem as jest.Mock)).toHaveBeenCalledWith('scrypture_custom_categories', [
         { name: 'test', icon: '🎯', color: 'var(--color-skills)' },
       ]);
     });
@@ -153,7 +151,7 @@ describe('categoryService', () => {
   describe('getCategoryByName', () => {
     it('returns category when found', () => {
       const mockCategory = { name: 'workout', icon: '💪', color: 'var(--color-body)' };
-      mockStorageService.getGenericItem.mockReturnValue([mockCategory]);
+      (storageService.getGenericItem as jest.Mock).mockReturnValue([mockCategory]);
 
       const result = categoryService.getCategoryByName('workout');
 
@@ -161,7 +159,7 @@ describe('categoryService', () => {
     });
 
     it('returns null when category not found', () => {
-      mockStorageService.getGenericItem.mockReturnValue([]);
+      (storageService.getGenericItem as jest.Mock).mockReturnValue([]);
 
       const result = categoryService.getCategoryByName('nonexistent');
 
@@ -170,7 +168,7 @@ describe('categoryService', () => {
 
     it('handles case insensitive search', () => {
       const mockCategory = { name: 'workout', icon: '💪', color: 'var(--color-body)' };
-      mockStorageService.getGenericItem.mockReturnValue([mockCategory]);
+      (storageService.getGenericItem as jest.Mock).mockReturnValue([mockCategory]);
 
       const result = categoryService.getCategoryByName('WORKOUT');
 
@@ -180,26 +178,20 @@ describe('categoryService', () => {
 
   describe('clearCustomCategories', () => {
     it('clears all custom categories', () => {
-      mockStorageService.setGenericItem.mockReturnValue(true);
+      (storageService.setGenericItem as jest.Mock).mockReturnValue(true);
 
       const result = categoryService.clearCustomCategories();
 
       expect(result).toBe(true);
-      expect(mockStorageService.setGenericItem).toHaveBeenCalledWith('scrypture_custom_categories', []);
+      expect((storageService.setGenericItem as jest.Mock)).toHaveBeenCalledWith('scrypture_custom_categories', []);
     });
 
     it('returns false when clear fails', () => {
-      mockStorageService.setGenericItem.mockReturnValue(false);
+      (storageService.setGenericItem as jest.Mock).mockReturnValue(false);
 
       const result = categoryService.clearCustomCategories();
 
       expect(result).toBe(false);
     });
-  });
-  */
-
-  // Placeholder test to keep the describe block
-  it('placeholder test', () => {
-    expect(true).toBe(true);
   });
 });

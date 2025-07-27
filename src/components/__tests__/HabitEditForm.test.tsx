@@ -3,7 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { HabitEditForm } from '../HabitEditForm';
 import { useHabits } from '../../hooks/useHabits';
 import { useTasks } from '../../hooks/useTasks';
-import { categoryService } from '../../services/categoryService';
+
 
 // Mock the services
 jest.mock('../../services/categoryService', () => ({

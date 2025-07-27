@@ -18,7 +18,7 @@ interface TaskListProps {
 
 export const TaskList = forwardRef<TaskListRef, TaskListProps>((props, ref) => {
   const { onEditTask } = props;
-  const { tasks, deleteTask, refreshTasks, isSaving } = useTasks();
+  const { tasks, refreshTasks, isSaving } = useTasks();
   const [isEditMode, setIsEditMode] = useState(false);
   const [taskToEdit, setTaskToEdit] = useState<Task | null>(null);
   const [sortBy, setSortBy] = useState<'priority' | 'date' | 'xp'>('priority');
@@ -324,9 +324,9 @@ export const TaskList = forwardRef<TaskListRef, TaskListProps>((props, ref) => {
                   
                   {!isCollapsed && (
                     <div className={styles.categoryTasks}>
-                      {categoryTasks.map((task, index) => {
+                      {categoryTasks.map((task) => {
                         // Find the task's index in the full sorted tasks array
-                        const taskIndex = activeTasks.findIndex(t => t.id === task.id);
+                        // const taskIndex = activeTasks.findIndex(t => t.id === task.id); // Unused variable
                         return (
                           <div
                             key={task.id}
@@ -370,7 +370,7 @@ export const TaskList = forwardRef<TaskListRef, TaskListProps>((props, ref) => {
           </div>
           {!collapsedCompletedSection && (
             <div className={styles.taskGrid}>
-              {completedTasks.map((task, index) => (
+              {completedTasks.map((task) => (
                 <TaskCard
                   key={task.id}
                   task={task}

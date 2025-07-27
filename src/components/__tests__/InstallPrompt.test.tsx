@@ -6,6 +6,18 @@ import { InstallPrompt } from '../InstallPrompt';
 describe('InstallPrompt', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    
+    // Mock localStorage
+    Object.defineProperty(window, 'localStorage', {
+      value: {
+        getItem: jest.fn(),
+        setItem: jest.fn(),
+        removeItem: jest.fn(),
+        clear: jest.fn(),
+      },
+      writable: true,
+    });
+    
     // Mock window.matchMedia
     Object.defineProperty(window, 'matchMedia', {
       writable: true,

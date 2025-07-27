@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { HabitProvider } from '../hooks/useHabits';
 import { TaskProvider } from '../hooks/useTasks';
@@ -10,7 +10,7 @@ import { HabitCard } from '../components/HabitCard';
 import { HabitEditForm } from '../components/HabitEditForm';
 import { habitService } from '../services/habitService';
 import { taskService } from '../services/taskService';
-import { categoryService } from '../services/categoryService';
+
 import { Habit, Task } from '../types';
 
 // Mock localStorage
@@ -93,7 +93,7 @@ describe('📋 HABIT SYSTEM TESTING', () => {
   });
 
   describe('1. HABIT CREATION', () => {
-    it('✓ Create habit via TaskForm', async () => {
+    it('✓ Create Task via TaskForm', async () => {
       render(
         <TestWrapper>
           <TaskForm />
@@ -206,6 +206,7 @@ describe('📋 HABIT SYSTEM TESTING', () => {
         difficulty: 0,
         categories: ['body'],
         createdAt: new Date(),
+        updatedAt: new Date(),
         statRewards: { body: 1, xp: 10 },
       };
 
@@ -580,7 +581,7 @@ describe('📋 HABIT SYSTEM TESTING', () => {
 
       jest.spyOn(habitService, 'getHabits').mockReturnValue([mockHabit]);
       jest.spyOn(habitService, 'deleteHabit').mockReturnValue(true);
-      jest.spyOn(taskService, 'addTask').mockReturnValue({
+      jest.spyOn(taskService, 'createTask').mockReturnValue({
         id: 'new-task-1',
         title: 'Test Habit',
         description: 'A test habit',
@@ -589,6 +590,7 @@ describe('📋 HABIT SYSTEM TESTING', () => {
         difficulty: 0,
         categories: ['body'],
         createdAt: new Date(),
+        updatedAt: new Date(),
         statRewards: { body: 1, xp: 10 },
       });
 
@@ -607,7 +609,7 @@ describe('📋 HABIT SYSTEM TESTING', () => {
       fireEvent.click(submitButton);
 
       await waitFor(() => {
-        expect(taskService.addTask).toHaveBeenCalled();
+        expect(taskService.createTask).toHaveBeenCalled();
         expect(habitService.deleteHabit).toHaveBeenCalledWith('test-habit-1');
       });
     });
@@ -625,8 +627,8 @@ describe('📋 HABIT SYSTEM TESTING', () => {
       fireEvent.click(titleInput);
 
       // Verify field order by checking for specific elements in order
-      const form = screen.getByRole('form');
-      const formElements = form.children;
+      // const form = screen.getByRole('form'); // Unused variable
+      // const formElements = form.children; // Unused variable
 
       // This is a simplified check - in a real test you'd verify the actual DOM order
       expect(screen.getByText(/Core Attributes:/)).toBeInTheDocument();
@@ -646,6 +648,7 @@ describe('📋 HABIT SYSTEM TESTING', () => {
         difficulty: 0,
         categories: ['body'],
         createdAt: new Date(),
+        updatedAt: new Date(),
         statRewards: { body: 1, xp: 10 },
       };
 
@@ -939,7 +942,8 @@ describe('📋 HABIT SYSTEM TESTING', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByText('Test Habit')).toBeInTheDocument();
+        const testHabits = screen.getAllByText('Test Habit');
+        expect(testHabits.length).toBeGreaterThan(0);
         // Verify categories are displayed
         expect(screen.getByText(/💪 Body/)).toBeInTheDocument();
         expect(screen.getByText(/🧠 Mind/)).toBeInTheDocument();
@@ -968,8 +972,9 @@ describe('📋 HABIT SYSTEM TESTING', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByText('7 days')).toBeInTheDocument();
-        expect(screen.getByText('Best: 10')).toBeInTheDocument();
+        // Check for streak display - the text might be combined in a single element
+        expect(screen.getByText(/7 days/)).toBeInTheDocument();
+        expect(screen.getByText(/Best: 10/)).toBeInTheDocument();
       });
     });
   });
@@ -991,7 +996,7 @@ describe('📋 HABIT SYSTEM TESTING', () => {
 
       // Should show validation error
       await waitFor(() => {
-        expect(screen.getByText(/required/i)).toBeInTheDocument();
+        expect(screen.getByText(/Please fill this field/i)).toBeInTheDocument();
       });
     });
 
@@ -1150,7 +1155,7 @@ describe('📋 HABIT SYSTEM TESTING', () => {
         </TestWrapper>
       );
 
-      const completeButton = screen.getByTitle('Mark as complete');
+      const completeButton = screen.getByRole('checkbox');
       
       // Test animation by clicking the button
       fireEvent.click(completeButton);
@@ -1203,8 +1208,8 @@ describe('📋 HABIT SYSTEM TESTING', () => {
         </TestWrapper>
       );
 
-      const desktopHabitCard = screen.getByText('Test Habit');
-      expect(desktopHabitCard).toBeInTheDocument();
+      const desktopHabitCards = screen.getAllByText('Test Habit');
+      expect(desktopHabitCards.length).toBeGreaterThan(0);
     });
 
     it('✓ Memory usage', async () => {
