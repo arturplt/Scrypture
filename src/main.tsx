@@ -52,18 +52,85 @@ const forceServiceWorkerUpdate = async (): Promise<void> => {
 // Make functions globally available for debugging
 (window as any).clearScryptureCache = async () => {
   console.log('🧹 Clearing all caches...');
-  const success = await clearAllCaches();
-  if (success) {
-    console.log('✅ Caches cleared, reloading...');
-    setTimeout(() => window.location.reload(), 1000);
+  
+  try {
+    // Unregister all service workers
+    if ('serviceWorker' in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      console.log(`📋 Found ${registrations.length} service worker(s)`);
+      
+      for (const registration of registrations) {
+        await registration.unregister();
+        console.log(`🔧 Unregistered service worker: ${registration.scope}`);
+      }
+    }
+    
+    // Clear all caches
+    if ('caches' in window) {
+      const cacheNames = await caches.keys();
+      console.log(`📦 Found ${cacheNames.length} cache(s): ${cacheNames.join(', ')}`);
+      
+      for (const cacheName of cacheNames) {
+        await caches.delete(cacheName);
+        console.log(`🗑️ Deleted cache: ${cacheName}`);
+      }
+    }
+    
+    // Clear storage
+    console.log('💾 Clearing localStorage...');
+    localStorage.clear();
+    console.log('💾 Clearing sessionStorage...');
+    sessionStorage.clear();
+    
+    console.log('✅ All caches cleared successfully!');
+    console.log('🔄 Reloading page in 2 seconds...');
+    
+    setTimeout(() => {
+      window.location.reload();
+    }, 2000);
+    
+  } catch (error) {
+    console.error('❌ Error clearing caches:', error);
   }
 };
 
 (window as any).forceUpdate = forceServiceWorkerUpdate;
 
+// Add a simple cache status checker
+(window as any).checkCacheStatus = async () => {
+  console.log('🔍 Checking cache status...');
+  
+  if ('serviceWorker' in navigator) {
+    const registrations = await navigator.serviceWorker.getRegistrations();
+    console.log(`📋 Service Workers: ${registrations.length}`);
+    registrations.forEach((reg, i) => {
+      console.log(`  ${i + 1}. Scope: ${reg.scope}, Active: ${!!reg.active}, Waiting: ${!!reg.waiting}`);
+    });
+  }
+  
+  if ('caches' in window) {
+    const cacheNames = await caches.keys();
+    console.log(`📦 Caches: ${cacheNames.length}`);
+    cacheNames.forEach((name, i) => {
+      console.log(`  ${i + 1}. ${name}`);
+    });
+  }
+  
+  console.log(`💾 localStorage items: ${Object.keys(localStorage).length}`);
+  console.log(`💾 sessionStorage items: ${Object.keys(sessionStorage).length}`);
+};
+
 // Register service worker for PWA functionality with better update handling
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
+    // Check if we're in development mode
+    const isDevelopment = process.env.NODE_ENV === 'development' || window.location.hostname === 'localhost';
+    
+    if (isDevelopment) {
+      console.log('🔧 Development mode detected - skipping service worker registration');
+      return;
+    }
+    
     navigator.serviceWorker.register('/sw.js')
       .then((reg) => {
         registration = reg;

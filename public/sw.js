@@ -1,5 +1,5 @@
 // Service Worker for Scrypture PWA
-const CACHE_NAME = 'scrypture-v3'; // Increment version to force cache update
+const CACHE_NAME = 'scrypture-v4'; // Increment version to force cache update
 const urlsToCache = [
   '/',
   '/index.html',
@@ -8,11 +8,11 @@ const urlsToCache = [
 
 // Install event - cache resources and force activation
 self.addEventListener('install', (event) => {
-  console.log('SW: Installing service worker v3');
+  console.log('SW: Installing service worker v4');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('SW: Opened cache v3');
+        console.log('SW: Opened cache v4');
         return cache.addAll(urlsToCache);
       })
       .then(() => {
@@ -23,7 +23,7 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// Fetch event - always try network first for HTML to prevent stale content
+// Fetch event - completely bypass cache for HTML and always fetch fresh
 self.addEventListener('fetch', (event) => {
   // Skip non-GET requests
   if (event.request.method !== 'GET') {
@@ -32,66 +32,63 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(event.request.url);
   
-  // For HTML files and the root path, always use network first
+  // For HTML files and the root path, ALWAYS fetch from network, never use cache
   if (event.request.headers.get('accept')?.includes('text/html') || 
       url.pathname === '/' || 
       url.pathname.endsWith('.html')) {
     
+    console.log('SW: Fetching HTML from network only:', url.pathname);
     event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          console.log('SW: Network response for HTML:', url.pathname);
-          // If network request succeeds, update cache and return response
-          if (response.ok) {
-            const responseClone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, responseClone);
-            });
-          }
-          return response;
-        })
-        .catch((error) => {
-          console.log('SW: Network failed for HTML, trying cache:', url.pathname);
-          // If network fails, try cache
-          return caches.match(event.request)
-            .then((cachedResponse) => {
-              if (cachedResponse) {
-                return cachedResponse;
-              }
-              // If no cache, return a basic offline page
-              return new Response('App is offline. Please check your connection.', {
-                status: 503,
-                headers: { 'Content-Type': 'text/plain' }
-              });
-            });
-        })
+      fetch(event.request, { 
+        cache: 'no-store', // Force bypass cache
+        headers: {
+          ...event.request.headers,
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache'
+        }
+      })
+      .then((response) => {
+        console.log('SW: Network response for HTML:', url.pathname, response.status);
+        // Don't cache HTML at all - always fetch fresh
+        return response;
+      })
+      .catch((error) => {
+        console.log('SW: Network failed for HTML:', url.pathname, error);
+        // Return a basic offline page
+        return new Response('App is offline. Please check your connection.', {
+          status: 503,
+          headers: { 'Content-Type': 'text/plain' }
+        });
+      })
     );
   } 
-  // For JS/CSS/assets, use network first with cache fallback
+  // For JS/CSS/assets, use network first but with cache fallback
   else {
     event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          // If network succeeds, cache and return
-          if (response.ok) {
-            const responseClone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, responseClone);
-            });
-          }
-          return response;
-        })
-        .catch(() => {
-          // If network fails, try cache
-          return caches.match(event.request);
-        })
+      fetch(event.request, { 
+        cache: 'no-cache' // Use cache but revalidate
+      })
+      .then((response) => {
+        // If network succeeds, update cache and return
+        if (response.ok) {
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseClone);
+          });
+        }
+        return response;
+      })
+      .catch(() => {
+        // If network fails, try cache
+        return caches.match(event.request);
+      })
     );
   }
 });
 
 // Activate event - clean up old caches and take control immediately
 self.addEventListener('activate', (event) => {
-  console.log('SW: Activating service worker v3');
+  console.log('SW: Activating service worker v4');
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
