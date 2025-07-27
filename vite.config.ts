@@ -12,7 +12,7 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: true,
   },
-  base: process.env.NODE_ENV === 'production' ? '/' : '/',
+  base: process.env.NODE_ENV === 'production' ? '/Scrypture/' : '/',
   resolve: {
     alias: {
       '@': '/src',
