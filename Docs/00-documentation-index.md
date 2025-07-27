@@ -18,6 +18,7 @@
 7. **[05-database-schema.md](05-database-schema.md)** - Database design and migrations (5 min read)
 8. **[06-development-guide.md](06-development-guide.md)** - Setup, implementation, and deployment (15 min read)
 9. **[07-mvp-checklist.md](07-mvp-checklist.md)** - Implementation tracking and status (5 min read)
+10. **[12-achievement-system.md](12-achievement-system.md)** - Complete Achievement system documentation (20 min read)
 
 ### **For Specific Roles:**
 - **👤 New Users**: [quick-start-guide.md](quick-start-guide.md) → [01-overview.md](01-overview.md) → [02-mvp-features.md](02-mvp-features.md)

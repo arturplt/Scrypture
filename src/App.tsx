@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { TaskProvider, useTasks } from './hooks/useTasks';
 import { UserProvider, useUser } from './hooks/useUser';
 import { HabitProvider, useHabits } from './hooks/useHabits';
+import { AchievementProvider, useAchievements } from './hooks/useAchievements';
 import { TaskForm } from './components/TaskForm';
 import { TaskList, TaskListRef } from './components/TaskList';
 import { HabitList } from './components/HabitList';
@@ -12,7 +13,9 @@ import { StartHereSection } from './components/StartHereSection';
 import { AutoSaveIndicator } from './components/AutoSaveIndicator';
 import { InstallPrompt } from './components/InstallPrompt';
 import { UserCreation } from './components/UserCreation';
-import { Task } from './types';
+import { AchievementGrid } from './components/AchievementGrid';
+import { AchievementNotification } from './components/AchievementNotification';
+import { Task, Achievement } from './types';
 import styles from './App.module.css';
 import { Modal } from './components/Modal';
 import { TaskEditForm } from './components/TaskEditForm';
@@ -113,13 +116,16 @@ function SpinnerOverlay() {
 }
 
 function AppContent() {
-  const { isSaving, lastSaved, refreshTasks } = useTasks();
+  const { tasks, isSaving, lastSaved, refreshTasks } = useTasks();
   const { user, isSaving: userIsSaving } = useUser();
-  const { isSaving: habitsIsSaving } = useHabits();
+  const { habits, isSaving: habitsIsSaving } = useHabits();
+  const { achievements, achievementProgress, checkAchievements } = useAchievements();
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [showStartHere, setShowStartHere] = useState(false);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
+  const [showAchievements, setShowAchievements] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [achievementNotifications, setAchievementNotifications] = useState<Achievement[]>([]);
   const lastLevel = useRef<number | null>(null);
   const taskListRef = useRef<TaskListRef | null>(null);
 
@@ -131,6 +137,17 @@ function AppContent() {
       lastLevel.current = user.level;
     }
   }, [user]);
+
+  // Check for achievement unlocks when user data, tasks, or habits change
+  useEffect(() => {
+    if (user && tasks && habits) {
+      const newlyUnlocked = checkAchievements(user, tasks, habits);
+      if (newlyUnlocked.length > 0) {
+        // Add newly unlocked achievements to notifications
+        setAchievementNotifications(prev => [...prev, ...newlyUnlocked]);
+      }
+    }
+  }, [user, tasks, habits, checkAchievements]);
 
   // Show install prompt on mobile devices after a delay (only on first visit)
   useEffect(() => {
@@ -176,6 +193,17 @@ function AppContent() {
     }
   };
 
+  const handleAchievementNotificationClose = (achievementId: string) => {
+    setAchievementNotifications(prev => 
+      prev.filter(achievement => achievement.id !== achievementId)
+    );
+  };
+
+  const handleAchievementClick = (achievement: Achievement) => {
+    // Could open a modal with more details, for now just log
+    console.log('Achievement clicked:', achievement);
+  };
+
   // Show user creation if no user exists
   if (!user) {
     return <UserCreation />;
@@ -199,6 +227,13 @@ function AppContent() {
         <div className={styles.userInfo}>
           <span className={styles.userName}>{user.name}</span>
           <span className={styles.userLevel}>Level {user.level}</span>
+          <button 
+            className={styles.achievementsButton}
+            onClick={() => setShowAchievements(!showAchievements)}
+            title="View Achievements"
+          >
+            🏆 {achievements.filter(a => a.unlocked).length}/{achievements.length}
+          </button>
         </div>
       </header>
 
@@ -220,6 +255,13 @@ function AppContent() {
         )}
         <TaskCounter className={styles.taskCounter} />
         <StatsDisplay />
+        {showAchievements && (
+          <AchievementGrid
+            achievements={achievements}
+            achievementProgress={achievementProgress}
+            onAchievementClick={handleAchievementClick}
+          />
+        )}
         <TaskForm 
           onNavigateToTask={handleNavigateToTask} 
           onEditTask={handleEditTask}
@@ -250,6 +292,15 @@ function AppContent() {
       )}
 
       <AutoSaveIndicator isSaving={isSaving} lastSaved={lastSaved} />
+      
+      {/* Achievement Notifications */}
+      {achievementNotifications.map((achievement, index) => (
+        <AchievementNotification
+          key={`${achievement.id}-${index}`}
+          achievement={achievement}
+          onClose={() => handleAchievementNotificationClose(achievement.id)}
+        />
+      ))}
     </div>
   );
 }
@@ -259,7 +310,9 @@ function App() {
     <UserProvider>
       <TaskProvider>
         <HabitProvider>
-          <AppContent />
+          <AchievementProvider>
+            <AppContent />
+          </AchievementProvider>
         </HabitProvider>
       </TaskProvider>
     </UserProvider>

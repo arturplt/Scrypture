@@ -51,7 +51,7 @@
 
 ## 📋 **Documentation Structure**
 
-### **Core Documentation (9 files)**
+### **Core Documentation (10 files)**
 1. **00-documentation-index.md** - Master navigation (new, streamlined)
 2. **quick-start-guide.md** - Developer onboarding (copied)
 3. **01-overview.md** - Project vision (copied)
@@ -61,6 +61,7 @@
 7. **04-api-reference.md** - API documentation (copied)
 8. **05-database-schema.md** - Database design (copied)
 9. **06-development-guide.md** - Implementation guide (copied)
+10. **12-achievement-system.md** - Achievement system documentation (new, comprehensive)
 
 ### **Implementation Tracking (1 file)**
 10. **07-mvp-checklist.md** - Implementation tracking (new, streamlined)
@@ -120,7 +121,7 @@ The habit system now includes a complete testing infrastructure with:
 - **Core Attributes**: 6 features (stats, leveling, progression)
 - **Bóbr Companion**: 5 features (introduction, evolution, motivation)
 - **Habit System**: 4 features (creation, tracking, streaks) - **FULLY TESTED** ✅
-- **Achievement System**: 3 features (unlocks, display, celebrations)
+- **Achievement System**: 3 features (unlocks, display, celebrations) - **FULLY IMPLEMENTED** ✅
 - **Onboarding**: 4 features (welcome, tutorial, guidance)
 
 ### **Terminology Mapping**

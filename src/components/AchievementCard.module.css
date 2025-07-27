@@ -1,0 +1,413 @@
+.card {
+  background: var(--color-bg-secondary);
+  border: 4px solid var(--color-border-primary);
+  border-radius: 0px;
+  padding: var(--spacing-md);
+  transition: all var(--transition-normal);
+  margin-bottom: var(--spacing-md);
+  box-shadow: var(--shadow-button);
+  cursor: pointer;
+  position: relative;
+  transform-origin: center;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-active);
+  border-color: var(--color-border-secondary);
+}
+
+.cardUnlocked {
+  border-color: var(--color-accent-gold);
+  background: var(--color-bg-primary);
+  box-shadow: 0 0 12px rgba(182, 164, 50, 0.3);
+}
+
+.cardUnlocked:hover {
+  box-shadow: 0 0 20px rgba(182, 164, 50, 0.5);
+}
+
+.cardLocked {
+  opacity: 0.6;
+  background: var(--color-bg-tertiary);
+}
+
+/* Rarity-based styling */
+.rarityCommon {
+  border-color: var(--color-border-primary);
+}
+
+.rarityUncommon {
+  border-color: var(--color-easy);
+  box-shadow: 0 0 8px rgba(45, 107, 59, 0.2);
+}
+
+.rarityRare {
+  border-color: var(--color-focus);
+  box-shadow: 0 0 8px rgba(108, 103, 71, 0.3);
+}
+
+.rarityEpic {
+  border-color: var(--color-chill);
+  box-shadow: 0 0 12px rgba(59, 74, 107, 0.4);
+}
+
+.rarityLegendary {
+  border-color: var(--color-accent-gold);
+  box-shadow: 0 0 16px rgba(182, 164, 50, 0.5);
+  animation: legendaryGlow 3s ease-in-out infinite;
+}
+
+@keyframes legendaryGlow {
+  0%, 100% {
+    box-shadow: 0 0 16px rgba(182, 164, 50, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 24px rgba(182, 164, 50, 0.8);
+  }
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+}
+
+.icon {
+  font-size: var(--font-size-xl);
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-primary);
+  border: 2px solid var(--color-border-primary);
+  border-radius: 0px;
+  position: relative;
+}
+
+.iconUnlocked {
+  border-color: var(--color-accent-gold);
+  background: var(--color-accent-gold);
+  color: var(--color-bg-primary);
+  animation: iconPulse 2s ease-in-out infinite;
+}
+
+@keyframes iconPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.iconLocked {
+  opacity: 0.5;
+  filter: grayscale(1);
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+}
+
+.name {
+  font-size: var(--font-size-md);
+  font-weight: normal;
+  margin: 0 0 var(--spacing-xs) 0;
+  color: var(--color-text-primary);
+  word-break: break-word;
+  line-height: 1.2;
+  font-family: 'Press Start 2P', monospace;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+}
+
+.nameUnlocked {
+  color: var(--color-accent-gold);
+}
+
+.description {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--spacing-sm) 0;
+  line-height: 1.2;
+  word-break: break-word;
+  font-family: 'Press Start 2P', monospace;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+}
+
+.meta {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: var(--spacing-sm);
+}
+
+.category {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  font-family: 'Press Start 2P', monospace;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--color-bg-primary);
+  border: 2px solid var(--color-border-primary);
+  border-radius: 0px;
+  text-transform: uppercase;
+}
+
+.rarity {
+  font-size: var(--font-size-xs);
+  font-family: 'Press Start 2P', monospace;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 2px solid;
+  border-radius: 0px;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.rarityCommonText {
+  background: var(--color-border-primary);
+  color: var(--color-text-primary);
+  border-color: var(--color-border-secondary);
+}
+
+.rarityUncommonText {
+  background: var(--color-easy);
+  color: var(--color-bg-primary);
+  border-color: var(--color-easy-border);
+}
+
+.rarityRareText {
+  background: var(--color-focus);
+  color: var(--color-bg-primary);
+  border-color: var(--color-focus-border);
+}
+
+.rarityEpicText {
+  background: var(--color-chill);
+  color: var(--color-text-primary);
+  border-color: var(--color-chill-border);
+}
+
+.rarityLegendaryText {
+  background: var(--color-accent-gold);
+  color: var(--color-bg-primary);
+  border-color: var(--color-accent-gold);
+  animation: rarityGlow 2s ease-in-out infinite;
+}
+
+@keyframes rarityGlow {
+  0%, 100% {
+    box-shadow: 0 0 4px rgba(182, 164, 50, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 8px rgba(182, 164, 50, 0.8);
+  }
+}
+
+.progressContainer {
+  margin-top: var(--spacing-sm);
+}
+
+.progressLabel {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-xs);
+  font-family: 'Press Start 2P', monospace;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+}
+
+.progressBar {
+  width: 100%;
+  height: 8px;
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: 0px;
+  overflow: hidden;
+  margin-bottom: var(--spacing-xs);
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--color-accent-gold);
+  border-radius: 0px;
+  transition: width var(--transition-normal);
+  position: relative;
+}
+
+.progressFill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    transparent 100%
+  );
+  animation: progressShimmer 2s ease-in-out infinite;
+}
+
+@keyframes progressShimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.progressText {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  font-family: 'Press Start 2P', monospace;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+}
+
+.rewards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-sm);
+}
+
+.reward {
+  display: inline-block;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--font-size-xs);
+  font-family: 'Press Start 2P', monospace;
+  font-weight: bold;
+  background: var(--color-bg-secondary);
+  border: 2px solid var(--color-border-primary);
+  border-radius: 0px;
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+}
+
+.rewardXP {
+  background: var(--color-accent-gold);
+  color: var(--color-bg-primary);
+  border-color: var(--color-accent-gold);
+}
+
+.rewardBody {
+  background: var(--color-body);
+  color: var(--color-bg-primary);
+  border-color: var(--color-body);
+}
+
+.rewardMind {
+  background: var(--color-mind);
+  color: var(--color-bg-primary);
+  border-color: var(--color-mind);
+}
+
+.rewardSoul {
+  background: var(--color-soul);
+  color: var(--color-bg-primary);
+  border-color: var(--color-soul);
+}
+
+.unlockedAt {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-top: var(--spacing-sm);
+  font-family: 'Press Start 2P', monospace;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+}
+
+/* Unlock animation */
+.cardUnlocking {
+  animation: achievementUnlock 1s ease-out;
+}
+
+@keyframes achievementUnlock {
+  0% {
+    transform: scale(1);
+    box-shadow: var(--shadow-button);
+    border-color: var(--color-border-primary);
+  }
+  25% {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px var(--color-accent-gold);
+    border-color: var(--color-accent-gold);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 0 30px var(--color-accent-gold);
+    border-color: var(--color-accent-gold);
+  }
+  75% {
+    transform: scale(1.05);
+    box-shadow: 0 0 25px var(--color-accent-gold);
+    border-color: var(--color-accent-gold);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 12px rgba(182, 164, 50, 0.3);
+    border-color: var(--color-accent-gold);
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .card {
+    padding: var(--spacing-sm);
+  }
+
+  .header {
+    gap: var(--spacing-sm);
+  }
+
+  .icon {
+    width: 28px;
+    height: 28px;
+    font-size: var(--font-size-lg);
+  }
+
+  .name {
+    font-size: var(--font-size-sm);
+  }
+
+  .description {
+    font-size: var(--font-size-xs);
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    padding: var(--spacing-xs);
+  }
+
+  .meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+
+  .rewards {
+    gap: var(--spacing-xs);
+  }
+} 

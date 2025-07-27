@@ -20,7 +20,7 @@ Scrypture uses **plain English terminology** by default for accessibility and cl
 | **Experience Points** | Points earned for completing tasks |
 | **Level** | Character progression level |
 | **Stats** | Body, Mind, Soul progression |
-| **Achievement** | Unlocked accomplishments |
+| **Achievement** | Unlocked accomplishments with 5 categories and rarity levels |
 | **Journal** | Personal progress tracking |
 | **Daily Goals** | Daily objectives and challenges |
 | **Companion** | Bóbr the forest companion |

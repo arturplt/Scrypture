@@ -5,6 +5,7 @@ export interface Task {
   completed: boolean;
   createdAt: Date;
   updatedAt: Date;
+  completedAt?: Date;
   priority: 'low' | 'medium' | 'high';
   categories: string[]; // Changed from category?: string to categories: string[]
   statRewards?: {
@@ -47,13 +48,44 @@ export interface User {
   updatedAt: Date;
 }
 
+export interface AchievementCondition {
+  type: 'level_reach' | 'task_complete' | 'habit_streak' | 'stat_reach' | 
+        'total_experience' | 'category_tasks' | 'daily_tasks' | 'perfect_week' |
+        'difficulty_master' | 'speed_demon' | 'consistency' | 'explorer' |
+        'first_task' | 'first_habit' | 'multi_category' | 'streak_master';
+  value: number;
+  category?: string;
+  timeframe?: 'daily' | 'weekly' | 'monthly';
+  stat?: 'body' | 'mind' | 'soul';
+  difficulty?: number;
+}
+
 export interface Achievement {
   id: string;
   name: string;
   description: string;
+  category: 'progression' | 'mastery' | 'consistency' | 'exploration' | 'special';
+  rarity: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
+  conditions: AchievementCondition[];
+  rewards?: {
+    xp?: number;
+    body?: number;
+    mind?: number;
+    soul?: number;
+  };
+  icon: string;
+  unlockedMessage: string;
   unlocked: boolean;
   unlockedAt?: Date;
-  icon: string;
+  progress?: number; // 0-1 for partially completed achievements
+}
+
+export interface AchievementProgress {
+  achievementId: string;
+  progress: number; // 0-1
+  currentValue: number;
+  targetValue: number;
+  lastUpdated: Date;
 }
 
 export interface TaskContextType {
@@ -93,4 +125,13 @@ export interface UserContextType {
   unlockAchievement: (achievementId: string) => void;
   createUser: (name: string) => User;
   isSaving: boolean;
+}
+
+export interface AchievementContextType {
+  achievements: Achievement[];
+  achievementProgress: AchievementProgress[];
+  checkAchievements: (user: User, tasks: Task[], habits: Habit[]) => Achievement[];
+  getAchievementProgress: (achievementId: string) => AchievementProgress | null;
+  isSaving: boolean;
+  lastSaved?: Date;
 }

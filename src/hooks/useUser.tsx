@@ -150,22 +150,12 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const unlockAchievement = (achievementId: string) => {
     const success = userService.unlockAchievement(achievementId);
     if (success && user) {
-      // Add the new achievement to the user's achievements
-      const newAchievement = {
-        id: achievementId,
-        name: `Achievement ${achievementId}`,
-        description: 'An unlocked achievement',
-        unlocked: true,
-        unlockedAt: new Date(),
-        icon: '🏆',
-      };
-      const updatedUser = {
-        ...user,
-        achievements: [...user.achievements, newAchievement],
-      };
-      setUser(updatedUser);
-      saveUserWithFeedback(updatedUser);
-      console.log('Achievement unlocked and auto-saved');
+      // Reload user from storage to get the updated achievements
+      const updatedUser = userService.getUser();
+      if (updatedUser) {
+        setUser(updatedUser);
+        console.log('Achievement unlocked and auto-saved');
+      }
     }
   };
 

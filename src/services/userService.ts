@@ -129,14 +129,19 @@ export const userService = {
     if (alreadyUnlocked) return false;
 
     // In a real app, you'd fetch achievement data from a database
-    // For now, we'll create a simple achievement
+    // For now, we'll create a simple achievement (this is legacy code, should use achievementService)
     const newAchievement: Achievement = {
       id: achievementId,
       name: `Achievement ${achievementId}`,
       description: 'An unlocked achievement',
+      category: 'special',
+      rarity: 'common',
+      conditions: [],
+      rewards: {},
+      icon: '🏆',
+      unlockedMessage: 'Achievement unlocked!',
       unlocked: true,
       unlockedAt: new Date(),
-      icon: '🏆',
     };
 
     const updatedAchievements = [...user.achievements, newAchievement];

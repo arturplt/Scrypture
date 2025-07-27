@@ -94,9 +94,15 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
     if (!task) return;
 
     const isCompleting = !task.completed;
+    const now = new Date();
 
     const updatedTasks = tasks.map((t) =>
-      t.id === id ? { ...t, completed: !t.completed, updatedAt: new Date() } : t
+      t.id === id ? { 
+        ...t, 
+        completed: !t.completed, 
+        updatedAt: now,
+        completedAt: isCompleting ? now : undefined
+      } : t
     );
 
     setTasks(updatedTasks);
