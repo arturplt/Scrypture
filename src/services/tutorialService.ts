@@ -65,7 +65,9 @@ class TutorialService {
   private currentState: TutorialState;
 
   constructor() {
+    console.log('🔧 TutorialService constructor called');
     this.currentState = this.loadTutorialState();
+    console.log('🔧 Initial tutorial state loaded:', this.currentState);
   }
 
   /**
@@ -107,9 +109,12 @@ class TutorialService {
    * Start the tutorial from the beginning
    */
   startTutorial(): void {
+    console.log('🚀 startTutorial called');
+    console.log('🚀 Before start - currentStep:', this.currentState.currentStep);
     // Start with the welcome step
     this.currentState.currentStep = 'welcome';
     this.saveTutorialState();
+    console.log('🚀 After start - currentStep:', this.currentState.currentStep);
   }
 
   /**
@@ -268,8 +273,14 @@ class TutorialService {
    * Check if a specific step should be shown now
    */
   shouldShowStep(stepId: string): boolean {
-    return this.currentState.currentStep === stepId && 
+    const result = this.currentState.currentStep === stepId && 
            !this.currentState.steps[stepId]?.completed;
+    console.log(`🔍 shouldShowStep('${stepId}'):`, {
+      currentStep: this.currentState.currentStep,
+      stepCompleted: this.currentState.steps[stepId]?.completed,
+      result
+    });
+    return result;
   }
 
   /**
