@@ -26,6 +26,7 @@ import { Task, Achievement } from './types';
 import styles from './App.module.css';
 import { Modal } from './components/Modal';
 import { TaskEditForm } from './components/TaskEditForm';
+import { LoadingDebug } from './components/LoadingDebug';
 
 function LevelUpModal({
   level,
@@ -53,14 +54,22 @@ function LevelUpModal({
         fontSize: 32,
         textAlign: 'center',
         animation: 'fadeIn 0.5s',
+        padding: 'var(--spacing-md)',
       }}
     >
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: scale(0.9); }
+          to { opacity: 1; transform: scale(1); }
+        }
+      `}</style>
       <div
         style={{
           background: 'var(--color-bg-primary)',
           border: '4px solid var(--color-accent-gold)',
           padding: 32,
           borderRadius: 0,
+          animation: 'fadeIn 0.5s ease-out',
         }}
       >
         <div style={{ fontSize: 48, marginBottom: 16 }}>🎉</div>
@@ -95,27 +104,117 @@ function SpinnerOverlay() {
         left: 0,
         width: '100vw',
         height: '100vh',
-        background: 'rgba(0,0,0,0.3)',
+        background: 'var(--color-bg-primary)',
         zIndex: 10000,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
+        flexDirection: 'column',
+        fontFamily: 'Press Start 2P, monospace',
+        color: 'var(--color-text-primary)',
       }}
     >
       <div
         style={{
-          width: 64,
-          height: 64,
-          border: '8px solid #eee',
-          borderTop: '8px solid var(--color-accent-gold)',
-          borderRadius: '50%',
-          animation: 'spin 1s linear infinite',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 'var(--spacing-lg)',
+          padding: 'var(--spacing-xl)',
+          background: 'var(--color-bg-secondary)',
+          border: '4px solid var(--color-accent-gold)',
+          borderRadius: '0px',
+          boxShadow: '0 0 20px rgba(182, 164, 50, 0.6)',
+          animation: 'fadeIn 0.5s ease-out',
         }}
-      />
+      >
+        <div
+          style={{
+            width: 64,
+            height: 64,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'var(--color-accent-gold)',
+            border: '2px solid var(--color-accent-gold)',
+            borderRadius: '0px',
+            animation: 'beaverBounce 2s ease-in-out infinite',
+          }}
+        >
+          <img 
+            src="/assets/Icons/beaver_32.png" 
+            alt="Bóbr" 
+            style={{
+              width: '32px',
+              height: '32px',
+              filter: 'brightness(0) saturate(100%) invert(1)',
+            }}
+          />
+        </div>
+        
+        <div style={{ fontSize: 'var(--font-size-md)', textAlign: 'center' }}>
+          Loading...
+        </div>
+        
+        <div
+          style={{
+            width: 120,
+            height: 4,
+            background: 'var(--color-bg-tertiary)',
+            borderRadius: '0px',
+            overflow: 'hidden',
+            position: 'relative',
+          }}
+        >
+          <div
+            style={{
+              height: '100%',
+              background: 'var(--color-accent-gold)',
+              borderRadius: '0px',
+              animation: 'loadingProgress 2s ease-in-out infinite',
+            }}
+          />
+        </div>
+      </div>
+      
       <style>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: scale(0.9); }
+          to { opacity: 1; transform: scale(1); }
+        }
+        
+        @keyframes beaverBounce {
+          0%, 100% {
+            transform: scale(1) rotate(0deg);
+            box-shadow: 0 0 8px rgba(182, 164, 50, 0.5);
+          }
+          25% {
+            transform: scale(1.1) rotate(-5deg);
+            box-shadow: 0 0 16px rgba(182, 164, 50, 0.8);
+          }
+          50% {
+            transform: scale(1.15) rotate(0deg);
+            box-shadow: 0 0 20px rgba(182, 164, 50, 1);
+          }
+          75% {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 0 16px rgba(182, 164, 50, 0.8);
+          }
+        }
+        
+        @keyframes loadingProgress {
+          0% {
+            width: 0%;
+            opacity: 0.5;
+          }
+          50% {
+            width: 70%;
+            opacity: 1;
+          }
+          100% {
+            width: 100%;
+            opacity: 0.5;
+          }
         }
       `}</style>
     </div>
@@ -143,6 +242,7 @@ function AppContent() {
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [achievementNotifications, setAchievementNotifications] = useState<Achievement[]>([]);
+  const [debugLoading, setDebugLoading] = useState(false);
   const lastLevel = useRef<number | null>(null);
   const taskListRef = useRef<TaskListRef | null>(null);
 
@@ -154,6 +254,18 @@ function AppContent() {
       lastLevel.current = user.level;
     }
   }, [user]);
+
+  // Debug loading states
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Loading States:', {
+        userIsSaving,
+        habitsIsSaving,
+        debugLoading,
+        showLoading: userIsSaving || habitsIsSaving || debugLoading
+      });
+    }
+  }, [userIsSaving, habitsIsSaving, debugLoading]);
 
   // Check for achievement unlocks when user data, tasks, or habits change
   useEffect(() => {
@@ -235,6 +347,11 @@ function AppContent() {
     console.log('Achievement clicked:', achievement);
   };
 
+  const handleDebugLoading = (duration: number) => {
+    setDebugLoading(true);
+    setTimeout(() => setDebugLoading(false), duration);
+  };
+
   // Show user creation if no user exists
   if (!user) {
     return <UserCreation onUserCreated={() => {
@@ -311,7 +428,7 @@ function AppContent() {
 
   return (
     <div className={styles.app}>
-      {(userIsSaving || habitsIsSaving) && <SpinnerOverlay />}
+      {(userIsSaving || habitsIsSaving || debugLoading) && <SpinnerOverlay />}
       {showLevelUp && (
         <LevelUpModal
           level={user.level}
@@ -347,6 +464,27 @@ function AppContent() {
           >
             🏆 {achievements.filter(a => a.unlocked).length}/{achievements.length}
           </button>
+          {process.env.NODE_ENV === 'development' && (
+            <button 
+              style={{
+                background: 'var(--color-bg-secondary)',
+                border: '2px solid var(--color-accent-gold)',
+                color: 'var(--color-text-primary)',
+                padding: 'var(--spacing-xs) var(--spacing-sm)',
+                fontFamily: 'Press Start 2P, monospace',
+                fontSize: 'var(--font-size-xs)',
+                cursor: 'pointer',
+                marginLeft: 'var(--spacing-sm)',
+              }}
+              onClick={() => {
+                setDebugLoading(true);
+                setTimeout(() => setDebugLoading(false), 3000);
+              }}
+              title="Test Loading Screen (3s)"
+            >
+              🔄
+            </button>
+          )}
         </div>
       </header>
 
@@ -427,6 +565,14 @@ function AppContent() {
           onClose={() => handleAchievementNotificationClose(achievement.id)}
         />
       ))}
+
+      {/* Debug Component - Only in development */}
+      {process.env.NODE_ENV === 'development' && (
+        <LoadingDebug
+          onTriggerLoading={handleDebugLoading}
+          isVisible={true}
+        />
+      )}
     </div>
   );
 }

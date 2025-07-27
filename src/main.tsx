@@ -290,18 +290,116 @@ rootElement.innerHTML = `
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: #1a1a2e;
-    color: #ffffff;
+    background: #23211a;
+    color: #e8e5d2;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    font-family: 'Courier New', monospace;
+    font-family: 'Press Start 2P', monospace;
     text-align: center;
+    font-size: 12px;
   ">
-    <div style="font-size: 2rem; margin-bottom: 1rem;">🔄</div>
-    <div>Loading Scrypture...</div>
-    <div style="font-size: 0.8rem; color: #999; margin-top: 1rem;">Initializing app...</div>
+    <div style="
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      background: #2d2b22;
+      border: 4px solid #b6a432;
+      border-radius: 0px;
+      box-shadow: 0 0 20px rgba(182, 164, 50, 0.6);
+      animation: fadeIn 0.5s ease-out;
+    ">
+      <div style="
+        width: 64px;
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #b6a432;
+        border: 2px solid #b6a432;
+        border-radius: 0px;
+        animation: beaverBounce 2s ease-in-out infinite;
+      ">
+        <img 
+          src="/assets/Icons/beaver_32.png" 
+          alt="Bóbr" 
+          style="
+            width: 32px;
+            height: 32px;
+            filter: brightness(0) saturate(100%) invert(1);
+          "
+        />
+      </div>
+      
+      <div style="font-size: 12px; text-align: center; margin-bottom: 8px;">
+        Loading Scrypture...
+      </div>
+      
+      <div style="font-size: 8px; color: rgba(232, 229, 210, 0.8);">
+        Initializing app...
+      </div>
+      
+      <div style="
+        width: 120px;
+        height: 4px;
+        background: #1a1812;
+        border-radius: 0px;
+        overflow: hidden;
+        position: relative;
+        margin-top: 8px;
+      ">
+        <div style="
+          height: 100%;
+          background: #b6a432;
+          border-radius: 0px;
+          animation: loadingProgress 2s ease-in-out infinite;
+        "></div>
+      </div>
+    </div>
+    
+    <style>
+      @keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.9); }
+        to { opacity: 1; transform: scale(1); }
+      }
+      
+      @keyframes beaverBounce {
+        0%, 100% {
+          transform: scale(1) rotate(0deg);
+          box-shadow: 0 0 8px rgba(182, 164, 50, 0.5);
+        }
+        25% {
+          transform: scale(1.1) rotate(-5deg);
+          box-shadow: 0 0 16px rgba(182, 164, 50, 0.8);
+        }
+        50% {
+          transform: scale(1.15) rotate(0deg);
+          box-shadow: 0 0 20px rgba(182, 164, 50, 1);
+        }
+        75% {
+          transform: scale(1.1) rotate(5deg);
+          box-shadow: 0 0 16px rgba(182, 164, 50, 0.8);
+        }
+      }
+      
+      @keyframes loadingProgress {
+        0% {
+          width: 0%;
+          opacity: 0.5;
+        }
+        50% {
+          width: 70%;
+          opacity: 1;
+        }
+        100% {
+          width: 100%;
+          opacity: 0.5;
+        }
+      }
+    </style>
   </div>
 `;
 
@@ -323,35 +421,91 @@ try {
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: #1a1a2e;
-      color: #ffffff;
+      background: #23211a;
+      color: #e8e5d2;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      font-family: 'Courier New', monospace;
+      font-family: 'Press Start 2P', monospace;
       text-align: center;
-      padding: 2rem;
+      font-size: 12px;
     ">
-      <h1>🚨 Initialization Error</h1>
-      <p>Failed to load the app.</p>
-      <p style="font-size: 0.9em; color: #999;">
-        Error: ${error instanceof Error ? error.message : 'Unknown error'}
-      </p>
-      <button 
-        onclick="window.location.reload()"
-        style="
-          margin-top: 1rem;
-          padding: 0.5rem 1rem;
-          background: #667eea;
-          color: white;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-        "
-      >
-        Reload App
-      </button>
+      <div style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        padding: 16px;
+        background: #2d2b22;
+        border: 4px solid #7b3b3b;
+        border-radius: 0px;
+        box-shadow: 0 0 20px rgba(123, 59, 59, 0.6);
+        animation: fadeIn 0.5s ease-out;
+      ">
+        <div style="
+          width: 64px;
+          height: 64px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: #7b3b3b;
+          border: 2px solid #7b3b3b;
+          border-radius: 0px;
+          animation: errorPulse 2s ease-in-out infinite;
+        ">
+          <div style="font-size: 24px;">🚨</div>
+        </div>
+        
+        <div style="font-size: 12px; text-align: center; margin-bottom: 8px;">
+          Initialization Error
+        </div>
+        
+        <div style="font-size: 8px; color: rgba(232, 229, 210, 0.8); margin-bottom: 12px;">
+          Failed to load the app
+        </div>
+        
+        <div style="font-size: 6px; color: rgba(232, 229, 210, 0.6); margin-bottom: 12px; max-width: 300px; word-wrap: break-word;">
+          Error: ${error instanceof Error ? error.message : 'Unknown error'}
+        </div>
+        
+        <button 
+          onclick="window.location.reload()"
+          style="
+            padding: 8px 16px;
+            background: #b6a432;
+            color: #23211a;
+            border: none;
+            border-radius: 0px;
+            cursor: pointer;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 8px;
+            transition: all 0.2s ease;
+          "
+          onmouseover="this.style.transform='scale(1.05)'"
+          onmouseout="this.style.transform='scale(1)'"
+        >
+          Reload App
+        </button>
+      </div>
+      
+      <style>
+        @keyframes fadeIn {
+          from { opacity: 0; transform: scale(0.9); }
+          to { opacity: 1; transform: scale(1); }
+        }
+        
+        @keyframes errorPulse {
+          0%, 100% {
+            transform: scale(1);
+            box-shadow: 0 0 8px rgba(123, 59, 59, 0.5);
+          }
+          50% {
+            transform: scale(1.1);
+            box-shadow: 0 0 16px rgba(123, 59, 59, 0.8);
+          }
+        }
+      </style>
     </div>
   `;
 }
