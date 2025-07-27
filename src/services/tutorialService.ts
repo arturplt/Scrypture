@@ -107,9 +107,8 @@ class TutorialService {
    * Start the tutorial from the beginning
    */
   startTutorial(): void {
-    // Mark welcome step as complete immediately and move to next step
-    this.currentState.steps.welcome.completed = true;
-    this.currentState.currentStep = 'bobrIntroduction';
+    // Start with the welcome step
+    this.currentState.currentStep = 'welcome';
     this.saveTutorialState();
   }
 

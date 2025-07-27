@@ -127,7 +127,14 @@ function AppContent() {
   const { user, isSaving: userIsSaving } = useUser();
   const { habits, isSaving: habitsIsSaving } = useHabits();
   const { achievements, achievementProgress, checkAchievements, refreshAchievements } = useAchievements();
-  const { shouldShowStep, markStepComplete, startTutorial, skipTutorial } = useTutorial();
+  const {
+    shouldShowStep,
+    markStepComplete,
+    startTutorial,
+    skipTutorial,
+    isTutorialCompleted,
+    getCurrentStep,
+  } = useTutorial();
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [showTutorialCompletion, setShowTutorialCompletion] = useState(false);
   const [showStartHere, setShowStartHere] = useState(false);
@@ -230,21 +237,29 @@ function AppContent() {
 
   // Show user creation if no user exists
   if (!user) {
+    console.log('🔍 No user found, showing UserCreation');
     return <UserCreation onUserCreated={() => {
-      console.log('User created, starting tutorial');
+      console.log('✅ User created, starting tutorial');
       startTutorial();
     }} />;
   }
 
+  console.log('🔍 User exists:', user);
+  console.log('🔍 Tutorial completed:', isTutorialCompleted());
+  console.log('🔍 Current tutorial step:', getCurrentStep());
+  console.log('🔍 Should show welcome step:', shouldShowStep('welcome'));
+
   // Show welcome screen for new users
   if (shouldShowStep('welcome')) {
+    console.log('📱 Showing WelcomeScreen');
     return (
       <WelcomeScreen
         onContinue={() => {
+          console.log('➡️ Welcome screen continue clicked');
           markStepComplete('welcome');
         }}
         onSkip={() => {
-          console.log('Skipping entire tutorial from welcome screen');
+          console.log('⏭️ Skipping entire tutorial from welcome screen');
           skipTutorial();
         }}
       />
@@ -253,6 +268,7 @@ function AppContent() {
 
   // Show onboarding flow for new users
   if (shouldShowStep('bobrIntroduction')) {
+    console.log('📱 Showing BobrIntroduction');
     return (
       <BobrIntroduction
         user={user}
