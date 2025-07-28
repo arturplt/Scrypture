@@ -27,7 +27,8 @@ class BobrService {
    * Calculate dam progress based on completed tasks
    */
   calculateDamProgress(completedTasks: number): number {
-    return Math.min(100, completedTasks * this.DAM_PROGRESS_PER_TASK);
+    const progress = Math.max(0, completedTasks) * this.DAM_PROGRESS_PER_TASK;
+    return Math.min(100, progress);
   }
 
   /**
@@ -101,51 +102,51 @@ class BobrService {
     return {
       hatchling: {
         greeting: [
-          "*chirp chirp* Welcome, friend! I'm just a little hatchling, but together we'll build something amazing!",
-          "*tiny wing flutter* Hi there! I'm new to this world, just like your journey is beginning!",
-          "*excited chirping* Every task you complete helps me grow stronger!"
+          "*tiny wing flutter* Hi there! I'm new to this world, just like your journey is beginning! *chirp*",
+          "*gentle chirp* Hello there, friend! I'm just a little hatchling, but together we'll build something amazing!",
+          "*soft chirp* Welcome! I'm excited to learn and grow alongside you!"
         ],
         task_completion: [
-          "*happy chirp* You did it! Each task you finish is like a twig for our future dam!",
-          "*wing flutter* Amazing work! I can feel myself getting a little stronger!",
-          "*cheerful chirp* One step closer to building something magnificent together!"
+          "*happy chirp* You did it! {taskTitle} is complete! Each task you finish is like a twig for our future dam! Great work on {category}!",
+          "*wing flutter* Amazing work! {taskTitle} is done! I can feel myself getting a little stronger! Excellent {category} work!",
+          "*cheerful chirp* {taskTitle} completed! One step closer to building something magnificent together! Outstanding {category} work!"
         ],
         level_up: [
-          "*excited chirping* You've grown so much! I can feel my own evolution approaching!",
-          "*happy flutter* Your wisdom helps me understand the world better!",
-          "*proud chirp* Together, we're both becoming stronger!"
+          "*happy flutter* Your evolution helps me understand the world better!",
+          "*excited chirp* I'm evolving too! This partnership is truly special!",
+          "*joyful flutter* Look at us grow together! Your evolution inspires mine!"
         ],
         achievement: [
-          "*amazed chirp* Incredible! Your achievements inspire my own growth!",
-          "*excited flutter* You're amazing! Each achievement brings us closer to greatness!",
-          "*proud chirping* I knew you had it in you! You're helping me believe in myself too!"
+          "*admiring chirp* Your achievements are legendary! They inspire my own transformation!",
+          "*respectful flutter* Such mastery! You're becoming as wise as the ancient builders!",
+          "*proud chirp* Witnessing your success fills my heart with joy and determination!"
         ],
         motivation: [
+          "*gentle chirp* Every small step matters. We're in this journey together!",
           "*encouraging chirp* Don't give up! Even the mightiest dam starts with a single stick!",
-          "*supportive flutter* You've got this! I believe in you, just like you believe in me!",
-          "*gentle chirp* Every small step matters. We're in this journey together!"
+          "*supportive flutter* You've got this! I believe in you, just like you believe in me!"
         ],
         dam_progress: [
-          "*excited chirp* Look! Our dam is growing! Each task you complete adds another stick!",
-          "*proud flutter* The foundation is getting stronger with every task!",
-          "*happy chirp* Stick by stick, we're building something beautiful!"
+          "*happy chirp* Stick by stick, we're building something beautiful! Our dam is {damPercentage}% complete!",
+          "*proud flutter* The foundation is getting stronger with every task! We're at {damPercentage}%!",
+          "*satisfied chirp* Our dam is growing! Each task adds to our masterpiece! Currently {damPercentage}% complete!"
         ]
       },
       young: {
         greeting: [
-          "*confident chirp* Greetings! I've grown quite a bit since we started this journey together!",
-          "*mature flutter* Hello there! Look how much we've both accomplished!",
-          "*wise chirp* Welcome back! Our bond grows stronger with each passing day."
+          "*confident chirp* Hello there, friend! I'm growing stronger with each task we complete!",
+          "*proud flutter* Greetings, partner! Our dam is becoming quite impressive!",
+          "*wise chirp* Welcome back! I can feel our bond strengthening with every accomplishment!"
         ],
         task_completion: [
-          "*satisfied chirp* Excellent work! Our dam is becoming quite impressive!",
-          "*proud flutter* Your dedication shows in every completed task. Well done!",
-          "*wise chirp* Each accomplishment strengthens both our spirits and our dam!"
+          "*proud flutter* Excellent work! {taskTitle} completed! Your dedication shows in every completed task. Well done on {category}!",
+          "*wise chirp* {taskTitle} is done! Each accomplishment strengthens both our spirits and our dam! Great {category} work!",
+          "*confident chirp* {taskTitle} finished! Amazing progress! Together we're building something magnificent! Outstanding {category} work!"
         ],
         level_up: [
-          "*majestic chirp* Your growth fills me with pride! We're becoming quite the team!",
-          "*strong flutter* Your wisdom deepens mine. This partnership is truly special!",
-          "*noble chirp* Together, we're reaching heights I never imagined!"
+          "*strong flutter* Your growth deepens mine. This partnership is truly special!",
+          "*proud chirp* Witness our growth together! Your evolution inspires my own!",
+          "*wise flutter* Such remarkable growth! We're both becoming stronger!"
         ],
         achievement: [
           "*admiring chirp* Your achievements are legendary! They inspire my own transformation!",
@@ -155,12 +156,12 @@ class BobrService {
         motivation: [
           "*encouraging chirp* Remember, every master was once a beginner. Keep building!",
           "*supportive flutter* The strongest dams weather the fiercest storms. Stay strong!",
-          "*wise chirp* Your perseverance today becomes tomorrow's foundation."
+          "*wise chirp* Your perseverance today becomes tomorrow's foundation. You're becoming a master!"
         ],
         dam_progress: [
-          "*admiring chirp* Behold our progress! This dam is becoming a testament to your dedication!",
-          "*satisfied flutter* The structure grows more impressive with each addition!",
-          "*proud chirp* Our dam stands as proof of what determination can accomplish!"
+          "*admiring chirp* Behold our progress! This dam is becoming a testament to your dedication! We're at {damPercentage}%!",
+          "*satisfied flutter* The structure grows more impressive with each addition! Currently {damPercentage}% complete!",
+          "*proud chirp* Our dam stands as proof of what determination can accomplish! {damPercentage}% and growing!"
         ]
       },
       mature: {
@@ -170,14 +171,14 @@ class BobrService {
           "*wise, ancient tone* Hello there. Look upon what we have built - a legacy of perseverance."
         ],
         task_completion: [
-          "*satisfied rumble* Another masterpiece added to our grand design. Well done.",
-          "*noble acknowledgment* Your craftsmanship continues to astound me. Truly excellent work.",
-          "*ancient wisdom* Each task completed with such skill strengthens our eternal bond."
+          "*satisfied rumble* {taskTitle} completed! Another masterpiece added to our grand design. Well done on {category}.",
+          "*noble acknowledgment* {taskTitle} finished! Your craftsmanship continues to astound me. Truly excellent {category} work.",
+          "*ancient wisdom* {taskTitle} is done! Each task completed with such skill strengthens our eternal bond. Masterful {category} work."
         ],
         level_up: [
           "*profound chirp* Your ascension fills me with ancient pride. We have both transcended.",
-          "*majestic flutter* Witness how far we have traveled together! Truly remarkable growth.",
-          "*wise celebration* Your evolution mirrors my own. We are masters of our destiny!"
+          "*majestic flutter* Witness your ascension! How far we have traveled together!",
+          "*wise celebration* Your ascension mirrors my own evolution. We are masters of our destiny!"
         ],
         achievement: [
           "*deep reverence* Your achievements echo through the ages. You honor our partnership.",
@@ -187,12 +188,12 @@ class BobrService {
         motivation: [
           "*ancient wisdom* The path of the master is never complete. Continue building, always.",
           "*deep encouragement* Even in stillness, the wise beaver plans the next great work.",
-          "*eternal truth* Your strength has been tested and proven. Trust in your abilities."
+          "*eternal truth* Your strength has been tested and proven. Trust in your abilities, master."
         ],
         dam_progress: [
-          "*profound satisfaction* Behold our masterwork! This dam rivals those of legend!",
-          "*ancient pride* Generations will marvel at what we have built together!",
-          "*eternal legacy* Our dam stands eternal - a monument to dedication and friendship!"
+          "*profound satisfaction* Behold our masterwork! This dam rivals those of legend! {damPercentage}% complete!",
+          "*ancient pride* Generations will marvel at our masterwork! A {damPercentage}% masterpiece!",
+          "*eternal legacy* Our masterwork stands eternal - a monument to dedication and friendship! {damPercentage}% of perfection!"
         ]
       }
     };
@@ -234,8 +235,8 @@ class BobrService {
   private getFallbackMessage(stage: 'hatchling' | 'young' | 'mature'): BobrMessage {
     const stageGreetings = {
       hatchling: "*chirp* Hello there, friend!",
-      young: "*confident chirp* Greetings, partner!",
-      mature: "*wise chirp* Welcome, master builder."
+      young: "*confident chirp* Hello there, friend!",
+      mature: "*wise chirp* Hello there, friend!"
     };
 
     return {
@@ -268,12 +269,21 @@ class BobrService {
    * Get Bóbr state from storage
    */
   getBobrState(): BobrState {
-    const saved = storageService.getGenericItem<BobrState>(this.STORAGE_KEY);
-    return saved || {
-      stage: 'hatchling',
-      damProgress: 0,
-      evolutionHistory: []
-    };
+    try {
+      const saved = storageService.getGenericItem<BobrState>(this.STORAGE_KEY);
+      return saved || {
+        stage: 'hatchling',
+        damProgress: 0,
+        evolutionHistory: []
+      };
+    } catch (error) {
+      console.error('Failed to load Bóbr state from storage:', error);
+      return {
+        stage: 'hatchling',
+        damProgress: 0,
+        evolutionHistory: []
+      };
+    }
   }
 
   /**

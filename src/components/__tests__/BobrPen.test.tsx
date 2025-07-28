@@ -1,7 +1,11 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import BobrPen from '../BobrPen';
 import { User } from '../../types';
+import { UserProvider } from '../../hooks/useUser';
+import { TaskProvider } from '../../hooks/useTasks';
+import { HabitProvider } from '../../hooks/useHabits';
 
 // Mock CSS modules to return the class names
 jest.mock('../BobrPen.module.css', () => ({
@@ -40,6 +44,18 @@ jest.mock('../DamVisualization', () => {
   };
 });
 
+const renderWithProviders = (component: React.ReactElement) => {
+  return render(
+    <UserProvider>
+      <TaskProvider>
+        <HabitProvider>
+          {component}
+        </HabitProvider>
+      </TaskProvider>
+    </UserProvider>
+  );
+};
+
 describe('BobrPen', () => {
   const createMockUser = (level: number, damProgress: number = 50): User => ({
     id: 'test-user',
@@ -63,14 +79,14 @@ describe('BobrPen', () => {
 
   describe('Initial render', () => {
     it('should render the pen header', () => {
-      render(<BobrPen {...defaultProps} />);
+      renderWithProviders(<BobrPen {...defaultProps} />);
       
       expect(screen.getByText('🏡')).toBeInTheDocument();
       expect(screen.getByText('Dam & Sanctuary')).toBeInTheDocument();
     });
 
     it('should render collapsed by default', () => {
-      render(<BobrPen {...defaultProps} />);
+      renderWithProviders(<BobrPen {...defaultProps} />);
       
       const collapseButton = screen.getByTitle('Expand');
       expect(collapseButton).toBeInTheDocument();
@@ -78,7 +94,7 @@ describe('BobrPen', () => {
     });
 
     it('should not show content when collapsed', () => {
-      render(<BobrPen {...defaultProps} />);
+      renderWithProviders(<BobrPen {...defaultProps} />);
       
       expect(screen.queryByTestId('bobr-companion')).not.toBeInTheDocument();
       expect(screen.queryByTestId('dam-visualization')).not.toBeInTheDocument();
@@ -87,7 +103,7 @@ describe('BobrPen', () => {
 
   describe('Expand/Collapse functionality', () => {
     it('should expand when collapse button is clicked', () => {
-      render(<BobrPen {...defaultProps} />);
+      renderWithProviders(<BobrPen {...defaultProps} />);
       
       const collapseButton = screen.getByTitle('Expand');
       fireEvent.click(collapseButton);
@@ -97,7 +113,7 @@ describe('BobrPen', () => {
     });
 
     it('should show content when expanded', () => {
-      render(<BobrPen {...defaultProps} />);
+      renderWithProviders(<BobrPen {...defaultProps} />);
       
       fireEvent.click(screen.getByTitle('Expand'));
       
@@ -106,7 +122,7 @@ describe('BobrPen', () => {
     });
 
     it('should collapse when collapse button is clicked again', () => {
-      render(<BobrPen {...defaultProps} />);
+      renderWithProviders(<BobrPen {...defaultProps} />);
       
       // Expand first
       fireEvent.click(screen.getByTitle('Expand'));
@@ -121,7 +137,7 @@ describe('BobrPen', () => {
 
   describe('Stage progression', () => {
     it('should show hatchling stage for levels 1-3', () => {
-      render(<BobrPen {...defaultProps} user={createMockUser(2)} />);
+      renderWithProviders(<BobrPen {...defaultProps} user={createMockUser(2)} />);
       
       fireEvent.click(screen.getByTitle('Expand'));
       
@@ -129,7 +145,7 @@ describe('BobrPen', () => {
     });
 
     it('should show young stage for levels 4-7', () => {
-      render(<BobrPen {...defaultProps} user={createMockUser(5)} />);
+      renderWithProviders(<BobrPen {...defaultProps} user={createMockUser(5)} />);
       
       fireEvent.click(screen.getByTitle('Expand'));
       
@@ -137,7 +153,7 @@ describe('BobrPen', () => {
     });
 
     it('should show mature stage for levels 8+', () => {
-      render(<BobrPen {...defaultProps} user={createMockUser(10)} />);
+      renderWithProviders(<BobrPen {...defaultProps} user={createMockUser(10)} />);
       
       fireEvent.click(screen.getByTitle('Expand'));
       
@@ -145,7 +161,7 @@ describe('BobrPen', () => {
     });
 
     it('should show correct number of active stage dots', () => {
-      render(<BobrPen {...defaultProps} user={createMockUser(5)} />);
+      renderWithProviders(<BobrPen {...defaultProps} user={createMockUser(5)} />);
       
       fireEvent.click(screen.getByTitle('Expand'));
       
@@ -161,7 +177,7 @@ describe('BobrPen', () => {
 
   describe('Evolution progress', () => {
     it('should show next evolution level for hatchling', () => {
-      render(<BobrPen {...defaultProps} user={createMockUser(2)} />);
+      renderWithProviders(<BobrPen {...defaultProps} user={createMockUser(2)} />);
       
       fireEvent.click(screen.getByTitle('Expand'));
       
@@ -169,7 +185,7 @@ describe('BobrPen', () => {
     });
 
     it('should show next evolution level for young', () => {
-      render(<BobrPen {...defaultProps} user={createMockUser(6)} />);
+      renderWithProviders(<BobrPen {...defaultProps} user={createMockUser(6)} />);
       
       fireEvent.click(screen.getByTitle('Expand'));
       
@@ -177,7 +193,7 @@ describe('BobrPen', () => {
     });
 
     it('should not show evolution progress for mature stage', () => {
-      render(<BobrPen {...defaultProps} user={createMockUser(10)} />);
+      renderWithProviders(<BobrPen {...defaultProps} user={createMockUser(10)} />);
       
       fireEvent.click(screen.getByTitle('Expand'));
       
@@ -187,7 +203,7 @@ describe('BobrPen', () => {
 
   describe('View switching', () => {
     beforeEach(() => {
-      render(<BobrPen {...defaultProps} />);
+      renderWithProviders(<BobrPen {...defaultProps} />);
       fireEvent.click(screen.getByTitle('Expand'));
     });
 
@@ -233,7 +249,7 @@ describe('BobrPen', () => {
   describe('Props passing', () => {
     it('should pass correct props to BobrCompanion', () => {
       const user = createMockUser(3);
-      render(<BobrPen user={user} completedTasksCount={10} />);
+      renderWithProviders(<BobrPen user={user} completedTasksCount={10} />);
       
       fireEvent.click(screen.getByTitle('Expand'));
       
@@ -244,7 +260,7 @@ describe('BobrPen', () => {
 
     it('should pass correct props to DamVisualization', () => {
       const user = createMockUser(5, 75);
-      render(<BobrPen user={user} completedTasksCount={15} />);
+      renderWithProviders(<BobrPen user={user} completedTasksCount={15} />);
       
       fireEvent.click(screen.getByTitle('Expand'));
       fireEvent.click(screen.getByText('Dam'));
@@ -257,7 +273,7 @@ describe('BobrPen', () => {
 
   describe('Custom className', () => {
     it('should apply custom className', () => {
-      const { container } = render(
+      const { container } = renderWithProviders(
         <BobrPen {...defaultProps} className="custom-class" />
       );
       
@@ -265,7 +281,7 @@ describe('BobrPen', () => {
     });
 
     it('should work without custom className', () => {
-      const { container } = render(<BobrPen {...defaultProps} />);
+      const { container } = renderWithProviders(<BobrPen {...defaultProps} />);
       
       expect(container.firstChild).toHaveClass('bobrPen');
     });
@@ -273,7 +289,7 @@ describe('BobrPen', () => {
 
   describe('Accessibility', () => {
     it('should have proper button titles', () => {
-      render(<BobrPen {...defaultProps} />);
+      renderWithProviders(<BobrPen {...defaultProps} />);
       
       expect(screen.getByTitle('Expand')).toBeInTheDocument();
       
@@ -282,7 +298,7 @@ describe('BobrPen', () => {
     });
 
     it('should have proper stage dot titles', () => {
-      render(<BobrPen {...defaultProps} user={createMockUser(5)} />);
+      renderWithProviders(<BobrPen {...defaultProps} user={createMockUser(5)} />);
       
       fireEvent.click(screen.getByTitle('Expand'));
       
@@ -292,7 +308,7 @@ describe('BobrPen', () => {
     });
 
     it('should support keyboard navigation', () => {
-      render(<BobrPen {...defaultProps} />);
+      renderWithProviders(<BobrPen {...defaultProps} />);
       
       const collapseButton = screen.getByTitle('Expand');
       collapseButton.focus();
@@ -302,7 +318,7 @@ describe('BobrPen', () => {
 
   describe('Edge cases', () => {
     it('should handle level 0 correctly', () => {
-      render(<BobrPen {...defaultProps} user={createMockUser(0)} />);
+      renderWithProviders(<BobrPen {...defaultProps} user={createMockUser(0)} />);
       
       fireEvent.click(screen.getByTitle('Expand'));
       
@@ -311,7 +327,7 @@ describe('BobrPen', () => {
     });
 
     it('should handle very high levels correctly', () => {
-      render(<BobrPen {...defaultProps} user={createMockUser(50)} />);
+      renderWithProviders(<BobrPen {...defaultProps} user={createMockUser(50)} />);
       
       fireEvent.click(screen.getByTitle('Expand'));
       
@@ -320,7 +336,7 @@ describe('BobrPen', () => {
     });
 
     it('should handle zero completed tasks', () => {
-      render(<BobrPen {...defaultProps} completedTasksCount={0} />);
+      renderWithProviders(<BobrPen {...defaultProps} completedTasksCount={0} />);
       
       fireEvent.click(screen.getByTitle('Expand'));
       

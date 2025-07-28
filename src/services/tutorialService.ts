@@ -107,8 +107,13 @@ class TutorialService {
    * Start the tutorial from the beginning
    */
   startTutorial(): void {
-    // Start with the welcome step
+    // Start with the welcome step and mark it as completed
     this.currentState.currentStep = 'welcome';
+    this.currentState.steps.welcome.completed = true;
+    
+    // Move to the next step
+    this.currentState.currentStep = this.getNextStep('welcome');
+    
     this.saveTutorialState();
   }
 
@@ -184,10 +189,15 @@ class TutorialService {
    * Reset the tutorial (for testing or re-onboarding)
    */
   resetTutorial(): void {
+    // Reset all steps to incomplete state
+    Object.keys(this.currentState.steps).forEach(stepId => {
+      this.currentState.steps[stepId].completed = false;
+    });
+    
     this.currentState = {
       completed: false,
       currentStep: null,
-      steps: { ...this.tutorialSteps },
+      steps: this.currentState.steps,
       completedAt: undefined
     };
     this.saveTutorialState();

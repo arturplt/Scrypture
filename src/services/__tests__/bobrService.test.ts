@@ -88,7 +88,7 @@ describe('bobrService', () => {
 
       expect(result.user.bobrStage).toBe('hatchling'); // Still hatchling at level 2
       expect(result.evolved).toBe(false);
-      expect(result.damProgressChanged).toBe(true);
+      expect(result.damProgressChanged).toBe(false); // 5 tasks * 5% = 25%, same as current
       expect(result.user.damProgress).toBe(25);
     });
 
@@ -132,6 +132,9 @@ describe('bobrService', () => {
     it('should update user timestamp when changes occur', () => {
       const user = createMockUser({ level: 5, bobrStage: 'hatchling' });
       const beforeUpdate = new Date();
+      
+      // Add a small delay to ensure timestamp difference
+      jest.advanceTimersByTime(1);
       
       const result = bobrService.updateBobrStatus(user, 10);
       

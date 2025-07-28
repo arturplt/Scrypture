@@ -467,9 +467,10 @@ export const FirstTaskWizard: React.FC<FirstTaskWizardProps> = ({
         />
       </div>
       <div className={styles.inputGroup}>
-        <label className={styles.label}>Task Title</label>
+        <label className={styles.label} htmlFor="task-title-input">Task Title</label>
         <div className={styles.titleInputContainer}>
           <input
+            id="task-title-input"
             type="text"
             className={styles.input}
             value={taskTitle}

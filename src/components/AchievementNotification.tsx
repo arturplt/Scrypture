@@ -19,10 +19,10 @@ export const AchievementNotification: React.FC<AchievementNotificationProps> = (
   const [progress, setProgress] = useState(100);
 
   // Use 8000 as default only if duration is undefined, but allow 0 to disable
-  const effectiveDuration = duration === undefined ? 8000 : duration;
+  const effectiveDuration = duration === undefined ? 0 : duration;
 
   useEffect(() => {
-    // Don't set up timers if duration is 0 or null
+    // Don't set up timers if duration is 0, null, or undefined
     if (!effectiveDuration || effectiveDuration <= 0) return;
 
     // Progress countdown

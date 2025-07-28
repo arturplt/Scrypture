@@ -62,8 +62,20 @@ const BobrCompanion: React.FC<BobrCompanionProps> = ({
 
   // Show greeting message on mount
   useEffect(() => {
-    const greetingMessage = bobrService.generateMessage('greeting', user.bobrStage);
-    showMessage(greetingMessage);
+    try {
+      const greetingMessage = bobrService.generateMessage('greeting', user.bobrStage);
+      showMessage(greetingMessage);
+    } catch (error) {
+      console.error('Failed to generate greeting message:', error);
+      // Show a fallback message
+      showMessage({
+        id: 'fallback-greeting',
+        message: 'Hello, I am Bóbr!',
+        type: 'greeting',
+        stage: user.bobrStage,
+        animation: 'idle'
+      });
+    }
   }, [user.bobrStage, showMessage]);
 
   // Show evolution notification

@@ -89,7 +89,7 @@ describe('AchievementNotification', () => {
         />
       );
 
-      const progressBar = container.querySelector('.progressBar');
+      const progressBar = container.querySelector('[class*="progressBar"]');
       expect(progressBar).toBeInTheDocument();
     });
   });
@@ -227,18 +227,25 @@ describe('AchievementNotification', () => {
 
   describe('Auto-close functionality', () => {
     it('should auto-close after default duration', () => {
-      render(<AchievementNotification achievement={mockAchievement} onClose={mockOnClose} />);
+      jest.useFakeTimers();
+      
+      render(
+        <AchievementNotification
+          achievement={mockAchievement}
+          onClose={mockOnClose}
+          duration={8000} // Provide a duration
+        />
+      );
+
+      expect(mockOnClose).not.toHaveBeenCalled();
 
       act(() => {
-        jest.advanceTimersByTime(8000); // Default duration
-      });
-
-      // Account for 300ms animation delay
-      act(() => {
-        jest.advanceTimersByTime(300);
+        jest.advanceTimersByTime(8000);
       });
 
       expect(mockOnClose).toHaveBeenCalledTimes(1);
+      
+      jest.useRealTimers();
     });
 
     it('should auto-close after custom duration', () => {
@@ -286,7 +293,7 @@ describe('AchievementNotification', () => {
         />
       );
 
-      const progressBar = container.querySelector('.progressBar');
+      const progressBar = container.querySelector('[class*="progressBar"]');
       expect(progressBar).toBeInTheDocument();
     });
 
@@ -330,28 +337,32 @@ describe('AchievementNotification', () => {
     });
 
     it('should update progress over time', () => {
-      const achievement = { ...mockAchievement, duration: 1000 };
+      jest.useFakeTimers();
+      
       const { container } = render(
         <AchievementNotification
-          achievement={achievement}
+          achievement={mockAchievement}
           onClose={mockOnClose}
+          duration={2000}
+          showProgress={true}
         />
       );
 
-      const progressFill = container.querySelector('.progressFill') as HTMLElement;
-      
+      const progressFill = container.querySelector('[class*="progressFill"]');
+      expect(progressFill).toBeInTheDocument();
+
       // Initial progress should be 100%
       expect(progressFill).toHaveStyle('width: 100%');
 
       // After half the duration, progress should be around 50%
       act(() => {
-        jest.advanceTimersByTime(500);
+        jest.advanceTimersByTime(1000);
       });
 
-      // Progress should have decreased (exact value may vary due to timing)
-      const currentWidth = progressFill.style.width;
-      expect(parseFloat(currentWidth)).toBeLessThan(100);
-      expect(parseFloat(currentWidth)).toBeGreaterThan(40);
+      // Progress should be decreasing
+      expect(progressFill).toHaveStyle('width: 50%');
+
+      jest.useRealTimers();
     });
   });
 

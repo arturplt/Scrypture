@@ -1,31 +1,23 @@
 import React from 'react';
-import { render, act, waitFor, screen } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import { useAchievements, AchievementProvider } from '../useAchievements';
+import { UserProvider } from '../useUser';
 import { achievementService } from '../../services/achievementService';
-import { Achievement, AchievementProgress, Task, Habit, User } from '../../types';
+import { Achievement, AchievementProgress, User, Task, Habit } from '../../types';
 
 // Mock the achievement service
-jest.mock('../../services/achievementService', () => ({
-  achievementService: {
-    getAchievements: jest.fn(),
-    getAllProgress: jest.fn(),
-    checkAchievements: jest.fn(),
-    getAchievementProgress: jest.fn(),
-    resetAchievements: jest.fn(),
-  },
-}));
-
+jest.mock('../../services/achievementService');
 const mockAchievementService = achievementService as jest.Mocked<typeof achievementService>;
 
-// Test component to access the hook
 const TestComponent = () => {
-  const {
-    achievements,
-    achievementProgress,
-    checkAchievements,
+  const { 
+    achievements, 
+    achievementProgress, 
+    checkAchievements, 
     getAchievementProgress,
     isSaving,
-    lastSaved,
+    lastSaved
   } = useAchievements();
 
   const mockUser: User = {
@@ -37,36 +29,14 @@ const TestComponent = () => {
     mind: 10,
     soul: 8,
     achievements: [],
-    bobrStage: 'hatchling' as const,
+    bobrStage: 'hatchling',
     damProgress: 50,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
 
-  const mockTasks: Task[] = [
-    {
-      id: 'task1',
-      title: 'Test Task',
-      description: 'A test task',
-      completed: true,
-      categories: ['work'],
-      priority: 'medium',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-  ];
-
-  const mockHabits: Habit[] = [
-    {
-      id: 'habit1',
-      name: 'Test Habit',
-      description: 'A test habit',
-      categories: ['health'],
-      targetFrequency: 'daily',
-      createdAt: new Date(),
-      streak: 5,
-    },
-  ];
+  const mockTasks: Task[] = [];
+  const mockHabits: Habit[] = [];
 
   return (
     <div>
@@ -92,9 +62,11 @@ const TestComponent = () => {
 
 const renderWithProvider = (component: React.ReactElement) => {
   return render(
-    <AchievementProvider>
-      {component}
-    </AchievementProvider>
+    <UserProvider>
+      <AchievementProvider>
+        {component}
+      </AchievementProvider>
+    </UserProvider>
   );
 };
 

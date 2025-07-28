@@ -1,8 +1,10 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import { StartHereModal } from '../StartHereModal';
 import { TaskProvider } from '../../hooks/useTasks';
 import { UserProvider } from '../../hooks/useUser';
+import { HabitProvider } from '../../hooks/useHabits';
 
 // Mock localStorage
 const localStorageMock = {
@@ -18,7 +20,9 @@ const renderWithProviders = (component: React.ReactElement) => {
   return render(
     <UserProvider>
       <TaskProvider>
-        {component}
+        <HabitProvider>
+          {component}
+        </HabitProvider>
       </TaskProvider>
     </UserProvider>
   );

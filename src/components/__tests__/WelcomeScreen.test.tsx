@@ -93,11 +93,15 @@ describe('WelcomeScreen', () => {
         <WelcomeScreen onContinue={mockOnContinue} onSkip={mockOnSkip} />
       );
 
-      const modal = container.querySelector('.modal');
+      const overlay = container.querySelector('[class*="overlay"]');
+      expect(overlay).toBeInTheDocument();
+
+      // Create a click event and spy on stopPropagation
       const clickEvent = new MouseEvent('click', { bubbles: true });
       const stopPropagationSpy = jest.spyOn(clickEvent, 'stopPropagation');
 
-      modal?.dispatchEvent(clickEvent);
+      // Dispatch the event on the overlay
+      overlay?.dispatchEvent(clickEvent);
 
       expect(stopPropagationSpy).toHaveBeenCalled();
     });
