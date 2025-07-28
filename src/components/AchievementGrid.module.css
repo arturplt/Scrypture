@@ -43,14 +43,14 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 14px;
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
 }
 
 .refreshButton {
   background: none;
   border: none;
-  font-size: 18px;
+  font-size: var(--font-size-md);
   cursor: pointer;
   padding: 4px;
   border-radius: 4px;

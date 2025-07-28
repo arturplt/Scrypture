@@ -15,7 +15,7 @@
 
 /* Bóbr Character */
 .bobrCharacter {
-  font-size: 4rem;
+  font-size: var(--font-size-xl);
   margin-bottom: var(--spacing-xs);
   display: flex;
   align-items: center;
@@ -69,17 +69,17 @@
 
 /* Evolution Stages */
 .hatchling .bobrCharacter {
-  font-size: 3rem;
+  font-size: var(--font-size-lg);
   opacity: 0.9;
 }
 
 .young .bobrCharacter {
-  font-size: 4rem;
+  font-size: var(--font-size-xl);
   opacity: 0.95;
 }
 
 .mature .bobrCharacter {
-  font-size: 5rem;
+  font-size: var(--font-size-xl);
   opacity: 1;
   text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
 }
@@ -280,19 +280,19 @@
   }
   
   .bobrCharacter {
-    font-size: 3rem;
+    font-size: var(--font-size-lg);
   }
   
   .hatchling .bobrCharacter {
-    font-size: 2.5rem;
+    font-size: var(--font-size-md);
   }
   
   .young .bobrCharacter {
-    font-size: 3rem;
+    font-size: var(--font-size-lg);
   }
   
   .mature .bobrCharacter {
-    font-size: 4rem;
+    font-size: var(--font-size-xl);
   }
   
   .messageDisplay {
@@ -301,6 +301,6 @@
   }
   
   .message {
-    font-size: 0.7rem;
+    font-size: var(--font-size-sm);
   }
 } 

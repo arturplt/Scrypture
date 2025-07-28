@@ -50,7 +50,7 @@
 
 /* Fireworks */
 .fireworks {
-  font-size: 48px;
+  font-size: var(--font-size-xl);
   margin-bottom: var(--spacing-lg);
   animation: fireworksFloat 3s ease-in-out infinite;
   display: flex;
@@ -286,7 +286,7 @@
   }
   
   .fireworks {
-    font-size: 36px;
+    font-size: var(--font-size-lg);
     gap: var(--spacing-md);
   }
   
@@ -316,6 +316,6 @@
   }
   
   .fireworks {
-    font-size: 28px;
+    font-size: var(--font-size-md);
   }
 } 

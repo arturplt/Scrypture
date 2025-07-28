@@ -13,7 +13,7 @@
 
 .title {
   color: #ffffff;
-  font-size: 28px;
+  font-size: var(--font-size-xl);
   font-weight: 700;
   margin: 0;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
@@ -26,7 +26,7 @@
 
 .frequencyTitle {
   color: #ffffff;
-  font-size: 22px;
+  font-size: var(--font-size-lg);
   font-weight: 600;
   margin: 0 0 16px 0;
   display: flex;
@@ -48,7 +48,7 @@
 
 .categoryTitle {
   color: #ffffff;
-  font-size: 18px;
+  font-size: var(--font-size-md);
   font-weight: 600;
   margin: 0 0 8px 0;
   display: flex;
@@ -64,7 +64,7 @@
 }
 
 .categoryIcon {
-  font-size: 16px;
+  font-size: var(--font-size-md);
   opacity: 0.8;
 }
 
@@ -74,7 +74,7 @@
 
 .sectionTitle {
   color: #ffffff;
-  font-size: 20px;
+  font-size: var(--font-size-lg);
   font-weight: 600;
   margin: 0 0 16px 0;
   display: flex;
@@ -93,7 +93,7 @@
   transition: all var(--transition-normal, 0.2s ease);
   justify-content: space-between;
   font-family: 'Press Start 2P', monospace;
-  font-size: 14px;
+  font-size: var(--font-size-sm);
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
@@ -110,7 +110,7 @@
 }
 
 .expandIcon {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   transition: transform var(--transition-normal, 0.2s ease);
   color: var(--color-accent-gold, #f7d026);
 }
@@ -138,7 +138,7 @@
 }
 
 .frequencyIcon {
-  font-size: 18px;
+  font-size: var(--font-size-md);
   opacity: 0.8;
 }
 
@@ -160,7 +160,7 @@
 }
 
 .emptyIcon {
-  font-size: 48px;
+  font-size: var(--font-size-xl);
   margin-bottom: var(--spacing-md);
   opacity: 0.7;
 }
@@ -200,16 +200,16 @@
   }
   
   .title {
-    font-size: 24px;
+    font-size: var(--font-size-xl);
     text-align: center;
   }
   
   .frequencyTitle {
-    font-size: 18px;
+    font-size: var(--font-size-lg);
   }
   
   .categoryTitle {
-    font-size: 16px;
+    font-size: var(--font-size-md);
   }
   
   .habitGrid {
@@ -223,15 +223,15 @@
   }
   
   .emptyIcon {
-    font-size: 48px;
+    font-size: var(--font-size-xl);
   }
   
   .emptyState h3 {
-    font-size: 20px;
+    font-size: var(--font-size-lg);
   }
   
   .emptyState p {
-    font-size: 14px;
+    font-size: var(--font-size-sm);
   }
   
   .modal {

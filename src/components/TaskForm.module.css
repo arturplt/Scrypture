@@ -1432,7 +1432,7 @@
 .coreAttributePlusOne {
   color: var(--color-accent-gold);
   font-weight: bold;
-  font-size: 1.2em;
+  font-size: var(--font-size-md);
   margin-left: 0.25em;
   font-family: 'Press Start 2P', monospace;
 }
@@ -1440,7 +1440,7 @@
 .coreAttributeXpLabel {
   color: var(--color-accent-gold);
   font-weight: bold;
-  font-size: 1.1em;
+  font-size: var(--font-size-sm);
   margin-left: var(--spacing-lg);
   align-self: center;
   font-family: 'Press Start 2P', monospace;
@@ -1702,7 +1702,7 @@
   position: absolute;
   top: -4px;
   right: -4px;
-  font-size: 8px;
+  font-size: var(--font-size-xs);
   background: var(--color-bg-primary);
   border-radius: 50%;
   width: 12px;
@@ -1731,7 +1731,7 @@
   .removeCategoryButton {
     width: 14px;
     height: 14px;
-    font-size: 8px;
+    font-size: var(--font-size-xs);
   }
 }
 

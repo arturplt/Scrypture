@@ -84,12 +84,12 @@
   --border-width-normal: 4px;
   --border-width-thick: 8px;
 
-  /* Pixel Art Font Sizes */
-  --font-size-xs: 8px; /* 8px - smallest */
-  --font-size-sm: 10px; /* 10px */
-  --font-size-md: 12px; /* 12px - base */
-  --font-size-lg: 14px; /* 14px */
-  --font-size-xl: 16px; /* 16px - largest */
+  /* Pixel Art Font Sizes - Standardized */
+  --font-size-xs: 8px;   /* 8px - smallest text, labels, badges */
+  --font-size-sm: 14px;  /* 14px - body text, descriptions */
+  --font-size-md: 16px;  /* 16px - headings, important text */
+  --font-size-lg: 20px;  /* 20px - section titles, emphasis */
+  --font-size-xl: 24px;  /* 24px - main titles, large emphasis */
 
   /* Shadows & Effects */
   --shadow-inset:

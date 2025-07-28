@@ -113,7 +113,7 @@
 }
 
 .taskIcon {
-  font-size: 64px;
+  font-size: var(--font-size-xl);
   animation: bounce 2s infinite;
 }
 
@@ -151,7 +151,7 @@
 }
 
 .tipIcon, .celebrationIcon {
-  font-size: 16px;
+  font-size: var(--font-size-md);
   flex-shrink: 0;
 }
 
@@ -261,17 +261,17 @@
 }
 
 .categoryIcon {
-  font-size: 24px;
+  font-size: var(--font-size-xl);
 }
 
 .categoryName {
-  font-size: 8px;
+  font-size: var(--font-size-xs);
   color: var(--color-text-primary);
   text-align: center;
 }
 
 .categoryDescription {
-  font-size: 6px;
+  font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
   text-align: center;
   line-height: 1.4;
@@ -604,6 +604,6 @@
   }
   
   .taskIcon {
-    font-size: 48px;
+    font-size: var(--font-size-xl);
   }
 } 

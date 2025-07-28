@@ -225,7 +225,7 @@
 }
 
 .icon32x32 {
-  font-size: 24px;
+  font-size: var(--font-size-xl);
   line-height: 1;
   display: flex;
   align-items: center;
@@ -433,7 +433,7 @@
   }
 
   .icon32x32 {
-    font-size: 20px;
+    font-size: var(--font-size-lg);
     width: 28px;
     height: 28px;
   }

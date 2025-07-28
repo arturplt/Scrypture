@@ -160,7 +160,7 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 3rem;
+  font-size: var(--font-size-xl);
   animation: celebrate 2s ease-in-out;
   z-index: 20;
   pointer-events: none;
@@ -207,7 +207,7 @@
   }
   
   .completionCelebration {
-    font-size: 2rem;
+    font-size: var(--font-size-lg);
   }
 }
 
