@@ -333,20 +333,4 @@ select:focus,
   }
 }
 
-/* Emergency fallback for white screen issues */
-@media screen and (max-width: 768px) {
-  /* Force background color on all elements to prevent white screen */
-  * {
-    background-color: var(--color-bg-primary) !important;
-  }
-  
-  /* Ensure text is visible */
-  body, #root {
-    color: var(--color-text-primary) !important;
-  }
-  
-  /* Disable any potential white backgrounds */
-  div, section, main, article {
-    background-color: var(--color-bg-primary) !important;
-  }
-}
+
