@@ -15,18 +15,29 @@ jest.mock('../../services/categoryService', () => ({
 }));
 
 // Mock the useHabits hook
-jest.mock('../../hooks/useHabits', () => ({
-  useHabits: jest.fn(),
-}));
+jest.mock('../../hooks/useHabits', () => {
+  const actual = jest.requireActual('../../hooks/useHabits');
+  return {
+    ...actual,
+    default: actual.default,
+    useHabits: jest.fn(),
+    HabitProvider: actual.HabitProvider,
+  };
+});
 
 // Mock the useUser hook
-jest.mock('../../hooks/useUser', () => ({
-  useUser: jest.fn(() => ({
-    user: { id: '1', name: 'Test User' },
-    updateUser: jest.fn(),
-  })),
-  UserProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-}));
+jest.mock('../../hooks/useUser', () => {
+  const actual = jest.requireActual('../../hooks/useUser');
+  return {
+    ...actual,
+    default: actual.default,
+    useUser: jest.fn(() => ({
+      user: { id: '1', name: 'Test User' },
+      updateUser: jest.fn(),
+    })),
+    UserProvider: actual.UserProvider,
+  };
+});
 
 const mockUseHabits = useHabits as jest.MockedFunction<typeof useHabits>;
 

@@ -5,9 +5,15 @@ import { useHabits } from '../../hooks/useHabits';
 import { Habit } from '../../types';
 
 // Mock the hooks
-jest.mock('../../hooks/useHabits', () => ({
-  useHabits: jest.fn(),
-}));
+jest.mock('../../hooks/useHabits', () => {
+  const actual = jest.requireActual('../../hooks/useHabits');
+  return {
+    ...actual,
+    default: actual.default,
+    useHabits: jest.fn(),
+    HabitProvider: actual.HabitProvider,
+  };
+});
 
 // Mock the AutoSaveIndicator component
 jest.mock('../AutoSaveIndicator', () => ({

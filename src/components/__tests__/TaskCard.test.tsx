@@ -1,17 +1,22 @@
+jest.mock('../../hooks/useTasks', () => {
+  const actual = jest.requireActual('../../hooks/useTasks');
+  return {
+    ...actual,
+    default: actual.default,
+    useTasks: () => ({
+      toggleTask: jest.fn(),
+      bringTaskToTop: jest.fn(),
+      isSaving: false,
+    }),
+    TaskProvider: actual.TaskProvider,
+  };
+});
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { TaskCard } from '../TaskCard';
 import { Task } from '../../types';
-
-// Mock the useTasks hook
-jest.mock('../../hooks/useTasks', () => ({
-  useTasks: () => ({
-    toggleTask: jest.fn(),
-    bringTaskToTop: jest.fn(),
-    isSaving: false,
-  }),
-}));
 
 // Mock the AutoSaveIndicator component
 jest.mock('../AutoSaveIndicator', () => ({

@@ -3,9 +3,81 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import BobrPen from '../BobrPen';
 import { User } from '../../types';
-import { UserProvider } from '../../hooks/useUser';
-import { TaskProvider } from '../../hooks/useTasks';
-import { HabitProvider } from '../../hooks/useHabits';
+import { UserProvider, useUser } from '../../hooks/useUser';
+import { TaskProvider, useTasks } from '../../hooks/useTasks';
+import { HabitProvider, useHabits } from '../../hooks/useHabits';
+
+// Mock the hooks but preserve the providers
+jest.mock('../../hooks/useUser', () => {
+  const actual = jest.requireActual('../../hooks/useUser');
+  return {
+    ...actual,
+    useUser: jest.fn(),
+    UserProvider: actual.UserProvider,
+  };
+});
+
+jest.mock('../../hooks/useTasks', () => {
+  const actual = jest.requireActual('../../hooks/useTasks');
+  return {
+    ...actual,
+    useTasks: jest.fn(),
+    TaskProvider: actual.TaskProvider,
+  };
+});
+
+jest.mock('../../hooks/useHabits', () => {
+  const actual = jest.requireActual('../../hooks/useHabits');
+  return {
+    ...actual,
+    useHabits: jest.fn(),
+    HabitProvider: actual.HabitProvider,
+  };
+});
+
+// Mock the services that providers depend on
+jest.mock('../../services/userService', () => ({
+  userService: {
+    getUser: jest.fn(() => ({
+      id: 'test-user',
+      name: 'Test User',
+      level: 1,
+      experience: 100,
+      body: 10,
+      mind: 15,
+      soul: 8,
+      achievements: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      bobrStage: 'hatchling',
+      damProgress: 50,
+    })),
+    saveUser: jest.fn(() => true),
+    updateUser: jest.fn(() => true),
+    addExperience: jest.fn(() => true),
+    addExperienceWithBobr: jest.fn(() => ({ success: true, evolved: false, damProgressChanged: false })),
+  },
+}));
+
+jest.mock('../../services/taskService', () => ({
+  taskService: {
+    getTasks: jest.fn(() => []),
+    saveTasks: jest.fn(() => true),
+    addTask: jest.fn(() => 'test-task-id'),
+    updateTask: jest.fn(() => true),
+    deleteTask: jest.fn(() => true),
+  },
+}));
+
+jest.mock('../../services/habitService', () => ({
+  habitService: {
+    getHabits: jest.fn(() => []),
+    saveHabits: jest.fn(() => true),
+    addHabit: jest.fn(() => 'test-habit-id'),
+    updateHabit: jest.fn(() => true),
+    deleteHabit: jest.fn(() => true),
+  },
+}));
 
 // Mock CSS modules to return the class names
 jest.mock('../BobrPen.module.css', () => ({
@@ -28,7 +100,8 @@ jest.mock('../BobrCompanion', () => {
   return function MockBobrCompanion({ user, completedTasksCount }: any) {
     return (
       <div data-testid="bobr-companion">
-        Bobr Companion - Level {user.level} - Tasks: {completedTasksCount}
+        <div>Companion for {user.name}</div>
+        <div>Completed tasks: {completedTasksCount}</div>
       </div>
     );
   };
@@ -38,7 +111,20 @@ jest.mock('../DamVisualization', () => {
   return function MockDamVisualization({ user, completedTasksCount }: any) {
     return (
       <div data-testid="dam-visualization">
-        Dam Visualization - Progress: {user.damProgress}% - Tasks: {completedTasksCount}
+        <div>Dam for {user.name}</div>
+        <div>Progress: {user.damProgress}%</div>
+      </div>
+    );
+  };
+});
+
+jest.mock('../BobrInteraction', () => {
+  return function MockBobrInteraction({ isOpen, onClose, onTaskCreated }: any) {
+    return (
+      <div data-testid="bobr-interaction">
+        <div>Interaction {isOpen ? 'Open' : 'Closed'}</div>
+        <button onClick={onClose}>Close</button>
+        <button onClick={() => onTaskCreated && onTaskCreated()}>Create Task</button>
       </div>
     );
   };
@@ -56,7 +142,63 @@ const renderWithProviders = (component: React.ReactElement) => {
   );
 };
 
+
+
 describe('BobrPen', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    
+    // Configure mock hooks
+    (useUser as jest.Mock).mockReturnValue({
+      user: {
+        id: 'test-user',
+        name: 'Test User',
+        level: 1,
+        experience: 100,
+        body: 10,
+        mind: 15,
+        soul: 8,
+        achievements: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        bobrStage: 'hatchling',
+        damProgress: 50,
+      },
+      createUser: jest.fn(),
+      updateUser: jest.fn(),
+      addExperience: jest.fn(),
+      addExperienceWithBobr: jest.fn(),
+      addStatRewards: jest.fn(),
+      removeStatRewards: jest.fn(),
+      removeExperience: jest.fn(),
+      unlockAchievement: jest.fn(),
+      isSaving: false,
+      addStatRewardsWithBobr: jest.fn(),
+      applyAchievementRewards: jest.fn(),
+    });
+    
+    (useTasks as jest.Mock).mockReturnValue({
+      tasks: [],
+      addTask: jest.fn(),
+      updateTask: jest.fn(),
+      deleteTask: jest.fn(),
+      toggleTask: jest.fn(),
+      bringTaskToTop: jest.fn(),
+      isSaving: false,
+      lastSaved: new Date(),
+      refreshTasks: jest.fn(),
+    });
+    
+    (useHabits as jest.Mock).mockReturnValue({
+      habits: [],
+      addHabit: jest.fn(),
+      updateHabit: jest.fn(),
+      deleteHabit: jest.fn(),
+      completeHabit: jest.fn(),
+      isSaving: false,
+    });
+  });
+
   const createMockUser = (level: number, damProgress: number = 50): User => ({
     id: 'test-user',
     name: 'Test User',
@@ -77,9 +219,25 @@ describe('BobrPen', () => {
     completedTasksCount: 5,
   };
 
+  describe('Provider test', () => {
+    it('should render providers correctly', () => {
+      const { container } = render(
+        <UserProvider>
+          <TaskProvider>
+            <HabitProvider>
+              <div data-testid="test-content">Test Content</div>
+            </HabitProvider>
+          </TaskProvider>
+        </UserProvider>
+      );
+      
+      expect(screen.getByTestId('test-content')).toBeInTheDocument();
+    });
+  });
+
   describe('Initial render', () => {
-    it('should render the pen header', () => {
-      renderWithProviders(<BobrPen {...defaultProps} />);
+    it('should render the pen header without providers', () => {
+      render(<BobrPen {...defaultProps} />);
       
       expect(screen.getByText('🏡')).toBeInTheDocument();
       expect(screen.getByText('Dam & Sanctuary')).toBeInTheDocument();

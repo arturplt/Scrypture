@@ -1,14 +1,16 @@
+jest.mock('../../hooks/useUser', () => {
+  const actual = jest.requireActual('../../hooks/useUser');
+  return {
+    ...actual,
+    default: actual.default,
+    useUser: jest.fn(),
+    UserProvider: actual.UserProvider,
+  };
+});
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { StatsDisplay } from '../StatsDisplay';
-
-// Mock the useUser hook
-jest.mock('../../hooks/useUser', () => ({
-  useUser: jest.fn(),
-  UserProvider: ({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
-  ),
-}));
 
 const mockUseUser = jest.mocked(require('../../hooks/useUser').useUser);
 

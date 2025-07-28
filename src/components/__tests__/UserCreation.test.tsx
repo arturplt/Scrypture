@@ -1,3 +1,13 @@
+jest.mock('../../hooks/useUser', () => {
+  const actual = jest.requireActual('../../hooks/useUser');
+  return {
+    ...actual,
+    default: actual.default,
+    useUser: () => mockUseUser,
+    UserProvider: actual.UserProvider,
+  };
+});
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -11,9 +21,6 @@ const mockUseUser = {
   createUser: mockCreateUser,
 };
 
-jest.mock('../../hooks/useUser', () => ({
-  useUser: () => mockUseUser,
-}));
 
 describe('UserCreation', () => {
   beforeEach(() => {
@@ -132,6 +139,8 @@ describe('UserCreation', () => {
       mind: 0,
       soul: 0,
       achievements: [],
+      bobrStage: 'hatchling',
+      damProgress: 0,
     });
 
     renderWithProvider(<UserCreation onUserCreated={mockOnUserCreated} />);
@@ -160,6 +169,8 @@ describe('UserCreation', () => {
       achievements: [],
       createdAt: new Date(),
       updatedAt: new Date(),
+      bobrStage: 'hatchling',
+      damProgress: 0,
     };
 
     const { container } = renderWithProvider(<UserCreation />);

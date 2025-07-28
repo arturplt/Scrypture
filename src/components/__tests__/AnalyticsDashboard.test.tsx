@@ -8,9 +8,33 @@ import { useHabits } from '../../hooks/useHabits';
 import { useAchievements } from '../../hooks/useAchievements';
 
 // Mock the hooks
-jest.mock('../../hooks/useUser');
-jest.mock('../../hooks/useTasks');
-jest.mock('../../hooks/useHabits');
+jest.mock('../../hooks/useUser', () => {
+  const actual = jest.requireActual('../../hooks/useUser');
+  return {
+    ...actual,
+    default: actual.default,
+    useUser: jest.fn(),
+    UserProvider: actual.UserProvider,
+  };
+});
+jest.mock('../../hooks/useTasks', () => {
+  const actual = jest.requireActual('../../hooks/useTasks');
+  return {
+    ...actual,
+    default: actual.default,
+    useTasks: jest.fn(),
+    TaskProvider: actual.TaskProvider,
+  };
+});
+jest.mock('../../hooks/useHabits', () => {
+  const actual = jest.requireActual('../../hooks/useHabits');
+  return {
+    ...actual,
+    default: actual.default,
+    useHabits: jest.fn(),
+    HabitProvider: actual.HabitProvider,
+  };
+});
 jest.mock('../../hooks/useAchievements');
 
 const mockUseUser = useUser as jest.MockedFunction<typeof useUser>;

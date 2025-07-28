@@ -18,13 +18,25 @@ jest.mock('../../services/categoryService', () => ({
 }));
 
 // Mock the hooks
-jest.mock('../../hooks/useHabits', () => ({
-  useHabits: jest.fn(),
-}));
+jest.mock('../../hooks/useHabits', () => {
+  const actual = jest.requireActual('../../hooks/useHabits');
+  return {
+    ...actual,
+    default: actual.default,
+    useHabits: jest.fn(),
+    HabitProvider: actual.HabitProvider,
+  };
+});
 
-jest.mock('../../hooks/useTasks', () => ({
-  useTasks: jest.fn(),
-}));
+jest.mock('../../hooks/useTasks', () => {
+  const actual = jest.requireActual('../../hooks/useTasks');
+  return {
+    ...actual,
+    default: actual.default,
+    useTasks: jest.fn(),
+    TaskProvider: actual.TaskProvider,
+  };
+});
 
 // Mock the AutoSaveIndicator component
 jest.mock('../AutoSaveIndicator', () => ({

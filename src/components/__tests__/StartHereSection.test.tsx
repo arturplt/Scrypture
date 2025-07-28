@@ -1,3 +1,42 @@
+// Mock AutoSaveIndicator component first
+jest.mock('../AutoSaveIndicator', () => ({
+  AutoSaveIndicator: function MockAutoSaveIndicator({ isSaving }: any) {
+    return (
+      <div data-testid="auto-save-indicator">
+        {isSaving ? 'Saving...' : 'Saved'}
+      </div>
+    );
+  },
+}));
+
+// Mock the hooks but preserve the providers
+jest.mock('../../hooks/useUser', () => {
+  const actual = jest.requireActual('../../hooks/useUser');
+  return {
+    ...actual,
+    useUser: jest.fn(),
+    UserProvider: actual.UserProvider,
+  };
+});
+
+jest.mock('../../hooks/useTasks', () => {
+  const actual = jest.requireActual('../../hooks/useTasks');
+  return {
+    ...actual,
+    useTasks: jest.fn(),
+    TaskProvider: actual.TaskProvider,
+  };
+});
+
+jest.mock('../../hooks/useHabits', () => {
+  const actual = jest.requireActual('../../hooks/useHabits');
+  return {
+    ...actual,
+    useHabits: jest.fn(),
+    HabitProvider: actual.HabitProvider,
+  };
+});
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -9,14 +48,7 @@ import { UserProvider } from '../../hooks/useUser';
 import { TaskProvider } from '../../hooks/useTasks';
 import { HabitProvider } from '../../hooks/useHabits';
 
-// Mock the hooks
-jest.mock('../../hooks/useTasks');
-jest.mock('../../hooks/useHabits');
-jest.mock('../../hooks/useUser');
 
-const mockUseTasks = useTasks as jest.MockedFunction<typeof useTasks>;
-const mockUseHabits = useHabits as jest.MockedFunction<typeof useHabits>;
-const mockUseUser = useUser as jest.MockedFunction<typeof useUser>;
 
 // Mock localStorage
 const localStorageMock = {
@@ -45,29 +77,8 @@ describe('StartHereSection', () => {
   const mockAddHabit = jest.fn();
 
   beforeEach(() => {
-    // Default mock implementations
-    mockUseTasks.mockReturnValue({
-      addTask: mockAddTask,
-      tasks: [],
-      isSaving: false,
-      updateTask: jest.fn(),
-      deleteTask: jest.fn(),
-      toggleTask: jest.fn(),
-      refreshTasks: jest.fn(),
-      bringTaskToTop: jest.fn(),
-      lastSaved: null,
-    });
-
-    mockUseHabits.mockReturnValue({
-      addHabit: mockAddHabit,
-      habits: [],
-      isSaving: false,
-      updateHabit: jest.fn(),
-      deleteHabit: jest.fn(),
-      completeHabit: jest.fn(),
-    });
-
-    mockUseUser.mockReturnValue({
+    // Configure mock hooks
+    (useUser as jest.Mock).mockReturnValue({
       user: {
         id: 'test-user',
         name: 'Test User',
@@ -95,6 +106,27 @@ describe('StartHereSection', () => {
       applyAchievementRewards: jest.fn(),
     });
 
+    (useTasks as jest.Mock).mockReturnValue({
+      addTask: mockAddTask,
+      tasks: [],
+      isSaving: false,
+      updateTask: jest.fn(),
+      deleteTask: jest.fn(),
+      toggleTask: jest.fn(),
+      refreshTasks: jest.fn(),
+      bringTaskToTop: jest.fn(),
+      lastSaved: null,
+    });
+
+    (useHabits as jest.Mock).mockReturnValue({
+      addHabit: mockAddHabit,
+      habits: [],
+      isSaving: false,
+      updateHabit: jest.fn(),
+      deleteHabit: jest.fn(),
+      completeHabit: jest.fn(),
+    });
+
     // Clear localStorage mock
     localStorageMock.getItem.mockReturnValue(null);
     localStorageMock.setItem.mockClear();
@@ -105,7 +137,10 @@ describe('StartHereSection', () => {
   });
 
   it('renders StartHereSection when visible', () => {
-    renderWithProviders(<StartHereSection isVisible={true} onClose={jest.fn()} />);
+    const { container } = renderWithProviders(<StartHereSection isVisible={true} onClose={jest.fn()} />);
+    
+    // Debug: log what's actually rendered
+    console.log('Container HTML:', container.innerHTML);
     
     expect(screen.getByText('Start Here')).toBeInTheDocument();
     expect(screen.getByText(/Choose categories to get started with progressively challenging tasks and habits:/)).toBeInTheDocument();

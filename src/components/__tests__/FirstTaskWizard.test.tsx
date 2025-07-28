@@ -5,9 +5,15 @@ import { useTasks } from '../../hooks/useTasks';
 import { tutorialService } from '../../services/tutorialService';
 
 // Mock the hooks and services
-jest.mock('../../hooks/useTasks', () => ({
-  useTasks: jest.fn(),
-}));
+jest.mock('../../hooks/useTasks', () => {
+  const actual = jest.requireActual('../../hooks/useTasks');
+  return {
+    ...actual,
+    default: actual.default,
+    useTasks: jest.fn(),
+    TaskProvider: actual.TaskProvider,
+  };
+});
 
 jest.mock('../../services/tutorialService', () => ({
   tutorialService: {

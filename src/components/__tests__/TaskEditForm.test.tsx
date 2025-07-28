@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { TaskEditForm } from '../TaskEditForm';
+import { Task } from '../../types';
 
 // Mock task for testing
 const mockTask = {
@@ -20,33 +21,46 @@ const mockTask = {
   difficulty: 3
 };
 
-// Mock the hooks
-jest.mock('../../hooks/useTasks', () => ({
-  useTasks: () => ({
-    updateTask: jest.fn(),
-    deleteTask: jest.fn(),
-    isSaving: false,
-  }),
-  TaskProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-}));
+jest.mock('../../hooks/useTasks', () => {
+  const actual = jest.requireActual('../../hooks/useTasks');
+  return {
+    ...actual,
+    default: actual.default,
+    useTasks: () => ({
+      updateTask: jest.fn(),
+      deleteTask: jest.fn(),
+      isSaving: false,
+    }),
+    TaskProvider: actual.TaskProvider,
+  };
+});
 
-jest.mock('../../hooks/useUser', () => ({
-  useUser: () => ({
-    addExperience: jest.fn(),
-    addStatRewards: jest.fn(),
-    removeStatRewards: jest.fn(),
-  }),
-  UserProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-}));
+jest.mock('../../hooks/useUser', () => {
+  const actual = jest.requireActual('../../hooks/useUser');
+  return {
+    ...actual,
+    default: actual.default,
+    useUser: () => ({
+      addExperience: jest.fn(),
+      addStatRewards: jest.fn(),
+      removeStatRewards: jest.fn(),
+    }),
+    UserProvider: actual.UserProvider,
+  };
+});
 
-// Mock the useHabits hook
-jest.mock('../../hooks/useHabits', () => ({
-  useHabits: () => ({
-    addHabit: jest.fn(),
-    habits: [],
-  }),
-  HabitProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-}));
+jest.mock('../../hooks/useHabits', () => {
+  const actual = jest.requireActual('../../hooks/useHabits');
+  return {
+    ...actual,
+    default: actual.default,
+    useHabits: () => ({
+      addHabit: jest.fn(),
+      habits: [],
+    }),
+    HabitProvider: actual.HabitProvider,
+  };
+});
 
 // Mock the AutoSaveIndicator component
 jest.mock('../AutoSaveIndicator', () => ({
