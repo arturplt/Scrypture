@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTasks } from '../hooks/useTasks';
 import { useHabits } from '../hooks/useHabits';
+import { useUser } from '../hooks/useUser';
 import { AutoSaveIndicator } from './AutoSaveIndicator';
 import styles from './StartHereSection.module.css';
 
@@ -29,6 +30,7 @@ interface HabitTemplate {
 export const StartHereSection: React.FC<StartHereSectionProps> = ({ isVisible, onClose }) => {
   const { addTask, tasks, isSaving: tasksSaving } = useTasks();
   const { addHabit, isSaving: habitsSaving } = useHabits();
+  const { user } = useUser();
   const [givenTasks, setGivenTasks] = useState<Set<string>>(new Set());
   const [givenHabits, setGivenHabits] = useState<Set<string>>(new Set());
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
@@ -36,53 +38,13 @@ export const StartHereSection: React.FC<StartHereSectionProps> = ({ isVisible, o
   const [isSavingProgress, setIsSavingProgress] = useState(false);
   const [isSavingUI, setIsSavingUI] = useState(false);
 
-  // Load given tasks and habits from localStorage on component mount
-  useEffect(() => {
-    const savedTasks = localStorage.getItem('startHereGivenTasks');
-    if (savedTasks) {
-      setGivenTasks(new Set(JSON.parse(savedTasks)));
-    }
-    
-    const savedHabits = localStorage.getItem('startHereGivenHabits');
-    if (savedHabits) {
-      setGivenHabits(new Set(JSON.parse(savedHabits)));
-    }
-    
-    const savedExpandedCategories = localStorage.getItem('startHereExpandedCategories');
-    if (savedExpandedCategories) {
-      setExpandedCategories(new Set(JSON.parse(savedExpandedCategories)));
-    }
-    
-    const savedCollapsedSections = localStorage.getItem('startHereCollapsedSections');
-    if (savedCollapsedSections) {
-      setCollapsedCompletedSections(new Set(JSON.parse(savedCollapsedSections)));
-    }
-  }, []);
-
-  // Save given tasks to localStorage whenever it changes
-  useEffect(() => {
-    setIsSavingProgress(true);
-    localStorage.setItem('startHereGivenTasks', JSON.stringify(Array.from(givenTasks)));
-    // Simulate a brief saving delay for better UX
-    setTimeout(() => setIsSavingProgress(false), 300);
-  }, [givenTasks]);
-
-  // Save given habits to localStorage whenever it changes
-  useEffect(() => {
-    setIsSavingProgress(true);
-    localStorage.setItem('startHereGivenHabits', JSON.stringify(Array.from(givenHabits)));
-    // Simulate a brief saving delay for better UX
-    setTimeout(() => setIsSavingProgress(false), 300);
-  }, [givenHabits]);
-
-  // Save UI state to localStorage whenever it changes
-  useEffect(() => {
-    setIsSavingUI(true);
-    localStorage.setItem('startHereExpandedCategories', JSON.stringify(Array.from(expandedCategories)));
-    localStorage.setItem('startHereCollapsedSections', JSON.stringify(Array.from(collapsedCompletedSections)));
-    // Simulate a brief saving delay for better UX
-    setTimeout(() => setIsSavingUI(false), 200);
-  }, [expandedCategories, collapsedCompletedSections]);
+  // Helper function to calculate XP based on priority and difficulty
+  const calculateXp = (priority: 'low' | 'medium' | 'high', difficulty: number): number => {
+    const priorityXp = priority === 'high' ? 15 : priority === 'medium' ? 10 : 5;
+    const fibonacciXp = [0, 1, 2, 3, 5, 8, 13, 21, 34, 55];
+    const difficultyXp = fibonacciXp[difficulty] || 0;
+    return 5 + priorityXp + difficultyXp; // Base 5xp + priority + difficulty
+  };
 
   const taskTemplates: Record<string, TaskTemplate[]> = {
     mind: [
@@ -92,7 +54,7 @@ export const StartHereSection: React.FC<StartHereSectionProps> = ({ isVisible, o
         description: 'Read exactly 1 page of any book or article',
         priority: 'low',
         categories: ['mind'],
-        statRewards: { mind: 1, xp: 10 },
+        statRewards: { mind: 1, xp: calculateXp('low', 0) },
         difficulty: 0,
       },
       {
@@ -100,7 +62,7 @@ export const StartHereSection: React.FC<StartHereSectionProps> = ({ isVisible, o
         description: 'Write exactly 1 sentence about anything',
         priority: 'low',
         categories: ['mind'],
-        statRewards: { mind: 1, xp: 10 },
+        statRewards: { mind: 1, xp: calculateXp('low', 0) },
         difficulty: 0,
       },
       // Difficulty 1 - Very Easy
@@ -109,7 +71,7 @@ export const StartHereSection: React.FC<StartHereSectionProps> = ({ isVisible, o
         description: 'Write down 1 new idea or thought',
         priority: 'low',
         categories: ['mind'],
-        statRewards: { mind: 1, xp: 15 },
+        statRewards: { mind: 1, xp: calculateXp('low', 1) },
         difficulty: 1,
       },
       {
@@ -117,7 +79,7 @@ export const StartHereSection: React.FC<StartHereSectionProps> = ({ isVisible, o
         description: 'Look up and learn the meaning of 1 new word',
         priority: 'low',
         categories: ['mind'],
-        statRewards: { mind: 1, xp: 15 },
+        statRewards: { mind: 1, xp: calculateXp('low', 1) },
         difficulty: 1,
       },
       {
@@ -125,7 +87,7 @@ export const StartHereSection: React.FC<StartHereSectionProps> = ({ isVisible, o
         description: 'Count slowly from 1 to 100',
         priority: 'low',
         categories: ['mind'],
-        statRewards: { mind: 1, xp: 15 },
+        statRewards: { mind: 1, xp: calculateXp('low', 1) },
         difficulty: 1,
       },
       // Difficulty 2 - Easy
@@ -134,7 +96,7 @@ export const StartHereSection: React.FC<StartHereSectionProps> = ({ isVisible, o
         description: 'Look up and learn the meaning of 3 new words',
         priority: 'low',
         categories: ['mind'],
-        statRewards: { mind: 1, xp: 20 },
+        statRewards: { mind: 1, xp: calculateXp('low', 2) },
         difficulty: 2,
       },
       {
@@ -142,7 +104,7 @@ export const StartHereSection: React.FC<StartHereSectionProps> = ({ isVisible, o
         description: 'Write exactly 3 sentences on any topic',
         priority: 'low',
         categories: ['mind'],
-        statRewards: { mind: 1, xp: 20 },
+        statRewards: { mind: 1, xp: calculateXp('low', 2) },
         difficulty: 2,
       },
       {
@@ -150,7 +112,7 @@ export const StartHereSection: React.FC<StartHereSectionProps> = ({ isVisible, o
         description: 'Complete 1 crossword clue, sudoku cell, or brain teaser',
         priority: 'low',
         categories: ['mind'],
-        statRewards: { mind: 1, xp: 20 },
+        statRewards: { mind: 1, xp: calculateXp('low', 2) },
         difficulty: 2,
       },
       // Difficulty 3 - Moderate
@@ -159,7 +121,7 @@ export const StartHereSection: React.FC<StartHereSectionProps> = ({ isVisible, o
         description: 'Look up and learn the meaning of 10 new words',
         priority: 'medium',
         categories: ['mind'],
-        statRewards: { mind: 1, xp: 40 },
+        statRewards: { mind: 1, xp: calculateXp('medium', 3) },
         difficulty: 3,
       },
       {
@@ -167,7 +129,7 @@ export const StartHereSection: React.FC<StartHereSectionProps> = ({ isVisible, o
         description: 'Write exactly 100 words on any topic',
         priority: 'medium',
         categories: ['mind'],
-        statRewards: { mind: 1, xp: 40 },
+        statRewards: { mind: 1, xp: calculateXp('medium', 3) },
         difficulty: 3,
       },
       {
@@ -175,7 +137,7 @@ export const StartHereSection: React.FC<StartHereSectionProps> = ({ isVisible, o
         description: 'Complete 5 crossword clues, sudoku cells, or brain teasers',
         priority: 'medium',
         categories: ['mind'],
-        statRewards: { mind: 1, xp: 40 },
+        statRewards: { mind: 1, xp: calculateXp('medium', 3) },
         difficulty: 3,
       },
       // Difficulty 4 - Medium
@@ -184,637 +146,241 @@ export const StartHereSection: React.FC<StartHereSectionProps> = ({ isVisible, o
         description: 'Dedicated study session for exactly 15 minutes',
         priority: 'medium',
         categories: ['mind'],
-        statRewards: { mind: 1, xp: 40 },
+        statRewards: { mind: 1, xp: calculateXp('medium', 4) },
         difficulty: 4,
       },
       {
-        title: 'Write 250 words',
-        description: 'Write exactly 250 words on any topic',
+        title: 'Read for 30 minutes',
+        description: 'Read any book or article for exactly 30 minutes',
         priority: 'medium',
         categories: ['mind'],
-        statRewards: { mind: 1, xp: 45 },
+        statRewards: { mind: 1, xp: calculateXp('medium', 4) },
         difficulty: 4,
       },
+      // Difficulty 5 - Hard
       {
-        title: 'Solve 10 puzzles',
-        description: 'Complete 10 crossword clues, sudoku cells, or brain teasers',
-        priority: 'medium',
+        title: 'Study for 1 hour',
+        description: 'Dedicated study session for exactly 1 hour',
+        priority: 'high',
         categories: ['mind'],
-        statRewards: { mind: 1, xp: 45 },
-        difficulty: 4,
-      },
-      // Difficulty 5 - Challenging
-      {
-        title: 'Study for 30 minutes',
-        description: 'Dedicated study session for exactly 30 minutes',
-        priority: 'medium',
-        categories: ['mind'],
-        statRewards: { mind: 1, xp: 50 },
+        statRewards: { mind: 1, xp: calculateXp('high', 5) },
         difficulty: 5,
       },
       {
         title: 'Write 500 words',
         description: 'Write exactly 500 words on any topic',
-        priority: 'medium',
+        priority: 'high',
         categories: ['mind'],
-        statRewards: { mind: 1, xp: 55 },
+        statRewards: { mind: 1, xp: calculateXp('high', 5) },
         difficulty: 5,
-      },
-      {
-        title: 'Solve 15 puzzles',
-        description: 'Complete 15 crossword clues, sudoku cells, or brain teasers',
-        priority: 'medium',
-        categories: ['mind'],
-        statRewards: { mind: 1, xp: 50 },
-        difficulty: 5,
-      },
-      // Difficulty 6 - Hard
-      {
-        title: 'Study for 45 minutes',
-        description: 'Dedicated study session for exactly 45 minutes',
-        priority: 'medium',
-        categories: ['mind'],
-        statRewards: { mind: 1, xp: 55 },
-        difficulty: 6,
-      },
-      {
-        title: 'Write 750 words',
-        description: 'Write exactly 750 words on any topic',
-        priority: 'medium',
-        categories: ['mind'],
-        statRewards: { mind: 1, xp: 60 },
-        difficulty: 6,
-      },
-      {
-        title: 'Solve 20 puzzles',
-        description: 'Complete 20 crossword clues, sudoku cells, or brain teasers',
-        priority: 'medium',
-        categories: ['mind'],
-        statRewards: { mind: 1, xp: 55 },
-        difficulty: 6,
-      },
-      // Difficulty 7 - Very Hard
-      {
-        title: 'Study for 60 minutes',
-        description: 'Dedicated study session for exactly 60 minutes',
-        priority: 'medium',
-        categories: ['mind'],
-        statRewards: { mind: 1, xp: 60 },
-        difficulty: 7,
-      },
-      {
-        title: 'Write 1000 words',
-        description: 'Write exactly 1000 words on any topic',
-        priority: 'medium',
-        categories: ['mind'],
-        statRewards: { mind: 1, xp: 65 },
-        difficulty: 7,
-      },
-      {
-        title: 'Solve 25 puzzles',
-        description: 'Complete 25 crossword clues, sudoku cells, or brain teasers',
-        priority: 'medium',
-        categories: ['mind'],
-        statRewards: { mind: 1, xp: 60 },
-        difficulty: 7,
-      },
-      // Difficulty 8 - Expert
-      {
-        title: 'Complete 90-min deep work',
-        description: 'Focus on a complex task for exactly 90 minutes without interruption',
-        priority: 'high',
-        categories: ['mind'],
-        statRewards: { mind: 1, xp: 90 },
-        difficulty: 8,
-      },
-      {
-        title: 'Write 1500 words',
-        description: 'Write exactly 1500 words on any topic',
-        priority: 'high',
-        categories: ['mind'],
-        statRewards: { mind: 1, xp: 95 },
-        difficulty: 8,
-      },
-      {
-        title: 'Solve 30 puzzles',
-        description: 'Complete 30 crossword clues, sudoku cells, or brain teasers',
-        priority: 'high',
-        categories: ['mind'],
-        statRewards: { mind: 1, xp: 90 },
-        difficulty: 8,
-      },
-      // Difficulty 9 - Master
-      {
-        title: 'Complete 120-min deep work',
-        description: 'Focus on a complex task for exactly 120 minutes without interruption',
-        priority: 'high',
-        categories: ['mind'],
-        statRewards: { mind: 1, xp: 120 },
-        difficulty: 9,
-      },
-      {
-        title: 'Write 2000 words',
-        description: 'Write exactly 2000 words on any topic',
-        priority: 'high',
-        categories: ['mind'],
-        statRewards: { mind: 1, xp: 125 },
-        difficulty: 9,
-      },
-      {
-        title: 'Solve 40 puzzles',
-        description: 'Complete 40 crossword clues, sudoku cells, or brain teasers',
-        priority: 'high',
-        categories: ['mind'],
-        statRewards: { mind: 1, xp: 120 },
-        difficulty: 9,
       },
     ],
     body: [
       // Difficulty 0 - Easiest
       {
-        title: 'Take 1 deep breath',
-        description: 'Take exactly 1 slow, deep breath',
+        title: 'Take 3 deep breaths',
+        description: 'Sit and take 3 slow, deep breaths',
         priority: 'low',
         categories: ['body'],
-        statRewards: { body: 1, xp: 10 },
+        statRewards: { body: 1, xp: calculateXp('low', 0) },
         difficulty: 0,
       },
       {
-        title: 'Stretch for 30 seconds',
-        description: 'Do a simple stretch for exactly 30 seconds',
+        title: 'Drink a glass of water',
+        description: 'Drink one full glass of water',
         priority: 'low',
         categories: ['body'],
-        statRewards: { body: 1, xp: 10 },
+        statRewards: { body: 1, xp: calculateXp('low', 0) },
         difficulty: 0,
       },
       // Difficulty 1 - Very Easy
       {
-        title: 'Take 5 deep breaths',
-        description: 'Take exactly 5 slow, deep breaths',
-        priority: 'low',
-        categories: ['body'],
-        statRewards: { body: 1, xp: 15 },
-        difficulty: 1,
-      },
-      {
         title: 'Stretch for 2 minutes',
-        description: 'Do a simple stretch for exactly 2 minutes',
+        description: 'Do gentle stretching for exactly 2 minutes',
         priority: 'low',
         categories: ['body'],
-        statRewards: { body: 1, xp: 15 },
+        statRewards: { body: 1, xp: calculateXp('low', 1) },
         difficulty: 1,
       },
       {
         title: 'Walk for 5 minutes',
-        description: 'Go for a walk for exactly 5 minutes',
+        description: 'Walk around for exactly 5 minutes',
         priority: 'low',
         categories: ['body'],
-        statRewards: { body: 1, xp: 15 },
+        statRewards: { body: 1, xp: calculateXp('low', 1) },
         difficulty: 1,
       },
       // Difficulty 2 - Easy
       {
-        title: 'Do 5 push-ups',
-        description: 'Complete exactly 5 push-ups (modify form as needed)',
+        title: 'Do 10 jumping jacks',
+        description: 'Complete exactly 10 jumping jacks',
         priority: 'low',
         categories: ['body'],
-        statRewards: { body: 1, xp: 20 },
+        statRewards: { body: 1, xp: calculateXp('low', 2) },
         difficulty: 2,
       },
       {
-        title: 'Stretch for 5 minutes',
-        description: 'Do a focused stretching routine for exactly 5 minutes',
+        title: 'Walk for 15 minutes',
+        description: 'Walk around for exactly 15 minutes',
         priority: 'low',
         categories: ['body'],
-        statRewards: { body: 1, xp: 20 },
-        difficulty: 2,
-      },
-      {
-        title: 'Walk for 10 minutes',
-        description: 'Go for a walk for exactly 10 minutes',
-        priority: 'low',
-        categories: ['body'],
-        statRewards: { body: 1, xp: 20 },
+        statRewards: { body: 1, xp: calculateXp('low', 2) },
         difficulty: 2,
       },
       // Difficulty 3 - Moderate
       {
-        title: 'Do 10 push-ups',
-        description: 'Complete exactly 10 push-ups (modify form as needed)',
+        title: 'Do 20 push-ups',
+        description: 'Complete exactly 20 push-ups (modified if needed)',
         priority: 'medium',
         categories: ['body'],
-        statRewards: { body: 1, xp: 40 },
+        statRewards: { body: 1, xp: calculateXp('medium', 3) },
         difficulty: 3,
       },
       {
-        title: 'Take a 15-min walk',
-        description: 'Go for a brisk walk for exactly 15 minutes',
+        title: 'Exercise for 30 minutes',
+        description: 'Any form of exercise for exactly 30 minutes',
         priority: 'medium',
         categories: ['body'],
-        statRewards: { body: 1, xp: 40 },
-        difficulty: 3,
-      },
-      {
-        title: 'Do 20 jumping jacks',
-        description: 'Complete exactly 20 jumping jacks',
-        priority: 'medium',
-        categories: ['body'],
-        statRewards: { body: 1, xp: 40 },
+        statRewards: { body: 1, xp: calculateXp('medium', 3) },
         difficulty: 3,
       },
       // Difficulty 4 - Medium
       {
-        title: 'Do 20 push-ups',
-        description: 'Complete exactly 20 push-ups in sets of 5',
+        title: 'Run for 20 minutes',
+        description: 'Run or jog for exactly 20 minutes',
         priority: 'medium',
         categories: ['body'],
-        statRewards: { body: 1, xp: 45 },
+        statRewards: { body: 1, xp: calculateXp('medium', 4) },
         difficulty: 4,
       },
-      {
-        title: 'Take a 30-min walk',
-        description: 'Go for a brisk walk for exactly 30 minutes',
-        priority: 'medium',
-        categories: ['body'],
-        statRewards: { body: 1, xp: 45 },
-        difficulty: 4,
-      },
-      {
-        title: 'Do 50 jumping jacks',
-        description: 'Complete exactly 50 jumping jacks in sets of 10',
-        priority: 'medium',
-        categories: ['body'],
-        statRewards: { body: 1, xp: 45 },
-        difficulty: 4,
-      },
-      // Difficulty 5 - Challenging
-      {
-        title: 'Do 30 push-ups',
-        description: 'Complete exactly 30 push-ups in sets of 10',
-        priority: 'medium',
-        categories: ['body'],
-        statRewards: { body: 1, xp: 50 },
-        difficulty: 5,
-      },
-      {
-        title: 'Do 100 jumping jacks',
-        description: 'Complete exactly 100 jumping jacks in sets of 25',
-        priority: 'medium',
-        categories: ['body'],
-        statRewards: { body: 1, xp: 50 },
-        difficulty: 5,
-      },
-      {
-        title: 'Take a 45-min walk',
-        description: 'Go for a brisk walk for exactly 45 minutes',
-        priority: 'medium',
-        categories: ['body'],
-        statRewards: { body: 1, xp: 50 },
-        difficulty: 5,
-      },
-      // Difficulty 6 - Hard
       {
         title: 'Do 50 push-ups',
-        description: 'Complete exactly 50 push-ups in sets of 10',
+        description: 'Complete exactly 50 push-ups (modified if needed)',
         priority: 'medium',
         categories: ['body'],
-        statRewards: { body: 1, xp: 55 },
-        difficulty: 6,
+        statRewards: { body: 1, xp: calculateXp('medium', 4) },
+        difficulty: 4,
       },
+      // Difficulty 5 - Hard
       {
-        title: 'Do 150 jumping jacks',
-        description: 'Complete exactly 150 jumping jacks in sets of 30',
-        priority: 'medium',
-        categories: ['body'],
-        statRewards: { body: 1, xp: 55 },
-        difficulty: 6,
-      },
-      {
-        title: 'Take a 60-min walk',
-        description: 'Go for a brisk walk for exactly 60 minutes',
-        priority: 'medium',
-        categories: ['body'],
-        statRewards: { body: 1, xp: 55 },
-        difficulty: 6,
-      },
-      // Difficulty 7 - Very Hard
-      {
-        title: 'Do 75 push-ups',
-        description: 'Complete exactly 75 push-ups in sets of 15',
-        priority: 'medium',
-        categories: ['body'],
-        statRewards: { body: 1, xp: 60 },
-        difficulty: 7,
-      },
-      {
-        title: 'Do 200 jumping jacks',
-        description: 'Complete exactly 200 jumping jacks in sets of 40',
-        priority: 'medium',
-        categories: ['body'],
-        statRewards: { body: 1, xp: 60 },
-        difficulty: 7,
-      },
-      {
-        title: 'Take a 90-min walk',
-        description: 'Go for a brisk walk for exactly 90 minutes',
-        priority: 'medium',
-        categories: ['body'],
-        statRewards: { body: 1, xp: 60 },
-        difficulty: 7,
-      },
-      // Difficulty 8 - Expert
-      {
-        title: 'Do 100 push-ups',
-        description: 'Complete exactly 100 push-ups in sets of 20',
+        title: 'Exercise for 1 hour',
+        description: 'Any form of exercise for exactly 1 hour',
         priority: 'high',
         categories: ['body'],
-        statRewards: { body: 1, xp: 90 },
-        difficulty: 8,
+        statRewards: { body: 1, xp: calculateXp('high', 5) },
+        difficulty: 5,
       },
       {
-        title: 'Do 300 jumping jacks',
-        description: 'Complete exactly 300 jumping jacks in sets of 50',
+        title: 'Run for 45 minutes',
+        description: 'Run or jog for exactly 45 minutes',
         priority: 'high',
         categories: ['body'],
-        statRewards: { body: 1, xp: 90 },
-        difficulty: 8,
-      },
-      {
-        title: 'Take a 120-min walk',
-        description: 'Go for a brisk walk for exactly 120 minutes',
-        priority: 'high',
-        categories: ['body'],
-        statRewards: { body: 1, xp: 90 },
-        difficulty: 8,
-      },
-      // Difficulty 9 - Master
-      {
-        title: 'Do 150 push-ups',
-        description: 'Complete exactly 150 push-ups in sets of 25',
-        priority: 'high',
-        categories: ['body'],
-        statRewards: { body: 1, xp: 110 },
-        difficulty: 9,
-      },
-      {
-        title: 'Do 500 jumping jacks',
-        description: 'Complete exactly 500 jumping jacks in sets of 100',
-        priority: 'high',
-        categories: ['body'],
-        statRewards: { body: 1, xp: 110 },
-        difficulty: 9,
-      },
-      {
-        title: 'Run 5 kilometers',
-        description: 'Run exactly 5 kilometers at your own pace',
-        priority: 'high',
-        categories: ['body'],
-        statRewards: { body: 1, xp: 110 },
-        difficulty: 9,
+        statRewards: { body: 1, xp: calculateXp('high', 5) },
+        difficulty: 5,
       },
     ],
     soul: [
       // Difficulty 0 - Easiest
       {
-        title: 'Light 1 candle',
-        description: 'Light exactly 1 candle and watch it for 1 minute',
+        title: 'Smile at someone',
+        description: 'Give a genuine smile to someone today',
         priority: 'low',
         categories: ['soul'],
-        statRewards: { soul: 1, xp: 10 },
+        statRewards: { soul: 1, xp: calculateXp('low', 0) },
         difficulty: 0,
       },
       {
-        title: 'Say 1 thank you',
-        description: 'Say thank you to someone or something',
+        title: 'Say thank you',
+        description: 'Say thank you to someone who helped you',
         priority: 'low',
         categories: ['soul'],
-        statRewards: { soul: 1, xp: 10 },
+        statRewards: { soul: 1, xp: calculateXp('low', 0) },
         difficulty: 0,
       },
       // Difficulty 1 - Very Easy
       {
-        title: 'Light 3 candles',
-        description: 'Light exactly 3 candles and watch them for 2 minutes',
+        title: 'Draw a simple shape',
+        description: 'Draw a circle, square, or triangle',
         priority: 'low',
         categories: ['soul'],
-        statRewards: { soul: 1, xp: 15 },
+        statRewards: { soul: 1, xp: calculateXp('low', 1) },
         difficulty: 1,
       },
       {
-        title: 'Express 3 gratitudes',
-        description: 'Write down or say exactly 3 things you\'re grateful for',
+        title: 'Listen to 1 song',
+        description: 'Listen to one complete song you enjoy',
         priority: 'low',
         categories: ['soul'],
-        statRewards: { soul: 1, xp: 15 },
-        difficulty: 1,
-      },
-      {
-        title: 'Take 10 deep breaths',
-        description: 'Take exactly 10 slow, deep breaths',
-        priority: 'low',
-        categories: ['soul'],
-        statRewards: { soul: 1, xp: 15 },
+        statRewards: { soul: 1, xp: calculateXp('low', 1) },
         difficulty: 1,
       },
       // Difficulty 2 - Easy
       {
-        title: 'Express 5 gratitudes',
-        description: 'Write down or say exactly 5 things you\'re grateful for',
+        title: 'Draw a simple picture',
+        description: 'Draw a simple picture of anything',
         priority: 'low',
         categories: ['soul'],
-        statRewards: { soul: 1, xp: 20 },
+        statRewards: { soul: 1, xp: calculateXp('low', 2) },
         difficulty: 2,
       },
       {
-        title: 'Listen to 1 song mindfully',
-        description: 'Listen to 1 song with full attention and presence',
+        title: 'Write a short poem',
+        description: 'Write a 4-line poem about anything',
         priority: 'low',
         categories: ['soul'],
-        statRewards: { soul: 1, xp: 20 },
-        difficulty: 2,
-      },
-      {
-        title: 'Meditate for 2 minutes',
-        description: 'Sit in meditation for exactly 2 minutes',
-        priority: 'low',
-        categories: ['soul'],
-        statRewards: { soul: 1, xp: 20 },
+        statRewards: { soul: 1, xp: calculateXp('low', 2) },
         difficulty: 2,
       },
       // Difficulty 3 - Moderate
       {
-        title: 'Express 10 gratitudes',
-        description: 'Write down or say exactly 10 things you\'re grateful for',
+        title: 'Create something for 30 minutes',
+        description: 'Spend 30 minutes creating anything (art, music, writing)',
         priority: 'medium',
         categories: ['soul'],
-        statRewards: { soul: 1, xp: 40 },
+        statRewards: { soul: 1, xp: calculateXp('medium', 3) },
         difficulty: 3,
       },
       {
-        title: 'Listen to 3 songs mindfully',
-        description: 'Listen to 3 songs with full attention and presence',
+        title: 'Meditate for 10 minutes',
+        description: 'Sit quietly and meditate for exactly 10 minutes',
         priority: 'medium',
         categories: ['soul'],
-        statRewards: { soul: 1, xp: 40 },
-        difficulty: 3,
-      },
-      {
-        title: 'Meditate for 5 minutes',
-        description: 'Sit in meditation for exactly 5 minutes',
-        priority: 'medium',
-        categories: ['soul'],
-        statRewards: { soul: 1, xp: 40 },
+        statRewards: { soul: 1, xp: calculateXp('medium', 3) },
         difficulty: 3,
       },
       // Difficulty 4 - Medium
       {
-        title: 'Journal for 10 minutes',
-        description: 'Write in your journal for exactly 10 minutes',
+        title: 'Create something for 1 hour',
+        description: 'Spend 1 hour creating anything (art, music, writing)',
         priority: 'medium',
         categories: ['soul'],
-        statRewards: { soul: 1, xp: 45 },
+        statRewards: { soul: 1, xp: calculateXp('medium', 4) },
         difficulty: 4,
-      },
-      {
-        title: 'Listen to 5 songs mindfully',
-        description: 'Listen to 5 songs with full attention and presence',
-        priority: 'medium',
-        categories: ['soul'],
-        statRewards: { soul: 1, xp: 45 },
-        difficulty: 4,
-      },
-      {
-        title: 'Meditate for 10 minutes',
-        description: 'Sit in meditation for exactly 10 minutes',
-        priority: 'medium',
-        categories: ['soul'],
-        statRewards: { soul: 1, xp: 45 },
-        difficulty: 4,
-      },
-      // Difficulty 5 - Challenging
-      {
-        title: 'Journal for 20 minutes',
-        description: 'Write in your journal for exactly 20 minutes',
-        priority: 'medium',
-        categories: ['soul'],
-        statRewards: { soul: 1, xp: 50 },
-        difficulty: 5,
-      },
-      {
-        title: 'Meditate for 15 minutes',
-        description: 'Sit in meditation for exactly 15 minutes',
-        priority: 'medium',
-        categories: ['soul'],
-        statRewards: { soul: 1, xp: 50 },
-        difficulty: 5,
-      },
-      {
-        title: 'Connect with 1 friend',
-        description: 'Reach out to 1 person you care about',
-        priority: 'medium',
-        categories: ['soul'],
-        statRewards: { soul: 1, xp: 50 },
-        difficulty: 5,
-      },
-      // Difficulty 6 - Hard
-      {
-        title: 'Journal for 30 minutes',
-        description: 'Write in your journal for exactly 30 minutes',
-        priority: 'medium',
-        categories: ['soul'],
-        statRewards: { soul: 1, xp: 55 },
-        difficulty: 6,
-      },
-      {
-        title: 'Meditate for 20 minutes',
-        description: 'Sit in meditation for exactly 20 minutes',
-        priority: 'medium',
-        categories: ['soul'],
-        statRewards: { soul: 1, xp: 55 },
-        difficulty: 6,
-      },
-      {
-        title: 'Connect with 2 friends',
-        description: 'Reach out to 2 people you care about',
-        priority: 'medium',
-        categories: ['soul'],
-        statRewards: { soul: 1, xp: 55 },
-        difficulty: 6,
-      },
-      // Difficulty 7 - Very Hard
-      {
-        title: 'Journal for 45 minutes',
-        description: 'Write in your journal for exactly 45 minutes',
-        priority: 'medium',
-        categories: ['soul'],
-        statRewards: { soul: 1, xp: 60 },
-        difficulty: 7,
       },
       {
         title: 'Meditate for 30 minutes',
-        description: 'Sit in meditation for exactly 30 minutes',
+        description: 'Sit quietly and meditate for exactly 30 minutes',
         priority: 'medium',
         categories: ['soul'],
-        statRewards: { soul: 1, xp: 60 },
-        difficulty: 7,
+        statRewards: { soul: 1, xp: calculateXp('medium', 4) },
+        difficulty: 4,
       },
+      // Difficulty 5 - Hard
       {
-        title: 'Connect with 3 friends',
-        description: 'Reach out to 3 people you care about',
-        priority: 'medium',
-        categories: ['soul'],
-        statRewards: { soul: 1, xp: 60 },
-        difficulty: 7,
-      },
-      // Difficulty 8 - Expert
-      {
-        title: 'Journal for 60 minutes',
-        description: 'Write in your journal for exactly 60 minutes',
+        title: 'Create a complete project',
+        description: 'Start and finish a creative project in one session',
         priority: 'high',
         categories: ['soul'],
-        statRewards: { soul: 1, xp: 90 },
-        difficulty: 8,
+        statRewards: { soul: 1, xp: calculateXp('high', 5) },
+        difficulty: 5,
       },
       {
-        title: 'Meditate for 45 minutes',
-        description: 'Sit in meditation for exactly 45 minutes',
+        title: 'Meditate for 1 hour',
+        description: 'Sit quietly and meditate for exactly 1 hour',
         priority: 'high',
         categories: ['soul'],
-        statRewards: { soul: 1, xp: 90 },
-        difficulty: 8,
-      },
-      {
-        title: 'Connect with 5 friends',
-        description: 'Reach out to 5 people you care about',
-        priority: 'high',
-        categories: ['soul'],
-        statRewards: { soul: 1, xp: 90 },
-        difficulty: 8,
-      },
-      // Difficulty 9 - Master
-      {
-        title: 'Journal for 90 minutes',
-        description: 'Write in your journal for exactly 90 minutes',
-        priority: 'high',
-        categories: ['soul'],
-        statRewards: { soul: 1, xp: 120 },
-        difficulty: 9,
-      },
-      {
-        title: 'Meditate for 60 minutes',
-        description: 'Sit in meditation for exactly 60 minutes',
-        priority: 'high',
-        categories: ['soul'],
-        statRewards: { soul: 1, xp: 120 },
-        difficulty: 9,
-      },
-      {
-        title: 'Face 3 inner truths',
-        description: 'Confront 3 difficult truths about yourself',
-        priority: 'high',
-        categories: ['soul'],
-        statRewards: { soul: 1, xp: 120 },
-        difficulty: 9,
+        statRewards: { soul: 1, xp: calculateXp('high', 5) },
+        difficulty: 5,
       },
     ],
     home: [

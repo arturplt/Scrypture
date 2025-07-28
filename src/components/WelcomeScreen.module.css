@@ -73,7 +73,7 @@
 }
 
 .storyIcon {
-  font-size: var(--font-size-2xl);
+  font-size: var(--font-size-xl);
   text-align: center;
   margin-bottom: var(--spacing-md);
   animation: float 3s ease-in-out infinite;

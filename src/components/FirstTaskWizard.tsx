@@ -27,147 +27,76 @@ export const FirstTaskWizard: React.FC<FirstTaskWizardProps> = ({
   const [bodyReward, setBodyReward] = useState(0);
   const [mindReward, setMindReward] = useState(0);
   const [soulReward, setSoulReward] = useState(0);
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
+  const [difficulty, setDifficulty] = useState<number>(2);
+  const [isHabit, setIsHabit] = useState(false);
+  const [habitFrequency, setHabitFrequency] = useState<'daily' | 'weekly' | 'monthly'>('daily');
   const [isCreating, setIsCreating] = useState(false);
+
+  // Calculate XP based on priority and difficulty
+  const priorityXp = priority === 'high' ? 15 : priority === 'medium' ? 10 : 5;
+  const fibonacciXp = [0, 1, 2, 3, 5, 8, 13, 21, 34, 55];
+  const difficultyXp = fibonacciXp[difficulty];
+  const totalXp = 5 + priorityXp + difficultyXp; // Base 5xp + priority + difficulty
+
+  // Handle Enter key press for title input
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && currentStepIndex === 0 && taskTitle.trim().length >= 2) {
+      handleNext();
+    }
+  };
+
+  const canProceed = (currentStepIndex === 0 && taskTitle.trim().length >= 2) ||
+                     (currentStepIndex === 4 && (bodyReward > 0 || mindReward > 0 || soulReward > 0)) ||
+                     (currentStepIndex !== 0 && currentStepIndex !== 4);
+  
+  console.log('🔍 FirstTaskWizard canProceed check:', { 
+    currentStepIndex, 
+    canProceed, 
+    taskTitle: taskTitle.trim(), 
+    bodyReward, 
+    mindReward, 
+    soulReward 
+  });
 
   const steps: WizardStep[] = [
     {
       id: 'welcome',
       title: 'Create Your First Task',
-      description: 'Let\'s start your journey by creating your very first task! This will help you understand how Scrypture works.',
-      component: (
-        <div className={styles.stepContent}>
-          <div className={styles.illustration}>
-            <div className={styles.taskIcon}>📝</div>
-          </div>
-          <p className={styles.stepDescription}>
-            Tasks are the building blocks of your progress. Each task you complete helps build your mystical dam with Bóbr!
-          </p>
-          <div className={styles.tipBox}>
-            <span className={styles.tipIcon}>💡</span>
-            <p>Start with something simple and achievable - even "Drink a glass of water" counts!</p>
-          </div>
-        </div>
-      )
+      description: 'Let\'s start your journey by creating your very first task! Give your task a clear, specific title.',
+      component: null // Will be set after handlers are defined
     },
     {
-      id: 'title',
-      title: 'What do you want to accomplish?',
-      description: 'Give your task a clear and specific title. This helps you know exactly what needs to be done.',
+      id: 'taskDescription',
+      title: 'Add more details (optional)',
+      description: 'You can add a description to clarify what you mean or add context.',
       component: (
         <div className={styles.stepContent}>
           <div className={styles.inputGroup}>
-            <label className={styles.label} htmlFor="task-title">
-              Task Title
-            </label>
-            <input
-              id="task-title"
-              type="text"
-              className={styles.input}
-              value={taskTitle}
-              onChange={(e) => setTaskTitle(e.target.value)}
-              placeholder="e.g., Read for 30 minutes, Take a walk, Call a friend..."
-              autoFocus
-            />
-          </div>
-          <div className={styles.exampleBox}>
-            <h4>Good task examples:</h4>
-            <ul>
-              <li>"Read one chapter of my book"</li>
-              <li>"Organize my desk"</li>
-              <li>"Write in my journal for 10 minutes"</li>
-              <li>"Do 20 push-ups"</li>
-            </ul>
-          </div>
-        </div>
-      )
-    },
-    {
-      id: 'category',
-      title: 'What type of task is this?',
-      description: 'Categories help you organize your tasks and track progress in different areas of your life.',
-      component: (
-        <div className={styles.stepContent}>
-          <div className={styles.categoryGrid}>
-            {[
-              { id: 'personal', name: 'Personal', icon: '🌟', description: 'Self-care, hobbies, personal growth' },
-              { id: 'work', name: 'Work', icon: '💼', description: 'Professional tasks and projects' },
-              { id: 'health', name: 'Health', icon: '💪', description: 'Exercise, nutrition, wellness' },
-              { id: 'learning', name: 'Learning', icon: '📚', description: 'Education, skills, knowledge' },
-              { id: 'social', name: 'Social', icon: '👥', description: 'Friends, family, relationships' },
-              { id: 'creative', name: 'Creative', icon: '🎨', description: 'Art, writing, creative projects' }
-            ].map((category) => (
-              <button
-                key={category.id}
-                className={`${styles.categoryCard} ${taskCategory === category.id ? styles.selected : ''}`}
-                onClick={() => setTaskCategory(category.id)}
-              >
-                <div className={styles.categoryIcon}>{category.icon}</div>
-                <div className={styles.categoryName}>{category.name}</div>
-                <div className={styles.categoryDescription}>{category.description}</div>
-              </button>
-            ))}
-          </div>
-        </div>
-      )
-    },
-    {
-      id: 'description',
-      title: 'Add some details (optional)',
-      description: 'You can add more details to help you remember what this task involves, but this is completely optional.',
-      component: (
-        <div className={styles.stepContent}>
-          <div className={styles.inputGroup}>
-            <label className={styles.label} htmlFor="task-description">
-              Task Description (Optional)
-            </label>
+            <label className={styles.label}>Description (optional)</label>
             <textarea
-              id="task-description"
               className={styles.textarea}
               value={taskDescription}
               onChange={(e) => setTaskDescription(e.target.value)}
-              placeholder="Add any additional details, notes, or reminders..."
-              rows={4}
+              placeholder="e.g., Read any book or article, even just one page counts"
+              maxLength={500}
+              style={{ minHeight: '100px' }}
             />
           </div>
           <div className={styles.tipBox}>
-            <span className={styles.tipIcon}>✨</span>
-            <p>You can always edit or add to your tasks later!</p>
+            <span className={styles.tipIcon}>💡</span>
+            <p>Descriptions help you remember exactly what you meant when you created the task.</p>
           </div>
         </div>
       )
     },
     {
-      id: 'stats',
-      title: 'Choose your stat rewards',
-      description: 'Select which core attributes this task will improve when completed. You can choose multiple!',
+      id: 'taskRewards',
+      title: 'Choose stat rewards',
+      description: 'Select which stats you want to improve when you complete this task.',
       component: (
         <div className={styles.stepContent}>
-          <div className={styles.statsExplanation}>
-            <p className={styles.stepDescription}>
-              Every task you complete can strengthen your core attributes:
-            </p>
-            <div className={styles.statsList}>
-              <div className={styles.statExplanation}>
-                <span className={styles.statEmoji}>💪</span>
-                <div>
-                  <strong>Body:</strong> Physical activities, exercise, health
-                </div>
-              </div>
-              <div className={styles.statExplanation}>
-                <span className={styles.statEmoji}>🧠</span>
-                <div>
-                  <strong>Mind:</strong> Learning, thinking, mental challenges
-                </div>
-              </div>
-              <div className={styles.statExplanation}>
-                <span className={styles.statEmoji}>✨</span>
-                <div>
-                  <strong>Soul:</strong> Creativity, relationships, personal growth
-                </div>
-              </div>
-            </div>
-          </div>
-          
           <div className={styles.statsSelection}>
             <label className={styles.statsLabel}>
               Choose rewards for this task:
@@ -180,6 +109,7 @@ export const FirstTaskWizard: React.FC<FirstTaskWizardProps> = ({
               >
                 <span className={styles.statButtonIcon}>💪</span>
                 <span className={styles.statButtonText}>BODY</span>
+                <span className={styles.statButtonDescription}>Health & strength</span>
                 {bodyReward > 0 && <span className={styles.statButtonReward}>+1</span>}
               </button>
               
@@ -190,6 +120,7 @@ export const FirstTaskWizard: React.FC<FirstTaskWizardProps> = ({
               >
                 <span className={styles.statButtonIcon}>🧠</span>
                 <span className={styles.statButtonText}>MIND</span>
+                <span className={styles.statButtonDescription}>Knowledge & learning</span>
                 {mindReward > 0 && <span className={styles.statButtonReward}>+1</span>}
               </button>
               
@@ -200,64 +131,257 @@ export const FirstTaskWizard: React.FC<FirstTaskWizardProps> = ({
               >
                 <span className={styles.statButtonIcon}>✨</span>
                 <span className={styles.statButtonText}>SOUL</span>
+                <span className={styles.statButtonDescription}>Creativity & spirit</span>
                 {soulReward > 0 && <span className={styles.statButtonReward}>+1</span>}
               </button>
             </div>
-          </div>
-          
-          <div className={styles.tipBox}>
-            <span className={styles.tipIcon}>🎯</span>
-            <p>Choose what fits your task best - you can always adjust this for future tasks!</p>
           </div>
         </div>
       )
     },
     {
-      id: 'review',
+      id: 'taskCategory',
+      title: 'Choose a category',
+      description: 'Categories help organize your tasks and group similar activities together.',
+      component: (
+        <div className={styles.stepContent}>
+          <div className={styles.categoryGrid}>
+            <button
+              type="button"
+              className={`${styles.categoryCard} ${selectedCategory === 'home' ? styles.selected : ''}`}
+              onClick={() => setSelectedCategory('home')}
+            >
+              <div className={styles.categoryIcon}>🏠</div>
+              <div className={styles.categoryName}>Home</div>
+              <div className={styles.categoryDescription}>Household tasks and chores</div>
+            </button>
+            <button
+              type="button"
+              className={`${styles.categoryCard} ${selectedCategory === 'free-time' ? styles.selected : ''}`}
+              onClick={() => setSelectedCategory('free-time')}
+            >
+              <div className={styles.categoryIcon}>🎮</div>
+              <div className={styles.categoryName}>Free Time</div>
+              <div className={styles.categoryDescription}>Hobbies and entertainment</div>
+            </button>
+            <button
+              type="button"
+              className={`${styles.categoryCard} ${selectedCategory === 'garden' ? styles.selected : ''}`}
+              onClick={() => setSelectedCategory('garden')}
+            >
+              <div className={styles.categoryIcon}>🌱</div>
+              <div className={styles.categoryName}>Garden</div>
+              <div className={styles.categoryDescription}>Gardening and outdoor activities</div>
+            </button>
+            <button
+              type="button"
+              className={`${styles.categoryCard} ${selectedCategory === 'work' ? styles.selected : ''}`}
+              onClick={() => setSelectedCategory('work')}
+            >
+              <div className={styles.categoryIcon}>💼</div>
+              <div className={styles.categoryName}>Work</div>
+              <div className={styles.categoryDescription}>Professional and career tasks</div>
+            </button>
+            <button
+              type="button"
+              className={`${styles.categoryCard} ${selectedCategory === 'health' ? styles.selected : ''}`}
+              onClick={() => setSelectedCategory('health')}
+            >
+              <div className={styles.categoryIcon}>🏥</div>
+              <div className={styles.categoryName}>Health</div>
+              <div className={styles.categoryDescription}>Medical and wellness activities</div>
+            </button>
+            <button
+              type="button"
+              className={`${styles.categoryCard} ${selectedCategory === 'learning' ? styles.selected : ''}`}
+              onClick={() => setSelectedCategory('learning')}
+            >
+              <div className={styles.categoryIcon}>📚</div>
+              <div className={styles.categoryName}>Learning</div>
+              <div className={styles.categoryDescription}>Education and skill development</div>
+            </button>
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 'taskPriority',
+      title: 'Priority and difficulty',
+      description: 'Priority and difficulty affect your XP rewards. Higher priority and difficulty = more XP!',
+      component: (
+        <div className={styles.stepContent}>
+          <div className={styles.prioritySection}>
+            <label className={styles.label}>Priority:</label>
+            <div className={styles.priorityButtons}>
+              <button
+                type="button"
+                className={`${styles.priorityButton} ${styles.priorityLow} ${priority === 'low' ? styles.priorityButtonActive : ''}`}
+                onClick={() => setPriority('low')}
+              >
+                <div className={styles.priorityName}>Low</div>
+                <div className={styles.priorityXp}>5 XP</div>
+              </button>
+              <button
+                type="button"
+                className={`${styles.priorityButton} ${styles.priorityMedium} ${priority === 'medium' ? styles.priorityButtonActive : ''}`}
+                onClick={() => setPriority('medium')}
+              >
+                <div className={styles.priorityName}>Medium</div>
+                <div className={styles.priorityXp}>10 XP</div>
+              </button>
+              <button
+                type="button"
+                className={`${styles.priorityButton} ${styles.priorityHigh} ${priority === 'high' ? styles.priorityButtonActive : ''}`}
+                onClick={() => setPriority('high')}
+              >
+                <div className={styles.priorityName}>High</div>
+                <div className={styles.priorityXp}>15 XP</div>
+              </button>
+            </div>
+          </div>
+          
+          <div className={styles.difficultySection}>
+            <label className={styles.label}>Difficulty:</label>
+            <div className={styles.difficultyButtons}>
+              {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((level) => (
+                <button
+                  key={level}
+                  type="button"
+                  data-difficulty={level}
+                  className={`${styles.difficultyButton} ${difficulty === level ? styles.difficultyButtonActive : ''}`}
+                  onClick={() => setDifficulty(level)}
+                >
+                  <div className={styles.difficultyNumber}>{level}</div>
+                  <div className={styles.difficultyXp}>{fibonacciXp[level]} XP</div>
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          <div className={styles.xpCalculation}>
+            <h4>XP Calculation:</h4>
+            <div className={styles.xpBreakdown}>
+              <span>Base: +5 XP</span>
+              <span>Priority: +{priorityXp} XP</span>
+              <span>Difficulty: +{difficultyXp} XP</span>
+              <span className={styles.totalXp}>Total: +{totalXp} XP</span>
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 'taskType',
+      title: 'Task type',
+      description: 'Choose whether this is a one-time task or a habit you want to build.',
+      component: (
+        <div className={styles.stepContent}>
+          <div className={styles.taskTypeSection}>
+            <button
+              type="button"
+              className={`${styles.makeHabitButton} ${isHabit ? styles.makeHabitButtonActive : ''}`}
+              onClick={() => setIsHabit(!isHabit)}
+            >
+              <div className={styles.makeHabitIcon}>🔄</div>
+              <div className={styles.makeHabitText}>Make it a habit</div>
+            </button>
+            
+            {isHabit && (
+              <div className={styles.frequencySection}>
+                <label className={styles.label}>Frequency:</label>
+                <div className={styles.frequencyButtons}>
+                  <button
+                    type="button"
+                    className={`${styles.frequencyButton} ${habitFrequency === 'daily' ? styles.frequencyButtonActive : ''}`}
+                    onClick={() => setHabitFrequency('daily')}
+                  >
+                    <div className={styles.frequencyIcon}>📅</div>
+                    <div className={styles.frequencyText}>Daily</div>
+                  </button>
+                  <button
+                    type="button"
+                    className={`${styles.frequencyButton} ${habitFrequency === 'weekly' ? styles.frequencyButtonActive : ''}`}
+                    onClick={() => setHabitFrequency('weekly')}
+                  >
+                    <div className={styles.frequencyIcon}>📆</div>
+                    <div className={styles.frequencyText}>Weekly</div>
+                  </button>
+                  <button
+                    type="button"
+                    className={`${styles.frequencyButton} ${habitFrequency === 'monthly' ? styles.frequencyButtonActive : ''}`}
+                    onClick={() => setHabitFrequency('monthly')}
+                  >
+                    <div className={styles.frequencyIcon}>🗓️</div>
+                    <div className={styles.frequencyText}>Monthly</div>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 'taskPreview',
       title: 'Ready to create your task?',
       description: 'Here\'s what your first task will look like. Once you create it, you can complete it to see Bóbr celebrate!',
       component: (
         <div className={styles.stepContent}>
           <div className={styles.taskPreview}>
             <div className={styles.previewHeader}>
-              <span className={styles.previewIcon}>📝</span>
-              <span className={styles.previewTitle}>Task Preview</span>
+              <span className={styles.previewIcon}>{isHabit ? '🔄' : '📝'}</span>
+              <h3 className={styles.previewTitle}>{isHabit ? 'Habit Preview' : 'Task Preview'}</h3>
             </div>
             <div className={styles.previewContent}>
-              <h3 className={styles.previewTaskTitle}>{taskTitle || 'Task Title'}</h3>
-              <div className={styles.previewCategory}>
-                <span className={styles.categoryTag}>{taskCategory}</span>
-              </div>
+              <h4 className={styles.previewTaskTitle}>{taskTitle || 'Your task title'}</h4>
               {taskDescription && (
                 <p className={styles.previewDescription}>{taskDescription}</p>
               )}
-              {(bodyReward > 0 || mindReward > 0 || soulReward > 0) && (
-                <div className={styles.previewRewards}>
-                  <span className={styles.rewardsLabel}>Rewards:</span>
-                  <div className={styles.rewardsList}>
-                    {bodyReward > 0 && (
-                      <span className={`${styles.rewardBadge} ${styles.bodyReward}`}>
-                        💪 Body: +{bodyReward}
-                      </span>
-                    )}
-                    {mindReward > 0 && (
-                      <span className={`${styles.rewardBadge} ${styles.mindReward}`}>
-                        🧠 Mind: +{mindReward}
-                      </span>
-                    )}
-                    {soulReward > 0 && (
-                      <span className={`${styles.rewardBadge} ${styles.soulReward}`}>
-                        ✨ Soul: +{soulReward}
-                      </span>
-                    )}
-                  </div>
+              <div className={styles.previewCategory}>
+                {selectedCategory && (
+                  <span className={styles.categoryTag} style={{ backgroundColor: 'var(--color-accent-gold)', color: 'var(--color-bg-primary)' }}>
+                    {selectedCategory.toUpperCase().replace('-', ' ')}
+                  </span>
+                )}
+                {isHabit && (
+                  <span className={styles.categoryTag} style={{ backgroundColor: 'var(--color-chill)', color: 'var(--color-text-primary)' }}>
+                    HABIT
+                  </span>
+                )}
+                {isHabit && habitFrequency && (
+                  <span className={styles.categoryTag} style={{ backgroundColor: 'var(--color-waiting)', color: 'var(--color-text-primary)' }}>
+                    {habitFrequency.toUpperCase()}
+                  </span>
+                )}
+              </div>
+              <div className={styles.previewRewards}>
+                <span className={styles.rewardsLabel}>Rewards:</span>
+                <div className={styles.rewardsList}>
+                  <span className={styles.rewardBadge} style={{ backgroundColor: 'var(--color-accent-gold)' }}>
+                    ⭐ XP: +{totalXp}
+                  </span>
+                  {bodyReward > 0 && (
+                    <span className={`${styles.rewardBadge} ${styles.bodyReward}`}>
+                      💪 Body: +{bodyReward}
+                    </span>
+                  )}
+                  {mindReward > 0 && (
+                    <span className={`${styles.rewardBadge} ${styles.mindReward}`}>
+                      🧠 Mind: +{mindReward}
+                    </span>
+                  )}
+                  {soulReward > 0 && (
+                    <span className={`${styles.rewardBadge} ${styles.soulReward}`}>
+                      ✨ Soul: +{soulReward}
+                    </span>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
           </div>
           <div className={styles.celebrationHint}>
             <span className={styles.celebrationIcon}>🎉</span>
-            <p>After creating this task, try completing it to see Bóbr's celebration!</p>
+            <p>After creating this {isHabit ? 'habit' : 'task'}, try completing it to see Bóbr's celebration!</p>
           </div>
         </div>
       )
@@ -266,20 +390,7 @@ export const FirstTaskWizard: React.FC<FirstTaskWizardProps> = ({
 
   const currentStep = steps[currentStepIndex];
   const isLastStep = currentStepIndex === steps.length - 1;
-  const canProceed = currentStepIndex === 0 || 
-                     (currentStepIndex === 1 && taskTitle.trim().length > 0) ||
-                     (currentStepIndex === 4 && (bodyReward > 0 || mindReward > 0 || soulReward > 0)) ||
-                     (currentStepIndex !== 1 && currentStepIndex !== 4);
   
-  console.log('🔍 FirstTaskWizard canProceed check:', { 
-    currentStepIndex, 
-    canProceed, 
-    taskTitle: taskTitle.trim(), 
-    bodyReward, 
-    mindReward, 
-    soulReward 
-  });
-
   const handleNext = () => {
     if (isLastStep) {
       handleCreateTask();
@@ -305,17 +416,20 @@ export const FirstTaskWizard: React.FC<FirstTaskWizardProps> = ({
         ...(bodyReward > 0 && { body: bodyReward }),
         ...(mindReward > 0 && { mind: mindReward }),
         ...(soulReward > 0 && { soul: soulReward }),
-        xp: 10, // Base XP reward
+        xp: totalXp, // Calculated XP based on priority and difficulty
       };
 
       console.log('🎯 Creating first task with stat rewards:', statRewards);
 
       const taskData = {
         title: taskTitle.trim(),
-        categories: [taskCategory],
+        categories: [taskCategory, selectedCategory].filter(Boolean),
         description: taskDescription.trim() || undefined,
-        priority: 'medium' as const,
+        priority,
+        difficulty,
         completed: false,
+        isHabit,
+        habitFrequency: isHabit ? habitFrequency : undefined,
         statRewards,
       };
 
@@ -343,6 +457,59 @@ export const FirstTaskWizard: React.FC<FirstTaskWizardProps> = ({
     onSkip();
   };
 
+  const renderFirstStepContent = () => (
+    <div className={styles.stepContent}>
+      <div className={styles.illustration}>
+        <img 
+          src="/assets/Icons/beaver_32.png" 
+          alt="Bóbr the beaver" 
+          className={styles.taskIcon}
+        />
+      </div>
+      <div className={styles.inputGroup}>
+        <label className={styles.label}>Task Title</label>
+        <div className={styles.titleInputContainer}>
+          <input
+            type="text"
+            className={styles.input}
+            value={taskTitle}
+            onChange={(e) => setTaskTitle(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder="e.g., Read for 10 minutes"
+            maxLength={100}
+          />
+          <button 
+            className={`${styles.nextButton} ${!canProceed ? styles.disabled : ''}`}
+            onClick={handleNext}
+            disabled={!canProceed || isCreating}
+          >
+            {isCreating ? (
+              <span>Creating...</span>
+            ) : (
+              'Next'
+            )}
+          </button>
+        </div>
+      </div>
+      <div className={styles.exampleBox}>
+        <h4>Good examples:</h4>
+        <ul>
+          <li>"Read for 10 minutes"</li>
+          <li>"Drink a glass of water"</li>
+          <li>"Write one sentence"</li>
+          <li>"Take 3 deep breaths"</li>
+        </ul>
+      </div>
+      <div className={styles.tipBox}>
+        <span className={styles.tipIcon}>💡</span>
+        <p>Tasks are the building blocks of your progress. Each task you complete helps build your mystical dam with Bóbr!</p>
+      </div>
+    </div>
+  );
+
+  // Set the component for the first step after handlers are defined
+  steps[0].component = renderFirstStepContent();
+
   return (
     <div className={styles.overlay} onClick={(e) => e.stopPropagation()}>
       <div className={styles.wizard} role="dialog" aria-labelledby="wizard-title" aria-describedby="wizard-description">
@@ -369,6 +536,33 @@ export const FirstTaskWizard: React.FC<FirstTaskWizardProps> = ({
               Step {currentStepIndex + 1} of {steps.length}
             </span>
           </div>
+
+          {/* Navigation buttons - only show for non-first steps */}
+          {currentStepIndex > 0 && (
+            <div className={styles.navigationButtons}>
+              <button 
+                className={styles.backButton}
+                onClick={handleBack}
+                disabled={isCreating}
+              >
+                Back
+              </button>
+              
+              <button 
+                className={`${styles.nextButton} ${!canProceed ? styles.disabled : ''}`}
+                onClick={handleNext}
+                disabled={!canProceed || isCreating}
+              >
+                {isCreating ? (
+                  <span>Creating...</span>
+                ) : isLastStep ? (
+                  'Create My First Task!'
+                ) : (
+                  'Next'
+                )}
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Content */}
@@ -376,7 +570,7 @@ export const FirstTaskWizard: React.FC<FirstTaskWizardProps> = ({
           {currentStep.component}
         </div>
 
-        {/* Footer */}
+        {/* Footer - only skip button */}
         <div className={styles.footer}>
           <button 
             className={styles.skipButton}
@@ -386,32 +580,6 @@ export const FirstTaskWizard: React.FC<FirstTaskWizardProps> = ({
           >
             Skip Tutorial
           </button>
-          
-          <div className={styles.navigationButtons}>
-            {currentStepIndex > 0 && (
-              <button 
-                className={styles.backButton}
-                onClick={handleBack}
-                disabled={isCreating}
-              >
-                Back
-              </button>
-            )}
-            
-            <button 
-              className={`${styles.nextButton} ${!canProceed ? styles.disabled : ''}`}
-              onClick={handleNext}
-              disabled={!canProceed || isCreating}
-            >
-              {isCreating ? (
-                <span>Creating...</span>
-              ) : isLastStep ? (
-                'Create My First Task!'
-              ) : (
-                'Next'
-              )}
-            </button>
-          </div>
         </div>
       </div>
     </div>

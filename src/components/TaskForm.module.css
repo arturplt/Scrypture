@@ -391,12 +391,12 @@
   flex: 1;
   min-width: 0;
   width: 100%;
-  padding: var(--spacing-xs) var(--spacing-sm);
+  padding: var(--spacing-sm);
   border: 2px solid var(--color-border-primary);
   border-radius: 0px;
   background: var(--color-bg-primary);
   color: var(--color-text-primary);
-  font-size: 1rem;
+  font-size: var(--font-size-md);
   font-family: 'Press Start 2P', monospace;
   transition: all var(--transition-normal);
   -webkit-font-smoothing: none;
@@ -802,7 +802,7 @@
 
 @media (max-width: 480px) {
   .titleInput {
-    font-size: 0.75rem;
+    font-size: var(--font-size-xs);
     padding: var(--spacing-xs) var(--spacing-sm);
   }
 

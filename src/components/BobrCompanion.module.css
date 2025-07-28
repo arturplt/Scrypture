@@ -259,7 +259,7 @@
   padding: 0.5rem;
   border-radius: 8px;
   font-family: 'Press Start 2P', monospace;
-  font-size: 0.5rem;
+  font-size: var(--font-size-xs);
   font-weight: bold;
   text-transform: uppercase;
   box-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);

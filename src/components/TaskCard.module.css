@@ -853,7 +853,7 @@
   border: 2px solid var(--color-border-primary);
   border-radius: 0;
   padding: var(--spacing-sm);
-  font-size: 1.1rem;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   width: 100%;
   margin-bottom: var(--spacing-sm);
