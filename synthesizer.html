@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8-BIT SYNTHESIZER</title>
+    <link rel="stylesheet" href="synthesizer.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Fixed Status Bar at Top -->
+    <div class="fixedStatusBar">
+        <div class="statusBarContent">
+            <div class="statusSection">
+                <div class="statusLabel">Frequency:</div>
+                <div class="statusValue" id="frequencyValue">- Hz</div>
+            </div>
+            <div class="statusSection notesSection">
+                <div class="statusLabel">Playing:</div>
+                <div class="notesDisplay" id="notesDisplay">None</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>8-BIT SYNTHESIZER</h1>
+        
+
+
+        <!-- Circle of Fifths Section -->
+        <div class="collapsible">
+            <div class="sectionHeader">
+                <label>🎯 Circle of Fifths</label>
+                <span class="collapseIcon">▼</span>
+            </div>
+            <div class="sectionContent">
+                <div class="circleOfFifths">
+                    <div class="circleKey major" style="left: 150px; top: 50px;">C</div>
+                    <div class="circleKey major" style="left: 200px; top: 80px;">G</div>
+                    <div class="circleKey major" style="left: 220px; top: 150px;">D</div>
+                    <div class="circleKey major" style="left: 200px; top: 220px;">A</div>
+                    <div class="circleKey major" style="left: 150px; top: 250px;">E</div>
+                    <div class="circleKey major" style="left: 100px; top: 220px;">B</div>
+                    <div class="circleKey diminished" style="left: 80px; top: 150px;">F#</div>
+                    <div class="circleKey minor" style="left: 100px; top: 80px;">C#</div>
+                    <div class="circleKey minor" style="left: 150px; top: 100px;">G#</div>
+                    <div class="circleKey minor" style="left: 180px; top: 120px;">D#</div>
+                    <div class="circleKey minor" style="left: 180px; top: 180px;">A#</div>
+                    <div class="circleKey dominant" style="left: 120px; top: 180px;">F</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mood Chords Section -->
+        <div class="collapsible">
+            <div class="sectionHeader">
+                <label>😊 Mood Chords</label>
+                <span class="collapseIcon">▼</span>
+            </div>
+            <div class="sectionContent">
+                <div class="moodChords">
+                    <div class="moodGroup">
+                        <div class="moodLabel">😊 Happy</div>
+                        <div class="moodButtons">
+                            <button class="moodBtn happy">C</button>
+                            <button class="moodBtn happy">F</button>
+                            <button class="moodBtn happy">G</button>
+                            <button class="moodBtn happy">Cmaj7</button>
+                        </div>
+                    </div>
+                    <div class="moodGroup">
+                        <div class="moodLabel">😢 Sad</div>
+                        <div class="moodButtons">
+                            <button class="moodBtn sad">Am</button>
+                            <button class="moodBtn sad">Dm</button>
+                            <button class="moodBtn sad">Em</button>
+                            <button class="moodBtn sad">Am7</button>
+                        </div>
+                    </div>
+                    <div class="moodGroup">
+                        <div class="moodLabel">😤 Tense</div>
+                        <div class="moodButtons">
+                            <button class="moodBtn tense">G7</button>
+                            <button class="moodBtn tense">B°</button>
+                            <button class="moodBtn tense">Dm7</button>
+                            <button class="moodBtn tense">Bm7b5</button>
+                        </div>
+                    </div>
+                    <div class="moodGroup">
+                        <div class="moodLabel">😌 Dreamy</div>
+                        <div class="moodButtons">
+                            <button class="moodBtn dreamy">Fmaj7</button>
+                            <button class="moodBtn dreamy">Em7</button>
+                            <button class="moodBtn dreamy">Cmaj7</button>
+                            <button class="moodBtn dreamy">Am7</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Plain Chords Section -->
+        <div class="collapsible">
+            <div class="sectionHeader">
+                <label>🎼 Plain Chords</label>
+                <span class="collapseIcon">▼</span>
+            </div>
+            <div class="sectionContent">
+                <div class="chordButtons">
+                    <button class="chordBtn major">C</button>
+                    <button class="chordBtn minor">Dm</button>
+                    <button class="chordBtn minor">Em</button>
+                    <button class="chordBtn major">F</button>
+                    <button class="chordBtn major">G</button>
+                    <button class="chordBtn minor">Am</button>
+                    <button class="chordBtn diminished">B°</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Piano Keyboard -->
+        <div class="keyboard">
+            <!-- Keys will be populated by JavaScript -->
+        </div>
+
+        <!-- Chord Progressions Section -->
+        <div class="collapsible">
+            <div class="sectionHeader">
+                <label>🎼 Chord Progressions</label>
+                <span class="collapseIcon">▼</span>
+            </div>
+            <div class="sectionContent">
+                <div class="chordControls">
+                    <div class="chordPresets">
+                        <button class="presetBtn">I-IV-V</button>
+                        <button class="presetBtn">ii-V-I</button>
+                        <button class="presetBtn">Pop</button>
+                        <button class="presetBtn">Sad</button>
+                        <button class="presetBtn">😊 Happy</button>
+                        <button class="presetBtn">😤 Tense</button>
+                        <button class="presetBtn">😌 Dreamy</button>
+                        <button class="presetBtn">🎷 Jazz</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Presets Section -->
+        <div class="collapsible">
+            <div class="sectionHeader">
+                <label>🎛️ Presets</label>
+                <span class="collapseIcon">▼</span>
+            </div>
+            <div class="sectionContent">
+                <div class="presetButtons">
+                    <button class="presetBtn">Piano</button>
+                    <button class="presetBtn">Bass</button>
+                    <button class="presetBtn">Lead</button>
+                    <button class="presetBtn">Pad</button>
+                    <button class="presetBtn">Pluck</button>
+                    <button class="presetBtn">Bell</button>
+                    <button class="presetBtn">Chord</button>
+                    <button class="presetBtn">Arp</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scrypture Sounds Section -->
+        <div class="collapsible">
+            <div class="sectionHeader">
+                <label>🦫 Scrypture Sounds</label>
+                <span class="collapseIcon">▼</span>
+            </div>
+            <div class="sectionContent">
+                <div class="presetButtons">
+                    <button class="presetBtn">🏆 Common</button>
+                    <button class="presetBtn">💎 Rare</button>
+                    <button class="presetBtn">👑 Legendary</button>
+                    <button class="presetBtn">✅ Complete</button>
+                    <button class="presetBtn">🎉 Level Up</button>
+                    <button class="presetBtn">🦫 Bóbr</button>
+                    <button class="presetBtn">🏗️ Dam Build</button>
+                    <button class="presetBtn">🔥 Streak</button>
+                    <button class="presetBtn">🖱️ UI Click</button>
+                    <button class="presetBtn">📝 Submit</button>
+                    <button class="presetBtn">📋 Modal</button>
+                    <button class="presetBtn">⭐ XP Gain</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Waveform Section -->
+        <div class="collapsible">
+            <div class="sectionHeader">
+                <label>🎵 Waveform</label>
+                <span class="collapseIcon">▼</span>
+            </div>
+            <div class="sectionContent">
+                <div class="waveformButtons">
+                    <button class="waveformBtn active">Sine</button>
+                    <button class="waveformBtn">Square</button>
+                    <button class="waveformBtn">Triangle</button>
+                    <button class="waveformBtn">Sawtooth</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Volume Control -->
+        <div class="section">
+            <label>Volume</label>
+            <div class="sliderGroup">
+                <button>-</button>
+                <input type="range" id="volume" min="0" max="100" value="50" step="1">
+                <button>+</button>
+                <span class="valueDisplay">50%</span>
+            </div>
+        </div>
+
+        <!-- Attack Control -->
+        <div class="section">
+            <label>Attack</label>
+            <div class="sliderGroup">
+                <button>-</button>
+                <input type="range" id="attack" min="0" max="100" value="10" step="1">
+                <button>+</button>
+            </div>
+        </div>
+
+        <!-- Release Control -->
+        <div class="section">
+            <label>Release</label>
+            <div class="sliderGroup">
+                <button>-</button>
+                <input type="range" id="release" min="0" max="100" value="20" step="1">
+                <button>+</button>
+                <button class="sustainBtn" id="sustainBtn">Sustain</button>
+            </div>
+        </div>
+
+        <!-- Detune Control -->
+        <div class="section">
+            <label>Detune</label>
+            <div class="sliderGroup">
+                <button>-</button>
+                <input type="range" id="detune" min="-100" max="100" value="0" step="1">
+                <button>+</button>
+                <span class="valueDisplay">0¢</span>
+                <button class="resetBtn">Reset</button>
+            </div>
+        </div>
+
+        <!-- Reverb Control -->
+        <div class="section">
+            <label>Reverb</label>
+            <select id="reverb">
+                <option value="off">Off</option>
+                <option value="on">On</option>
+            </select>
+        </div>
+
+        <!-- Arpeggiator Control -->
+        <div class="section">
+            <label>Arpeggiator</label>
+            <select id="arpeggiator">
+                <option value="off">Off</option>
+                <option value="up">Up</option>
+                <option value="down">Down</option>
+            </select>
+        </div>
+
+        <!-- LFO Rate Control -->
+        <div class="section">
+            <label>LFO Rate</label>
+            <div class="sliderGroup">
+                <button>-</button>
+                <input type="range" id="lfoRate" min="0" max="10" value="1" step="0.1">
+                <button>+</button>
+                <span class="valueDisplay">1 Hz</span>
+            </div>
+        </div>
+
+        <!-- LFO Depth Control -->
+        <div class="section">
+            <label>LFO Depth</label>
+            <div class="sliderGroup">
+                <button>-</button>
+                <input type="range" id="lfoDepth" min="0" max="50" value="10" step="1">
+                <button>+</button>
+            </div>
+        </div>
+
+        <!-- Filter Control -->
+        <div class="section">
+            <label>Filter Cutoff</label>
+            <div class="sliderGroup">
+                <button>-</button>
+                <input type="range" min="0" max="100" value="100" step="1">
+                <button>+</button>
+                <span class="valueDisplay">100%</span>
+            </div>
+        </div>
+
+        <!-- Filter Resonance -->
+        <div class="section">
+            <label>Filter Resonance</label>
+            <div class="sliderGroup">
+                <button>-</button>
+                <input type="range" min="0" max="20" value="0" step="1">
+                <button>+</button>
+                <span class="valueDisplay">0</span>
+            </div>
+        </div>
+
+        <!-- LFO Target Control -->
+        <div class="section">
+            <label>LFO Target</label>
+            <select id="lfoTarget">
+                <option value="pitch">Pitch</option>
+                <option value="volume">Volume</option>
+                <option value="filter">Filter</option>
+            </select>
+        </div>
+
+        <!-- Sequencer Section -->
+        <div class="container" style="margin-top: 20px;">
+            <h1>SEQUENCER</h1>
+
+            <!-- BPM Control -->
+            <div class="section">
+                <label>BPM</label>
+                <div class="sliderGroup">
+                    <button>-</button>
+                    <input type="range" id="bpm" min="60" max="200" value="120" step="1">
+                    <button>+</button>
+                </div>
+            </div>
+
+            <!-- Steps Control -->
+            <div class="section">
+                <label>Steps</label>
+                <div class="sliderGroup">
+                    <button>-</button>
+                    <input type="range" id="steps" min="4" max="16" value="8" step="1">
+                    <button>+</button>
+                </div>
+            </div>
+
+            <!-- Sequencer Controls -->
+            <div class="section">
+                <div class="sliderGroup">
+                    <button id="playBtn">Play</button>
+                    <button id="stopBtn">Stop</button>
+                    <button id="clearBtn">Clear</button>
+                    <button id="drawBtn">Draw</button>
+                </div>
+            </div>
+
+            <!-- Timeline -->
+            <div class="section">
+                <div class="timelineContainer">
+                    <div class="timelineHeader">
+                        <div class="stepIndicators">
+                            <!-- Step indicators will be populated by JavaScript -->
+                        </div>
+                    </div>
+                    <div class="timelineTracks">
+                        <!-- Tracks will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer Controls -->
+        <div class="footerControls">
+            <div class="controlGroup">
+                <button class="footerBtn" id="panicBtn">🚨 Panic</button>
+                <button class="footerBtn" id="resetBtn">🔄 Reset</button>
+                <button class="footerBtn" id="saveBtn">💾 Save</button>
+                <button class="footerBtn" id="loadBtn">📂 Load</button>
+            </div>
+            <div class="controlGroup">
+                <button class="footerBtn" id="midiBtn">🎹 MIDI</button>
+                <button class="footerBtn" id="recordBtn">⏺️ Record</button>
+                <button class="footerBtn" id="exportBtn">📤 Export</button>
+                <button class="footerBtn" id="helpBtn">❓ Help</button>
+            </div>
+        </div>
+        
+        <!-- Info Panel -->
+        <div class="infoPanel">
+            <div class="infoItem">
+                <span class="infoLabel">Version:</span>
+                <span class="infoValue">1.0.0</span>
+            </div>
+            <div class="infoItem">
+                <span class="infoLabel">Sample Rate:</span>
+                <span class="infoValue">44.1 kHz</span>
+            </div>
+            <div class="infoItem">
+                <span class="infoLabel">Buffer Size:</span>
+                <span class="infoValue">512</span>
+            </div>
+            <div class="infoItem">
+                <span class="infoLabel">Latency:</span>
+                <span class="infoValue">11.6ms</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="synthesizer-data.js"></script>
+    <script src="synthesizer.js"></script>
+</body>
+</html> 

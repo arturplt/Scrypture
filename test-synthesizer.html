@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Synthesizer Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #23211a;
+            color: #e8e5d2;
+            padding: 20px;
+        }
+        .test-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #2d2b22;
+            padding: 20px;
+            border: 4px solid #39362a;
+        }
+        .keyboard {
+            display: flex;
+            gap: 2px;
+            margin: 20px 0;
+        }
+        .key {
+            flex: 1;
+            height: 80px;
+            background: #e8e5d2;
+            color: #23211a;
+            border: 1px solid #39362a;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .key.black {
+            background: #1a1812;
+            color: #e8e5d2;
+            height: 50px;
+            flex: 0.6;
+            margin: 0 -18px;
+        }
+        .key.active {
+            background: #b6a432 !important;
+            color: #23211a;
+        }
+        .test-btn {
+            background: #4a7c59;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .test-btn:hover {
+            background: #5a8c69;
+        }
+        .status {
+            background: #1a1812;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #39362a;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔊 Synthesizer Test</h1>
+        
+        <div class="status">
+            <strong>Status:</strong> <span id="status">Loading...</span>
+        </div>
+        
+        <div>
+            <button class="test-btn" id="initAudio">🎵 Initialize Audio</button>
+            <button class="test-btn" id="testNote">🎹 Test Note (A4)</button>
+            <button class="test-btn" id="testChord">🎼 Test Chord (C Major)</button>
+        </div>
+        
+        <h3>Piano Keyboard:</h3>
+        <div class="keyboard" id="keyboard">
+            <!-- Keys will be populated by JavaScript -->
+        </div>
+        
+        <div class="status">
+            <strong>Debug Info:</strong>
+            <div id="debug"></div>
+        </div>
+    </div>
+
+    <script src="synthesizer-data.js"></script>
+    <script>
+        // Simple test synthesizer
+        let audioContext = null;
+        let masterGain = null;
+        let activeNotes = {};
+        
+        function updateStatus(message) {
+            document.getElementById('status').textContent = message;
+            console.log('Status:', message);
+        }
+        
+        function updateDebug(info) {
+            document.getElementById('debug').innerHTML = info;
+        }
+        
+        function initializeAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                masterGain = audioContext.createGain();
+                masterGain.connect(audioContext.destination);
+                masterGain.gain.value = 0.3;
+                updateStatus('Audio initialized successfully');
+                return true;
+            } catch (error) {
+                console.error('Failed to initialize audio:', error);
+                updateStatus('Audio initialization failed: ' + error.message);
+                return false;
+            }
+        }
+        
+        function playNote(frequency) {
+            if (!audioContext || !masterGain) {
+                updateStatus('Audio not initialized');
+                return;
+            }
+            
+            const noteKey = frequency.toString();
+            if (activeNotes[noteKey]) return;
+            
+            try {
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+                
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+                
+                const now = audioContext.currentTime;
+                gainNode.gain.setValueAtTime(0, now);
+                gainNode.gain.linearRampToValueAtTime(0.3, now + 0.01);
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(masterGain);
+                
+                oscillator.start(now);
+                
+                activeNotes[noteKey] = { oscillator, gain: gainNode };
+                updateStatus(`Playing ${frequency.toFixed(1)} Hz`);
+                
+            } catch (error) {
+                console.error('Error playing note:', error);
+                updateStatus('Error playing note: ' + error.message);
+            }
+        }
+        
+        function stopNote(frequency) {
+            const noteKey = frequency.toString();
+            const note = activeNotes[noteKey];
+            
+            if (!note) return;
+            
+            try {
+                const now = audioContext.currentTime;
+                note.gain.gain.linearRampToValueAtTime(0, now + 0.1);
+                
+                setTimeout(() => {
+                    if (note.oscillator) {
+                        note.oscillator.stop();
+                    }
+                    delete activeNotes[noteKey];
+                }, 100);
+                
+            } catch (error) {
+                console.error('Error stopping note:', error);
+            }
+        }
+        
+        function playChord(chordName) {
+            const chord = window.SynthesizerData?.CHORDS[chordName];
+            if (!chord) {
+                updateStatus('Chord not found: ' + chordName);
+                return;
+            }
+            
+            chord.frequencies.forEach(freq => {
+                playNote(freq);
+            });
+            
+            updateStatus(`Playing ${chordName}`);
+        }
+        
+        function createKeyboard() {
+            const keyboard = document.getElementById('keyboard');
+            const notes = window.SynthesizerData?.NOTES || [
+                { freq: 261.63, key: 'C' },
+                { freq: 277.18, key: 'C#', black: true },
+                { freq: 293.66, key: 'D' },
+                { freq: 311.13, key: 'D#', black: true },
+                { freq: 329.63, key: 'E' },
+                { freq: 349.23, key: 'F' },
+                { freq: 369.99, key: 'F#', black: true },
+                { freq: 392.00, key: 'G' },
+                { freq: 415.30, key: 'G#', black: true },
+                { freq: 440.00, key: 'A' },
+                { freq: 466.16, key: 'A#', black: true },
+                { freq: 493.88, key: 'B' },
+                { freq: 523.25, key: 'C2' }
+            ];
+            
+            keyboard.innerHTML = '';
+            
+            notes.forEach(note => {
+                const key = document.createElement('div');
+                key.className = `key ${note.black ? 'black' : ''}`;
+                key.textContent = note.key;
+                key.dataset.freq = note.freq;
+                
+                key.addEventListener('mousedown', function() {
+                    this.classList.add('active');
+                    playNote(note.freq);
+                });
+                
+                key.addEventListener('mouseup', function() {
+                    this.classList.remove('active');
+                    stopNote(note.freq);
+                });
+                
+                key.addEventListener('mouseleave', function() {
+                    this.classList.remove('active');
+                    stopNote(note.freq);
+                });
+                
+                keyboard.appendChild(key);
+            });
+            
+            updateDebug(`Keyboard created with ${notes.length} keys<br>
+                       SynthesizerData available: ${!!window.SynthesizerData}<br>
+                       Audio context: ${!!audioContext}`);
+        }
+        
+        // Event listeners
+        document.getElementById('initAudio').addEventListener('click', function() {
+            if (initializeAudio()) {
+                updateStatus('Audio ready - try playing notes!');
+            }
+        });
+        
+        document.getElementById('testNote').addEventListener('click', function() {
+            if (!audioContext) {
+                initializeAudio();
+            }
+            playNote(440); // A4
+            setTimeout(() => stopNote(440), 1000);
+        });
+        
+        document.getElementById('testChord').addEventListener('click', function() {
+            if (!audioContext) {
+                initializeAudio();
+            }
+            playChord('Cmaj');
+            setTimeout(() => {
+                Object.keys(activeNotes).forEach(freq => stopNote(parseFloat(freq)));
+            }, 2000);
+        });
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStatus('Page loaded - click "Initialize Audio" to start');
+            createKeyboard();
+        });
+    </script>
+</body>
+</html> 
