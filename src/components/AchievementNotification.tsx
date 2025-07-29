@@ -126,9 +126,10 @@ export const AchievementNotification: React.FC<AchievementNotificationProps> = (
 
       {/* Progress bar for auto-dismiss */}
       {showProgress && effectiveDuration && (
-        <div className={styles.progressBar}>
+        <div className={styles.progressBar} data-testid="progress-bar">
           <div 
             className={styles.progressFill}
+            data-testid="progress-fill"
             style={{ 
               width: `${progress}%`,
               animationDuration: `${effectiveDuration}ms`

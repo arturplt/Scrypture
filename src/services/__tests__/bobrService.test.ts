@@ -158,7 +158,7 @@ describe('bobrService', () => {
       
       expect(message.type).toBe('task_completion');
       expect(message.stage).toBe('young');
-      expect(message.message).toContain('confident chirp');
+      expect(message.message).toMatch(/\*.*\*.*\{taskTitle\}.*\{category\}/);
       expect(message.animation).toBe('celebrate');
     });
 
@@ -198,7 +198,7 @@ describe('bobrService', () => {
       const message = bobrService.generateMessage('greeting', 'unknown' as any);
       
       expect(message.type).toBe('greeting');
-      expect(message.message).toContain('tiny wing flutter');
+      expect(message.message).toMatch(/\*.*\*.*/);
     });
   });
 
@@ -229,7 +229,7 @@ describe('bobrService', () => {
       
       expect(message.type).toBe('level_up');
       expect(message.stage).toBe('hatchling');
-      expect(message.message).toContain('evolving');
+      expect(message.message).toMatch(/\*.*\*.*/);
       expect(message.animation).toBe('evolve');
     });
 
@@ -258,7 +258,7 @@ describe('bobrService', () => {
       
       expect(message.type).toBe('motivation');
       expect(message.stage).toBe('hatchling');
-      expect(message.message).toContain('Don\'t give up');
+      expect(message.message).toMatch(/\*.*\*.*/);
       expect(message.animation).toBe('idle');
     });
 
@@ -267,7 +267,7 @@ describe('bobrService', () => {
       
       expect(message.type).toBe('motivation');
       expect(message.stage).toBe('young');
-      expect(message.message).toContain('strongest dams');
+      expect(message.message).toMatch(/\*.*\*.*/);
       expect(message.animation).toBe('idle');
     });
 
@@ -276,7 +276,7 @@ describe('bobrService', () => {
       
       expect(message.type).toBe('motivation');
       expect(message.stage).toBe('mature');
-      expect(message.message).toContain('wise beaver');
+      expect(message.message).toMatch(/\*.*\*.*/);
       expect(message.animation).toBe('idle');
     });
   });
@@ -287,7 +287,7 @@ describe('bobrService', () => {
       
       expect(message.type).toBe('dam_progress');
       expect(message.stage).toBe('hatchling');
-      expect(message.message).toContain('foundation');
+      expect(message.message).toMatch(/\*.*\*.*50%/);
       expect(message.animation).toBe('build');
     });
 

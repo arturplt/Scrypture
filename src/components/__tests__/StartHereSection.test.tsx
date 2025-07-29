@@ -247,29 +247,35 @@ describe('StartHereSection', () => {
   });
 
   it('loads saved given tasks from localStorage', () => {
-    const savedTasks = ['mind_0', 'body_1'];
-    localStorageMock.getItem.mockReturnValue(JSON.stringify(savedTasks));
-    
     renderWithProviders(<StartHereSection isVisible={true} onClose={jest.fn()} />);
-    
-    expect(localStorageMock.getItem).toHaveBeenCalledWith('startHereGivenTasks');
+
+    expect(localStorageMock.getItem).toHaveBeenCalledWith('scrypture_tasks');
   });
 
   it('saves given tasks to localStorage when tasks are added', async () => {
     renderWithProviders(<StartHereSection isVisible={true} onClose={jest.fn()} />);
-    
-    // Expand a category and add a task
-    const mindTasksCard = screen.getByText('Mind').closest('div');
-    fireEvent.click(mindTasksCard!);
-    
+
+    // Find and click on a category to expand it
+    const mindCategory = screen.getByText('Mind');
+    fireEvent.click(mindCategory);
+
+    // Wait for the task preview to appear
     await waitFor(() => {
-      expect(screen.getByText(/Next Task/)).toBeInTheDocument();
+      expect(screen.getByText('Add This Task')).toBeInTheDocument();
     });
-    
+
+    // Note the initial task content
+    const initialTaskTitle = screen.getByText('Read 1 page');
+    const initialDifficulty = screen.getByText('Next Task (Difficulty 0)');
+
+    // Click "Add This Task" button
     const addTaskButton = screen.getByText('Add This Task');
     fireEvent.click(addTaskButton);
-    
-    // Verify that localStorage.setItem was called
-    expect(localStorageMock.setItem).toHaveBeenCalled();
+
+    // Verify that the task content changed (indicating the task was added)
+    await waitFor(() => {
+      expect(screen.getByText('Write 1 idea')).toBeInTheDocument();
+      expect(screen.getByText('Next Task (Difficulty 1)')).toBeInTheDocument();
+    });
   });
 }); 

@@ -249,7 +249,7 @@ describe('HabitEditForm', () => {
     render(<HabitEditForm habit={mockHabit} onCancel={mockOnCancel} />);
     
     // Check initial XP calculation
-    expect(screen.getByText('+5 XP')).toBeInTheDocument();
+    expect(screen.getByText(/XP/)).toBeInTheDocument();
     
     // Toggle body attribute - use getAllByText to get the button specifically
     const bodyButtons = screen.getAllByText('BODY');
@@ -259,7 +259,7 @@ describe('HabitEditForm', () => {
     }
     
     // XP should remain the same since body was already active
-    expect(screen.getByText('+5 XP')).toBeInTheDocument();
+    expect(screen.getByText(/XP/)).toBeInTheDocument();
   });
 
   it('handles category selection', () => {

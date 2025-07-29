@@ -93,7 +93,8 @@ describe('WelcomeScreen', () => {
         <WelcomeScreen onContinue={mockOnContinue} onSkip={mockOnSkip} />
       );
 
-      const overlay = container.querySelector('[class*="overlay"]');
+      // Find the root div that contains the modal (first div in the container)
+      const overlay = container.firstChild as HTMLElement;
       expect(overlay).toBeInTheDocument();
 
       // Create a click event and spy on stopPropagation
