@@ -3,6 +3,7 @@ import { userService } from '../services/userService';
 import { tutorialService } from '../services/tutorialService';
 
 import { AutoSaveIndicator } from './AutoSaveIndicator';
+import { Synthesizer } from './Synthesizer';
 import styles from './DataManager.module.css';
 
 interface DataManagerProps {
@@ -17,6 +18,7 @@ export const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
   );
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [showSynthesizer, setShowSynthesizer] = useState(false);
 
   const showMessage = (
     msg: string,
@@ -242,6 +244,24 @@ export const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
               </div>
             )}
           </div>
+
+          <div className={styles.section}>
+            <h3>Tools</h3>
+            <div className={styles.buttonGroup}>
+              <button 
+                onClick={() => setShowSynthesizer(!showSynthesizer)} 
+                className={styles.button}
+              >
+                {showSynthesizer ? 'Hide' : 'Show'} Synthesizer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showSynthesizer && (
+        <div className={styles.synthesizerContainer}>
+          <Synthesizer />
         </div>
       )}
     </div>

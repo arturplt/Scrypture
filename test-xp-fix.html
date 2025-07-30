@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XP Fix Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .test-output {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .success {
+            color: #28a745;
+        }
+        .error {
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 XP Fix Test</h1>
+        
+        <div>
+            <button onclick="testUserCreation()">Test User Creation</button>
+            <button onclick="testTaskCreation()">Test Task Creation</button>
+            <button onclick="testTaskCompletion()">Test Task Completion</button>
+            <button onclick="runFullTest()">Run Full Test</button>
+            <button onclick="clearStorage()">Clear Storage</button>
+        </div>
+        
+        <div class="test-output" id="testOutput">
+            Click a test button to start...
+        </div>
+    </div>
+
+    <script>
+        const testOutput = document.getElementById('testOutput');
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = type === 'error' ? '❌' : type === 'success' ? '✅' : 'ℹ️';
+            testOutput.textContent += `[${timestamp}] ${prefix} ${message}\n`;
+            testOutput.scrollTop = testOutput.scrollHeight;
+        }
+        
+        function clearOutput() {
+            testOutput.textContent = '';
+        }
+        
+        function testUserCreation() {
+            clearOutput();
+            log('Testing user creation...');
+            
+            try {
+                // Create a test user with all required fields
+                const testUser = {
+                    id: 'test-user-1',
+                    name: 'TestUser',
+                    level: 1,
+                    experience: 0,
+                    body: 0,
+                    mind: 0,
+                    soul: 0,
+                    achievements: [],
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                    bobrStage: 'hatchling',
+                    damProgress: 0,
+                };
+                
+                // Save to localStorage
+                localStorage.setItem('scrypture_user', JSON.stringify(testUser));
+                log('User saved to localStorage', 'success');
+                
+                // Try to read it back
+                const savedUser = localStorage.getItem('scrypture_user');
+                if (savedUser) {
+                    const parsedUser = JSON.parse(savedUser);
+                    log('User loaded from localStorage:', 'success');
+                    log(JSON.stringify(parsedUser, null, 2));
+                    
+                    // Check if all required fields are present
+                    const requiredFields = ['id', 'name', 'level', 'experience', 'body', 'mind', 'soul', 'achievements', 'createdAt', 'updatedAt', 'bobrStage', 'damProgress'];
+                    const missingFields = requiredFields.filter(field => !(field in parsedUser));
+                    
+                    if (missingFields.length === 0) {
+                        log('All required fields present!', 'success');
+                    } else {
+                        log(`Missing fields: ${missingFields.join(', ')}`, 'error');
+                    }
+                } else {
+                    log('Failed to load user from localStorage', 'error');
+                }
+            } catch (error) {
+                log(`Error: ${error.message}`, 'error');
+            }
+        }
+        
+        function testTaskCreation() {
+            clearOutput();
+            log('Testing task creation...');
+            
+            try {
+                const testTask = {
+                    id: 'test-task-1',
+                    title: 'Test Task',
+                    description: 'Test Description',
+                    completed: false,
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                    priority: 'medium',
+                    categories: ['personal'],
+                    statRewards: {
+                        xp: 15,
+                        body: 2,
+                        mind: 1,
+                        soul: 0,
+                    },
+                    difficulty: 3,
+                };
+                
+                // Get existing tasks or create empty array
+                const existingTasks = JSON.parse(localStorage.getItem('scrypture_tasks') || '[]');
+                const updatedTasks = [...existingTasks, testTask];
+                localStorage.setItem('scrypture_tasks', JSON.stringify(updatedTasks));
+                
+                log('Task saved to localStorage', 'success');
+                log(JSON.stringify(testTask, null, 2));
+            } catch (error) {
+                log(`Error: ${error.message}`, 'error');
+            }
+        }
+        
+        function testTaskCompletion() {
+            clearOutput();
+            log('Testing task completion and XP addition...');
+            
+            try {
+                // Get current user
+                const userData = localStorage.getItem('scrypture_user');
+                if (!userData) {
+                    log('No user found. Please create a user first.', 'error');
+                    return;
+                }
+                
+                const user = JSON.parse(userData);
+                log(`Current user XP: ${user.experience}`);
+                
+                // Get tasks
+                const tasksData = localStorage.getItem('scrypture_tasks');
+                if (!tasksData) {
+                    log('No tasks found. Please create a task first.', 'error');
+                    return;
+                }
+                
+                const tasks = JSON.parse(tasksData);
+                const testTask = tasks.find(t => t.id === 'test-task-1');
+                
+                if (!testTask) {
+                    log('Test task not found. Please create a task first.', 'error');
+                    return;
+                }
+                
+                log(`Task: ${testTask.title} (XP reward: ${testTask.statRewards?.xp || 0})`);
+                
+                // Mark task as completed
+                const updatedTask = {
+                    ...testTask,
+                    completed: true,
+                    updatedAt: new Date(),
+                    completedAt: new Date(),
+                };
+                
+                const updatedTasks = tasks.map(t => t.id === 'test-task-1' ? updatedTask : t);
+                localStorage.setItem('scrypture_tasks', JSON.stringify(updatedTasks));
+                
+                // Add XP for completion
+                if (updatedTask.statRewards && updatedTask.statRewards.xp) {
+                    const xpToAdd = updatedTask.statRewards.xp;
+                    const newExperience = user.experience + xpToAdd;
+                    const newLevel = Math.floor(newExperience / 100) + 1;
+                    
+                    const updatedUser = {
+                        ...user,
+                        experience: newExperience,
+                        level: newLevel,
+                        updatedAt: new Date(),
+                    };
+                    
+                    localStorage.setItem('scrypture_user', JSON.stringify(updatedUser));
+                    
+                    log(`Task completed! XP added: ${xpToAdd}`, 'success');
+                    log(`User XP: ${user.experience} → ${updatedUser.experience}`, 'success');
+                    log(`User Level: ${user.level} → ${updatedUser.level}`, 'success');
+                } else {
+                    log('No XP reward found for task', 'error');
+                }
+            } catch (error) {
+                log(`Error: ${error.message}`, 'error');
+            }
+        }
+        
+        function runFullTest() {
+            clearOutput();
+            log('Running full XP functionality test...');
+            
+            testUserCreation();
+            setTimeout(() => {
+                testTaskCreation();
+                setTimeout(() => {
+                    testTaskCompletion();
+                    setTimeout(() => {
+                        log('Full test completed!', 'success');
+                    }, 500);
+                }, 500);
+            }, 500);
+        }
+        
+        function clearStorage() {
+            localStorage.clear();
+            clearOutput();
+            log('Storage cleared!', 'success');
+        }
+    </script>
+</body>
+</html> 

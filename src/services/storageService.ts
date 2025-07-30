@@ -52,7 +52,9 @@ const validateUser = (user: unknown): user is User => {
     typeof (user as User).soul === 'number' &&
     Array.isArray((user as User).achievements) &&
     (user as User).createdAt instanceof Date &&
-    (user as User).updatedAt instanceof Date
+    (user as User).updatedAt instanceof Date &&
+    ['hatchling', 'young', 'mature'].includes((user as User).bobrStage) &&
+    typeof (user as User).damProgress === 'number'
   );
 };
 
@@ -189,9 +191,50 @@ export class StorageService {
           ? new Date(achievement.unlockedAt as string)
           : undefined,
       })),
+      // Ensure Bóbr fields are present with defaults
+      bobrStage: userRecord.bobrStage || 'hatchling',
+      damProgress: typeof userRecord.damProgress === 'number' ? userRecord.damProgress : 0,
     } as User;
 
-    return validateUser(processedUser) ? processedUser : null;
+    // If validation fails, try to migrate the user data
+    if (!validateUser(processedUser)) {
+      console.warn('User validation failed, attempting migration...');
+      const migratedUser = this.migrateUserData(userRecord);
+      if (migratedUser && validateUser(migratedUser)) {
+        // Save the migrated user
+        this.saveUser(migratedUser);
+        return migratedUser;
+      }
+      return null;
+    }
+
+    return processedUser;
+  }
+
+  private migrateUserData(userRecord: Record<string, unknown>): User | null {
+    try {
+      // Create a new user with all required fields
+      const migratedUser: User = {
+        id: userRecord.id as string || 'migrated-user',
+        name: userRecord.name as string || 'Migrated User',
+        level: typeof userRecord.level === 'number' ? userRecord.level : 1,
+        experience: typeof userRecord.experience === 'number' ? userRecord.experience : 0,
+        body: typeof userRecord.body === 'number' ? userRecord.body : 0,
+        mind: typeof userRecord.mind === 'number' ? userRecord.mind : 0,
+        soul: typeof userRecord.soul === 'number' ? userRecord.soul : 0,
+        achievements: Array.isArray(userRecord.achievements) ? userRecord.achievements as any[] : [],
+        createdAt: userRecord.createdAt ? new Date(userRecord.createdAt as string) : new Date(),
+        updatedAt: new Date(),
+        bobrStage: 'hatchling',
+        damProgress: 0,
+      };
+
+      console.log('User migration successful:', migratedUser);
+      return migratedUser;
+    } catch (error) {
+      console.error('User migration failed:', error);
+      return null;
+    }
   }
 
   saveUser(user: User): boolean {

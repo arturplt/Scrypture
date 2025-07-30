@@ -46,9 +46,112 @@
   --transition-slow: 0.3s ease;
 }
 
+/* Currently Playing Notes Display */
+.fixedPlayingNotesBar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: var(--color-bg-primary);
+  border-bottom: var(--border-width-thin) solid var(--color-accent-gold);
+  z-index: 9999;
+  padding: var(--spacing-sm);
+  box-shadow: var(--shadow-button);
+  width: 100%;
+  height: auto;
+}
+
+.playingNotesContent {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--spacing-md);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.playingNotesLabel {
+  color: var(--color-accent-gold);
+  font-size: var(--font-size-sm);
+  font-weight: bold;
+  font-family: 'Press Start 2P', monospace;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+}
+
+.playingNotesList {
+  display: flex;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.playingNote {
+  background: var(--color-accent-gold);
+  color: var(--color-bg-primary);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: bold;
+  font-family: 'Press Start 2P', monospace;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  animation: pulse 1s infinite;
+}
+
+/* Status Display */
+.fixedStatusBar {
+  position: fixed;
+  top: 40px;
+  left: 0;
+  right: 0;
+  background: var(--color-bg-tertiary);
+  border-bottom: var(--border-width-thin) solid var(--color-border-primary);
+  z-index: 9998;
+  padding: var(--spacing-sm);
+  box-shadow: var(--shadow-button);
+  width: 100%;
+  height: auto;
+}
+
+.statusBarContent {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--spacing-xl);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.statusSection {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+  font-weight: bold;
+}
+
+.statusSection .statusLabel {
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.statusSection .statusValue {
+  color: var(--color-accent-gold);
+  font-family: 'Press Start 2P', monospace;
+  font-size: var(--font-size-md);
+}
+
+#frequencyValue {
+  min-width: 80px;
+  text-align: right;
+}
+
+/* Adjust container to account for fixed status bar and playing notes bar */
 .container {
   max-width: 800px;
-  margin: auto;
+  margin: 100px auto 0;
   background-color: var(--color-bg-secondary);
   border: var(--border-width-normal) solid var(--color-border-primary);
   border-radius: var(--border-radius-sm);
@@ -67,6 +170,52 @@
   -webkit-font-smoothing: none;
   -moz-osx-font-smoothing: none;
   text-rendering: optimizeSpeed;
+}
+
+/* Status Display */
+.statusDisplay {
+  position: absolute;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--spacing-xs);
+  z-index: 10;
+}
+
+.noteName {
+  font-size: var(--font-size-lg);
+  color: var(--color-accent-gold);
+  font-weight: bold;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+  line-height: 1;
+}
+
+.frequency {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+  line-height: 1;
+}
+
+.playingStatus {
+  font-size: var(--font-size-md);
+  color: var(--color-accent-gold);
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+  line-height: 1;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 
 .section {
@@ -280,14 +429,14 @@
 
 .keyboard {
   display: flex;
-  flex-wrap: wrap;
-  gap: 2px;
+  position: relative;
   justify-content: center;
   width: 100%;
   max-width: 100%;
   margin: 0 0 var(--spacing-md) 0;
   padding: 0;
   overflow: visible;
+  height: 80px;
 }
 
 .key {
@@ -308,25 +457,64 @@
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
-  transition: all var(--transition-normal);
-  -webkit-font-smoothing: none;
-  -moz-osx-font-smoothing: none;
-  text-rendering: optimizeSpeed;
+  transition: all var(--transition-fast);
+  position: relative;
+  margin: 0;
+  padding: 0;
 }
 
 .key.black {
   background-color: var(--color-bg-tertiary);
   height: 50px;
-  z-index: 1;
-  margin: 0 -18px;
+  z-index: 2;
+  position: absolute;
   color: var(--color-text-primary);
-  flex: 0.6;
+  flex: 0;
   min-width: 20px;
+  width: 20px;
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: 0 0 var(--border-radius-sm) var(--border-radius-sm);
 }
+
+/* Position black keys over white keys - proper piano layout */
+.key[data-key="w"] { left: 6%; }  /* C# between C and D */
+.key[data-key="e"] { left: 20%; } /* D# between D and E */
+.key[data-key="t"] { left: 48%; } /* F# between F and G */
+.key[data-key="y"] { left: 62%; } /* G# between G and A */
+.key[data-key="u"] { left: 76%; } /* A# between A and B */
 
 .key.active {
   background-color: var(--color-accent-gold) !important;
+  color: var(--color-bg-primary) !important;
+  transform: translateY(2px);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+  animation: keyPress 0.1s ease-out;
+}
+
+.key.black.active {
+  background-color: var(--color-accent-gold) !important;
+  color: var(--color-bg-primary) !important;
+  transform: translateY(1px);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+  animation: keyPress 0.1s ease-out;
+}
+
+@keyframes keyPress {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(3px); }
+  100% { transform: translateY(2px); }
+}
+
+.key:hover {
+  background-color: var(--color-accent-gold);
   color: var(--color-bg-primary);
+  transform: translateY(1px);
+}
+
+.key.black:hover {
+  background-color: var(--color-accent-gold);
+  color: var(--color-bg-primary);
+  transform: translateY(1px);
 }
 
 .collapsible {
@@ -751,4 +939,83 @@
 * {
   scrollbar-width: thin;
   scrollbar-color: #4a4a4a #1c1b1b;
+} 
+
+/* Help Section */
+.helpSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background: var(--color-bg-tertiary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: var(--border-radius-sm);
+}
+
+.helpItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm);
+  background: var(--color-bg-secondary);
+  border: var(--border-width-thin) solid var(--color-border-secondary);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-sm);
+}
+
+.helpItem strong {
+  color: var(--color-accent-gold);
+  font-family: 'Press Start 2P', monospace;
+  font-size: var(--font-size-xs);
+} 
+
+/* Live Update Indicators */
+.liveIndicator {
+  color: #ff4444;
+  font-size: var(--font-size-xs);
+  font-weight: bold;
+  margin-left: var(--spacing-sm);
+  animation: pulse 2s infinite;
+}
+
+.liveSlider {
+  border: 2px solid var(--color-accent-gold);
+  box-shadow: 0 0 8px rgba(182, 164, 50, 0.3);
+}
+
+.liveSlider::-webkit-slider-thumb {
+  background: var(--color-accent-gold);
+  box-shadow: 0 0 10px rgba(182, 164, 50, 0.5);
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+} 
+
+/* Test Button */
+.testBtn {
+  background: var(--color-accent-gold);
+  color: var(--color-bg-primary);
+  border: var(--border-width-thin) solid var(--color-accent-gold);
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: var(--font-size-xs);
+  font-weight: bold;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  border-radius: var(--border-radius-sm);
+  font-family: 'Press Start 2P', monospace;
+}
+
+.testBtn:hover {
+  background: #d4c23a;
+  border-color: #d4c23a;
+  box-shadow: var(--shadow-button);
+}
+
+.testBtn:active {
+  background: #a89a2a;
+  border-color: #a89a2a;
+  transform: translateY(1px);
 } 

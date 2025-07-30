@@ -43,6 +43,7 @@ interface SliderControlProps {
   showValue?: boolean;
   valueDisplay?: string;
   additionalControls?: React.ReactNode;
+  isLive?: boolean;
 }
 
 const SliderControl: React.FC<SliderControlProps> = ({
@@ -54,11 +55,15 @@ const SliderControl: React.FC<SliderControlProps> = ({
   onChange,
   showValue = false,
   valueDisplay,
-  additionalControls
+  additionalControls,
+  isLive = false
 }) => {
   return (
     <div className={styles.section}>
-      <label>{label}</label>
+      <label>
+        {label}
+        {isLive && <span className={styles.liveIndicator}> 🔴 LIVE</span>}
+      </label>
       <div className={styles.sliderGroup}>
         <button onClick={() => onChange(Math.max(min, value - step))}>-</button>
         <input
@@ -68,6 +73,7 @@ const SliderControl: React.FC<SliderControlProps> = ({
           step={step}
           value={value}
           onChange={(e) => onChange(parseFloat(e.target.value))}
+          className={isLive ? styles.liveSlider : ''}
         />
         <button onClick={() => onChange(Math.min(max, value + step))}>+</button>
         {showValue && (
@@ -84,33 +90,110 @@ const SliderControl: React.FC<SliderControlProps> = ({
 export const Synthesizer: React.FC = () => {
   const synth = useSynthesizer();
   const [isDragging, setIsDragging] = useState(false);
+  const [isDrawing, setIsDrawing] = useState(false);
   const [lastPlayedKey, setLastPlayedKey] = useState<HTMLElement | null>(null);
+  const [currentPlayingNote, setCurrentPlayingNote] = useState<{ note: typeof NOTES[0] | null, freq: number }>({ note: null, freq: 0 });
+  const [activeKeys, setActiveKeys] = useState<Set<string>>(new Set());
   const keyboardRef = useRef<HTMLDivElement>(null);
+
+  // Add keyboard event listeners
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      synth.handleKeyDown(e);
+      // Track active keys for visual feedback
+      const key = e.key.toLowerCase();
+      const note = NOTES.find(n => n.key === key);
+      if (note) {
+        setActiveKeys(prev => new Set(prev).add(note.key));
+      }
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      synth.handleKeyUp(e);
+      // Remove active keys for visual feedback
+      const key = e.key.toLowerCase();
+      const note = NOTES.find(n => n.key === key);
+      if (note && !synth.state.sustainMode) {
+        setActiveKeys(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(note.key);
+          return newSet;
+        });
+      }
+    };
+
+    const handleMouseDown = (e: MouseEvent) => {
+      synth.handleMouseDown(e);
+      if (synth.state.drawMode) {
+        setIsDrawing(true);
+      }
+    };
+
+    const handleMouseUp = (e: MouseEvent) => {
+      synth.handleMouseUp(e);
+      if (synth.state.drawMode) {
+        setIsDrawing(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keyup', handleKeyUp);
+    document.addEventListener('mousedown', handleMouseDown);
+    document.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('keyup', handleKeyUp);
+      document.removeEventListener('mousedown', handleMouseDown);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [synth]);
+
+  // Clear active keys when sustain mode is turned off
+  useEffect(() => {
+    if (!synth.state.sustainMode) {
+      setActiveKeys(new Set());
+    }
+  }, [synth.state.sustainMode]);
 
   const handleKeyMouseDown = (note: typeof NOTES[0], element: HTMLElement) => {
     setIsDragging(true);
     setLastPlayedKey(element);
+    setCurrentPlayingNote({ note, freq: note.freq });
+    setActiveKeys(prev => new Set(prev).add(note.key));
     synth.startNote(note.freq, element);
   };
 
   const handleKeyMouseUp = (note: typeof NOTES[0], element: HTMLElement) => {
     if (!synth.state.sustainMode) {
       synth.stopNote(note.freq, element);
+      setActiveKeys(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(note.key);
+        return newSet;
+      });
     }
     setIsDragging(false);
     setLastPlayedKey(null);
+    setCurrentPlayingNote({ note: null, freq: 0 });
   };
 
   const handleKeyMouseEnter = (note: typeof NOTES[0], element: HTMLElement) => {
-    if (isDragging && element !== lastPlayedKey) {
-      setLastPlayedKey(element);
+    if (isDragging) {
+      setCurrentPlayingNote({ note, freq: note.freq });
+      setActiveKeys(prev => new Set(prev).add(note.key));
       synth.startNote(note.freq, element);
     }
   };
 
   const handleKeyMouseLeave = (note: typeof NOTES[0], element: HTMLElement) => {
-    if (!synth.state.sustainMode) {
+    if (isDragging && !synth.state.sustainMode) {
       synth.stopNote(note.freq, element);
+      setActiveKeys(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(note.key);
+        return newSet;
+      });
     }
   };
 
@@ -120,20 +203,22 @@ export const Synthesizer: React.FC = () => {
   };
 
   const handleStepClick = (note: string, stepIndex: number) => {
-    if (synth.state.drawMode) {
-      synth.sequence[note][stepIndex] = !synth.sequence[note][stepIndex];
-    } else {
-      synth.sequence[note][stepIndex] = !synth.sequence[note][stepIndex];
+    if (!synth.sequence[note]) {
+      synth.sequence[note] = new Array(32).fill(false);
     }
+    synth.sequence[note][stepIndex] = !synth.sequence[note][stepIndex];
     // Force re-render
-    synth.updateState({});
+    setCurrentPlayingNote(prev => ({ ...prev }));
   };
 
   const handleStepMouseEnter = (note: string, stepIndex: number) => {
-    if (synth.state.drawMode && synth.state.isDrawing) {
+    if (synth.state.drawMode && isDrawing) {
+      if (!synth.sequence[note]) {
+        synth.sequence[note] = new Array(32).fill(false);
+      }
       synth.sequence[note][stepIndex] = true;
       // Force re-render
-      synth.updateState({});
+      setCurrentPlayingNote(prev => ({ ...prev }));
     }
   };
 
@@ -155,8 +240,70 @@ export const Synthesizer: React.FC = () => {
     }
   };
 
+  // Use currentPlayingNote state for immediate feedback
+  const { note, freq } = currentPlayingNote;
+
+  // Clear current playing note when no active notes
+  useEffect(() => {
+    if (Object.keys(synth.activeNotes).length === 0 && currentPlayingNote.note) {
+      setCurrentPlayingNote({ note: null, freq: 0 });
+    }
+  }, [synth.activeNotes, currentPlayingNote.note]);
+
   return (
     <div className={styles.container}>
+      {/* Currently Playing Notes Display */}
+      {Object.keys(synth.activeNotes).length > 0 && (
+        <div className={styles.fixedPlayingNotesBar}>
+          <div className={styles.playingNotesContent}>
+            <div className={styles.playingNotesLabel}>🎵 Playing:</div>
+            <div className={styles.playingNotesList}>
+              {Object.values(synth.activeNotes).map((activeNote, index) => {
+                const note = NOTES.find(n => Math.abs(n.freq - activeNote.freq) < 0.1);
+                return (
+                  <span key={index} className={styles.playingNote}>
+                    {note?.note || activeNote.freq.toFixed(0)}Hz
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Real-time Status Display */}
+      {currentPlayingNote.note && (
+        <div className={styles.fixedStatusBar}>
+          <div className={styles.statusBarContent}>
+            <div className={styles.statusSection}>
+              <span className={styles.statusLabel}>Note:</span>
+              <span className={styles.statusValue}>{currentPlayingNote.note.note || currentPlayingNote.note.key.toUpperCase()}</span>
+            </div>
+            <div className={styles.statusSection}>
+              <span className={styles.statusLabel}>Freq:</span>
+              <span className={styles.statusValue} id="frequencyValue">{currentPlayingNote.freq.toFixed(1)} Hz</span>
+            </div>
+            {activeKeys.size > 0 && (
+              <div className={styles.statusSection}>
+                <span className={styles.statusLabel}>Active:</span>
+                <span className={styles.statusValue}>
+                  {Array.from(activeKeys).map(key => {
+                    const note = NOTES.find(n => n.key === key);
+                    return note?.note || key.toUpperCase();
+                  }).join(' ')}
+                </span>
+              </div>
+            )}
+            {synth.state.sustainMode && (
+              <div className={styles.statusSection}>
+                <span className={styles.statusLabel}>Sustain:</span>
+                <span className={styles.statusValue}>ON</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       <h1>8-BIT SYNTHESIZER</h1>
 
       <CollapsibleSection title="🎯 Circle of Fifths">
@@ -246,7 +393,7 @@ export const Synthesizer: React.FC = () => {
         {NOTES.map((note, index) => (
           <div
             key={index}
-            className={`${styles.key} ${note.black ? styles.black : ''}`}
+            className={`${styles.key} ${note.black ? styles.black : ''} ${activeKeys.has(note.key) ? styles.active : ''}`}
             data-freq={note.freq}
             data-key={note.key}
             onMouseDown={(e) => handleKeyMouseDown(note, e.currentTarget)}
@@ -262,7 +409,7 @@ export const Synthesizer: React.FC = () => {
               handleKeyMouseUp(note, e.currentTarget);
             }}
           >
-            {note.key.toUpperCase()}
+            {note.note || note.key.toUpperCase()}
           </div>
         ))}
       </div>
@@ -301,7 +448,7 @@ export const Synthesizer: React.FC = () => {
           <button onClick={() => synth.loadPreset('achievement-rare')} className={styles.presetBtn}>💎 Rare</button>
           <button onClick={() => synth.loadPreset('achievement-legendary')} className={styles.presetBtn}>👑 Legendary</button>
           <button onClick={() => synth.loadPreset('task-complete')} className={styles.presetBtn}>✅ Complete</button>
-          <button onClick={() => synth.loadPreset('level-up')} className={styles.presetBtn}>🎉 Level Up</button>
+          <button onClick={() => synth.loadPreset('level-up')} className={styles.presetBtn}>�� Level Up</button>
           <button onClick={() => synth.loadPreset('bobr-greeting')} className={styles.presetBtn}>🦫 Bóbr</button>
           <button onClick={() => synth.loadPreset('dam-build')} className={styles.presetBtn}>🏗️ Dam Build</button>
           <button onClick={() => synth.loadPreset('streak-milestone')} className={styles.presetBtn}>🔥 Streak</button>
@@ -334,6 +481,7 @@ export const Synthesizer: React.FC = () => {
         onChange={(value) => synth.updateState({ volume: value })}
         showValue
         valueDisplay={`${synth.state.volume}%`}
+        isLive={true}
       />
 
       <SliderControl
@@ -342,6 +490,9 @@ export const Synthesizer: React.FC = () => {
         min={0}
         max={100}
         onChange={(value) => synth.updateState({ attack: value })}
+        showValue
+        valueDisplay={`${((synth.state.attack / 100) * 2).toFixed(2)}s`}
+        isLive={true}
       />
 
       <SliderControl
@@ -350,14 +501,25 @@ export const Synthesizer: React.FC = () => {
         min={0}
         max={100}
         onChange={(value) => synth.updateState({ release: value })}
+        showValue
+        valueDisplay={`${Math.max(0.1, (synth.state.release / 100) * 3).toFixed(2)}s`}
         additionalControls={
-          <button
-            onClick={synth.toggleSustain}
-            className={`${styles.sustainBtn} ${synth.state.sustainMode ? styles.active : ''}`}
-          >
-            Sustain
-          </button>
+          <>
+            <button
+              onClick={synth.toggleSustain}
+              className={`${styles.sustainBtn} ${synth.state.sustainMode ? styles.active : ''}`}
+            >
+              Sustain
+            </button>
+            <button
+              onClick={() => synth.startNote(440)} // A4 note
+              className={styles.testBtn}
+            >
+              Test A4
+            </button>
+          </>
         }
+        isLive={true}
       />
 
       <SliderControl
@@ -366,13 +528,12 @@ export const Synthesizer: React.FC = () => {
         min={-100}
         max={100}
         onChange={(value) => synth.updateState({ detune: value })}
-        showValue
-        valueDisplay={`${synth.state.detune}¢`}
         additionalControls={
           <button onClick={synth.resetDetune} className={styles.resetBtn}>
             Reset
           </button>
         }
+        isLive={true}
       />
 
       <div className={styles.section}>
@@ -389,14 +550,29 @@ export const Synthesizer: React.FC = () => {
       <div className={styles.section}>
         <label>Arpeggiator</label>
         <select
-          value="off"
-          onChange={() => {}}
+          value={synth.state.arpeggiatorMode}
+          onChange={(e) => synth.setArpeggiatorMode(e.target.value as any)}
         >
           <option value="off">Off</option>
           <option value="up">Up</option>
           <option value="down">Down</option>
+          <option value="updown">Up/Down</option>
+          <option value="random">Random</option>
         </select>
       </div>
+
+      {synth.state.arpeggiatorMode !== 'off' && (
+        <SliderControl
+          label="Arpeggiator Rate"
+          value={synth.state.arpeggiatorRate}
+          min={1}
+          max={16}
+          onChange={(value) => synth.updateState({ arpeggiatorRate: value })}
+          showValue
+          valueDisplay={`${synth.state.arpeggiatorRate}/16`}
+          isLive={true}
+        />
+      )}
 
       <SliderControl
         label="LFO Rate"
@@ -407,6 +583,7 @@ export const Synthesizer: React.FC = () => {
         onChange={(value) => synth.updateState({ lfoRate: value })}
         showValue
         valueDisplay={`${synth.state.lfoRate} Hz`}
+        isLive={true}
       />
 
       <SliderControl
@@ -415,6 +592,7 @@ export const Synthesizer: React.FC = () => {
         min={0}
         max={50}
         onChange={(value) => synth.updateState({ lfoDepth: value })}
+        isLive={true}
       />
 
       <div className={styles.section}>
@@ -439,6 +617,7 @@ export const Synthesizer: React.FC = () => {
           min={60}
           max={200}
           onChange={(value) => synth.updateState({ bpm: value })}
+          isLive={true}
         />
 
         <SliderControl
@@ -447,6 +626,7 @@ export const Synthesizer: React.FC = () => {
           min={4}
           max={16}
           onChange={(value) => synth.updateState({ steps: value })}
+          isLive={true}
         />
 
         <div className={styles.section}>

@@ -1,19 +1,19 @@
 import { Note, Chord, ChordProgression, CircleKey, Preset, NumberKeyPattern } from '../types/synthesizer';
 
 export const NOTES: Note[] = [
-  { freq: 261.63, key: 'a' },
-  { freq: 277.18, key: 'w', black: true },
-  { freq: 293.66, key: 's' },
-  { freq: 311.13, key: 'e', black: true },
-  { freq: 329.63, key: 'd' },
-  { freq: 349.23, key: 'f' },
-  { freq: 369.99, key: 't', black: true },
-  { freq: 392.00, key: 'g' },
-  { freq: 415.30, key: 'y', black: true },
-  { freq: 440.00, key: 'h' },
-  { freq: 466.16, key: 'u', black: true },
-  { freq: 493.88, key: 'j' },
-  { freq: 523.25, key: 'k' }
+  { freq: 261.63, key: 'a', note: 'C' }, // C4
+  { freq: 277.18, key: 'w', black: true, note: 'C#' }, // C#4
+  { freq: 293.66, key: 's', note: 'D' }, // D4
+  { freq: 311.13, key: 'e', black: true, note: 'D#' }, // D#4
+  { freq: 329.63, key: 'd', note: 'E' }, // E4
+  { freq: 349.23, key: 'f', note: 'F' }, // F4
+  { freq: 369.99, key: 't', black: true, note: 'F#' }, // F#4
+  { freq: 392.00, key: 'g', note: 'G' }, // G4
+  { freq: 415.30, key: 'y', black: true, note: 'G#' }, // G#4
+  { freq: 440.00, key: 'h', note: 'A' }, // A4
+  { freq: 466.16, key: 'u', black: true, note: 'A#' }, // A#4
+  { freq: 493.88, key: 'j', note: 'B' }, // B4
+  { freq: 523.25, key: 'k', note: 'C' } // C5
 ];
 
 export const CHORDS: Record<string, Chord> = {

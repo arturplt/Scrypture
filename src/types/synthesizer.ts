@@ -2,6 +2,7 @@ export interface Note {
   freq: number;
   key: string;
   black?: boolean;
+  note?: string;
 }
 
 export interface Chord {
@@ -57,6 +58,8 @@ export interface SynthesizerState {
   drawMode: boolean;
   isDrawing: boolean;
   isDraggingCircle: boolean;
+  arpeggiatorMode: 'off' | 'up' | 'down' | 'updown' | 'random';
+  arpeggiatorRate: number;
 }
 
 export interface SequencerStep {
@@ -218,28 +221,8 @@ export interface SynthesizerContextType {
   activeNotes: Record<string, ActiveNote>;
   sequence: Record<string, boolean[]>;
   
-  // Audio state
-  audioNodes: AudioNodes | null;
-  audioContextState: AudioContextState | null;
-  
-  // Sequencer state
-  sequencerState: SequencerState;
-  
-  // Keyboard state
-  keyboardState: KeyboardState;
-  
-  // Circle of fifths state
-  circleState: CircleOfFifthsState;
-  
-  // Timeline display
-  timelineDisplay: TimelineDisplay | null;
-  
   // Update functions
   updateState: (updates: Partial<SynthesizerState>) => void;
-  updateAudioContext: (state: 'suspended' | 'running' | 'closed') => void;
-  updateSequencerState: (updates: Partial<SequencerState>) => void;
-  updateKeyboardState: (updates: Partial<KeyboardState>) => void;
-  updateCircleState: (updates: Partial<CircleOfFifthsState>) => void;
   
   // Audio functions
   startNote: (freq: number, element?: HTMLElement | null) => void;
@@ -254,40 +237,16 @@ export interface SynthesizerContextType {
   clearSequence: () => void;
   toggleDrawMode: () => void;
   loadPattern: (number: number) => void;
-  createTimeline: () => void;
-  updateTimelineDisplay: () => void;
   
   // Control functions
   resetDetune: () => void;
   toggleSustain: () => void;
   setWaveform: (waveform: WaveformType) => void;
-  adjustParameter: (param: keyof SynthesizerState, delta: number) => void;
-  
-  // Circle of fifths functions
-  createCircleOfFifths: () => void;
-  playCircleKey: (key: CircleKey) => void;
+  setArpeggiatorMode: (mode: 'off' | 'up' | 'down' | 'updown' | 'random') => void;
   
   // Keyboard functions
   handleKeyDown: (event: KeyboardEvent) => void;
   handleKeyUp: (event: KeyboardEvent) => void;
   handleMouseDown: (event: MouseEvent) => void;
   handleMouseUp: (event: MouseEvent) => void;
-  handleMouseEnter: (event: MouseEvent) => void;
-  handleMouseLeave: (event: MouseEvent) => void;
-  handleTouchStart: (event: TouchEvent) => void;
-  handleTouchEnd: (event: TouchEvent) => void;
-  handleTouchMove: (event: TouchEvent) => void;
-  
-  // Audio processing functions
-  createLFO: (config: LFOConfig) => LFOConfig;
-  createFilter: (config: FilterConfig) => FilterConfig;
-  createEnvelope: (config: EnvelopeConfig) => EnvelopeConfig;
-  createReverb: (config: ReverbConfig) => ReverbConfig;
-  createArpeggiator: (config: ArpeggiatorConfig) => ArpeggiatorConfig;
-  
-  // Event handlers
-  handleNoteEvent: (event: NoteEvent) => void;
-  handleChordEvent: (event: ChordEvent) => void;
-  handleProgressionEvent: (event: ProgressionEvent) => void;
-  handleSequencerEvent: (event: SequencerEvent) => void;
 } 
