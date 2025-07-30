@@ -474,14 +474,15 @@
   width: 20px;
   border: var(--border-width-thin) solid var(--color-border-primary);
   border-radius: 0 0 var(--border-radius-sm) var(--border-radius-sm);
+  margin-left: -10px; /* Center the black key by offsetting half its width */
 }
 
 /* Position black keys over white keys - proper piano layout */
-.key[data-key="w"] { left: 6.25%; }  /* C# between C and D */
-.key[data-key="e"] { left: 18.75%; } /* D# between D and E */
-.key[data-key="t"] { left: 56.25%; } /* F# between F and G */
-.key[data-key="y"] { left: 68.75%; } /* G# between G and A */
-.key[data-key="u"] { left: 81.25%; } /* A# between A and B */
+.key[data-key="w"] { left: 12.5%; }  /* C# between C and D */
+.key[data-key="e"] { left: 25%; }    /* D# between D and E */
+.key[data-key="t"] { left: 50%; }    /* F# between F and G */
+.key[data-key="y"] { left: 62.5%; }  /* G# between G and A */
+.key[data-key="u"] { left: 75%; }    /* A# between A and B */
 
 .key.active {
   background-color: var(--color-accent-gold) !important;
