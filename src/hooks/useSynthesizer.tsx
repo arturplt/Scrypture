@@ -248,7 +248,7 @@ export const useSynthesizer = (): SynthesizerContextType => {
     if (isNaN(frequency)) return;
     
     const notesToStop = Object.entries(activeNotesRef.current).filter(
-      ([id, note]) => Math.abs(note.freq - frequency) < 0.1
+      ([, note]) => Math.abs(note.freq - frequency) < 0.1
     );
     
     notesToStop.forEach(([noteId, note]) => {

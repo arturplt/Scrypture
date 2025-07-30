@@ -91,13 +91,12 @@ describe('InstallPrompt', () => {
 
     expect(screen.getByText(/Open this page in your mobile browser/)).toBeInTheDocument();
     expect(screen.getByText(/Use your browser's 'Add to Home Screen' option/)).toBeInTheDocument();
-    expect(screen.getByText(/Launch from your home screen for full-screen experience/)).toBeInTheDocument();
+    expect(screen.getByText(/Launch from your home screen for app-like experience/)).toBeInTheDocument();
   });
 
   it('displays benefits of installing', () => {
     render(<InstallPrompt onClose={jest.fn()} />);
 
-    expect(screen.getByText(/Full-screen experience/)).toBeInTheDocument();
     expect(screen.getByText(/No address bar/)).toBeInTheDocument();
     expect(screen.getByText(/App-like feel/)).toBeInTheDocument();
     expect(screen.getByText(/Offline access/)).toBeInTheDocument();

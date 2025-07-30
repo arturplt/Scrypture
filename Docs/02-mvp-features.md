@@ -307,7 +307,7 @@
 **Purpose**: Introduce Scrypture and its mystical theme
 **Implementation**: Story-driven welcome with Ancient Bóbr
 **User Flow**: Open app → See welcome → Begin journey
-**Technical**: Modal or full-screen welcome component
+**Technical**: Modal welcome component
 
 ### **28. Ancient Bóbr Introduction**
 **Purpose**: Introduce the mystical companion character

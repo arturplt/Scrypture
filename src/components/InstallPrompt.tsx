@@ -16,7 +16,6 @@ export const InstallPrompt: React.FC<InstallPromptProps> = ({ onClose }) => {
   const [isStandalone, setIsStandalone] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
   const [isAndroid, setIsAndroid] = useState(false);
-  const [isFullscreenSupported, setIsFullscreenSupported] = useState(false);
 
   useEffect(() => {
     // Check if app is already installed (standalone mode)
@@ -27,9 +26,6 @@ export const InstallPrompt: React.FC<InstallPromptProps> = ({ onClose }) => {
     const userAgent = navigator.userAgent.toLowerCase();
     setIsIOS(/iphone|ipad|ipod/.test(userAgent));
     setIsAndroid(/android/.test(userAgent));
-    
-    // Check if fullscreen is supported
-    setIsFullscreenSupported(!!document.documentElement.requestFullscreen);
   }, []);
 
   // Don't show if already in standalone mode
@@ -41,16 +37,6 @@ export const InstallPrompt: React.FC<InstallPromptProps> = ({ onClose }) => {
     // Mark that install prompt has been shown
     localStorage.setItem('installPromptShown', 'true');
     onClose();
-  };
-
-  const handleFullscreenRequest = async () => {
-    try {
-      if (document.documentElement.requestFullscreen) {
-        await document.documentElement.requestFullscreen();
-      }
-    } catch (error) {
-      console.log('Fullscreen request failed:', error);
-    }
   };
 
   const getInstallInstructions = () => {
@@ -78,7 +64,7 @@ export const InstallPrompt: React.FC<InstallPromptProps> = ({ onClose }) => {
         steps: [
           "Open this page in your mobile browser",
           "Use your browser's 'Add to Home Screen' option",
-          "Launch from your home screen for full-screen experience"
+          "Launch from your home screen for app-like experience"
         ]
       };
     }
@@ -111,7 +97,6 @@ export const InstallPrompt: React.FC<InstallPromptProps> = ({ onClose }) => {
           <div className={styles.benefits}>
             <h4>✨ Benefits:</h4>
             <ul>
-              <li>Full-screen experience</li>
               <li>No address bar</li>
               <li>App-like feel</li>
               <li>Offline access</li>
@@ -120,14 +105,6 @@ export const InstallPrompt: React.FC<InstallPromptProps> = ({ onClose }) => {
         </div>
         
         <div className={styles.actions}>
-          {isFullscreenSupported && (
-            <button 
-              className={styles.fullscreenButton}
-              onClick={handleFullscreenRequest}
-            >
-              🖥️ Enter Fullscreen
-            </button>
-          )}
           <button 
             className={styles.primaryButton}
             onClick={handleClose}
