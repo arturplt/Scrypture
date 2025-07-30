@@ -599,6 +599,58 @@ export const Synthesizer: React.FC = () => {
         </div>
       </CollapsibleSection>
 
+      <CollapsibleSection title="🎛️ Sequencer Presets">
+        <div className={styles.presetButtons}>
+          <button onClick={() => synth.loadPreset('sequencer-bass')} className={styles.presetBtn}>🎸 Bass</button>
+          <button onClick={() => synth.loadPreset('sequencer-lead')} className={styles.presetBtn}>🎹 Lead</button>
+          <button onClick={() => synth.loadPreset('sequencer-pad')} className={styles.presetBtn}>🎼 Pad</button>
+          <button onClick={() => synth.loadPreset('sequencer-percussion')} className={styles.presetBtn}>🥁 Percussion</button>
+          <button onClick={() => synth.loadPreset('sequencer-arpeggio')} className={styles.presetBtn}>🎵 Arpeggio</button>
+          <button onClick={() => synth.loadPreset('sequencer-acid')} className={styles.presetBtn}>🧪 Acid</button>
+          <button onClick={() => synth.loadPreset('sequencer-ambient')} className={styles.presetBtn}>🌿 Ambient</button>
+          <button onClick={() => synth.loadPreset('sequencer-techno')} className={styles.presetBtn}>⚡ Techno</button>
+        </div>
+      </CollapsibleSection>
+
+      <CollapsibleSection title="🥁 Basic Rhythm Presets">
+        <div className={styles.presetButtons}>
+          <button onClick={() => synth.loadPreset('rhythm-kick')} className={styles.presetBtn}>🥁 Kick</button>
+          <button onClick={() => synth.loadPreset('rhythm-snare')} className={styles.presetBtn}>🥁 Snare</button>
+          <button onClick={() => synth.loadPreset('rhythm-hihat')} className={styles.presetBtn}>🥁 Hi-Hat</button>
+          <button onClick={() => synth.loadPreset('rhythm-clap')} className={styles.presetBtn}>👏 Clap</button>
+          <button onClick={() => synth.loadPreset('rhythm-tom')} className={styles.presetBtn}>🥁 Tom</button>
+          <button onClick={() => synth.loadPreset('rhythm-crash')} className={styles.presetBtn}>🥁 Crash</button>
+          <button onClick={() => synth.loadPreset('rhythm-ride')} className={styles.presetBtn}>🥁 Ride</button>
+          <button onClick={() => synth.loadPreset('rhythm-bass')} className={styles.presetBtn}>🎸 Bass</button>
+        </div>
+      </CollapsibleSection>
+
+      <CollapsibleSection title="🥁 Rhythm Patterns">
+        <div className={styles.presetButtons}>
+          <button onClick={() => synth.loadRhythmPattern('basic-beat')} className={styles.presetBtn}>🥁 Basic Beat</button>
+          <button onClick={() => synth.loadRhythmPattern('rock-beat')} className={styles.presetBtn}>🤘 Rock Beat</button>
+          <button onClick={() => synth.loadRhythmPattern('funk-beat')} className={styles.presetBtn}>🎵 Funk Beat</button>
+          <button onClick={() => synth.loadRhythmPattern('latin-beat')} className={styles.presetBtn}>🌴 Latin Beat</button>
+          <button onClick={() => synth.loadRhythmPattern('techno-beat')} className={styles.presetBtn}>⚡ Techno Beat</button>
+          <button onClick={() => synth.loadRhythmPattern('jazz-beat')} className={styles.presetBtn}>🎷 Jazz Beat</button>
+          <button onClick={() => synth.loadRhythmPattern('hip-hop-beat')} className={styles.presetBtn}>🎤 Hip-Hop Beat</button>
+          <button onClick={() => synth.loadRhythmPattern('ambient-beat')} className={styles.presetBtn}>🌿 Ambient Beat</button>
+        </div>
+      </CollapsibleSection>
+
+      <CollapsibleSection title="🦫 Scrypture Rhythm Patterns">
+        <div className={styles.presetButtons}>
+          <button onClick={() => synth.loadScryptureRhythmPattern('achievement-unlock')} className={styles.presetBtn}>🏆 Achievement Unlock</button>
+          <button onClick={() => synth.loadScryptureRhythmPattern('task-complete')} className={styles.presetBtn}>✅ Task Complete</button>
+          <button onClick={() => synth.loadScryptureRhythmPattern('level-up')} className={styles.presetBtn}>⭐ Level Up</button>
+          <button onClick={() => synth.loadScryptureRhythmPattern('streak-milestone')} className={styles.presetBtn}>🔥 Streak Milestone</button>
+          <button onClick={() => synth.loadScryptureRhythmPattern('bobr-greeting')} className={styles.presetBtn}>🦫 Bóbr Greeting</button>
+          <button onClick={() => synth.loadScryptureRhythmPattern('dam-build')} className={styles.presetBtn}>🏗️ Dam Build</button>
+          <button onClick={() => synth.loadScryptureRhythmPattern('xp-gain')} className={styles.presetBtn}>📈 XP Gain</button>
+          <button onClick={() => synth.loadScryptureRhythmPattern('productivity-flow')} className={styles.presetBtn}>🚀 Productivity Flow</button>
+        </div>
+      </CollapsibleSection>
+
       <CollapsibleSection title="🦫 Scrypture Sounds">
         <div className={styles.presetButtons}>
           <button onClick={() => synth.loadPreset('achievement-common')} className={styles.presetBtn}>🏆 Common</button>

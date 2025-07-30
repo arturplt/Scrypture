@@ -156,6 +156,14 @@ export interface NumberKeyPattern {
   [key: number]: number[];
 }
 
+export interface RhythmPattern {
+  [trackIndex: number]: number[];
+}
+
+export interface ScryptureRhythmPattern {
+  [trackIndex: number]: number[];
+}
+
 // New interfaces from Synth.html implementation
 
 export interface AudioNodes {
@@ -307,6 +315,8 @@ export interface SynthesizerContextType {
   clearSequence: () => void;
   toggleDrawMode: () => void;
   loadPattern: (number: number) => void;
+  loadRhythmPattern: (patternName: string) => void;
+  loadScryptureRhythmPattern: (patternName: string) => void;
   
   // Control functions
   resetDetune: () => void;

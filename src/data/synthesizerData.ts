@@ -132,7 +132,7 @@ export const CIRCLE_OF_FIFTHS: CircleKey[] = [
 
 export const NUMBER_KEY_PATTERNS: NumberKeyPattern = {
   0: [], // Empty pattern
-  1: [0, 4, 8, 12], // Basic beat
+  1: [0, 4, 8, 12], // Basic 4/4 beat
   2: [0, 2, 4, 6, 8, 10, 12, 14], // Double time
   3: [0, 3, 6, 9, 12, 15], // Triplet feel
   4: [0, 4, 8, 12, 1, 5, 9, 13], // Two-track pattern
@@ -140,7 +140,139 @@ export const NUMBER_KEY_PATTERNS: NumberKeyPattern = {
   6: [0, 6, 12], // Sparse pattern
   7: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], // All steps
   8: [0, 8, 1, 9, 2, 10, 3, 11], // Alternating pattern
-  9: [0, 3, 6, 9, 12, 15, 1, 4, 7, 10, 13] // Complex pattern
+  9: [0, 3, 6, 9, 12, 15, 1, 4, 7, 10, 13], // Complex pattern
+  // New advanced patterns
+  10: [0, 4, 7, 11, 14], // Jazz swing
+  11: [0, 2, 5, 7, 10, 12, 15], // Latin rhythm
+  12: [0, 3, 6, 9, 12, 15, 2, 5, 8, 11, 14], // Polyrhythm
+  13: [0, 1, 4, 5, 8, 9, 12, 13], // Stutter
+  14: [0, 6, 12, 2, 8, 14, 4, 10], // Cross rhythm
+  15: [0, 2, 4, 6, 8, 10, 12, 14, 1, 3, 5, 7, 9, 11, 13, 15], // Dense syncopation
+  16: [0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15], // Layered pattern
+  17: [0, 3, 7, 10, 14, 1, 4, 8, 11, 15, 2, 5, 9, 12], // Melodic sequence
+  18: [0, 2, 4, 6, 8, 10, 12, 14, 1, 3, 5, 7, 9, 11, 13, 15], // Binary pattern
+  19: [0, 1, 2, 3, 12, 13, 14, 15, 4, 5, 6, 7, 8, 9, 10, 11] // Bookend pattern
+};
+
+// Basic rhythm patterns for drum sequencing
+export const RHYTHM_PATTERNS: { [key: string]: { [trackIndex: number]: number[] } } = {
+  'basic-beat': {
+    0: [0, 4, 8, 12], // Kick on beats 1, 2, 3, 4
+    2: [2, 6, 10, 14], // Snare on beats 2 and 4
+    4: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15] // Hi-hat on every step
+  },
+  'rock-beat': {
+    0: [0, 6, 12], // Kick on beats 1, 2.5, 4
+    2: [4, 12], // Snare on beats 2 and 4
+    4: [0, 2, 4, 6, 8, 10, 12, 14], // Hi-hat on off-beats
+    6: [0, 8] // Crash on beats 1 and 3
+  },
+  'funk-beat': {
+    0: [0, 4, 7, 11, 14], // Kick with syncopation
+    2: [4, 12], // Snare on beats 2 and 4
+    4: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], // Hi-hat on every step
+    8: [0, 8] // Clap on beats 1 and 3
+  },
+  'latin-beat': {
+    0: [0, 6, 12], // Kick on beats 1, 2.5, 4
+    2: [4, 12], // Snare on beats 2 and 4
+    4: [0, 2, 4, 6, 8, 10, 12, 14], // Hi-hat on off-beats
+    10: [0, 4, 8, 12], // Tom on beats 1, 2, 3, 4
+    12: [0, 8] // Ride on beats 1 and 3
+  },
+  'techno-beat': {
+    0: [0, 4, 8, 12], // Kick on every beat
+    2: [4, 12], // Snare on beats 2 and 4
+    4: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], // Hi-hat on every step
+    6: [0, 8], // Crash on beats 1 and 3
+    14: [0, 4, 8, 12] // Bass on every beat
+  },
+  'jazz-beat': {
+    0: [0, 7, 14], // Kick with swing
+    2: [4, 12], // Snare on beats 2 and 4
+    4: [0, 2, 4, 6, 8, 10, 12, 14], // Hi-hat on off-beats
+    12: [0, 4, 8, 12], // Ride on every beat
+    16: [0, 8] // Bass on beats 1 and 3
+  },
+  'hip-hop-beat': {
+    0: [0, 6, 12], // Kick with syncopation
+    2: [4, 12], // Snare on beats 2 and 4
+    4: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], // Hi-hat on every step
+    8: [0, 8], // Clap on beats 1 and 3
+    18: [0, 4, 8, 12] // Bass on every beat
+  },
+  'ambient-beat': {
+    0: [0, 8], // Kick on beats 1 and 3
+    2: [4, 12], // Snare on beats 2 and 4
+    4: [0, 4, 8, 12], // Hi-hat on every beat
+    12: [0, 8], // Ride on beats 1 and 3
+    20: [0, 8] // Bass on beats 1 and 3
+  }
+};
+
+// Scrypture-specific rhythm patterns for gamified productivity
+export const SCRYPTURE_RHYTHM_PATTERNS: { [key: string]: { [trackIndex: number]: number[] } } = {
+  'achievement-unlock': {
+    0: [0, 8], // Kick on beats 1 and 3 (achievement impact)
+    2: [4, 12], // Snare on beats 2 and 4 (celebration)
+    4: [0, 2, 4, 6, 8, 10, 12, 14], // Hi-hat (excitement)
+    6: [0, 8], // Crash (achievement sound)
+    8: [1, 5, 9, 13] // Bass (power)
+  },
+  'task-complete': {
+    0: [0, 4, 8, 12], // Kick (completion rhythm)
+    2: [4, 12], // Snare (satisfaction)
+    4: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], // Hi-hat (progress)
+    6: [2, 6, 10, 14], // Clap (success)
+    8: [0, 8] // Crash (completion)
+  },
+  'level-up': {
+    0: [0, 6, 12], // Kick (level progression)
+    2: [4, 12], // Snare (achievement)
+    4: [0, 2, 4, 6, 8, 10, 12, 14], // Hi-hat (excitement)
+    6: [0, 8], // Crash (level up sound)
+    8: [1, 5, 9, 13], // Bass (power)
+    10: [2, 6, 10, 14] // Tom (celebration)
+  },
+  'streak-milestone': {
+    0: [0, 4, 8, 12], // Kick (consistency)
+    2: [4, 12], // Snare (milestone)
+    4: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], // Hi-hat (momentum)
+    6: [0, 8], // Crash (achievement)
+    8: [2, 6, 10, 14], // Clap (success)
+    10: [1, 5, 9, 13] // Bass (power)
+  },
+  'bobr-greeting': {
+    0: [0, 8], // Kick (friendly greeting)
+    2: [4, 12], // Snare (welcome)
+    4: [0, 2, 4, 6, 8, 10, 12, 14], // Hi-hat (cheerful)
+    6: [0, 8], // Crash (hello)
+    8: [1, 5, 9, 13] // Bass (warmth)
+  },
+  'dam-build': {
+    0: [0, 4, 8, 12], // Kick (construction)
+    2: [4, 12], // Snare (building)
+    4: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], // Hi-hat (work)
+    6: [2, 6, 10, 14], // Clap (progress)
+    8: [0, 8], // Crash (completion)
+    10: [1, 5, 9, 13] // Bass (strength)
+  },
+  'xp-gain': {
+    0: [0, 6, 12], // Kick (experience gain)
+    2: [4, 12], // Snare (reward)
+    4: [0, 2, 4, 6, 8, 10, 12, 14], // Hi-hat (progress)
+    6: [0, 8], // Crash (achievement)
+    8: [1, 5, 9, 13], // Bass (growth)
+    10: [2, 6, 10, 14] // Tom (celebration)
+  },
+  'productivity-flow': {
+    0: [0, 4, 8, 12], // Kick (focus)
+    2: [4, 12], // Snare (breakthrough)
+    4: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], // Hi-hat (flow)
+    6: [0, 8], // Crash (inspiration)
+    8: [2, 6, 10, 14], // Clap (success)
+    10: [1, 5, 9, 13] // Bass (momentum)
+  }
 };
 
 export const PRESETS: Record<string, Preset> = {
@@ -914,15 +1046,484 @@ export const PRESETS: Record<string, Preset> = {
     chorusDepth: 0.002,
     chorusMix: 0.4,
     stereoWidth: 1.5
+  },
+
+  // 🎛️ Sequencer-Specific Presets
+  'sequencer-bass': {
+    name: 'sequencer-bass',
+    waveform: 'square',
+    volume: 7,
+    attack: 1,
+    release: 30,
+    detune: 2,
+    reverb: 'off',
+    arpeggiator: 'off',
+    lfoRate: 0.5,
+    lfoDepth: 8,
+    lfoTarget: 'filter',
+    filterEnabled: true,
+    filterType: 'lowpass',
+    filterFrequency: 300,
+    filterResonance: 3,
+    compressionEnabled: true,
+    compressionThreshold: -12,
+    compressionRatio: 6,
+    compressionAttack: 0.001,
+    compressionRelease: 0.15,
+    distortionEnabled: true,
+    distortionAmount: 0.3,
+    distortionType: 'soft',
+    stereoWidth: 1.1
+  },
+
+  'sequencer-lead': {
+    name: 'sequencer-lead',
+    waveform: 'sawtooth',
+    volume: 6,
+    attack: 2,
+    release: 20,
+    detune: 5,
+    reverb: 'on',
+    arpeggiator: 'off',
+    lfoRate: 2.5,
+    lfoDepth: 12,
+    lfoTarget: 'pitch',
+    filterEnabled: true,
+    filterType: 'lowpass',
+    filterFrequency: 2500,
+    filterResonance: 2,
+    delayEnabled: true,
+    delayTime: 0.2,
+    delayFeedback: 0.3,
+    delayMix: 0.3,
+    chorusEnabled: true,
+    chorusRate: 1.1,
+    chorusDepth: 0.003,
+    chorusMix: 0.4,
+    compressionEnabled: true,
+    compressionThreshold: -10,
+    compressionRatio: 4,
+    compressionAttack: 0.005,
+    compressionRelease: 0.1,
+    stereoWidth: 1.3
+  },
+
+  'sequencer-pad': {
+    name: 'sequencer-pad',
+    waveform: 'sine',
+    volume: 4,
+    attack: 50,
+    release: 80,
+    detune: 8,
+    reverb: 'on',
+    arpeggiator: 'off',
+    lfoRate: 0.4,
+    lfoDepth: 15,
+    lfoTarget: 'volume',
+    filterEnabled: true,
+    filterType: 'lowpass',
+    filterFrequency: 1200,
+    filterResonance: 1,
+    delayEnabled: true,
+    delayTime: 0.6,
+    delayFeedback: 0.4,
+    delayMix: 0.4,
+    chorusEnabled: true,
+    chorusRate: 0.7,
+    chorusDepth: 0.004,
+    chorusMix: 0.6,
+    compressionEnabled: true,
+    compressionThreshold: -18,
+    compressionRatio: 2,
+    compressionAttack: 0.02,
+    compressionRelease: 0.3,
+    stereoWidth: 1.6
+  },
+
+  'sequencer-percussion': {
+    name: 'sequencer-percussion',
+    waveform: 'square',
+    volume: 8,
+    attack: 1,
+    release: 5,
+    detune: 0,
+    reverb: 'off',
+    arpeggiator: 'off',
+    lfoRate: 0,
+    lfoDepth: 0,
+    lfoTarget: 'pitch',
+    filterEnabled: true,
+    filterType: 'highpass',
+    filterFrequency: 800,
+    filterResonance: 4,
+    compressionEnabled: true,
+    compressionThreshold: -6,
+    compressionRatio: 8,
+    compressionAttack: 0.001,
+    compressionRelease: 0.05,
+    distortionEnabled: true,
+    distortionAmount: 0.4,
+    distortionType: 'hard',
+    stereoWidth: 1.0
+  },
+
+  'sequencer-arpeggio': {
+    name: 'sequencer-arpeggio',
+    waveform: 'triangle',
+    volume: 5,
+    attack: 1,
+    release: 15,
+    detune: 3,
+    reverb: 'on',
+    arpeggiator: 'up',
+    lfoRate: 1.5,
+    lfoDepth: 10,
+    lfoTarget: 'filter',
+    filterEnabled: true,
+    filterType: 'lowpass',
+    filterFrequency: 2000,
+    filterResonance: 1.5,
+    delayEnabled: true,
+    delayTime: 0.3,
+    delayFeedback: 0.5,
+    delayMix: 0.4,
+    chorusEnabled: true,
+    chorusRate: 1.0,
+    chorusDepth: 0.002,
+    chorusMix: 0.3,
+    compressionEnabled: true,
+    compressionThreshold: -14,
+    compressionRatio: 3,
+    compressionAttack: 0.01,
+    compressionRelease: 0.2,
+    stereoWidth: 1.4
+  },
+
+  'sequencer-acid': {
+    name: 'sequencer-acid',
+    waveform: 'sawtooth',
+    volume: 7,
+    attack: 1,
+    release: 25,
+    detune: 6,
+    reverb: 'on',
+    arpeggiator: 'off',
+    lfoRate: 3,
+    lfoDepth: 20,
+    lfoTarget: 'filter',
+    filterEnabled: true,
+    filterType: 'lowpass',
+    filterFrequency: 800,
+    filterResonance: 4,
+    delayEnabled: true,
+    delayTime: 0.4,
+    delayFeedback: 0.6,
+    delayMix: 0.5,
+    distortionEnabled: true,
+    distortionAmount: 0.5,
+    distortionType: 'hard',
+    compressionEnabled: true,
+    compressionThreshold: -8,
+    compressionRatio: 5,
+    compressionAttack: 0.005,
+    compressionRelease: 0.15,
+    stereoWidth: 1.2
+  },
+
+  'sequencer-ambient': {
+    name: 'sequencer-ambient',
+    waveform: 'sine',
+    volume: 3,
+    attack: 100,
+    release: 150,
+    detune: 12,
+    reverb: 'on',
+    arpeggiator: 'off',
+    lfoRate: 0.2,
+    lfoDepth: 25,
+    lfoTarget: 'volume',
+    filterEnabled: true,
+    filterType: 'lowpass',
+    filterFrequency: 800,
+    filterResonance: 0.5,
+    delayEnabled: true,
+    delayTime: 1.2,
+    delayFeedback: 0.7,
+    delayMix: 0.6,
+    chorusEnabled: true,
+    chorusRate: 0.5,
+    chorusDepth: 0.006,
+    chorusMix: 0.8,
+    compressionEnabled: true,
+    compressionThreshold: -20,
+    compressionRatio: 1.5,
+    compressionAttack: 0.05,
+    compressionRelease: 0.5,
+    stereoWidth: 1.8
+  },
+
+  'sequencer-techno': {
+    name: 'sequencer-techno',
+    waveform: 'square',
+    volume: 8,
+    attack: 1,
+    release: 10,
+    detune: 2,
+    reverb: 'off',
+    arpeggiator: 'off',
+    lfoRate: 4,
+    lfoDepth: 15,
+    lfoTarget: 'filter',
+    filterEnabled: true,
+    filterType: 'lowpass',
+    filterFrequency: 1500,
+    filterResonance: 3,
+    delayEnabled: true,
+    delayTime: 0.25,
+    delayFeedback: 0.4,
+    delayMix: 0.3,
+    compressionEnabled: true,
+    compressionThreshold: -6,
+    compressionRatio: 10,
+    compressionAttack: 0.001,
+    compressionRelease: 0.1,
+    distortionEnabled: true,
+    distortionAmount: 0.3,
+    distortionType: 'soft',
+    stereoWidth: 1.1
+  },
+
+  // 🥁 Basic Rhythm Presets
+  'rhythm-kick': {
+    name: 'rhythm-kick',
+    waveform: 'sine',
+    volume: 9,
+    attack: 1,
+    release: 20,
+    detune: 0,
+    reverb: 'off',
+    arpeggiator: 'off',
+    lfoRate: 0,
+    lfoDepth: 0,
+    lfoTarget: 'pitch',
+    filterEnabled: true,
+    filterType: 'lowpass',
+    filterFrequency: 200,
+    filterResonance: 2,
+    compressionEnabled: true,
+    compressionThreshold: -4,
+    compressionRatio: 8,
+    compressionAttack: 0.001,
+    compressionRelease: 0.05,
+    stereoWidth: 1.0
+  },
+
+  'rhythm-snare': {
+    name: 'rhythm-snare',
+    waveform: 'square',
+    volume: 7,
+    attack: 1,
+    release: 8,
+    detune: 0,
+    reverb: 'off',
+    arpeggiator: 'off',
+    lfoRate: 0,
+    lfoDepth: 0,
+    lfoTarget: 'pitch',
+    filterEnabled: true,
+    filterType: 'highpass',
+    filterFrequency: 1000,
+    filterResonance: 4,
+    compressionEnabled: true,
+    compressionThreshold: -6,
+    compressionRatio: 6,
+    compressionAttack: 0.001,
+    compressionRelease: 0.03,
+    distortionEnabled: true,
+    distortionAmount: 0.2,
+    distortionType: 'soft',
+    stereoWidth: 1.0
+  },
+
+  'rhythm-hihat': {
+    name: 'rhythm-hihat',
+    waveform: 'square',
+    volume: 6,
+    attack: 1,
+    release: 3,
+    detune: 0,
+    reverb: 'off',
+    arpeggiator: 'off',
+    lfoRate: 0,
+    lfoDepth: 0,
+    lfoTarget: 'pitch',
+    filterEnabled: true,
+    filterType: 'highpass',
+    filterFrequency: 2000,
+    filterResonance: 3,
+    compressionEnabled: true,
+    compressionThreshold: -8,
+    compressionRatio: 10,
+    compressionAttack: 0.001,
+    compressionRelease: 0.02,
+    stereoWidth: 1.0
+  },
+
+  'rhythm-clap': {
+    name: 'rhythm-clap',
+    waveform: 'square',
+    volume: 7,
+    attack: 1,
+    release: 6,
+    detune: 0,
+    reverb: 'off',
+    arpeggiator: 'off',
+    lfoRate: 0,
+    lfoDepth: 0,
+    lfoTarget: 'pitch',
+    filterEnabled: true,
+    filterType: 'highpass',
+    filterFrequency: 800,
+    filterResonance: 2,
+    compressionEnabled: true,
+    compressionThreshold: -5,
+    compressionRatio: 7,
+    compressionAttack: 0.001,
+    compressionRelease: 0.04,
+    stereoWidth: 1.0
+  },
+
+  'rhythm-tom': {
+    name: 'rhythm-tom',
+    waveform: 'sine',
+    volume: 8,
+    attack: 1,
+    release: 15,
+    detune: 0,
+    reverb: 'off',
+    arpeggiator: 'off',
+    lfoRate: 0,
+    lfoDepth: 0,
+    lfoTarget: 'pitch',
+    filterEnabled: true,
+    filterType: 'lowpass',
+    filterFrequency: 400,
+    filterResonance: 3,
+    compressionEnabled: true,
+    compressionThreshold: -6,
+    compressionRatio: 6,
+    compressionAttack: 0.001,
+    compressionRelease: 0.08,
+    stereoWidth: 1.0
+  },
+
+  'rhythm-crash': {
+    name: 'rhythm-crash',
+    waveform: 'sawtooth',
+    volume: 8,
+    attack: 1,
+    release: 25,
+    detune: 5,
+    reverb: 'on',
+    arpeggiator: 'off',
+    lfoRate: 0,
+    lfoDepth: 0,
+    lfoTarget: 'pitch',
+    filterEnabled: true,
+    filterType: 'highpass',
+    filterFrequency: 1500,
+    filterResonance: 2,
+    delayEnabled: true,
+    delayTime: 0.1,
+    delayFeedback: 0.3,
+    delayMix: 0.2,
+    compressionEnabled: true,
+    compressionThreshold: -4,
+    compressionRatio: 8,
+    compressionAttack: 0.001,
+    compressionRelease: 0.1,
+    stereoWidth: 1.2
+  },
+
+  'rhythm-ride': {
+    name: 'rhythm-ride',
+    waveform: 'triangle',
+    volume: 6,
+    attack: 1,
+    release: 12,
+    detune: 2,
+    reverb: 'on',
+    arpeggiator: 'off',
+    lfoRate: 0,
+    lfoDepth: 0,
+    lfoTarget: 'pitch',
+    filterEnabled: true,
+    filterType: 'highpass',
+    filterFrequency: 1200,
+    filterResonance: 2,
+    delayEnabled: true,
+    delayTime: 0.2,
+    delayFeedback: 0.2,
+    delayMix: 0.15,
+    compressionEnabled: true,
+    compressionThreshold: -7,
+    compressionRatio: 5,
+    compressionAttack: 0.001,
+    compressionRelease: 0.06,
+    stereoWidth: 1.1
+  },
+
+  'rhythm-bass': {
+    name: 'rhythm-bass',
+    waveform: 'square',
+    volume: 8,
+    attack: 1,
+    release: 30,
+    detune: 1,
+    reverb: 'off',
+    arpeggiator: 'off',
+    lfoRate: 0.5,
+    lfoDepth: 5,
+    lfoTarget: 'filter',
+    filterEnabled: true,
+    filterType: 'lowpass',
+    filterFrequency: 300,
+    filterResonance: 2,
+    compressionEnabled: true,
+    compressionThreshold: -8,
+    compressionRatio: 4,
+    compressionAttack: 0.001,
+    compressionRelease: 0.15,
+    distortionEnabled: true,
+    distortionAmount: 0.2,
+    distortionType: 'soft',
+    stereoWidth: 1.0
   }
 };
 
 export const SEQUENCER_TRACKS = [
   { note: 'C', frequency: 261.63 },
+  { note: 'C#', frequency: 277.18 },
   { note: 'D', frequency: 293.66 },
+  { note: 'D#', frequency: 311.13 },
   { note: 'E', frequency: 329.63 },
   { note: 'F', frequency: 349.23 },
+  { note: 'F#', frequency: 369.99 },
   { note: 'G', frequency: 392.00 },
+  { note: 'G#', frequency: 415.30 },
   { note: 'A', frequency: 440.00 },
-  { note: 'B', frequency: 493.88 }
+  { note: 'A#', frequency: 466.16 },
+  { note: 'B', frequency: 493.88 },
+  { note: 'C2', frequency: 523.25 },
+  { note: 'C#2', frequency: 554.37 },
+  { note: 'D2', frequency: 587.33 },
+  { note: 'D#2', frequency: 622.25 },
+  { note: 'E2', frequency: 659.25 },
+  { note: 'F2', frequency: 698.46 },
+  { note: 'F#2', frequency: 739.99 },
+  { note: 'G2', frequency: 783.99 },
+  { note: 'G#2', frequency: 830.61 },
+  { note: 'A2', frequency: 880.00 },
+  { note: 'A#2', frequency: 932.33 },
+  { note: 'B2', frequency: 987.77 }
 ]; 

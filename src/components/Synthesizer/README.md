@@ -12,7 +12,7 @@ A fully-featured 8-bit synthesizer available in both React TypeScript and standa
 - **Chord System**: Major, minor, diminished, and extended chords
 - **Comprehensive Chord Progressions**: 50+ progressions across 11 categories (Classic, Jazz, Blues, Pop, Rock, Folk, Country, Electronic, Mood-Based, Advanced, Modal)
 - **Circle of Fifths**: Interactive music theory exploration
-- **Step Sequencer**: 16-step sequencer with pattern presets
+- **Step Sequencer**: 32-step sequencer with 20 advanced patterns, 8 sequencer-specific presets, 8 basic rhythm presets, 8 rhythm patterns, and 8 Scrypture rhythm patterns
 - **Scrypture Integration**: Game-themed sound presets for achievements and UI feedback
 - **DataManager Integration**: Easy access through the DataManager's Tools section
 
@@ -128,10 +128,95 @@ Comprehensive TypeScript interfaces for:
 
 ### Sequencer Controls
 - **BPM**: Tempo control (60-200 BPM)
-- **Steps**: Pattern length (4-16 steps)
+- **Steps**: Pattern length (8-32 steps)
 - **Play/Stop**: Transport controls
 - **Clear**: Reset pattern
 - **Draw Mode**: Click to toggle step sequencer mode
+
+### 🎛️ Sequencer Patterns
+The sequencer now includes **20 advanced patterns** for creative sequencing:
+
+#### **Basic Patterns (0-9)**
+- **0**: Empty pattern
+- **1**: Basic 4/4 beat (0, 4, 8, 12)
+- **2**: Double time (0, 2, 4, 6, 8, 10, 12, 14)
+- **3**: Triplet feel (0, 3, 6, 9, 12, 15)
+- **4**: Two-track pattern (0, 4, 8, 12, 1, 5, 9, 13)
+- **5**: Full pattern (all steps)
+- **6**: Sparse pattern (0, 6, 12)
+- **7**: All steps (0-15)
+- **8**: Alternating pattern (0, 8, 1, 9, 2, 10, 3, 11)
+- **9**: Complex pattern (0, 3, 6, 9, 12, 15, 1, 4, 7, 10, 13)
+
+#### **Advanced Patterns (10-19)**
+- **10**: Jazz swing (0, 4, 7, 11, 14)
+- **11**: Latin rhythm (0, 2, 5, 7, 10, 12, 15)
+- **12**: Polyrhythm (0, 3, 6, 9, 12, 15, 2, 5, 8, 11, 14)
+- **13**: Stutter (0, 1, 4, 5, 8, 9, 12, 13)
+- **14**: Cross rhythm (0, 6, 12, 2, 8, 14, 4, 10)
+- **15**: Dense syncopation (all steps with offset)
+- **16**: Layered pattern (0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15)
+- **17**: Melodic sequence (0, 3, 7, 10, 14, 1, 4, 8, 11, 15, 2, 5, 9, 12)
+- **18**: Binary pattern (0, 2, 4, 6, 8, 10, 12, 14, 1, 3, 5, 7, 9, 11, 13, 15)
+- **19**: Bookend pattern (0, 1, 2, 3, 12, 13, 14, 15, 4, 5, 6, 7, 8, 9, 10, 11)
+
+### 🎛️ Sequencer Presets
+The synthesizer includes **8 sequencer-specific presets** optimized for different musical styles:
+
+#### **Sequencer Presets**
+- **🎸 Bass**: Deep, punchy bass with compression and distortion
+- **🎹 Lead**: Bright, cutting lead with chorus and delay
+- **🎼 Pad**: Atmospheric pad with long attack/release and stereo width
+- **🥁 Percussion**: Sharp, percussive sounds with high-pass filter
+- **🎵 Arpeggio**: Crystal-clear arpeggio with chorus and delay
+- **🧪 Acid**: Classic acid sound with resonant filter and distortion
+- **🌿 Ambient**: Ethereal ambient sounds with long delays and chorus
+- **⚡ Techno**: Aggressive techno sounds with heavy compression and distortion
+
+### 🥁 Basic Rhythm Presets
+The synthesizer includes **8 basic rhythm presets** for creating drum patterns and beats:
+
+#### **Rhythm Presets**
+- **🥁 Kick**: Deep, punchy kick drum with low-pass filter and compression
+- **🥁 Snare**: Sharp, cutting snare with high-pass filter and distortion
+- **🥁 Hi-Hat**: Crisp, bright hi-hat with high-pass filter and fast compression
+- **👏 Clap**: Sharp clap sound with high-pass filter and compression
+- **🥁 Tom**: Warm tom sound with low-pass filter and medium compression
+- **🥁 Crash**: Bright crash cymbal with reverb, delay, and stereo width
+- **🥁 Ride**: Clear ride cymbal with reverb, delay, and compression
+- **🎸 Bass**: Rhythmic bass with LFO filter modulation and compression
+
+### 🥁 Rhythm Patterns
+The synthesizer includes **8 rhythm patterns** that can be loaded directly into the sequencer grid:
+
+#### **Rhythm Patterns**
+- **🥁 Basic Beat**: Classic 4/4 drum pattern with kick, snare, and hi-hat
+- **🤘 Rock Beat**: Rock-style pattern with syncopated kick and off-beat hi-hats
+- **🎵 Funk Beat**: Funk pattern with syncopated kick and clap accents
+- **🌴 Latin Beat**: Latin rhythm with tom fills and ride cymbal
+- **⚡ Techno Beat**: Electronic techno pattern with heavy kick and bass
+- **🎷 Jazz Beat**: Jazz swing pattern with ride cymbal and bass
+- **🎤 Hip-Hop Beat**: Hip-hop pattern with syncopated kick and clap
+- **🌿 Ambient Beat**: Ambient pattern with sparse kick and atmospheric elements
+
+### 🦫 Scrypture Rhythm Patterns
+The synthesizer includes **8 Scrypture-specific rhythm patterns** designed for gamified productivity:
+
+#### **Scrypture Rhythm Patterns**
+- **🏆 Achievement Unlock**: Celebration pattern with kick, snare, hi-hat, crash, and bass for achievement moments
+- **✅ Task Complete**: Completion rhythm with kick, snare, hi-hat, clap, and crash for task satisfaction
+- **⭐ Level Up**: Progression pattern with kick, snare, hi-hat, crash, bass, and tom for level advancement
+- **🔥 Streak Milestone**: Momentum pattern with kick, snare, hi-hat, crash, clap, and bass for consistency rewards
+- **🦫 Bóbr Greeting**: Friendly pattern with kick, snare, hi-hat, crash, and bass for welcoming interactions
+- **🏗️ Dam Build**: Construction pattern with kick, snare, hi-hat, clap, crash, and bass for building progress
+- **📈 XP Gain**: Growth pattern with kick, snare, hi-hat, crash, bass, and tom for experience rewards
+- **🚀 Productivity Flow**: Focus pattern with kick, snare, hi-hat, crash, clap, and bass for flow state
+
+### 🎵 Enhanced Sequencer Tracks
+The sequencer now includes **24 tracks** covering two full octaves:
+- **C to B**: First octave (261.63 Hz to 493.88 Hz)
+- **C2 to B2**: Second octave (523.25 Hz to 987.77 Hz)
+- Includes all sharps/flats for complete chromatic scale
 
 ### Chord Progression Organization
 The chord progressions are organized into logical sections for easy navigation:

@@ -5,7 +5,7 @@ import {
   ActiveNote, 
   WaveformType 
 } from '../types/synthesizer';
-import { CHORDS, CHORD_PROGRESSIONS, PRESETS, NUMBER_KEY_PATTERNS, SEQUENCER_TRACKS, NOTES } from '../data/synthesizerData';
+import { CHORDS, CHORD_PROGRESSIONS, PRESETS, NUMBER_KEY_PATTERNS, RHYTHM_PATTERNS, SCRYPTURE_RHYTHM_PATTERNS, SEQUENCER_TRACKS, NOTES } from '../data/synthesizerData';
 
 
 
@@ -753,6 +753,56 @@ export const useSynthesizer = (): SynthesizerContextType => {
     });
   }, [state.steps, clearSequence]);
 
+  const loadRhythmPattern = useCallback((patternName: string) => {
+    const pattern = RHYTHM_PATTERNS[patternName];
+    if (!pattern) return;
+    
+    clearSequence();
+    
+    const noteNames = SEQUENCER_TRACKS.map(track => track.note);
+    
+    Object.entries(pattern).forEach(([trackIndexStr, steps]) => {
+      const trackIndex = parseInt(trackIndexStr);
+      if (trackIndex < noteNames.length) {
+        const note = noteNames[trackIndex];
+        if (!sequenceRef.current[note]) {
+          sequenceRef.current[note] = new Array(32).fill(false);
+        }
+        
+        steps.forEach(step => {
+          if (step < state.steps) {
+            sequenceRef.current[note][step] = true;
+          }
+        });
+      }
+    });
+  }, [state.steps, clearSequence]);
+
+  const loadScryptureRhythmPattern = useCallback((patternName: string) => {
+    const pattern = SCRYPTURE_RHYTHM_PATTERNS[patternName];
+    if (!pattern) return;
+    
+    clearSequence();
+    
+    const noteNames = SEQUENCER_TRACKS.map(track => track.note);
+    
+    Object.entries(pattern).forEach(([trackIndexStr, steps]) => {
+      const trackIndex = parseInt(trackIndexStr);
+      if (trackIndex < noteNames.length) {
+        const note = noteNames[trackIndex];
+        if (!sequenceRef.current[note]) {
+          sequenceRef.current[note] = new Array(32).fill(false);
+        }
+        
+        steps.forEach(step => {
+          if (step < state.steps) {
+            sequenceRef.current[note][step] = true;
+          }
+        });
+      }
+    });
+  }, [state.steps, clearSequence]);
+
   const resetDetune = useCallback(() => {
     updateState({ detune: 0 });
     
@@ -1138,6 +1188,8 @@ export const useSynthesizer = (): SynthesizerContextType => {
     clearSequence,
     toggleDrawMode,
     loadPattern,
+    loadRhythmPattern,
+    loadScryptureRhythmPattern,
     resetDetune,
     resetVolume,
     resetAttack,
