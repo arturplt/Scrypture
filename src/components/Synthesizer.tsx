@@ -70,7 +70,6 @@ const SliderControl: React.FC<SliderControlProps> = ({
     <div className={styles.section}>
       <label>
         {label}
-        {isLive && <span className={styles.liveIndicator}> 🔴 LIVE</span>}
       </label>
       <div className={styles.sliderGroup}>
         <button onClick={() => onChange(Math.max(min, value - step))}>-</button>
@@ -457,15 +456,117 @@ export const Synthesizer: React.FC = () => {
 
       <CollapsibleSection title="🎼 Chord Progressions">
         <div className={styles.chordControls}>
-          <div className={styles.chordPresets}>
-            <button onClick={() => synth.playProgression('I-IV-V')} className={styles.presetBtn}>I-IV-V</button>
-            <button onClick={() => synth.playProgression('ii-V-I')} className={styles.presetBtn}>ii-V-I</button>
-            <button onClick={() => synth.playProgression('I-V-vi-IV')} className={styles.presetBtn}>Pop</button>
-            <button onClick={() => synth.playProgression('vi-IV-I-V')} className={styles.presetBtn}>Sad</button>
-            <button onClick={() => synth.playProgression('Happy')} className={styles.presetBtn}>😊 Happy</button>
-            <button onClick={() => synth.playProgression('Tense')} className={styles.presetBtn}>😤 Tense</button>
-            <button onClick={() => synth.playProgression('Dreamy')} className={styles.presetBtn}>😌 Dreamy</button>
-            <button onClick={() => synth.playProgression('Jazz')} className={styles.presetBtn}>🎷 Jazz</button>
+          <div className={styles.chordSection}>
+            <h4>🎵 Classic Progressions</h4>
+            <div className={styles.chordPresets}>
+              <button onClick={() => synth.playProgression('I-IV-V')} className={styles.presetBtn}>I-IV-V</button>
+              <button onClick={() => synth.playProgression('ii-V-I')} className={styles.presetBtn}>ii-V-I</button>
+              <button onClick={() => synth.playProgression('I-V-vi-IV')} className={styles.presetBtn}>I-V-vi-IV</button>
+              <button onClick={() => synth.playProgression('vi-IV-I-V')} className={styles.presetBtn}>vi-IV-I-V</button>
+              <button onClick={() => synth.playProgression('I-vi-ii-V')} className={styles.presetBtn}>I-vi-ii-V</button>
+              <button onClick={() => synth.playProgression('ii-vi-I-V')} className={styles.presetBtn}>ii-vi-I-V</button>
+            </div>
+          </div>
+
+          <div className={styles.chordSection}>
+            <h4>🎷 Jazz Progressions</h4>
+            <div className={styles.chordPresets}>
+              <button onClick={() => synth.playProgression('Jazz')} className={styles.presetBtn}>Jazz</button>
+              <button onClick={() => synth.playProgression('Jazz II-V-I')} className={styles.presetBtn}>II-V-I</button>
+              <button onClick={() => synth.playProgression('Jazz Turnaround')} className={styles.presetBtn}>Turnaround</button>
+              <button onClick={() => synth.playProgression('Jazz Minor')} className={styles.presetBtn}>Minor</button>
+              <button onClick={() => synth.playProgression('Jazz Blues')} className={styles.presetBtn}>Blues</button>
+            </div>
+          </div>
+
+          <div className={styles.chordSection}>
+            <h4>🎸 Blues Progressions</h4>
+            <div className={styles.chordPresets}>
+              <button onClick={() => synth.playProgression('Blues')} className={styles.presetBtn}>Blues</button>
+              <button onClick={() => synth.playProgression('Blues 12-Bar')} className={styles.presetBtn}>12-Bar</button>
+              <button onClick={() => synth.playProgression('Blues Minor')} className={styles.presetBtn}>Minor</button>
+            </div>
+          </div>
+
+          <div className={styles.chordSection}>
+            <h4>🎵 Pop Progressions</h4>
+            <div className={styles.chordPresets}>
+              <button onClick={() => synth.playProgression('Pop')} className={styles.presetBtn}>Pop</button>
+              <button onClick={() => synth.playProgression('Pop Rock')} className={styles.presetBtn}>Rock</button>
+              <button onClick={() => synth.playProgression('Pop Ballad')} className={styles.presetBtn}>Ballad</button>
+              <button onClick={() => synth.playProgression('Pop Upbeat')} className={styles.presetBtn}>Upbeat</button>
+            </div>
+          </div>
+
+          <div className={styles.chordSection}>
+            <h4>🤘 Rock Progressions</h4>
+            <div className={styles.chordPresets}>
+              <button onClick={() => synth.playProgression('Rock')} className={styles.presetBtn}>Rock</button>
+              <button onClick={() => synth.playProgression('Rock Minor')} className={styles.presetBtn}>Minor</button>
+              <button onClick={() => synth.playProgression('Rock Power')} className={styles.presetBtn}>Power</button>
+            </div>
+          </div>
+
+          <div className={styles.chordSection}>
+            <h4>🌿 Folk Progressions</h4>
+            <div className={styles.chordPresets}>
+              <button onClick={() => synth.playProgression('Folk')} className={styles.presetBtn}>Folk</button>
+              <button onClick={() => synth.playProgression('Folk Minor')} className={styles.presetBtn}>Minor</button>
+              <button onClick={() => synth.playProgression('Folk Ballad')} className={styles.presetBtn}>Ballad</button>
+            </div>
+          </div>
+
+          <div className={styles.chordSection}>
+            <h4>🤠 Country Progressions</h4>
+            <div className={styles.chordPresets}>
+              <button onClick={() => synth.playProgression('Country')} className={styles.presetBtn}>Country</button>
+              <button onClick={() => synth.playProgression('Country Ballad')} className={styles.presetBtn}>Ballad</button>
+              <button onClick={() => synth.playProgression('Country Rock')} className={styles.presetBtn}>Rock</button>
+            </div>
+          </div>
+
+          <div className={styles.chordSection}>
+            <h4>🎛️ Electronic Progressions</h4>
+            <div className={styles.chordPresets}>
+              <button onClick={() => synth.playProgression('Electronic')} className={styles.presetBtn}>Electronic</button>
+              <button onClick={() => synth.playProgression('House')} className={styles.presetBtn}>House</button>
+              <button onClick={() => synth.playProgression('Ambient')} className={styles.presetBtn}>Ambient</button>
+            </div>
+          </div>
+
+          <div className={styles.chordSection}>
+            <h4>😊 Mood-Based Progressions</h4>
+            <div className={styles.chordPresets}>
+              <button onClick={() => synth.playProgression('Happy')} className={styles.presetBtn}>😊 Happy</button>
+              <button onClick={() => synth.playProgression('Sad')} className={styles.presetBtn}>😢 Sad</button>
+              <button onClick={() => synth.playProgression('Tense')} className={styles.presetBtn}>😤 Tense</button>
+              <button onClick={() => synth.playProgression('Dreamy')} className={styles.presetBtn}>😌 Dreamy</button>
+              <button onClick={() => synth.playProgression('Mysterious')} className={styles.presetBtn}>🔮 Mysterious</button>
+              <button onClick={() => synth.playProgression('Peaceful')} className={styles.presetBtn}>🕊️ Peaceful</button>
+              <button onClick={() => synth.playProgression('Energetic')} className={styles.presetBtn}>⚡ Energetic</button>
+              <button onClick={() => synth.playProgression('Melancholic')} className={styles.presetBtn}>🌧️ Melancholic</button>
+            </div>
+          </div>
+
+          <div className={styles.chordSection}>
+            <h4>🎼 Advanced Progressions</h4>
+            <div className={styles.chordPresets}>
+              <button onClick={() => synth.playProgression('Advanced Jazz')} className={styles.presetBtn}>Advanced Jazz</button>
+              <button onClick={() => synth.playProgression('Advanced Pop')} className={styles.presetBtn}>Advanced Pop</button>
+              <button onClick={() => synth.playProgression('Advanced Blues')} className={styles.presetBtn}>Advanced Blues</button>
+              <button onClick={() => synth.playProgression('Extended Harmony')} className={styles.presetBtn}>Extended Harmony</button>
+              <button onClick={() => synth.playProgression('Rich Harmony')} className={styles.presetBtn}>Rich Harmony</button>
+              <button onClick={() => synth.playProgression('Complex Jazz')} className={styles.presetBtn}>Complex Jazz</button>
+            </div>
+          </div>
+
+          <div className={styles.chordSection}>
+            <h4>🎵 Modal Progressions</h4>
+            <div className={styles.chordPresets}>
+              <button onClick={() => synth.playProgression('Dorian')} className={styles.presetBtn}>Dorian</button>
+              <button onClick={() => synth.playProgression('Mixolydian')} className={styles.presetBtn}>Mixolydian</button>
+              <button onClick={() => synth.playProgression('Lydian')} className={styles.presetBtn}>Lydian</button>
+            </div>
           </div>
         </div>
       </CollapsibleSection>
@@ -533,7 +634,7 @@ export const Synthesizer: React.FC = () => {
         label="Volume"
         value={synth.state.volume}
         min={1}
-        max={50}
+        max={100}
         onChange={(value) => synth.updateState({ volume: value })}
         showValue
         valueDisplay={`${synth.state.volume}%`}
@@ -1063,7 +1164,7 @@ export const Synthesizer: React.FC = () => {
             <div className={styles.timelineTracks}>
               {/* Step numbers row - integrated into the grid */}
               <div className={styles.track}>
-                <div className={styles.trackLabel}>Steps</div>
+                <div className={styles.trackLabel}></div>
                 <div className={styles.trackSteps}>
                   {Array.from({ length: synth.state.steps }, (_, i) => (
                     <div

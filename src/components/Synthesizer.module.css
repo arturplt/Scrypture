@@ -819,7 +819,27 @@
 .chordControls {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--spacing-lg);
+}
+
+.chordSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background: var(--color-bg-tertiary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: var(--border-radius-sm);
+}
+
+.chordSection h4 {
+  color: var(--color-accent-gold);
+  font-size: var(--font-size-sm);
+  font-family: 'Press Start 2P', monospace;
+  margin: 0 0 var(--spacing-sm) 0;
+  text-align: center;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
 }
 
 .chordPresets {

@@ -10,7 +10,7 @@ A fully-featured 8-bit synthesizer available in both React TypeScript and standa
 - **Multiple Waveforms**: Sine, Square, Triangle, Sawtooth
 - **Advanced Audio Controls**: Volume, Attack, Release, Detune, LFO, Reverb
 - **Chord System**: Major, minor, diminished, and extended chords
-- **Chord Progressions**: Classic progressions (I-IV-V, ii-V-I) and mood-based collections
+- **Comprehensive Chord Progressions**: 50+ progressions across 11 categories (Classic, Jazz, Blues, Pop, Rock, Folk, Country, Electronic, Mood-Based, Advanced, Modal)
 - **Circle of Fifths**: Interactive music theory exploration
 - **Step Sequencer**: 16-step sequencer with pattern presets
 - **Scrypture Integration**: Game-themed sound presets for achievements and UI feedback
@@ -62,6 +62,7 @@ The main UI component featuring:
 - Collapsible sections for organization
 - Interactive controls with real-time updates
 - Real-time status display (note name + frequency)
+- Comprehensive chord progression library organized by genre and mood
 - Responsive design for all screen sizes
 - Touch and mouse support
 
@@ -132,6 +133,26 @@ Comprehensive TypeScript interfaces for:
 - **Clear**: Reset pattern
 - **Draw Mode**: Click to toggle step sequencer mode
 
+### Chord Progression Organization
+The chord progressions are organized into logical sections for easy navigation:
+
+#### Genre-Based Sections
+- **🎵 Classic Progressions**: Fundamental music theory progressions
+- **🎷 Jazz Progressions**: Jazz standards and complex harmonies
+- **🎸 Blues Progressions**: Traditional blues patterns
+- **🎵 Pop Progressions**: Popular music progressions
+- **🤘 Rock Progressions**: Rock and power chord patterns
+- **🌿 Folk Progressions**: Traditional folk music patterns
+- **🤠 Country Progressions**: Country and western patterns
+- **🎛️ Electronic Progressions**: Electronic and ambient patterns
+
+#### Mood-Based Sections
+- **😊 Mood-Based Progressions**: Emotional and atmospheric progressions
+- **🎼 Advanced Progressions**: Complex and extended harmonies
+- **🎵 Modal Progressions**: Modal music theory progressions
+
+Each section contains multiple variations and complexity levels, making it easy to find the perfect progression for any musical style or mood.
+
 ## 🎼 Musical Features
 
 ### Chords
@@ -139,9 +160,100 @@ Comprehensive TypeScript interfaces for:
 - **Extended Chords**: Cmaj7, Dmin7, Emin7, Fmaj7, G7, Amin7, Bm7b5
 - **Mood Collections**: Happy, Sad, Tense, Dreamy
 
+### Chord Progressions
+The synthesizer includes **50+ chord progressions** organized into 11 categories:
+
+- **6 Classic Progressions**: Fundamental music theory patterns
+- **5 Jazz Progressions**: Jazz standards and complex harmonies  
+- **3 Blues Progressions**: Traditional blues patterns
+- **4 Pop Progressions**: Popular music progressions
+- **3 Rock Progressions**: Rock and power chord patterns
+- **3 Folk Progressions**: Traditional folk music patterns
+- **3 Country Progressions**: Country and western patterns
+- **3 Electronic Progressions**: Electronic and ambient patterns
+- **8 Mood-Based Progressions**: Emotional and atmospheric progressions
+- **6 Advanced Progressions**: Complex and extended harmonies
+- **3 Modal Progressions**: Modal music theory progressions
+
+Each progression is carefully crafted to provide authentic musical patterns for composition, learning, and creative exploration.
+
 ### Progressions
-- **Classic**: I-IV-V, ii-V-I, I-V-vi-IV, vi-IV-I-V
-- **Mood-Based**: Happy, Sad, Tense, Dreamy, Jazz, Blues
+The synthesizer includes an extensive collection of chord progressions organized by genre, mood, and complexity:
+
+#### Classic Progressions
+- **I-IV-V**: The most fundamental progression (C-F-G)
+- **ii-V-I**: Jazz standard progression (Dm-G-C)
+- **I-V-vi-IV**: Popular music progression (C-G-Am-F)
+- **vi-IV-I-V**: Sad/melancholic progression (Am-F-C-G)
+- **I-vi-ii-V**: Extended classic progression (C-Am-Dm-G)
+- **ii-vi-I-V**: Alternative classic progression (Dm-Am-C-G)
+
+#### Extended Classic Progressions
+- **I-IV-V-IV**: Extended I-IV-V with repetition (C-F-G-F)
+- **I-V-vi-iii**: Modal progression (C-G-Am-Em)
+- **I-vi-IV-V**: Alternative pop progression (C-Am-F-G)
+- **vi-V-IV-III**: Descending progression (Am-G-F-Em)
+
+#### Jazz Progressions
+- **Jazz**: Standard jazz progression (Dm7-G7-Cmaj7-Fmaj7)
+- **Jazz II-V-I**: Essential jazz progression (Dm7-G7-Cmaj7)
+- **Jazz Turnaround**: Classic turnaround (Cmaj7-Am7-Dm7-G7)
+- **Jazz Minor**: Minor jazz progression (Am7-Dm7-G7-Cmaj7)
+- **Jazz Blues**: Jazz blues progression (Cmaj7-Fmaj7-G7-Cmaj7)
+
+#### Blues Progressions
+- **Blues**: Basic blues progression (C-F-G7-C)
+- **Blues 12-Bar**: Extended 12-bar blues (C-F-C-G7-F-C)
+- **Blues Minor**: Minor blues progression (Am-Dm-Am-E7-Dm-Am)
+
+#### Pop Progressions
+- **Pop**: Standard pop progression (C-G-Am-F)
+- **Pop Rock**: Rock-influenced pop (C-F-G-Am)
+- **Pop Ballad**: Ballad-style pop (C-Am-F-G)
+- **Pop Upbeat**: Upbeat pop progression (C-F-G-C)
+
+#### Rock Progressions
+- **Rock**: Classic rock progression (C-F-G-C)
+- **Rock Minor**: Minor rock progression (Am-Dm-Em-Am)
+- **Rock Power**: Power chord progression (C-F-G-Am)
+
+#### Folk Progressions
+- **Folk**: Traditional folk progression (C-F-G-Am)
+- **Folk Minor**: Minor folk progression (Am-Dm-G-Am)
+- **Folk Ballad**: Folk ballad progression (C-Am-F-G)
+
+#### Country Progressions
+- **Country**: Classic country progression (C-F-G-C)
+- **Country Ballad**: Country ballad progression (C-Am-F-G)
+- **Country Rock**: Country rock progression (C-F-G-Am)
+
+#### Electronic Progressions
+- **Electronic**: Electronic music progression (C-Am-F-G)
+- **House**: House music progression (C-F-G-Am)
+- **Ambient**: Ambient music progression (Cmaj7-Fmaj7-Am7-Gmaj7)
+
+#### Mood-Based Progressions
+- **😊 Happy**: Bright, uplifting progression (C-F-G-C)
+- **😢 Sad**: Melancholic progression (Am-Dm-Em-Am)
+- **😤 Tense**: Suspenseful progression (G7-Bdim-Dm7-G7)
+- **😌 Dreamy**: Ethereal progression (Fmaj7-Em7-Cmaj7-Am7)
+- **🔮 Mysterious**: Mysterious progression (Am-Em-Dm-Am)
+- **🕊️ Peaceful**: Calming progression (Cmaj7-Fmaj7-Gmaj7-Cmaj7)
+- **⚡ Energetic**: High-energy progression (C-G-F-G)
+- **🌧️ Melancholic**: Deeply sad progression (Am-F-C-G)
+
+#### Advanced Progressions
+- **Advanced Jazz**: Complex jazz progression (Dm7-G7-Cmaj7-Am7-Dm7-G7)
+- **Advanced Pop**: Extended pop progression (C-Am-F-G-C-F-G-C)
+- **Advanced Blues**: Extended blues progression (C-F-C-G7-F-C-G7-C)
+- **Extended Harmony**: Rich harmony progression (Cmaj7-Dm7-Em7-Fmaj7)
+- **Rich Harmony**: Complex harmony progression (Cmaj7-Am7-Fmaj7-G7)
+- **Complex Jazz**: Advanced jazz progression (Dm7-G7-Cmaj7-Fmaj7-Bm7-E7)
+
+#### Modal Progressions
+- **Dorian**: Dorian mode progression (Dm-G-C-Dm)
+- **Mixolydian**: Mixolydian mode progression (G-F-C-G)
+- **Lydian**: Lydian mode progression (F-G-C-F)
 
 ### Circle of Fifths
 Interactive circle showing:
@@ -152,25 +264,58 @@ Interactive circle showing:
 
 ## 🦫 Scrypture Integration
 
-The synthesizer includes presets specifically designed for the Scrypture productivity app:
+The synthesizer includes enhanced presets specifically designed for the Scrypture productivity app, featuring advanced audio effects for a more engaging and polished user experience:
+
+### 🎛️ Enhanced Audio Effects
+All Scrypture presets now utilize modern audio processing techniques:
+
+#### **Filter Effects**
+- **High-pass filters** (600-2000Hz) for crisp, focused sounds
+- **Low-pass filters** (2500-4000Hz) for warm, mellow tones
+- **Bandpass filters** (1500-2000Hz) for unique, focused frequencies
+- **Resonance control** (0.5-2.0) for filter character
+
+#### **Compression Effects**
+- **Threshold control** (-20 to -8dB) for dynamic range control
+- **Ratio control** (1.1-2.0) for compression intensity
+- **Fast attack** (0.001-0.02s) for transient control
+- **Quick release** (0.02-0.15s) for natural dynamics
+
+#### **Delay Effects**
+- **Short delays** (0.05-0.3s) for spatial depth and echo
+- **Feedback control** (0.1-0.4) for echo decay
+- **Mix control** (0.1-0.3) for wet/dry balance
+
+#### **Chorus Effects**
+- **Rate control** (0.6-1.2Hz) for modulation speed
+- **Depth control** (0.002-0.006) for modulation intensity
+- **Mix control** (0.2-0.5) for chorus presence
+
+#### **Distortion Effects**
+- **Soft distortion** for warm, musical saturation
+- **Amount control** (0.2-0.3) for harmonic richness
+
+#### **Stereo Effects**
+- **Stereo width** (1.1-1.5x) for spatial enhancement
+- **Panning control** for stereo positioning
 
 ### Achievement Sounds
-- **Common**: Simple, satisfying completion sound
-- **Rare**: Enhanced with reverb and LFO
-- **Legendary**: Complex, celebratory sound with arpeggiation
+- **🏆 Common**: Clean sine wave with high-pass filter (800Hz), compression (-20dB), and short delay (0.1s)
+- **💎 Rare**: Rich triangle wave with low-pass filter (3000Hz), chorus (1.2Hz), delay (0.2s), and stereo width (1.3x)
+- **👑 Legendary**: Complex sawtooth wave with bandpass filter (2000Hz), chorus (0.8Hz), delay (0.3s), distortion (30%), and stereo width (1.5x)
 
 ### UI Feedback
-- **Task Complete**: Quick confirmation sound
-- **Level Up**: Exciting progression sound
-- **UI Click**: Subtle interface feedback
-- **Form Submit**: Positive submission sound
-- **Modal Open**: Attention-grabbing sound
-- **XP Gain**: Rewarding experience sound
+- **✅ Task Complete**: Quick sine wave with high-pass filter (1200Hz) and compression (-15dB)
+- **⭐ Level Up**: Exciting square wave with low-pass filter (4000Hz), chorus (1.0Hz), delay (0.15s), and stereo width (1.2x)
+- **🖱️ UI Click**: Subtle sine wave with high-pass filter (2000Hz) and compression (-10dB)
+- **📝 Form Submit**: Positive triangle wave with low-pass filter (3500Hz), chorus (0.9Hz), and compression (-12dB)
+- **🔲 Modal Open**: Attention-grabbing sine wave with high-pass filter (1000Hz), short delay (0.05s), and compression (-8dB)
+- **📈 XP Gain**: Rewarding triangle wave with low-pass filter (2800Hz), chorus (1.0Hz), and compression (-14dB)
 
 ### Game Elements
-- **Bóbr Greeting**: Friendly companion sound
-- **Dam Build**: Construction progress sound
-- **Streak Milestone**: Achievement celebration
+- **🦫 Bóbr Greeting**: Friendly triangle wave with low-pass filter (2500Hz), chorus (0.6Hz), delay (0.25s), and stereo width (1.1x)
+- **🏗️ Dam Build**: Construction square wave with high-pass filter (600Hz), distortion (20%), compression (-18dB), and delay (0.1s)
+- **🔥 Streak Milestone**: Achievement sine wave with bandpass filter (1500Hz), chorus (1.1Hz), delay (0.2s), and stereo width (1.25x)
 
 ## 🚀 Usage
 

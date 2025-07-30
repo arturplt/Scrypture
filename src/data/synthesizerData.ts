@@ -45,13 +45,74 @@ export const CHORD_PROGRESSIONS: Record<string, ChordProgression> = {
   'I-vi-ii-V': { name: 'I-vi-ii-V', chords: ['Cmaj', 'Amin', 'Dmin', 'Gmaj'] },
   'ii-vi-I-V': { name: 'ii-vi-I-V', chords: ['Dmin', 'Amin', 'Cmaj', 'Gmaj'] },
   
+  // Extended Classic Progressions
+  'I-IV-V-IV': { name: 'I-IV-V-IV', chords: ['Cmaj', 'Fmaj', 'Gmaj', 'Fmaj'] },
+  'I-V-vi-iii': { name: 'I-V-vi-iii', chords: ['Cmaj', 'Gmaj', 'Amin', 'Emin'] },
+  'I-vi-IV-V': { name: 'I-vi-IV-V', chords: ['Cmaj', 'Amin', 'Fmaj', 'Gmaj'] },
+  'vi-V-IV-III': { name: 'vi-V-IV-III', chords: ['Amin', 'Gmaj', 'Fmaj', 'Emin'] },
+  
+  // Jazz Progressions
+  'Jazz': { name: 'Jazz', chords: ['Dmin7', 'G7', 'Cmaj7', 'Fmaj7'], mood: 'jazz' },
+  'Jazz II-V-I': { name: 'Jazz II-V-I', chords: ['Dmin7', 'G7', 'Cmaj7'], mood: 'jazz' },
+  'Jazz Turnaround': { name: 'Jazz Turnaround', chords: ['Cmaj7', 'Amin7', 'Dmin7', 'G7'], mood: 'jazz' },
+  'Jazz Minor': { name: 'Jazz Minor', chords: ['Amin7', 'Dmin7', 'G7', 'Cmaj7'], mood: 'jazz' },
+  'Jazz Blues': { name: 'Jazz Blues', chords: ['Cmaj7', 'Fmaj7', 'G7', 'Cmaj7'], mood: 'jazz' },
+  
+  // Blues Progressions
+  'Blues': { name: 'Blues', chords: ['Cmaj', 'Fmaj', 'G7', 'Cmaj'], mood: 'blues' },
+  'Blues 12-Bar': { name: 'Blues 12-Bar', chords: ['Cmaj', 'Fmaj', 'Cmaj', 'G7', 'Fmaj', 'Cmaj'], mood: 'blues' },
+  'Blues Minor': { name: 'Blues Minor', chords: ['Amin', 'Dmin', 'Amin', 'E7', 'Dmin', 'Amin'], mood: 'blues' },
+  
+  // Pop Progressions
+  'Pop': { name: 'Pop', chords: ['Cmaj', 'Gmaj', 'Amin', 'Fmaj'], mood: 'happy' },
+  'Pop Rock': { name: 'Pop Rock', chords: ['Cmaj', 'Fmaj', 'Gmaj', 'Amin'], mood: 'happy' },
+  'Pop Ballad': { name: 'Pop Ballad', chords: ['Cmaj', 'Amin', 'Fmaj', 'Gmaj'], mood: 'sad' },
+  'Pop Upbeat': { name: 'Pop Upbeat', chords: ['Cmaj', 'Fmaj', 'Gmaj', 'Cmaj'], mood: 'happy' },
+  
+  // Rock Progressions
+  'Rock': { name: 'Rock', chords: ['Cmaj', 'Fmaj', 'Gmaj', 'Cmaj'], mood: 'tense' },
+  'Rock Minor': { name: 'Rock Minor', chords: ['Amin', 'Dmin', 'Emin', 'Amin'], mood: 'tense' },
+  'Rock Power': { name: 'Rock Power', chords: ['Cmaj', 'Fmaj', 'Gmaj', 'Amin'], mood: 'tense' },
+  
+  // Folk Progressions
+  'Folk': { name: 'Folk', chords: ['Cmaj', 'Fmaj', 'Gmaj', 'Amin'], mood: 'happy' },
+  'Folk Minor': { name: 'Folk Minor', chords: ['Amin', 'Dmin', 'Gmaj', 'Amin'], mood: 'sad' },
+  'Folk Ballad': { name: 'Folk Ballad', chords: ['Cmaj', 'Amin', 'Fmaj', 'Gmaj'], mood: 'sad' },
+  
+  // Country Progressions
+  'Country': { name: 'Country', chords: ['Cmaj', 'Fmaj', 'Gmaj', 'Cmaj'], mood: 'happy' },
+  'Country Ballad': { name: 'Country Ballad', chords: ['Cmaj', 'Amin', 'Fmaj', 'Gmaj'], mood: 'sad' },
+  'Country Rock': { name: 'Country Rock', chords: ['Cmaj', 'Fmaj', 'Gmaj', 'Amin'], mood: 'happy' },
+  
+  // Electronic Progressions
+  'Electronic': { name: 'Electronic', chords: ['Cmaj', 'Amin', 'Fmaj', 'Gmaj'], mood: 'dreamy' },
+  'House': { name: 'House', chords: ['Cmaj', 'Fmaj', 'Gmaj', 'Amin'], mood: 'happy' },
+  'Ambient': { name: 'Ambient', chords: ['Cmaj7', 'Fmaj7', 'Amin7', 'Gmaj7'], mood: 'dreamy' },
+  
   // Mood-Based Progressions
   'Happy': { name: 'Happy', chords: ['Cmaj', 'Fmaj', 'Gmaj', 'Cmaj'], mood: 'happy' },
   'Sad': { name: 'Sad', chords: ['Amin', 'Dmin', 'Emin', 'Amin'], mood: 'sad' },
   'Tense': { name: 'Tense', chords: ['G7', 'Bdim', 'Dmin7', 'G7'], mood: 'tense' },
   'Dreamy': { name: 'Dreamy', chords: ['Fmaj7', 'Emin7', 'Cmaj7', 'Amin7'], mood: 'dreamy' },
-  'Jazz': { name: 'Jazz', chords: ['Dmin7', 'G7', 'Cmaj7', 'Fmaj7'], mood: 'jazz' },
-  'Blues': { name: 'Blues', chords: ['Cmaj', 'Fmaj', 'G7', 'Cmaj'], mood: 'blues' }
+  'Mysterious': { name: 'Mysterious', chords: ['Amin', 'Emin', 'Dmin', 'Amin'], mood: 'tense' },
+  'Peaceful': { name: 'Peaceful', chords: ['Cmaj7', 'Fmaj7', 'Gmaj7', 'Cmaj7'], mood: 'dreamy' },
+  'Energetic': { name: 'Energetic', chords: ['Cmaj', 'Gmaj', 'Fmaj', 'Gmaj'], mood: 'happy' },
+  'Melancholic': { name: 'Melancholic', chords: ['Amin', 'Fmaj', 'Cmaj', 'Gmaj'], mood: 'sad' },
+  
+  // Advanced Progressions
+  'Advanced Jazz': { name: 'Advanced Jazz', chords: ['Dmin7', 'G7', 'Cmaj7', 'Amin7', 'Dmin7', 'G7'], mood: 'jazz' },
+  'Advanced Pop': { name: 'Advanced Pop', chords: ['Cmaj', 'Amin', 'Fmaj', 'Gmaj', 'Cmaj', 'Fmaj', 'Gmaj', 'Cmaj'], mood: 'happy' },
+  'Advanced Blues': { name: 'Advanced Blues', chords: ['Cmaj', 'Fmaj', 'Cmaj', 'G7', 'Fmaj', 'Cmaj', 'G7', 'Cmaj'], mood: 'blues' },
+  
+  // Modal Progressions
+  'Dorian': { name: 'Dorian', chords: ['Dmin', 'Gmaj', 'Cmaj', 'Dmin'], mood: 'dreamy' },
+  'Mixolydian': { name: 'Mixolydian', chords: ['Gmaj', 'Fmaj', 'Cmaj', 'Gmaj'], mood: 'happy' },
+  'Lydian': { name: 'Lydian', chords: ['Fmaj', 'Gmaj', 'Cmaj', 'Fmaj'], mood: 'dreamy' },
+  
+  // Extended Harmony Progressions
+  'Extended Harmony': { name: 'Extended Harmony', chords: ['Cmaj7', 'Dmin7', 'Emin7', 'Fmaj7'], mood: 'jazz' },
+  'Rich Harmony': { name: 'Rich Harmony', chords: ['Cmaj7', 'Amin7', 'Fmaj7', 'G7'], mood: 'jazz' },
+  'Complex Jazz': { name: 'Complex Jazz', chords: ['Dmin7', 'G7', 'Cmaj7', 'Fmaj7', 'Bmin7', 'E7'], mood: 'jazz' }
 };
 
 export const CIRCLE_OF_FIFTHS: CircleKey[] = [
@@ -275,7 +336,20 @@ export const PRESETS: Record<string, Preset> = {
     arpeggiator: 'off',
     lfoRate: 0,
     lfoDepth: 0,
-    lfoTarget: 'pitch'
+    lfoTarget: 'pitch',
+    filterEnabled: true,
+    filterType: 'highpass',
+    filterFrequency: 800,
+    filterResonance: 0.5,
+    compressionEnabled: true,
+    compressionThreshold: -20,
+    compressionRatio: 2.0,
+    compressionAttack: 0.01,
+    compressionRelease: 0.1,
+    delayEnabled: true,
+    delayTime: 0.1,
+    delayFeedback: 0.2,
+    delayMix: 0.15
   },
   'achievement-rare': {
     name: 'achievement-rare',
@@ -288,7 +362,20 @@ export const PRESETS: Record<string, Preset> = {
     arpeggiator: 'off',
     lfoRate: 1,
     lfoDepth: 8,
-    lfoTarget: 'pitch'
+    lfoTarget: 'pitch',
+    filterEnabled: true,
+    filterType: 'lowpass',
+    filterFrequency: 3000,
+    filterResonance: 1.2,
+    chorusEnabled: true,
+    chorusRate: 1.2,
+    chorusDepth: 0.004,
+    chorusMix: 0.4,
+    delayEnabled: true,
+    delayTime: 0.2,
+    delayFeedback: 0.3,
+    delayMix: 0.25,
+    stereoWidth: 1.3
   },
   'achievement-legendary': {
     name: 'achievement-legendary',
@@ -301,7 +388,22 @@ export const PRESETS: Record<string, Preset> = {
     arpeggiator: 'up',
     lfoRate: 2,
     lfoDepth: 15,
-    lfoTarget: 'pitch'
+    lfoTarget: 'pitch',
+    filterEnabled: true,
+    filterType: 'bandpass',
+    filterFrequency: 2000,
+    filterResonance: 2.0,
+    chorusEnabled: true,
+    chorusRate: 0.8,
+    chorusDepth: 0.006,
+    chorusMix: 0.5,
+    delayEnabled: true,
+    delayTime: 0.3,
+    delayFeedback: 0.4,
+    delayMix: 0.3,
+    distortionEnabled: true,
+    distortionAmount: 0.3,
+    stereoWidth: 1.5
   },
   'task-complete': {
     name: 'task-complete',
@@ -314,7 +416,16 @@ export const PRESETS: Record<string, Preset> = {
     arpeggiator: 'off',
     lfoRate: 0,
     lfoDepth: 0,
-    lfoTarget: 'pitch'
+    lfoTarget: 'pitch',
+    filterEnabled: true,
+    filterType: 'highpass',
+    filterFrequency: 1200,
+    filterResonance: 0.8,
+    compressionEnabled: true,
+    compressionThreshold: -15,
+    compressionRatio: 1.5,
+    compressionAttack: 0.005,
+    compressionRelease: 0.05
   },
   'level-up': {
     name: 'level-up',
@@ -327,7 +438,20 @@ export const PRESETS: Record<string, Preset> = {
     arpeggiator: 'up',
     lfoRate: 1.5,
     lfoDepth: 12,
-    lfoTarget: 'pitch'
+    lfoTarget: 'pitch',
+    filterEnabled: true,
+    filterType: 'lowpass',
+    filterFrequency: 4000,
+    filterResonance: 1.5,
+    chorusEnabled: true,
+    chorusRate: 1.0,
+    chorusDepth: 0.003,
+    chorusMix: 0.35,
+    delayEnabled: true,
+    delayTime: 0.15,
+    delayFeedback: 0.25,
+    delayMix: 0.2,
+    stereoWidth: 1.2
   },
   'bobr-greeting': {
     name: 'bobr-greeting',
@@ -340,7 +464,20 @@ export const PRESETS: Record<string, Preset> = {
     arpeggiator: 'off',
     lfoRate: 0.8,
     lfoDepth: 6,
-    lfoTarget: 'volume'
+    lfoTarget: 'volume',
+    filterEnabled: true,
+    filterType: 'lowpass',
+    filterFrequency: 2500,
+    filterResonance: 1.0,
+    chorusEnabled: true,
+    chorusRate: 0.6,
+    chorusDepth: 0.002,
+    chorusMix: 0.3,
+    delayEnabled: true,
+    delayTime: 0.25,
+    delayFeedback: 0.2,
+    delayMix: 0.2,
+    stereoWidth: 1.1
   },
   'dam-build': {
     name: 'dam-build',
@@ -353,7 +490,22 @@ export const PRESETS: Record<string, Preset> = {
     arpeggiator: 'off',
     lfoRate: 0,
     lfoDepth: 0,
-    lfoTarget: 'pitch'
+    lfoTarget: 'pitch',
+    filterEnabled: true,
+    filterType: 'highpass',
+    filterFrequency: 600,
+    filterResonance: 1.5,
+    distortionEnabled: true,
+    distortionAmount: 0.2,
+    compressionEnabled: true,
+    compressionThreshold: -18,
+    compressionRatio: 2.0,
+    compressionAttack: 0.02,
+    compressionRelease: 0.1,
+    delayEnabled: true,
+    delayTime: 0.1,
+    delayFeedback: 0.1,
+    delayMix: 0.1
   },
   'streak-milestone': {
     name: 'streak-milestone',
@@ -366,7 +518,20 @@ export const PRESETS: Record<string, Preset> = {
     arpeggiator: 'off',
     lfoRate: 0.5,
     lfoDepth: 4,
-    lfoTarget: 'pitch'
+    lfoTarget: 'pitch',
+    filterEnabled: true,
+    filterType: 'bandpass',
+    filterFrequency: 1500,
+    filterResonance: 1.8,
+    chorusEnabled: true,
+    chorusRate: 1.1,
+    chorusDepth: 0.003,
+    chorusMix: 0.4,
+    delayEnabled: true,
+    delayTime: 0.2,
+    delayFeedback: 0.3,
+    delayMix: 0.25,
+    stereoWidth: 1.25
   },
   'ui-click': {
     name: 'ui-click',
@@ -379,7 +544,16 @@ export const PRESETS: Record<string, Preset> = {
     arpeggiator: 'off',
     lfoRate: 0,
     lfoDepth: 0,
-    lfoTarget: 'pitch'
+    lfoTarget: 'pitch',
+    filterEnabled: true,
+    filterType: 'highpass',
+    filterFrequency: 2000,
+    filterResonance: 0.5,
+    compressionEnabled: true,
+    compressionThreshold: -10,
+    compressionRatio: 1.2,
+    compressionAttack: 0.001,
+    compressionRelease: 0.02
   },
   'form-submit': {
     name: 'form-submit',
@@ -392,7 +566,20 @@ export const PRESETS: Record<string, Preset> = {
     arpeggiator: 'off',
     lfoRate: 0,
     lfoDepth: 0,
-    lfoTarget: 'pitch'
+    lfoTarget: 'pitch',
+    filterEnabled: true,
+    filterType: 'lowpass',
+    filterFrequency: 3500,
+    filterResonance: 0.8,
+    chorusEnabled: true,
+    chorusRate: 0.9,
+    chorusDepth: 0.002,
+    chorusMix: 0.25,
+    compressionEnabled: true,
+    compressionThreshold: -12,
+    compressionRatio: 1.5,
+    compressionAttack: 0.01,
+    compressionRelease: 0.05
   },
   'modal-open': {
     name: 'modal-open',
@@ -405,7 +592,20 @@ export const PRESETS: Record<string, Preset> = {
     arpeggiator: 'off',
     lfoRate: 0,
     lfoDepth: 0,
-    lfoTarget: 'pitch'
+    lfoTarget: 'pitch',
+    filterEnabled: true,
+    filterType: 'highpass',
+    filterFrequency: 1000,
+    filterResonance: 1.0,
+    delayEnabled: true,
+    delayTime: 0.05,
+    delayFeedback: 0.1,
+    delayMix: 0.1,
+    compressionEnabled: true,
+    compressionThreshold: -8,
+    compressionRatio: 1.1,
+    compressionAttack: 0.005,
+    compressionRelease: 0.03
   },
   'xp-gain': {
     name: 'xp-gain',
@@ -418,7 +618,20 @@ export const PRESETS: Record<string, Preset> = {
     arpeggiator: 'off',
     lfoRate: 0,
     lfoDepth: 0,
-    lfoTarget: 'pitch'
+    lfoTarget: 'pitch',
+    filterEnabled: true,
+    filterType: 'lowpass',
+    filterFrequency: 2800,
+    filterResonance: 0.6,
+    chorusEnabled: true,
+    chorusRate: 1.0,
+    chorusDepth: 0.002,
+    chorusMix: 0.2,
+    compressionEnabled: true,
+    compressionThreshold: -14,
+    compressionRatio: 1.3,
+    compressionAttack: 0.008,
+    compressionRelease: 0.04
   },
 
   // 🎛️ Modern Effect Presets

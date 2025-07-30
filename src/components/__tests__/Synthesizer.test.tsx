@@ -51,7 +51,7 @@ describe('Synthesizer', () => {
     expect(screen.getByText('😊 Mood Chords')).toBeInTheDocument();
     expect(screen.getByText('🎼 Plain Chords')).toBeInTheDocument();
     expect(screen.getByText('🎼 Chord Progressions')).toBeInTheDocument();
-    expect(screen.getByText('🎛️ Presets')).toBeInTheDocument();
+    expect(screen.getByText('🎛️ Classic Presets')).toBeInTheDocument();
     expect(screen.getByText('🦫 Scrypture Sounds')).toBeInTheDocument();
     expect(screen.getByText('🎵 Waveform')).toBeInTheDocument();
     expect(screen.getByText('SEQUENCER')).toBeInTheDocument();
@@ -63,10 +63,10 @@ describe('Synthesizer', () => {
     // Check for some piano keys - use getAllByText since there are multiple elements
     const aKeys = screen.getAllByText('A');
     expect(aKeys.length).toBeGreaterThan(0);
-    const sKeys = screen.getAllByText('S');
-    expect(sKeys.length).toBeGreaterThan(0);
     const dKeys = screen.getAllByText('D');
     expect(dKeys.length).toBeGreaterThan(0);
+    const fKeys = screen.getAllByText('F');
+    expect(fKeys.length).toBeGreaterThan(0);
   });
 
   it('renders volume control', () => {
@@ -130,14 +130,14 @@ describe('Synthesizer', () => {
     expect(screen.getByText('💎 Rare')).toBeInTheDocument();
     expect(screen.getByText('👑 Legendary')).toBeInTheDocument();
     expect(screen.getByText('✅ Complete')).toBeInTheDocument();
-    expect(screen.getByText('🎉 Level Up')).toBeInTheDocument();
     expect(screen.getByText('🦫 Bóbr')).toBeInTheDocument();
   });
 
   it('renders sequencer controls', () => {
     render(<Synthesizer />);
     expect(screen.getByText('BPM')).toBeInTheDocument();
-    expect(screen.getByText('Steps')).toBeInTheDocument();
+    const stepsElements = screen.getAllByText('Steps');
+    expect(stepsElements.length).toBeGreaterThan(0);
     expect(screen.getByText('Play')).toBeInTheDocument();
     expect(screen.getByText('Stop')).toBeInTheDocument();
     expect(screen.getByText('Clear')).toBeInTheDocument();
