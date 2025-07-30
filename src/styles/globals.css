@@ -121,6 +121,8 @@
   /* Remove mobile tap highlight */
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
+  /* Prevent pinch-to-zoom and other touch gestures */
+  touch-action: manipulation;
   -webkit-touch-action: manipulation;
 }
 
@@ -131,6 +133,9 @@ html {
   overflow-x: hidden;
   /* Create a stacking context to ensure fixed elements work properly */
   transform: translateZ(0);
+  /* Prevent pinch-to-zoom */
+  touch-action: manipulation;
+  -webkit-touch-action: manipulation;
 }
 
 body {
@@ -147,6 +152,9 @@ body {
   text-rendering: optimizeSpeed;
   /* Create a new stacking context */
   transform: translateZ(0);
+  /* Prevent pinch-to-zoom */
+  touch-action: manipulation;
+  -webkit-touch-action: manipulation;
 }
 
 #root {
@@ -246,6 +254,7 @@ select:focus,
   html {
     /* Disable zoom on mobile */
     touch-action: manipulation;
+    -webkit-touch-action: manipulation;
     -webkit-text-size-adjust: 100%;
     /* Fix viewport height issues */
     height: 100%;
@@ -267,6 +276,9 @@ select:focus,
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+    /* Prevent pinch-to-zoom on mobile */
+    touch-action: manipulation;
+    -webkit-touch-action: manipulation;
   }
   
   #root {
