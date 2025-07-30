@@ -36,6 +36,36 @@ export interface Preset {
   lfoRate: number;
   lfoDepth: number;
   lfoTarget: 'pitch' | 'volume' | 'filter';
+  
+  // New Effects
+  delayEnabled?: boolean;
+  delayTime?: number;
+  delayFeedback?: number;
+  delayMix?: number;
+  
+  chorusEnabled?: boolean;
+  chorusRate?: number;
+  chorusDepth?: number;
+  chorusMix?: number;
+  
+  distortionEnabled?: boolean;
+  distortionAmount?: number;
+  distortionType?: 'soft' | 'hard' | 'bitcrusher';
+  
+  filterEnabled?: boolean;
+  filterType?: 'lowpass' | 'highpass' | 'bandpass' | 'notch';
+  filterFrequency?: number;
+  filterResonance?: number;
+  
+  compressionEnabled?: boolean;
+  compressionThreshold?: number;
+  compressionRatio?: number;
+  compressionAttack?: number;
+  compressionRelease?: number;
+  
+  stereoWidth?: number;
+  panningEnabled?: boolean;
+  panningAmount?: number;
 }
 
 export type WaveformType = 'sine' | 'square' | 'triangle' | 'sawtooth';
@@ -60,6 +90,41 @@ export interface SynthesizerState {
   isDraggingCircle: boolean;
   arpeggiatorMode: 'off' | 'up' | 'down' | 'updown' | 'random';
   arpeggiatorRate: number;
+  
+  // New Effects
+  delayEnabled: boolean;
+  delayTime: number;
+  delayFeedback: number;
+  delayMix: number;
+  
+  chorusEnabled: boolean;
+  chorusRate: number;
+  chorusDepth: number;
+  chorusMix: number;
+  
+  distortionEnabled: boolean;
+  distortionAmount: number;
+  distortionType: 'soft' | 'hard' | 'bitcrusher';
+  
+  filterEnabled: boolean;
+  filterType: 'lowpass' | 'highpass' | 'bandpass' | 'notch';
+  filterFrequency: number;
+  filterResonance: number;
+  filterEnvelopeEnabled: boolean;
+  filterAttack: number;
+  filterDecay: number;
+  filterSustain: number;
+  filterRelease: number;
+  
+  compressionEnabled: boolean;
+  compressionThreshold: number;
+  compressionRatio: number;
+  compressionAttack: number;
+  compressionRelease: number;
+  
+  stereoWidth: number;
+  panningEnabled: boolean;
+  panningAmount: number;
 }
 
 export interface SequencerStep {

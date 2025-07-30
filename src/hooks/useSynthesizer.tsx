@@ -7,6 +7,8 @@ import {
 } from '../types/synthesizer';
 import { CHORDS, CHORD_PROGRESSIONS, PRESETS, NUMBER_KEY_PATTERNS, SEQUENCER_TRACKS, NOTES } from '../data/synthesizerData';
 
+
+
 const initialState: SynthesizerState = {
   waveform: 'sine',
   volume: 20,
@@ -26,7 +28,42 @@ const initialState: SynthesizerState = {
   isDrawing: false,
   isDraggingCircle: false,
   arpeggiatorMode: 'off',
-  arpeggiatorRate: 8
+  arpeggiatorRate: 8,
+  
+  // New Effects - Default Values
+  delayEnabled: false,
+  delayTime: 0.3,
+  delayFeedback: 0.3,
+  delayMix: 0.5,
+  
+  chorusEnabled: false,
+  chorusRate: 1.5,
+  chorusDepth: 0.002,
+  chorusMix: 0.5,
+  
+  distortionEnabled: false,
+  distortionAmount: 0.3,
+  distortionType: 'soft',
+  
+  filterEnabled: false,
+  filterType: 'lowpass',
+  filterFrequency: 2000,
+  filterResonance: 1,
+  filterEnvelopeEnabled: false,
+  filterAttack: 0.1,
+  filterDecay: 0.3,
+  filterSustain: 0.5,
+  filterRelease: 0.5,
+  
+  compressionEnabled: false,
+  compressionThreshold: -24,
+  compressionRatio: 4,
+  compressionAttack: 0.003,
+  compressionRelease: 0.25,
+  
+  stereoWidth: 1,
+  panningEnabled: false,
+  panningAmount: 0,
 };
 
 export const useSynthesizer = (): SynthesizerContextType => {
@@ -37,6 +74,17 @@ export const useSynthesizer = (): SynthesizerContextType => {
   const wetGainRef = useRef<GainNode | null>(null);
   const convolverRef = useRef<ConvolverNode | null>(null);
   const limiterRef = useRef<DynamicsCompressorNode | null>(null);
+  
+  // New effect nodes
+  const delayRef = useRef<DelayNode | null>(null);
+  const delayGainRef = useRef<GainNode | null>(null);
+  const delayFeedbackRef = useRef<GainNode | null>(null);
+  const chorusRef = useRef<GainNode | null>(null);
+  const distortionRef = useRef<WaveShaperNode | null>(null);
+  const filterRef = useRef<BiquadFilterNode | null>(null);
+  const compressorRef = useRef<DynamicsCompressorNode | null>(null);
+  const stereoWidthRef = useRef<GainNode | null>(null);
+  const panningRef = useRef<StereoPannerNode | null>(null);
   const activeNotesRef = useRef<Record<string, ActiveNote>>({});
   const sequenceRef = useRef<Record<string, boolean[]>>({});
   const sequenceIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -56,6 +104,17 @@ export const useSynthesizer = (): SynthesizerContextType => {
         const wetGain = audioContext.createGain();
         const convolver = audioContext.createConvolver();
         
+        // Create new effect nodes
+        const delay = audioContext.createDelay(2.0); // Max 2 second delay
+        const delayGain = audioContext.createGain();
+        const delayFeedback = audioContext.createGain();
+        const chorus = audioContext.createGain();
+        const distortion = audioContext.createWaveShaper();
+        const filter = audioContext.createBiquadFilter();
+        const compressor = audioContext.createDynamicsCompressor();
+        const stereoWidth = audioContext.createGain();
+        const panning = audioContext.createStereoPanner();
+        
         // Create limiter to prevent clipping
         const limiter = audioContext.createDynamicsCompressor();
         limiter.threshold.value = -1; // Start limiting at -1dB
@@ -64,14 +123,48 @@ export const useSynthesizer = (): SynthesizerContextType => {
         limiter.attack.value = 0.001; // Very fast attack
         limiter.release.value = 0.1; // Fast release
 
-        // Connect audio chain with limiter
+        // Configure effect nodes
+        delay.delayTime.value = state.delayTime;
+        delayGain.gain.value = state.delayMix;
+        delayFeedback.gain.value = state.delayFeedback;
+        
+        filter.type = state.filterType;
+        filter.frequency.value = state.filterFrequency;
+        filter.Q.value = state.filterResonance;
+        
+        compressor.threshold.value = state.compressionThreshold;
+        compressor.ratio.value = state.compressionRatio;
+        compressor.attack.value = state.compressionAttack;
+        compressor.release.value = state.compressionRelease;
+        
+        stereoWidth.gain.value = state.stereoWidth;
+        panning.pan.value = state.panningAmount;
+
+        // Connect audio chain with effects
         masterGain.connect(limiter);
         limiter.connect(audioContext.destination);
         masterGain.gain.value = state.volume / 100;
 
-        dryGain.connect(masterGain);
+        // Main audio path: dryGain → filter → distortion → compressor → stereoWidth → panning → masterGain
+        dryGain.connect(filter);
+        filter.connect(distortion);
+        distortion.connect(compressor);
+        compressor.connect(stereoWidth);
+        stereoWidth.connect(panning);
+        panning.connect(masterGain);
+        
+        // Reverb path: wetGain → convolver → masterGain
         wetGain.connect(masterGain);
         convolver.connect(wetGain);
+        
+        // Delay path: delay → delayGain → delayFeedback → delay (feedback loop)
+        delay.connect(delayGain);
+        delayGain.connect(delayFeedback);
+        delayFeedback.connect(delay);
+        delayGain.connect(masterGain);
+        
+        // Chorus path: chorus → masterGain
+        chorus.connect(masterGain);
 
         // Create reverb impulse response
         const rate = audioContext.sampleRate;
@@ -91,6 +184,17 @@ export const useSynthesizer = (): SynthesizerContextType => {
         wetGainRef.current = wetGain;
         convolverRef.current = convolver;
         limiterRef.current = limiter;
+        
+        // Store new effect nodes
+        delayRef.current = delay;
+        delayGainRef.current = delayGain;
+        delayFeedbackRef.current = delayFeedback;
+        chorusRef.current = chorus;
+        distortionRef.current = distortion;
+        filterRef.current = filter;
+        compressorRef.current = compressor;
+        stereoWidthRef.current = stereoWidth;
+        panningRef.current = panning;
 
         // Initialize sequence
         SEQUENCER_TRACKS.forEach(track => {
@@ -152,6 +256,81 @@ export const useSynthesizer = (): SynthesizerContextType => {
       }
     }
   }, [state.reverbEnabled]);
+
+  // Update delay parameters
+  useEffect(() => {
+    if (delayRef.current) {
+      delayRef.current.delayTime.setValueAtTime(state.delayTime, audioContextRef.current!.currentTime);
+    }
+    if (delayGainRef.current) {
+      delayGainRef.current.gain.setValueAtTime(state.delayMix, audioContextRef.current!.currentTime);
+    }
+    if (delayFeedbackRef.current) {
+      delayFeedbackRef.current.gain.setValueAtTime(state.delayFeedback, audioContextRef.current!.currentTime);
+    }
+  }, [state.delayTime, state.delayMix, state.delayFeedback]);
+
+  // Update filter parameters
+  useEffect(() => {
+    if (filterRef.current) {
+      filterRef.current.type = state.filterType;
+      filterRef.current.frequency.setValueAtTime(state.filterFrequency, audioContextRef.current!.currentTime);
+      filterRef.current.Q.setValueAtTime(state.filterResonance, audioContextRef.current!.currentTime);
+    }
+  }, [state.filterType, state.filterFrequency, state.filterResonance]);
+
+  // Update compression parameters
+  useEffect(() => {
+    if (compressorRef.current) {
+      compressorRef.current.threshold.setValueAtTime(state.compressionThreshold, audioContextRef.current!.currentTime);
+      compressorRef.current.ratio.setValueAtTime(state.compressionRatio, audioContextRef.current!.currentTime);
+      compressorRef.current.attack.setValueAtTime(state.compressionAttack, audioContextRef.current!.currentTime);
+      compressorRef.current.release.setValueAtTime(state.compressionRelease, audioContextRef.current!.currentTime);
+    }
+  }, [state.compressionThreshold, state.compressionRatio, state.compressionAttack, state.compressionRelease]);
+
+  // Update stereo width and panning
+  useEffect(() => {
+    if (stereoWidthRef.current) {
+      stereoWidthRef.current.gain.setValueAtTime(state.stereoWidth, audioContextRef.current!.currentTime);
+    }
+    if (panningRef.current) {
+      panningRef.current.pan.setValueAtTime(state.panningAmount, audioContextRef.current!.currentTime);
+    }
+  }, [state.stereoWidth, state.panningAmount]);
+
+  // Create distortion curve based on type and amount
+  const createDistortionCurve = useCallback((amount: number, type: 'soft' | 'hard' | 'bitcrusher'): Float32Array => {
+    const samples = 44100;
+    const curve = new Float32Array(samples);
+    const deg = Math.PI / 180;
+
+    for (let i = 0; i < samples; i++) {
+      const x = (i * 2) / samples - 1;
+      
+      switch (type) {
+        case 'soft':
+          curve[i] = (Math.PI + amount) * x / (Math.PI + amount * Math.abs(x));
+          break;
+        case 'hard':
+          curve[i] = Math.sign(x) * (1 - Math.exp(-Math.abs(x) * amount));
+          break;
+        case 'bitcrusher':
+          const bits = Math.max(1, Math.floor(16 * (1 - amount)));
+          const levels = Math.pow(2, bits);
+          curve[i] = Math.round(x * levels) / levels;
+          break;
+      }
+    }
+    return curve;
+  }, []);
+
+  // Update distortion
+  useEffect(() => {
+    if (distortionRef.current) {
+      distortionRef.current.curve = createDistortionCurve(state.distortionAmount, state.distortionType);
+    }
+  }, [state.distortionAmount, state.distortionType, createDistortionCurve]);
 
   // Calculate optimal gain to prevent clipping based on number of notes
   const calculateOptimalGain = useCallback((numNotes: number): number => {
@@ -224,7 +403,19 @@ export const useSynthesizer = (): SynthesizerContextType => {
       osc.connect(gain);
     }
     
+    // Route through effects based on state
+    if (state.delayEnabled && delayRef.current) {
+      gain.connect(delayRef.current);
+    }
+    
+    if (state.chorusEnabled && chorusRef.current) {
+      gain.connect(chorusRef.current);
+    }
+    
+    // Main audio path through effects
     gain.connect(dryGainRef.current);
+    
+    // Reverb path
     if (state.reverbEnabled && convolverRef.current) {
       gain.connect(convolverRef.current);
     }
@@ -288,6 +479,19 @@ export const useSynthesizer = (): SynthesizerContextType => {
     chordGain.gain.value = optimalGain;
     chordGain.connect(masterGainRef.current);
     
+    // Highlight chord keys visually
+    const chordKeys: HTMLElement[] = [];
+    validFreqs.forEach(freq => {
+      const note = NOTES.find(n => Math.abs(n.freq - freq) < 0.1);
+      if (note) {
+        const keyElement = document.querySelector(`[data-freq="${note.freq}"]`) as HTMLElement;
+        if (keyElement) {
+          keyElement.classList.add('chord-active');
+          chordKeys.push(keyElement);
+        }
+      }
+    });
+    
     validFreqs.forEach(freq => {
       const osc = audioContextRef.current!.createOscillator();
       const gain = audioContextRef.current!.createGain();
@@ -345,6 +549,13 @@ export const useSynthesizer = (): SynthesizerContextType => {
         lfo.stop(audioContextRef.current!.currentTime + releaseTime);
       }, 1000);
     });
+    
+    // Remove chord key highlighting after chord duration
+    setTimeout(() => {
+      chordKeys.forEach(keyElement => {
+        keyElement.classList.remove('chord-active');
+      });
+    }, 1000);
   }, [state.waveform, state.detune, state.lfoRate, state.lfoDepth, state.lfoTarget, state.reverbEnabled, state.attack, state.release, calculateOptimalGain]);
 
   const playProgression = useCallback((progressionName: string) => {
@@ -376,7 +587,37 @@ export const useSynthesizer = (): SynthesizerContextType => {
       reverbEnabled: preset.reverb === 'on',
       lfoRate: preset.lfoRate,
       lfoDepth: preset.lfoDepth,
-      lfoTarget: preset.lfoTarget
+      lfoTarget: preset.lfoTarget,
+      
+      // New Effects
+      delayEnabled: preset.delayEnabled ?? false,
+      delayTime: preset.delayTime ?? 0.3,
+      delayFeedback: preset.delayFeedback ?? 0.3,
+      delayMix: preset.delayMix ?? 0.5,
+      
+      chorusEnabled: preset.chorusEnabled ?? false,
+      chorusRate: preset.chorusRate ?? 1.5,
+      chorusDepth: preset.chorusDepth ?? 0.002,
+      chorusMix: preset.chorusMix ?? 0.5,
+      
+      distortionEnabled: preset.distortionEnabled ?? false,
+      distortionAmount: preset.distortionAmount ?? 0.3,
+      distortionType: preset.distortionType ?? 'soft',
+      
+      filterEnabled: preset.filterEnabled ?? false,
+      filterType: preset.filterType ?? 'lowpass',
+      filterFrequency: preset.filterFrequency ?? 2000,
+      filterResonance: preset.filterResonance ?? 1,
+      
+      compressionEnabled: preset.compressionEnabled ?? false,
+      compressionThreshold: preset.compressionThreshold ?? -24,
+      compressionRatio: preset.compressionRatio ?? 4,
+      compressionAttack: preset.compressionAttack ?? 0.003,
+      compressionRelease: preset.compressionRelease ?? 0.25,
+      
+      stereoWidth: preset.stereoWidth ?? 1,
+      panningEnabled: preset.panningEnabled ?? false,
+      panningAmount: preset.panningAmount ?? 0
     });
 
     // Update detune for all currently playing notes
