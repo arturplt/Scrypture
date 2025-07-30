@@ -532,14 +532,14 @@ export const Synthesizer: React.FC = () => {
       <SliderControl
         label="Volume"
         value={synth.state.volume}
-        min={0}
-        max={100}
+        min={1}
+        max={50}
         onChange={(value) => synth.updateState({ volume: value })}
         showValue
         valueDisplay={`${synth.state.volume}%`}
         isLive={true}
         resetFunction={synth.resetVolume}
-        defaultValue={20}
+        defaultValue={1}
       />
 
       <SliderControl
@@ -1013,6 +1013,8 @@ export const Synthesizer: React.FC = () => {
           }}
           onMouseDown={() => synth.startBpmSlide()}
           onMouseUp={(value) => synth.endBpmSlide(value)}
+          showValue
+          valueDisplay={`${synth.state.bpm} BPM`}
           isLive={true}
           resetFunction={synth.resetBpm}
           defaultValue={120}
@@ -1021,12 +1023,14 @@ export const Synthesizer: React.FC = () => {
         <SliderControl
           label="Steps"
           value={synth.state.steps}
-          min={4}
-          max={16}
+          min={8}
+          max={32}
           onChange={(value) => synth.updateState({ steps: value })}
+          showValue
+          valueDisplay={`${synth.state.steps} Steps`}
           isLive={true}
           resetFunction={synth.resetSteps}
-          defaultValue={8}
+          defaultValue={16}
         />
 
         <div className={styles.section}>
@@ -1056,21 +1060,25 @@ export const Synthesizer: React.FC = () => {
 
         <div className={styles.section}>
           <div className={styles.timelineContainer}>
-            <div className={styles.timelineHeader}>
-              <div className={styles.stepIndicators}>
-                {Array.from({ length: synth.state.steps }, (_, i) => (
-                  <div
-                    key={i}
-                    className={`${styles.stepIndicator} ${synth.state.currentStep === i ? styles.active : ''} ${
-                      synth.state.gridAlignment === 'quantize' && (i % 4 === 0) ? styles.gridBeat : ''
-                    }`}
-                  >
-                    {(i + 1) % 10}
-                  </div>
-                ))}
-              </div>
-            </div>
             <div className={styles.timelineTracks}>
+              {/* Step numbers row - integrated into the grid */}
+              <div className={styles.track}>
+                <div className={styles.trackLabel}>Steps</div>
+                <div className={styles.trackSteps}>
+                  {Array.from({ length: synth.state.steps }, (_, i) => (
+                    <div
+                      key={i}
+                      className={`${styles.stepNumber} ${synth.state.currentStep === i ? styles.active : ''} ${
+                        synth.state.gridAlignment === 'quantize' && (i % 4 === 0) ? styles.gridBeat : ''
+                      }`}
+                    >
+                      {(i + 1) % 10}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Note tracks */}
               {SEQUENCER_TRACKS.map((track, trackIndex) => (
                 <div key={trackIndex} className={styles.track}>
                   <div className={styles.trackLabel}>{track.note}</div>

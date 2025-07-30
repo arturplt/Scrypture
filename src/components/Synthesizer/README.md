@@ -46,15 +46,6 @@ src/
     └── synthesizerData.ts           # Musical data constants
 ```
 
-### Standalone HTML/JavaScript Version
-```
-/
-├── synthesizer.html                 # Main HTML interface
-├── synthesizer.js                   # Core JavaScript logic
-├── synthesizer.css                  # Styles
-├── synthesizer-data.js              # Musical data constants
-└── test-synthesizer.html           # Test page
-```
 
 ### Key Components
 

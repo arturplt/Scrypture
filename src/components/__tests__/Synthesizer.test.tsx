@@ -168,4 +168,34 @@ describe('Synthesizer', () => {
     expect(screen.getByText('Reverb')).toBeInTheDocument();
     expect(screen.getByText('Arpeggiator')).toBeInTheDocument();
   });
+
+  it('displays BPM value in sequencer', () => {
+    render(<Synthesizer />);
+    
+    // Check that BPM value is displayed
+    const bpmDisplay = screen.getByText('120 BPM');
+    expect(bpmDisplay).toBeInTheDocument();
+  });
+
+  it('has BPM slider with proper range', () => {
+    render(<Synthesizer />);
+    
+    // Find the BPM slider input by its attributes
+    const bpmSlider = screen.getByDisplayValue('120');
+    expect(bpmSlider).toBeInTheDocument();
+    expect(bpmSlider).toHaveAttribute('min', '60');
+    expect(bpmSlider).toHaveAttribute('max', '200');
+    expect(bpmSlider).toHaveAttribute('value', '120');
+  });
+
+  it('has Steps slider with proper range', () => {
+    render(<Synthesizer />);
+    
+    // Find the Steps slider input by its attributes
+    const stepsSlider = screen.getByDisplayValue('16');
+    expect(stepsSlider).toBeInTheDocument();
+    expect(stepsSlider).toHaveAttribute('min', '8');
+    expect(stepsSlider).toHaveAttribute('max', '32');
+    expect(stepsSlider).toHaveAttribute('value', '16');
+  });
 }); 

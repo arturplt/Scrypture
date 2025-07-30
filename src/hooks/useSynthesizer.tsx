@@ -11,7 +11,7 @@ import { CHORDS, CHORD_PROGRESSIONS, PRESETS, NUMBER_KEY_PATTERNS, SEQUENCER_TRA
 
 const initialState: SynthesizerState = {
   waveform: 'sine',
-  volume: 20,
+  volume: 1,
   attack: 1,
   release: 10,
   detune: 0,
@@ -21,7 +21,7 @@ const initialState: SynthesizerState = {
   lfoTarget: 'pitch',
   sustainMode: false,
   bpm: 120,
-  steps: 8,
+  steps: 16,
   isPlaying: false,
   currentStep: 0,
   drawMode: false,
@@ -90,6 +90,7 @@ export const useSynthesizer = (): SynthesizerContextType => {
   const compressorRef = useRef<DynamicsCompressorNode | null>(null);
   const stereoWidthRef = useRef<GainNode | null>(null);
   const panningRef = useRef<StereoPannerNode | null>(null);
+  
   const activeNotesRef = useRef<Record<string, ActiveNote>>({});
   const sequenceRef = useRef<Record<string, boolean[]>>({});
   const sequenceIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -150,7 +151,7 @@ export const useSynthesizer = (): SynthesizerContextType => {
         limiter.connect(audioContext.destination);
         masterGain.gain.value = state.volume / 100;
 
-        // Main audio path: dryGain → filter → distortion → compressor → stereoWidth → panning → masterGain
+        // Main audio path with effects (effects will be bypassed when disabled)
         dryGain.connect(filter);
         filter.connect(distortion);
         distortion.connect(compressor);
@@ -222,8 +223,9 @@ export const useSynthesizer = (): SynthesizerContextType => {
   // Update volume when state changes with anti-clipping protection
   useEffect(() => {
     if (masterGainRef.current) {
-      // Apply volume with additional headroom to prevent clipping
-      const safeVolume = Math.min(state.volume / 100, 0.8); // Cap at 80% to prevent clipping
+      // Apply volume with much more conservative scaling
+      // 1% = 0.01, 50% = 0.25, 100% = 0.5 (max)
+      const safeVolume = Math.min(state.volume / 200, 0.5); // Much more conservative scaling
       masterGainRef.current.gain.value = safeVolume;
     }
   }, [state.volume]);
@@ -330,28 +332,73 @@ export const useSynthesizer = (): SynthesizerContextType => {
     return curve;
   }, []);
 
-  // Update distortion
+
+
+  // Update effect bypass states by adjusting effect parameters
+  useEffect(() => {
+    if (filterRef.current) {
+      if (state.filterEnabled) {
+        // Enable filter by setting normal parameters
+        filterRef.current.frequency.value = state.filterFrequency;
+        filterRef.current.Q.value = state.filterResonance;
+      } else {
+        // Disable filter by setting it to pass-through
+        filterRef.current.frequency.value = 20000; // Very high frequency = pass-through
+        filterRef.current.Q.value = 0; // No resonance
+      }
+    }
+  }, [state.filterEnabled, state.filterFrequency, state.filterResonance]);
+
   useEffect(() => {
     if (distortionRef.current) {
-      distortionRef.current.curve = createDistortionCurve(state.distortionAmount, state.distortionType);
+      if (state.distortionEnabled) {
+        // Enable distortion by setting the curve
+        distortionRef.current.curve = createDistortionCurve(state.distortionAmount, state.distortionType);
+      } else {
+        // Disable distortion by setting a linear curve (no distortion)
+        const linearCurve = new Float32Array(44100);
+        for (let i = 0; i < 44100; i++) {
+          const x = (i * 2) / 44100 - 1;
+          linearCurve[i] = x; // Linear response = no distortion
+        }
+        distortionRef.current.curve = linearCurve;
+      }
     }
-  }, [state.distortionAmount, state.distortionType, createDistortionCurve]);
+  }, [state.distortionEnabled, state.distortionAmount, state.distortionType, createDistortionCurve]);
+
+  useEffect(() => {
+    if (compressorRef.current) {
+      if (state.compressionEnabled) {
+        // Enable compression by setting normal parameters
+        compressorRef.current.threshold.value = state.compressionThreshold;
+        compressorRef.current.ratio.value = state.compressionRatio;
+        compressorRef.current.attack.value = state.compressionAttack;
+        compressorRef.current.release.value = state.compressionRelease;
+      } else {
+        // Disable compression by setting it to pass-through
+        compressorRef.current.threshold.value = -100; // Very low threshold = no compression
+        compressorRef.current.ratio.value = 1; // 1:1 ratio = no compression
+        compressorRef.current.attack.value = 0.001; // Very fast attack
+        compressorRef.current.release.value = 0.001; // Very fast release
+      }
+    }
+  }, [state.compressionEnabled, state.compressionThreshold, state.compressionRatio, state.compressionAttack, state.compressionRelease]);
 
   // Calculate optimal gain to prevent clipping based on number of notes
   const calculateOptimalGain = useCallback((numNotes: number): number => {
-    // Base gain for single notes
-    const baseGain = 0.8;
+    // Base gain for single notes - much more conservative to prevent clipping
+    const baseGain = 0.3;
     
     // Reduce gain logarithmically as more notes are added
     // This prevents the sum of multiple sine waves from clipping
     if (numNotes <= 1) return baseGain;
-    if (numNotes <= 2) return baseGain * 0.85;
-    if (numNotes <= 3) return baseGain * 0.7;
-    if (numNotes <= 4) return baseGain * 0.6;
-    if (numNotes <= 5) return baseGain * 0.5;
-    if (numNotes <= 6) return baseGain * 0.45;
-    if (numNotes <= 7) return baseGain * 0.4;
-    return baseGain * 0.35; // For 8+ notes
+    if (numNotes <= 2) return baseGain * 0.7;
+    if (numNotes <= 3) return baseGain * 0.55;
+    if (numNotes <= 4) return baseGain * 0.45;
+    if (numNotes <= 5) return baseGain * 0.35;
+    if (numNotes <= 6) return baseGain * 0.3;
+    if (numNotes <= 7) return baseGain * 0.25;
+    return baseGain * 0.2; // For 8+ notes
   }, []);
 
   const updateState = useCallback((updates: Partial<SynthesizerState> | ((prev: SynthesizerState) => Partial<SynthesizerState>)) => {
@@ -379,8 +426,9 @@ export const useSynthesizer = (): SynthesizerContextType => {
     lfoGain.gain.value = state.lfoDepth;
     lfo.connect(lfoGain);
     
-    // Calculate optimal gain to prevent clipping
-    const optimalGain = calculateOptimalGain(1); // Single note
+    // Calculate optimal gain to prevent clipping based on current active notes
+    const currentActiveNotes = Object.keys(activeNotesRef.current).length + 1; // +1 for this new note
+    const optimalGain = calculateOptimalGain(currentActiveNotes);
     gain.gain.value = optimalGain;
     
     osc.type = state.waveform;
@@ -539,7 +587,7 @@ export const useSynthesizer = (): SynthesizerContextType => {
       // Apply attack envelope - convert from 0-100 to 0-2 seconds
       const attackTime = (state.attack / 100) * 2; // 0 to 2 seconds
       gain.gain.setValueAtTime(0, audioContextRef.current!.currentTime);
-      gain.gain.linearRampToValueAtTime(1, audioContextRef.current!.currentTime + attackTime);
+      gain.gain.linearRampToValueAtTime(optimalGain, audioContextRef.current!.currentTime + attackTime);
       
       osc.start();
       lfo.start();
@@ -715,7 +763,7 @@ export const useSynthesizer = (): SynthesizerContextType => {
   }, [updateState]);
 
   const resetVolume = useCallback(() => {
-    updateState({ volume: 20 });
+    updateState({ volume: 1 });
   }, [updateState]);
 
   const resetAttack = useCallback(() => {
@@ -803,17 +851,14 @@ export const useSynthesizer = (): SynthesizerContextType => {
   }, [updateState]);
 
   const resetSteps = useCallback(() => {
-    updateState({ steps: 8 });
+    updateState({ steps: 16 });
   }, [updateState]);
 
   // Sequencer improvement functions
   const startBpmSlide = useCallback(() => {
     updateState({ isBpmSliding: true });
-    // Pause sequencer while sliding
-    if (state.isPlaying) {
-      stopSequence();
-    }
-  }, [updateState, state.isPlaying, stopSequence]);
+    // Allow BPM changes without stopping the sequencer
+  }, [updateState]);
 
   const endBpmSlide = useCallback((newBpm: number) => {
     updateState({ 

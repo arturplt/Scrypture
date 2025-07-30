@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BPM Slider Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #23211a;
+            color: #e8e5d2;
+        }
+        .test-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #2d2b22;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .slider-group button {
+            background: #4a7c59;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .slider-group button:hover {
+            background: #5a8c69;
+        }
+        .value-display {
+            font-size: 10px;
+            color: #ffe066;
+            font-weight: bold;
+            min-width: 40px;
+            text-align: center;
+            padding: 2px 6px;
+            background: #2a2a2a;
+            border: 1px solid #555;
+            border-radius: 3px;
+        }
+        input[type="range"] {
+            flex: 1;
+        }
+        .test-result {
+            margin-top: 20px;
+            padding: 10px;
+            background: #1a1812;
+            border-radius: 4px;
+        }
+        .success {
+            color: #4a7c59;
+        }
+        .error {
+            color: #7c4a4a;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>BPM Slider Test</h1>
+        
+        <div class="slider-group">
+            <button onclick="decreaseBPM()">-</button>
+            <input 
+                type="range" 
+                id="bpmSlider" 
+                min="60" 
+                max="200" 
+                value="120" 
+                step="1"
+                oninput="updateBPM(this.value)"
+                onmousedown="startBpmSlide()"
+                onmouseup="endBpmSlide(this.value)"
+            >
+            <button onclick="increaseBPM()">+</button>
+            <span class="value-display" id="bpmDisplay">120 BPM</span>
+            <button onclick="resetBPM()">Reset</button>
+        </div>
+
+        <div class="test-result" id="testResult">
+            <h3>Test Results:</h3>
+            <div id="results"></div>
+        </div>
+
+        <div class="test-result">
+            <h3>Instructions:</h3>
+            <ol>
+                <li>Move the BPM slider - the display should update in real-time</li>
+                <li>Click and drag the slider - this should simulate stopping the sequencer</li>
+                <li>Click the + and - buttons to test step changes</li>
+                <li>Click Reset to return to 120 BPM</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        let isBpmSliding = false;
+        let sequencerPlaying = false;
+
+        function updateBPM(value) {
+            document.getElementById('bpmDisplay').textContent = value + ' BPM';
+            
+            if (isBpmSliding) {
+                // Update BPM immediately while sliding
+                console.log('BPM updated immediately:', value);
+            } else {
+                // Set pending change for next note
+                console.log('BPM pending change:', value);
+            }
+        }
+
+        function startBpmSlide() {
+            isBpmSliding = true;
+            // Pause sequencer while sliding
+            if (sequencerPlaying) {
+                sequencerPlaying = false;
+                console.log('Sequencer stopped while sliding BPM');
+            }
+            console.log('Started BPM slide');
+        }
+
+        function endBpmSlide(value) {
+            isBpmSliding = false;
+            console.log('Ended BPM slide at:', value);
+        }
+
+        function decreaseBPM() {
+            const slider = document.getElementById('bpmSlider');
+            const newValue = Math.max(60, parseInt(slider.value) - 1);
+            slider.value = newValue;
+            updateBPM(newValue);
+        }
+
+        function increaseBPM() {
+            const slider = document.getElementById('bpmSlider');
+            const newValue = Math.min(200, parseInt(slider.value) + 1);
+            slider.value = newValue;
+            updateBPM(newValue);
+        }
+
+        function resetBPM() {
+            const slider = document.getElementById('bpmSlider');
+            slider.value = 120;
+            updateBPM(120);
+            console.log('BPM reset to 120');
+        }
+
+        // Test the functionality
+        function runTests() {
+            const results = document.getElementById('results');
+            let testResults = [];
+
+            // Test 1: BPM display shows correct value
+            const display = document.getElementById('bpmDisplay');
+            if (display.textContent === '120 BPM') {
+                testResults.push('<span class="success">✓ BPM display shows correct value</span>');
+            } else {
+                testResults.push('<span class="error">✗ BPM display incorrect</span>');
+            }
+
+            // Test 2: Slider has correct range
+            const slider = document.getElementById('bpmSlider');
+            if (slider.min === '60' && slider.max === '200') {
+                testResults.push('<span class="success">✓ Slider has correct range (60-200)</span>');
+            } else {
+                testResults.push('<span class="error">✗ Slider range incorrect</span>');
+            }
+
+            // Test 3: Buttons work
+            const originalValue = slider.value;
+            increaseBPM();
+            if (slider.value > originalValue) {
+                testResults.push('<span class="success">✓ Increase button works</span>');
+            } else {
+                testResults.push('<span class="error">✗ Increase button failed</span>');
+            }
+
+            resetBPM();
+
+            results.innerHTML = testResults.join('<br>');
+        }
+
+        // Run tests when page loads
+        window.onload = runTests;
+    </script>
+</body>
+</html> 

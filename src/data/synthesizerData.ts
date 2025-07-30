@@ -86,7 +86,7 @@ export const PRESETS: Record<string, Preset> = {
   piano: {
     name: 'piano',
     waveform: 'sine',
-    volume: 30,
+    volume: 5,
     attack: 5,
     release: 20,
     detune: 0,
@@ -108,7 +108,7 @@ export const PRESETS: Record<string, Preset> = {
   bass: {
     name: 'bass',
     waveform: 'square',
-    volume: 40,
+    volume: 8,
     attack: 1,
     release: 50,
     detune: 0,
@@ -133,7 +133,7 @@ export const PRESETS: Record<string, Preset> = {
   lead: {
     name: 'lead',
     waveform: 'sawtooth',
-    volume: 25,
+    volume: 6,
     attack: 2,
     release: 15,
     detune: 5,
@@ -157,7 +157,7 @@ export const PRESETS: Record<string, Preset> = {
   pad: {
     name: 'pad',
     waveform: 'sine',
-    volume: 20,
+    volume: 3,
     attack: 100,
     release: 100,
     detune: 10,
@@ -179,7 +179,7 @@ export const PRESETS: Record<string, Preset> = {
   pluck: {
     name: 'pluck',
     waveform: 'square',
-    volume: 35,
+    volume: 7,
     attack: 1,
     release: 5,
     detune: 0,
@@ -222,7 +222,7 @@ export const PRESETS: Record<string, Preset> = {
   chord: {
     name: 'chord',
     waveform: 'sine',
-    volume: 25,
+    volume: 5,
     attack: 10,
     release: 60,
     detune: 5,
@@ -244,7 +244,7 @@ export const PRESETS: Record<string, Preset> = {
   arp: {
     name: 'arp',
     waveform: 'square',
-    volume: 30,
+    volume: 6,
     attack: 1,
     release: 10,
     detune: 0,
@@ -267,7 +267,7 @@ export const PRESETS: Record<string, Preset> = {
   'achievement-common': {
     name: 'achievement-common',
     waveform: 'sine',
-    volume: 25,
+    volume: 5,
     attack: 1,
     release: 15,
     detune: 0,
@@ -280,7 +280,7 @@ export const PRESETS: Record<string, Preset> = {
   'achievement-rare': {
     name: 'achievement-rare',
     waveform: 'triangle',
-    volume: 30,
+    volume: 6,
     attack: 2,
     release: 25,
     detune: 5,
@@ -293,7 +293,7 @@ export const PRESETS: Record<string, Preset> = {
   'achievement-legendary': {
     name: 'achievement-legendary',
     waveform: 'sawtooth',
-    volume: 35,
+    volume: 7,
     attack: 5,
     release: 40,
     detune: 10,
@@ -306,7 +306,7 @@ export const PRESETS: Record<string, Preset> = {
   'task-complete': {
     name: 'task-complete',
     waveform: 'sine',
-    volume: 20,
+    volume: 4,
     attack: 1,
     release: 8,
     detune: 0,
@@ -319,7 +319,7 @@ export const PRESETS: Record<string, Preset> = {
   'level-up': {
     name: 'level-up',
     waveform: 'square',
-    volume: 30,
+    volume: 6,
     attack: 3,
     release: 20,
     detune: 5,
@@ -332,7 +332,7 @@ export const PRESETS: Record<string, Preset> = {
   'bobr-greeting': {
     name: 'bobr-greeting',
     waveform: 'triangle',
-    volume: 25,
+    volume: 5,
     attack: 5,
     release: 30,
     detune: 3,
@@ -345,7 +345,7 @@ export const PRESETS: Record<string, Preset> = {
   'dam-build': {
     name: 'dam-build',
     waveform: 'square',
-    volume: 28,
+    volume: 6,
     attack: 2,
     release: 15,
     detune: 0,
@@ -358,7 +358,7 @@ export const PRESETS: Record<string, Preset> = {
   'streak-milestone': {
     name: 'streak-milestone',
     waveform: 'sine',
-    volume: 30,
+    volume: 6,
     attack: 1,
     release: 12,
     detune: 2,
@@ -371,7 +371,7 @@ export const PRESETS: Record<string, Preset> = {
   'ui-click': {
     name: 'ui-click',
     waveform: 'sine',
-    volume: 15,
+    volume: 3,
     attack: 1,
     release: 5,
     detune: 0,
@@ -384,7 +384,7 @@ export const PRESETS: Record<string, Preset> = {
   'form-submit': {
     name: 'form-submit',
     waveform: 'triangle',
-    volume: 20,
+    volume: 4,
     attack: 2,
     release: 10,
     detune: 0,
@@ -397,7 +397,7 @@ export const PRESETS: Record<string, Preset> = {
   'modal-open': {
     name: 'modal-open',
     waveform: 'sine',
-    volume: 18,
+    volume: 4,
     attack: 3,
     release: 8,
     detune: 0,
@@ -410,7 +410,7 @@ export const PRESETS: Record<string, Preset> = {
   'xp-gain': {
     name: 'xp-gain',
     waveform: 'triangle',
-    volume: 22,
+    volume: 4,
     attack: 1,
     release: 6,
     detune: 1,
@@ -425,7 +425,7 @@ export const PRESETS: Record<string, Preset> = {
   'atmospheric-pad': {
     name: 'atmospheric-pad',
     waveform: 'sine',
-    volume: 18,
+    volume: 4,
     attack: 150,
     release: 120,
     detune: 15,
@@ -452,7 +452,7 @@ export const PRESETS: Record<string, Preset> = {
   'aggressive-lead': {
     name: 'aggressive-lead',
     waveform: 'sawtooth',
-    volume: 28,
+    volume: 6,
     attack: 1,
     release: 20,
     detune: 8,
@@ -482,7 +482,7 @@ export const PRESETS: Record<string, Preset> = {
   'retro-bitcrusher': {
     name: 'retro-bitcrusher',
     waveform: 'square',
-    volume: 32,
+    volume: 6,
     attack: 1,
     release: 8,
     detune: 0,
@@ -507,7 +507,7 @@ export const PRESETS: Record<string, Preset> = {
   'warm-bass': {
     name: 'warm-bass',
     waveform: 'triangle',
-    volume: 45,
+    volume: 9,
     attack: 2,
     release: 60,
     detune: 3,
@@ -534,7 +534,7 @@ export const PRESETS: Record<string, Preset> = {
   'ethereal-bell': {
     name: 'ethereal-bell',
     waveform: 'triangle',
-    volume: 25,
+    volume: 5,
     attack: 1,
     release: 100,
     detune: 5,
@@ -561,7 +561,7 @@ export const PRESETS: Record<string, Preset> = {
   'rhythmic-pluck': {
     name: 'rhythmic-pluck',
     waveform: 'square',
-    volume: 38,
+    volume: 8,
     attack: 1,
     release: 3,
     detune: 0,
@@ -588,7 +588,7 @@ export const PRESETS: Record<string, Preset> = {
   'space-pad': {
     name: 'space-pad',
     waveform: 'sine',
-    volume: 15,
+    volume: 1,
     attack: 200,
     release: 150,
     detune: 20,
@@ -617,7 +617,7 @@ export const PRESETS: Record<string, Preset> = {
   'industrial-noise': {
     name: 'industrial-noise',
     waveform: 'sawtooth',
-    volume: 30,
+    volume: 6,
     attack: 5,
     release: 25,
     detune: 12,
@@ -647,7 +647,7 @@ export const PRESETS: Record<string, Preset> = {
   'liquid-chord': {
     name: 'liquid-chord',
     waveform: 'sine',
-    volume: 22,
+    volume: 4,
     attack: 20,
     release: 80,
     detune: 8,
@@ -679,7 +679,7 @@ export const PRESETS: Record<string, Preset> = {
   'crystal-arp': {
     name: 'crystal-arp',
     waveform: 'triangle',
-    volume: 28,
+    volume: 6,
     attack: 1,
     release: 12,
     detune: 3,
