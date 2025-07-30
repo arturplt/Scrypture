@@ -44,6 +44,8 @@ interface SliderControlProps {
   valueDisplay?: string;
   additionalControls?: React.ReactNode;
   isLive?: boolean;
+  resetFunction?: () => void;
+  defaultValue?: number;
 }
 
 const SliderControl: React.FC<SliderControlProps> = ({
@@ -56,7 +58,9 @@ const SliderControl: React.FC<SliderControlProps> = ({
   showValue = false,
   valueDisplay,
   additionalControls,
-  isLive = false
+  isLive = false,
+  resetFunction,
+  defaultValue
 }) => {
   return (
     <div className={styles.section}>
@@ -80,6 +84,15 @@ const SliderControl: React.FC<SliderControlProps> = ({
           <span className={styles.valueDisplay}>
             {valueDisplay || `${value}${label === 'Volume' ? '%' : ''}`}
           </span>
+        )}
+        {resetFunction && (
+          <button 
+            onClick={resetFunction} 
+            className={styles.resetBtn}
+            title={`Reset ${label} to ${defaultValue || 'default'}`}
+          >
+            Reset
+          </button>
         )}
         {additionalControls}
       </div>
@@ -519,6 +532,8 @@ export const Synthesizer: React.FC = () => {
         showValue
         valueDisplay={`${synth.state.volume}%`}
         isLive={true}
+        resetFunction={synth.resetVolume}
+        defaultValue={20}
       />
 
       <SliderControl
@@ -530,6 +545,8 @@ export const Synthesizer: React.FC = () => {
         showValue
         valueDisplay={`${((synth.state.attack / 100) * 2).toFixed(2)}s`}
         isLive={true}
+        resetFunction={synth.resetAttack}
+        defaultValue={1}
       />
 
       <SliderControl
@@ -557,6 +574,8 @@ export const Synthesizer: React.FC = () => {
           </>
         }
         isLive={true}
+        resetFunction={synth.resetRelease}
+        defaultValue={10}
       />
 
       <SliderControl
@@ -565,12 +584,9 @@ export const Synthesizer: React.FC = () => {
         min={-100}
         max={100}
         onChange={(value) => synth.updateState({ detune: value })}
-        additionalControls={
-          <button onClick={synth.resetDetune} className={styles.resetBtn}>
-            Reset
-          </button>
-        }
         isLive={true}
+        resetFunction={synth.resetDetune}
+        defaultValue={0}
       />
 
       <div className={styles.section}>
@@ -608,6 +624,8 @@ export const Synthesizer: React.FC = () => {
           showValue
           valueDisplay={`${synth.state.arpeggiatorRate}/16`}
           isLive={true}
+          resetFunction={synth.resetArpeggiatorRate}
+          defaultValue={8}
         />
       )}
 
@@ -621,6 +639,8 @@ export const Synthesizer: React.FC = () => {
         showValue
         valueDisplay={`${synth.state.lfoRate} Hz`}
         isLive={true}
+        resetFunction={synth.resetLfoRate}
+        defaultValue={0}
       />
 
       <SliderControl
@@ -630,6 +650,8 @@ export const Synthesizer: React.FC = () => {
         max={50}
         onChange={(value) => synth.updateState({ lfoDepth: value })}
         isLive={true}
+        resetFunction={synth.resetLfoDepth}
+        defaultValue={5}
       />
 
       <div className={styles.section}>
@@ -668,6 +690,8 @@ export const Synthesizer: React.FC = () => {
               showValue
               valueDisplay={`${synth.state.delayTime.toFixed(1)}s`}
               isLive={true}
+              resetFunction={synth.resetDelayTime}
+              defaultValue={0.3}
             />
             <SliderControl
               label="Feedback"
@@ -679,6 +703,8 @@ export const Synthesizer: React.FC = () => {
               showValue
               valueDisplay={`${(synth.state.delayFeedback * 100).toFixed(0)}%`}
               isLive={true}
+              resetFunction={synth.resetDelayFeedback}
+              defaultValue={0.3}
             />
             <SliderControl
               label="Mix"
@@ -690,6 +716,8 @@ export const Synthesizer: React.FC = () => {
               showValue
               valueDisplay={`${(synth.state.delayMix * 100).toFixed(0)}%`}
               isLive={true}
+              resetFunction={synth.resetDelayMix}
+              defaultValue={0.5}
             />
           </>
         )}
@@ -718,6 +746,8 @@ export const Synthesizer: React.FC = () => {
               showValue
               valueDisplay={`${synth.state.chorusRate.toFixed(1)} Hz`}
               isLive={true}
+              resetFunction={synth.resetChorusRate}
+              defaultValue={1.5}
             />
             <SliderControl
               label="Depth"
@@ -729,6 +759,8 @@ export const Synthesizer: React.FC = () => {
               showValue
               valueDisplay={`${(synth.state.chorusDepth * 1000).toFixed(1)} ms`}
               isLive={true}
+              resetFunction={synth.resetChorusDepth}
+              defaultValue={0.002}
             />
             <SliderControl
               label="Mix"
@@ -740,6 +772,8 @@ export const Synthesizer: React.FC = () => {
               showValue
               valueDisplay={`${(synth.state.chorusMix * 100).toFixed(0)}%`}
               isLive={true}
+              resetFunction={synth.resetChorusMix}
+              defaultValue={0.5}
             />
           </>
         )}
@@ -779,6 +813,8 @@ export const Synthesizer: React.FC = () => {
               showValue
               valueDisplay={`${(synth.state.distortionAmount * 100).toFixed(0)}%`}
               isLive={true}
+              resetFunction={synth.resetDistortionAmount}
+              defaultValue={0.3}
             />
           </>
         )}
@@ -819,6 +855,8 @@ export const Synthesizer: React.FC = () => {
               showValue
               valueDisplay={`${synth.state.filterFrequency.toFixed(0)} Hz`}
               isLive={true}
+              resetFunction={synth.resetFilterFrequency}
+              defaultValue={2000}
             />
             <SliderControl
               label="Resonance"
@@ -830,6 +868,8 @@ export const Synthesizer: React.FC = () => {
               showValue
               valueDisplay={`${synth.state.filterResonance.toFixed(1)}`}
               isLive={true}
+              resetFunction={synth.resetFilterResonance}
+              defaultValue={1}
             />
           </>
         )}
@@ -858,6 +898,8 @@ export const Synthesizer: React.FC = () => {
               showValue
               valueDisplay={`${synth.state.compressionThreshold} dB`}
               isLive={true}
+              resetFunction={synth.resetCompressionThreshold}
+              defaultValue={-24}
             />
             <SliderControl
               label="Ratio"
@@ -869,6 +911,8 @@ export const Synthesizer: React.FC = () => {
               showValue
               valueDisplay={`${synth.state.compressionRatio}:1`}
               isLive={true}
+              resetFunction={synth.resetCompressionRatio}
+              defaultValue={4}
             />
             <SliderControl
               label="Attack"
@@ -880,6 +924,8 @@ export const Synthesizer: React.FC = () => {
               showValue
               valueDisplay={`${(synth.state.compressionAttack * 1000).toFixed(1)} ms`}
               isLive={true}
+              resetFunction={synth.resetCompressionAttack}
+              defaultValue={0.003}
             />
             <SliderControl
               label="Release"
@@ -891,6 +937,8 @@ export const Synthesizer: React.FC = () => {
               showValue
               valueDisplay={`${(synth.state.compressionRelease * 1000).toFixed(1)} ms`}
               isLive={true}
+              resetFunction={synth.resetCompressionRelease}
+              defaultValue={0.25}
             />
           </>
         )}
@@ -907,6 +955,8 @@ export const Synthesizer: React.FC = () => {
           showValue
           valueDisplay={`${synth.state.stereoWidth.toFixed(1)}x`}
           isLive={true}
+          resetFunction={synth.resetStereoWidth}
+          defaultValue={1}
         />
         <div className={styles.section}>
           <label>
@@ -931,6 +981,8 @@ export const Synthesizer: React.FC = () => {
               synth.state.panningAmount > 0 ? `Right ${(synth.state.panningAmount * 100).toFixed(0)}%` :
               `Left ${(Math.abs(synth.state.panningAmount) * 100).toFixed(0)}%`}
             isLive={true}
+            resetFunction={synth.resetPanningAmount}
+            defaultValue={0}
           />
         )}
       </CollapsibleSection>
@@ -946,6 +998,8 @@ export const Synthesizer: React.FC = () => {
           max={200}
           onChange={(value) => synth.updateState({ bpm: value })}
           isLive={true}
+          resetFunction={synth.resetBpm}
+          defaultValue={120}
         />
 
         <SliderControl
@@ -955,6 +1009,8 @@ export const Synthesizer: React.FC = () => {
           max={16}
           onChange={(value) => synth.updateState({ steps: value })}
           isLive={true}
+          resetFunction={synth.resetSteps}
+          defaultValue={8}
         />
 
         <div className={styles.section}>

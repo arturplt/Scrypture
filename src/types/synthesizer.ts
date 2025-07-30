@@ -305,6 +305,29 @@ export interface SynthesizerContextType {
   
   // Control functions
   resetDetune: () => void;
+  resetVolume: () => void;
+  resetAttack: () => void;
+  resetRelease: () => void;
+  resetLfoRate: () => void;
+  resetLfoDepth: () => void;
+  resetArpeggiatorRate: () => void;
+  resetDelayTime: () => void;
+  resetDelayFeedback: () => void;
+  resetDelayMix: () => void;
+  resetChorusRate: () => void;
+  resetChorusDepth: () => void;
+  resetChorusMix: () => void;
+  resetDistortionAmount: () => void;
+  resetFilterFrequency: () => void;
+  resetFilterResonance: () => void;
+  resetCompressionThreshold: () => void;
+  resetCompressionRatio: () => void;
+  resetCompressionAttack: () => void;
+  resetCompressionRelease: () => void;
+  resetStereoWidth: () => void;
+  resetPanningAmount: () => void;
+  resetBpm: () => void;
+  resetSteps: () => void;
   toggleSustain: () => void;
   setWaveform: (waveform: WaveformType) => void;
   setArpeggiatorMode: (mode: 'off' | 'up' | 'down' | 'updown' | 'random') => void;

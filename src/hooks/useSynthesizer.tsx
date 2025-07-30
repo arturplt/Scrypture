@@ -709,6 +709,98 @@ export const useSynthesizer = (): SynthesizerContextType => {
     });
   }, [updateState]);
 
+  const resetVolume = useCallback(() => {
+    updateState({ volume: 20 });
+  }, [updateState]);
+
+  const resetAttack = useCallback(() => {
+    updateState({ attack: 1 });
+  }, [updateState]);
+
+  const resetRelease = useCallback(() => {
+    updateState({ release: 10 });
+  }, [updateState]);
+
+  const resetLfoRate = useCallback(() => {
+    updateState({ lfoRate: 0 });
+  }, [updateState]);
+
+  const resetLfoDepth = useCallback(() => {
+    updateState({ lfoDepth: 5 });
+  }, [updateState]);
+
+  const resetArpeggiatorRate = useCallback(() => {
+    updateState({ arpeggiatorRate: 8 });
+  }, [updateState]);
+
+  const resetDelayTime = useCallback(() => {
+    updateState({ delayTime: 0.3 });
+  }, [updateState]);
+
+  const resetDelayFeedback = useCallback(() => {
+    updateState({ delayFeedback: 0.3 });
+  }, [updateState]);
+
+  const resetDelayMix = useCallback(() => {
+    updateState({ delayMix: 0.5 });
+  }, [updateState]);
+
+  const resetChorusRate = useCallback(() => {
+    updateState({ chorusRate: 1.5 });
+  }, [updateState]);
+
+  const resetChorusDepth = useCallback(() => {
+    updateState({ chorusDepth: 0.002 });
+  }, [updateState]);
+
+  const resetChorusMix = useCallback(() => {
+    updateState({ chorusMix: 0.5 });
+  }, [updateState]);
+
+  const resetDistortionAmount = useCallback(() => {
+    updateState({ distortionAmount: 0.3 });
+  }, [updateState]);
+
+  const resetFilterFrequency = useCallback(() => {
+    updateState({ filterFrequency: 2000 });
+  }, [updateState]);
+
+  const resetFilterResonance = useCallback(() => {
+    updateState({ filterResonance: 1 });
+  }, [updateState]);
+
+  const resetCompressionThreshold = useCallback(() => {
+    updateState({ compressionThreshold: -24 });
+  }, [updateState]);
+
+  const resetCompressionRatio = useCallback(() => {
+    updateState({ compressionRatio: 4 });
+  }, [updateState]);
+
+  const resetCompressionAttack = useCallback(() => {
+    updateState({ compressionAttack: 0.003 });
+  }, [updateState]);
+
+  const resetCompressionRelease = useCallback(() => {
+    updateState({ compressionRelease: 0.25 });
+  }, [updateState]);
+
+  const resetStereoWidth = useCallback(() => {
+    updateState({ stereoWidth: 1 });
+  }, [updateState]);
+
+  const resetPanningAmount = useCallback(() => {
+    updateState({ panningAmount: 0 });
+  }, [updateState]);
+
+  const resetBpm = useCallback(() => {
+    updateState({ bpm: 120 });
+  }, [updateState]);
+
+  const resetSteps = useCallback(() => {
+    updateState({ steps: 8 });
+  }, [updateState]);
+
   const toggleSustain = useCallback(() => {
     updateState(prev => ({ sustainMode: !prev.sustainMode }));
   }, [updateState]);
@@ -966,6 +1058,29 @@ export const useSynthesizer = (): SynthesizerContextType => {
     toggleDrawMode,
     loadPattern,
     resetDetune,
+    resetVolume,
+    resetAttack,
+    resetRelease,
+    resetLfoRate,
+    resetLfoDepth,
+    resetArpeggiatorRate,
+    resetDelayTime,
+    resetDelayFeedback,
+    resetDelayMix,
+    resetChorusRate,
+    resetChorusDepth,
+    resetChorusMix,
+    resetDistortionAmount,
+    resetFilterFrequency,
+    resetFilterResonance,
+    resetCompressionThreshold,
+    resetCompressionRatio,
+    resetCompressionAttack,
+    resetCompressionRelease,
+    resetStereoWidth,
+    resetPanningAmount,
+    resetBpm,
+    resetSteps,
     toggleSustain,
     setWaveform,
     setArpeggiatorMode,
