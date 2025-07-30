@@ -925,6 +925,11 @@
   color: #000;
 }
 
+.stepIndicator.gridBeat {
+  border: 2px solid #4a7c59;
+  font-weight: bold;
+}
+
 .timelineTracks {
   display: flex;
   flex-direction: column;

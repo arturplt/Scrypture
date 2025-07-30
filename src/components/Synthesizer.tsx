@@ -46,6 +46,8 @@ interface SliderControlProps {
   isLive?: boolean;
   resetFunction?: () => void;
   defaultValue?: number;
+  onMouseDown?: () => void;
+  onMouseUp?: (value: number) => void;
 }
 
 const SliderControl: React.FC<SliderControlProps> = ({
@@ -60,7 +62,9 @@ const SliderControl: React.FC<SliderControlProps> = ({
   additionalControls,
   isLive = false,
   resetFunction,
-  defaultValue
+  defaultValue,
+  onMouseDown,
+  onMouseUp
 }) => {
   return (
     <div className={styles.section}>
@@ -77,6 +81,8 @@ const SliderControl: React.FC<SliderControlProps> = ({
           step={step}
           value={value}
           onChange={(e) => onChange(parseFloat(e.target.value))}
+          onMouseDown={onMouseDown}
+          onMouseUp={() => onMouseUp?.(value)}
           className={isLive ? styles.liveSlider : ''}
         />
         <button onClick={() => onChange(Math.min(max, value + step))}>+</button>
@@ -996,7 +1002,17 @@ export const Synthesizer: React.FC = () => {
           value={synth.state.bpm}
           min={60}
           max={200}
-          onChange={(value) => synth.updateState({ bpm: value })}
+          onChange={(value) => {
+            if (synth.state.isBpmSliding) {
+              // Update BPM immediately while sliding
+              synth.updateState({ bpm: value });
+            } else {
+              // Set pending change for next note
+              synth.updateState({ pendingBpmChange: value });
+            }
+          }}
+          onMouseDown={() => synth.startBpmSlide()}
+          onMouseUp={(value) => synth.endBpmSlide(value)}
           isLive={true}
           resetFunction={synth.resetBpm}
           defaultValue={120}
@@ -1026,6 +1042,15 @@ export const Synthesizer: React.FC = () => {
             >
               {synth.state.drawMode ? 'Click' : 'Draw'}
             </button>
+            <button 
+              onClick={() => synth.setGridAlignment(synth.state.gridAlignment === 'quantize' ? 'free' : 'quantize')}
+              style={{ 
+                backgroundColor: synth.state.gridAlignment === 'quantize' ? '#4a7c59' : '#7c4a4a',
+                color: '#fff'
+              }}
+            >
+              {synth.state.gridAlignment === 'quantize' ? 'Grid On' : 'Grid Off'}
+            </button>
           </div>
         </div>
 
@@ -1036,7 +1061,9 @@ export const Synthesizer: React.FC = () => {
                 {Array.from({ length: synth.state.steps }, (_, i) => (
                   <div
                     key={i}
-                    className={`${styles.stepIndicator} ${synth.state.currentStep === i ? styles.active : ''}`}
+                    className={`${styles.stepIndicator} ${synth.state.currentStep === i ? styles.active : ''} ${
+                      synth.state.gridAlignment === 'quantize' && (i % 4 === 0) ? styles.gridBeat : ''
+                    }`}
                   >
                     {(i + 1) % 10}
                   </div>

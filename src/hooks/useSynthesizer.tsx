@@ -64,6 +64,11 @@ const initialState: SynthesizerState = {
   stereoWidth: 1,
   panningEnabled: false,
   panningAmount: 0,
+  
+  // Sequencer improvements
+  isBpmSliding: false,
+  pendingBpmChange: null,
+  gridAlignment: 'quantize',
 };
 
 export const useSynthesizer = (): SynthesizerContextType => {
@@ -801,6 +806,27 @@ export const useSynthesizer = (): SynthesizerContextType => {
     updateState({ steps: 8 });
   }, [updateState]);
 
+  // Sequencer improvement functions
+  const startBpmSlide = useCallback(() => {
+    updateState({ isBpmSliding: true });
+    // Pause sequencer while sliding
+    if (state.isPlaying) {
+      stopSequence();
+    }
+  }, [updateState, state.isPlaying, stopSequence]);
+
+  const endBpmSlide = useCallback((newBpm: number) => {
+    updateState({ 
+      isBpmSliding: false, 
+      pendingBpmChange: newBpm,
+      bpm: newBpm 
+    });
+  }, [updateState]);
+
+  const setGridAlignment = useCallback((alignment: 'quantize' | 'free') => {
+    updateState({ gridAlignment: alignment });
+  }, [updateState]);
+
   const toggleSustain = useCallback(() => {
     updateState(prev => ({ sustainMode: !prev.sustainMode }));
   }, [updateState]);
@@ -998,6 +1024,16 @@ export const useSynthesizer = (): SynthesizerContextType => {
         setState(prev => {
           const newStep = (prev.currentStep + 1) % prev.steps;
           
+          // Apply pending BPM change on the next step
+          let newBpm = prev.bpm;
+          if (prev.pendingBpmChange !== null) {
+            newBpm = prev.pendingBpmChange;
+            // Clear the pending change after applying it
+            setTimeout(() => {
+              updateState({ pendingBpmChange: null });
+            }, 0);
+          }
+          
           // Play notes for current step
           SEQUENCER_TRACKS.forEach(track => {
             if (sequenceRef.current[track.note] && sequenceRef.current[track.note][prev.currentStep]) {
@@ -1009,11 +1045,11 @@ export const useSynthesizer = (): SynthesizerContextType => {
             }
           });
           
-          return { ...prev, currentStep: newStep };
+          return { ...prev, currentStep: newStep, bpm: newBpm };
         });
       }, stepTime * 1000);
     }
-  }, [state.bpm, state.steps, state.isPlaying, startNote, stopNote]);
+  }, [state.bpm, state.steps, state.isPlaying, startNote, stopNote, updateState]);
 
   // Initialize sequence state properly
   useEffect(() => {
@@ -1081,6 +1117,9 @@ export const useSynthesizer = (): SynthesizerContextType => {
     resetPanningAmount,
     resetBpm,
     resetSteps,
+    startBpmSlide,
+    endBpmSlide,
+    setGridAlignment,
     toggleSustain,
     setWaveform,
     setArpeggiatorMode,

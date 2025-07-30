@@ -125,6 +125,11 @@ export interface SynthesizerState {
   stereoWidth: number;
   panningEnabled: boolean;
   panningAmount: number;
+  
+  // Sequencer improvements
+  isBpmSliding: boolean;
+  pendingBpmChange: number | null;
+  gridAlignment: 'quantize' | 'free';
 }
 
 export interface SequencerStep {
@@ -331,6 +336,11 @@ export interface SynthesizerContextType {
   toggleSustain: () => void;
   setWaveform: (waveform: WaveformType) => void;
   setArpeggiatorMode: (mode: 'off' | 'up' | 'down' | 'updown' | 'random') => void;
+  
+  // Sequencer improvement functions
+  startBpmSlide: () => void;
+  endBpmSlide: (newBpm: number) => void;
+  setGridAlignment: (alignment: 'quantize' | 'free') => void;
   
   // Keyboard functions
   handleKeyDown: (event: KeyboardEvent) => void;
