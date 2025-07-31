@@ -15,7 +15,7 @@ interface GridSettings {
 }
 
 interface OutputSettings {
-  size: '16x16' | '32x32' | '64x64' | 'custom';
+  size: '16x16' | '32x32' | '64x64' | '64x128' | '128x64' | 'custom';
   customWidth: number;
   customHeight: number;
   previewScale: 1 | 2 | 4;
@@ -91,47 +91,30 @@ const Pixelite: React.FC<PixeliteProps> = ({ isOpen, onClose }) => {
           name: file.name
         });
         
-        // Auto-detect grid size
+        // Auto-detect grid size based on shorter side being 64px
         const detectedSize = detectOptimalGridSize(img.width, img.height);
         setGridSettings(prev => ({ ...prev, size: detectedSize }));
         
-        // Calculate output size to maintain aspect ratio
+        // Calculate output size to make shorter side 64px
         const aspectRatio = img.width / img.height;
         let outputWidth: number;
         let outputHeight: number;
         
-        // Determine the best output size based on aspect ratio
         if (aspectRatio > 1) {
-          // Landscape image - use width as base
-          if (img.width <= 64) {
-            outputWidth = img.width;
-            outputHeight = img.height;
-          } else if (img.width <= 128) {
-            outputWidth = 64;
-            outputHeight = Math.round(64 / aspectRatio);
-          } else {
-            outputWidth = 128;
-            outputHeight = Math.round(128 / aspectRatio);
-          }
+          // Landscape image - height is shorter side
+          outputHeight = 64;
+          outputWidth = Math.round(64 * aspectRatio);
         } else {
-          // Portrait or square image - use height as base
-          if (img.height <= 64) {
-            outputWidth = img.width;
-            outputHeight = img.height;
-          } else if (img.height <= 128) {
-            outputHeight = 64;
-            outputWidth = Math.round(64 * aspectRatio);
-          } else {
-            outputHeight = 128;
-            outputWidth = Math.round(128 * aspectRatio);
-          }
+          // Portrait or square image - width is shorter side
+          outputWidth = 64;
+          outputHeight = Math.round(64 / aspectRatio);
         }
         
         // Ensure minimum size of 16x16
         outputWidth = Math.max(16, outputWidth);
         outputHeight = Math.max(16, outputHeight);
         
-        // Set custom output size to maintain aspect ratio
+        // Set custom output size to maintain aspect ratio with shorter side at 64px
         setOutputSettings(prev => ({
           ...prev,
           size: 'custom',
@@ -147,20 +130,20 @@ const Pixelite: React.FC<PixeliteProps> = ({ isOpen, onClose }) => {
     reader.readAsDataURL(file);
   }, []);
 
-  // Auto-detect optimal grid size
+  // Auto-detect optimal grid size based on shorter side being 64px
   const detectOptimalGridSize = (width: number, height: number): number => {
-    const sizes = [16, 32, 64, 128];
-    const aspectRatio = width / height;
+    const shorterSide = Math.min(width, height);
     
-    // Check if dimensions are multiples of common sprite sizes
-    for (const size of sizes) {
-      if (width % size === 0 && height % size === 0) {
-        return size;
-      }
+    // If shorter side is already 64px or less, use 1px grid
+    if (shorterSide <= 64) {
+      return 1;
     }
     
-    // Default to 64px for most cases
-    return 64;
+    // Calculate grid size to make shorter side 64px
+    const gridSize = Math.ceil(shorterSide / 64);
+    
+    // Ensure grid size is reasonable (between 1 and 64)
+    return Math.max(1, Math.min(64, gridSize));
   };
 
   // Extract dominant colors from image
@@ -305,6 +288,14 @@ const Pixelite: React.FC<PixeliteProps> = ({ isOpen, onClose }) => {
         break;
       case '64x64':
         outputWidth = 64;
+        outputHeight = 64;
+        break;
+      case '64x128':
+        outputWidth = 64;
+        outputHeight = 128;
+        break;
+      case '128x64':
+        outputWidth = 128;
         outputHeight = 64;
         break;
       case 'custom':
@@ -987,47 +978,56 @@ const Pixelite: React.FC<PixeliteProps> = ({ isOpen, onClose }) => {
                  />
                  <label>Snap to Grid</label>
                </div>
-               {imageData.url && (
-                 <button 
-                   className={styles.button} 
-                   onClick={snapOutputToGrid}
-                   title="Adjust output size to match current grid settings"
-                 >
-                   SNAP
-                 </button>
-               )}
+                               {imageData.url && (
+                  <>
+                    <button 
+                      className={styles.button} 
+                      onClick={snapOutputToGrid}
+                      title="Adjust output size to match current grid settings"
+                    >
+                      SNAP
+                    </button>
+                    <button 
+                      className={styles.button} 
+                      onClick={() => setGridSettings(prev => ({ ...prev, offsetX: 0, offsetY: 0 }))}
+                      title="Reset grid offset to center"
+                    >
+                      Reset Offset
+                    </button>
+                  </>
+                )}
             </div>
 
                          <div className={styles.section}>
                <h3>🎨 Cell Shading</h3>
-               <div className={styles.control}>
-                 <label>Intensity:</label>
-                 <div className={styles.sliderContainer}>
-                   <button 
-                     className={styles.sliderButton} 
-                     onClick={() => adjustCellShading(-2)}
-                     title="Decrease"
-                   >
-                     -
-                   </button>
-                   <input
-                     type="range"
-                     min="0"
-                     max="100"
-                     step="1"
-                     value={cellShadingIntensity}
-                     onChange={(e) => setCellShadingIntensity(parseInt(e.target.value))}
-                   />
-                   <button 
-                     className={styles.sliderButton} 
-                     onClick={() => adjustCellShading(2)}
-                     title="Increase"
-                   >
-                     +
-                   </button>
-                   <span className={styles.sliderValue}>{cellShadingIntensity}%</span>
-                 </div>
-               </div>
+                               <div className={styles.control}>
+                  <label>Intensity:</label>
+                  <div className={styles.sliderContainer}>
+                    <button 
+                      className={styles.sliderButton} 
+                      onClick={() => adjustCellShading(-1)}
+                      title="Decrease"
+                    >
+                      -
+                    </button>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      step="1"
+                      value={cellShadingIntensity}
+                      onChange={(e) => setCellShadingIntensity(parseInt(e.target.value))}
+                    />
+                    <button 
+                      className={styles.sliderButton} 
+                      onClick={() => adjustCellShading(1)}
+                      title="Increase"
+                    >
+                      +
+                    </button>
+                    <span className={styles.sliderValue}>{cellShadingIntensity}%</span>
+                  </div>
+                </div>
               {colorPalette.colors.length > 0 && (
                 <div className={styles.palette}>
                   <h4>Color Palette:</h4>
@@ -1125,6 +1125,8 @@ const Pixelite: React.FC<PixeliteProps> = ({ isOpen, onClose }) => {
                    <option value="16x16">16 × 16</option>
                    <option value="32x32">32 × 32</option>
                    <option value="64x64">64 × 64</option>
+                   <option value="64x128">64 × 128</option>
+                   <option value="128x64">128 × 64</option>
                    <option value="custom">Custom</option>
                  </select>
                </div>
