@@ -95,31 +95,25 @@ const Pixelite: React.FC<PixeliteProps> = ({ isOpen, onClose }) => {
         const detectedSize = detectOptimalGridSize(img.width, img.height);
         setGridSettings(prev => ({ ...prev, size: detectedSize }));
         
-        // Calculate output size to make shorter side 64px
+        // Auto-select output size based on aspect ratio
         const aspectRatio = img.width / img.height;
-        let outputWidth: number;
-        let outputHeight: number;
+        let outputSize: '64x64' | '64x128' | '128x64';
         
-        if (aspectRatio > 1) {
-          // Landscape image - height is shorter side
-          outputHeight = 64;
-          outputWidth = Math.round(64 * aspectRatio);
+        if (aspectRatio > 1.5) {
+          // Very wide landscape - use 128x64
+          outputSize = '128x64';
+        } else if (aspectRatio < 0.67) {
+          // Very tall portrait - use 64x128
+          outputSize = '64x128';
         } else {
-          // Portrait or square image - width is shorter side
-          outputWidth = 64;
-          outputHeight = Math.round(64 / aspectRatio);
+          // Square-ish or moderate aspect ratio - use 64x64
+          outputSize = '64x64';
         }
         
-        // Ensure minimum size of 16x16
-        outputWidth = Math.max(16, outputWidth);
-        outputHeight = Math.max(16, outputHeight);
-        
-        // Set custom output size to maintain aspect ratio with shorter side at 64px
+        // Set the appropriate output size
         setOutputSettings(prev => ({
           ...prev,
-          size: 'custom',
-          customWidth: outputWidth,
-          customHeight: outputHeight
+          size: outputSize
         }));
         
         // Extract colors

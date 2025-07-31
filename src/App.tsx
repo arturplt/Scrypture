@@ -541,7 +541,7 @@ function AppContent() {
                 </button>
                 <button 
                   className={styles.secretMenuButton}
-                  onClick={() => setShowSynthesizer(!showSynthesizer)}
+                  onClick={() => setShowSynthesizer(true)}
                   title="8-Bit Synthesizer"
                 >
                   🎵 Synthesizer
@@ -551,22 +551,7 @@ function AppContent() {
           </div>
         </div>
 
-        {/* Synthesizer Container */}
-        {showSynthesizer && (
-          <div style={{
-            position: 'fixed',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            background: 'var(--color-bg-primary)',
-            borderTop: '2px solid var(--color-border-primary)',
-            zIndex: 1000,
-            maxHeight: '50vh',
-            overflow: 'auto'
-          }}>
-            <Synthesizer />
-          </div>
-        )}
+
       </main>
 
       {/* Analytics Dashboard */}
@@ -579,6 +564,12 @@ function AppContent() {
       <Pixelite
         isOpen={showPixelite}
         onClose={() => setShowPixelite(false)}
+      />
+
+      {/* Synthesizer Modal */}
+      <Synthesizer
+        isOpen={showSynthesizer}
+        onClose={() => setShowSynthesizer(false)}
       />
 
       {/* Combination Lock - Expanding from Secret Menu */}

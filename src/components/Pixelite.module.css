@@ -5,62 +5,73 @@
   width: 100vw;
   height: 100vh;
   height: calc(var(--vh, 1vh) * 100);
-  height: calc(var(--mobile-vh, 100vh));
   background: rgba(0, 0, 0, 0.8);
   z-index: 10000;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0;
+  padding: var(--spacing-lg);
   font-family: 'Press Start 2P', monospace;
 }
 
 .modal {
   background: var(--color-bg-primary);
-  border: 4px solid var(--color-accent-gold);
-  border-radius: 0;
-  width: 100vw;
-  height: 100vh;
-  height: calc(var(--vh, 1vh) * 100);
-  height: calc(var(--mobile-vh, 100vh));
+  border: var(--border-width-normal) solid var(--color-border-primary);
+  border-radius: var(--border-radius-md);
+  max-width: 95vw;
+  max-height: 95vh;
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--shadow-button);
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--spacing-md);
+  padding: var(--spacing-lg);
   background: var(--color-bg-secondary);
-  border-bottom: 2px solid var(--color-accent-gold);
+  border-bottom: var(--border-width-thin) solid var(--color-border-primary);
 }
 
 .header h2 {
   margin: 0;
   color: var(--color-accent-gold);
-  font-size: 1rem;
+  font-size: var(--font-size-lg);
   font-weight: normal;
   font-family: 'Press Start 2P', monospace;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
 }
 
 .closeButton {
-  background: none;
-  border: 2px solid var(--color-accent-gold);
-  color: var(--color-accent-gold);
-  font-size: 1.5rem;
-  width: 40px;
-  height: 40px;
+  background: var(--color-urgent);
+  color: var(--color-text-primary);
+  border: var(--border-width-thin) solid var(--color-urgent-border);
+  border-radius: var(--border-radius-sm);
+  width: 32px;
+  height: 32px;
+  font-size: var(--font-size-lg);
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-fast);
   font-family: 'Press Start 2P', monospace;
-  transition: all 0.2s ease;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
 }
 
 .closeButton:hover {
-  background: var(--color-accent-gold);
-  color: var(--color-bg-primary);
+  background: var(--color-urgent-border);
+  transform: scale(1.05);
+}
+
+.closeButton:active {
+  transform: scale(0.95);
 }
 
 .content {
@@ -72,56 +83,61 @@
 .controlsPanel {
   width: 320px;
   background: var(--color-bg-secondary);
-  border-right: 2px solid var(--color-accent-gold);
+  border-right: var(--border-width-thin) solid var(--color-border-primary);
   overflow-y: auto;
-  padding: var(--spacing-md);
+  padding: var(--spacing-lg);
 }
 
 .section {
   margin-bottom: var(--spacing-lg);
   padding: var(--spacing-md);
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: var(--border-radius-sm);
+  background: var(--color-bg-primary);
 }
 
 .section h3 {
   margin: 0 0 var(--spacing-sm) 0;
   color: var(--color-accent-gold);
-  font-size: 0.7rem;
+  font-size: var(--font-size-sm);
   font-weight: normal;
   font-family: 'Press Start 2P', monospace;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: var(--border-width-thin) solid var(--color-border-primary);
   padding-bottom: var(--spacing-xs);
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
 }
 
 .section h4 {
   margin: var(--spacing-sm) 0;
   color: var(--color-text-primary);
-  font-size: 0.6rem;
+  font-size: var(--font-size-xs);
   font-weight: normal;
   font-family: 'Press Start 2P', monospace;
 }
 
 .control {
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xs);
 }
 
 .control label {
-  font-size: 0.6rem;
+  font-size: var(--font-size-xs);
   color: var(--color-text-primary);
   font-weight: normal;
   font-family: 'Press Start 2P', monospace;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
 }
 
 .control input[type="range"] {
   flex: 1;
   height: 6px;
   background: var(--color-bg-primary);
-  border: 1px solid var(--color-border);
-  border-radius: 3px;
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: var(--border-radius-sm);
   outline: none;
   cursor: pointer;
 }
@@ -131,6 +147,7 @@
   width: 16px;
   height: 16px;
   background: var(--color-accent-gold);
+  border: var(--border-width-thin) solid var(--color-border-primary);
   border-radius: 50%;
   cursor: pointer;
 }
@@ -139,16 +156,18 @@
   width: 16px;
   height: 16px;
   background: var(--color-accent-gold);
+  border: var(--border-width-thin) solid var(--color-border-primary);
   border-radius: 50%;
   cursor: pointer;
-  border: none;
 }
 
 .control span {
-  font-size: 0.6rem;
+  font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
   text-align: right;
   font-family: 'Press Start 2P', monospace;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
 }
 
 .sliderContainer {
@@ -159,24 +178,28 @@
 }
 
 .sliderButton {
-  background: var(--color-accent-gold);
-  color: var(--color-bg-primary);
-  border: none;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
   width: 24px;
   height: 24px;
-  font-size: 0.6rem;
+  font-size: var(--font-size-xs);
   font-family: 'Press Start 2P', monospace;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: var(--transition-normal);
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 0;
+  border-radius: var(--border-radius-sm);
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
 }
 
 .sliderButton:hover {
-  background: var(--color-accent-gold-hover);
+  border-color: var(--color-accent-gold);
+  color: var(--color-accent-gold);
   transform: translateY(-1px);
+  box-shadow: 0 0 8px rgba(182, 164, 50, 0.3);
 }
 
 .sliderButton:active {
@@ -184,21 +207,26 @@
 }
 
 .sliderValue {
-  font-size: 0.6rem;
+  font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
   font-family: 'Press Start 2P', monospace;
   min-width: 40px;
   text-align: right;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
 }
 
 .control select {
   background: var(--color-bg-primary);
-  border: 1px solid var(--color-border);
+  border: var(--border-width-thin) solid var(--color-border-primary);
   color: var(--color-text-primary);
   padding: var(--spacing-xs);
   font-family: 'Press Start 2P', monospace;
-  font-size: 0.7rem;
+  font-size: var(--font-size-xs);
   cursor: pointer;
+  border-radius: var(--border-radius-sm);
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
 }
 
 .checkbox {
@@ -216,28 +244,35 @@
 }
 
 .checkbox label {
-  font-size: 0.6rem;
+  font-size: var(--font-size-xs);
   color: var(--color-text-primary);
   cursor: pointer;
   font-family: 'Press Start 2P', monospace;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
 }
 
 .button {
-  background: var(--color-accent-gold);
-  color: var(--color-bg-primary);
-  border: none;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
   padding: var(--spacing-xs) var(--spacing-sm);
   font-family: 'Press Start 2P', monospace;
-  font-size: 0.6rem;
+  font-size: var(--font-size-xs);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: var(--transition-normal);
   margin-bottom: var(--spacing-xs);
   width: 100%;
+  border-radius: var(--border-radius-sm);
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
 }
 
 .button:hover {
-  background: var(--color-accent-gold-hover);
+  border-color: var(--color-accent-gold);
+  color: var(--color-accent-gold);
   transform: translateY(-1px);
+  box-shadow: 0 0 8px rgba(182, 164, 50, 0.3);
 }
 
 .button:active {
@@ -245,18 +280,19 @@
 }
 
 .dropZone {
-  border: 2px dashed var(--color-accent-gold);
-  border-radius: 4px;
+  border: var(--border-width-thin) dashed var(--color-border-primary);
+  border-radius: var(--border-radius-sm);
   padding: var(--spacing-lg);
   text-align: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: var(--transition-normal);
   margin-bottom: var(--spacing-sm);
+  background: var(--color-bg-primary);
 }
 
 .dropZone:hover {
-  border-color: var(--color-accent-gold-hover);
-  background: rgba(255, 215, 0, 0.1);
+  border-color: var(--color-accent-gold);
+  background: rgba(182, 164, 50, 0.1);
 }
 
 .dropZoneContent {
@@ -265,8 +301,10 @@
 
 .dropZoneContent p {
   margin: var(--spacing-xs) 0;
-  font-size: 0.6rem;
+  font-size: var(--font-size-xs);
   font-family: 'Press Start 2P', monospace;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
 }
 
 .imageInfo {
@@ -275,15 +313,17 @@
 
 .imageInfo p {
   margin: var(--spacing-xs) 0;
-  font-size: 0.6rem;
+  font-size: var(--font-size-xs);
   font-family: 'Press Start 2P', monospace;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
 }
 
 .thumbnail {
   max-width: 100%;
   max-height: 100px;
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: var(--border-radius-sm);
   margin-bottom: var(--spacing-sm);
 }
 
@@ -301,14 +341,15 @@
 .colorSwatch {
   width: 100%;
   height: 24px;
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: var(--border-radius-sm);
   cursor: pointer;
-  transition: transform 0.2s ease;
+  transition: var(--transition-normal);
 }
 
 .colorSwatch:hover {
-  transform: scale(1.1);
+  transform: scale(1.05);
+  box-shadow: var(--shadow-button);
 }
 
 .canvasPanel {
