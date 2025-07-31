@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Habit, HabitContextType } from '../types';
 import { habitService } from '../services/habitService';
+import { useUser } from './useUser';
 
 const HabitContext = createContext<HabitContextType | undefined>(undefined);
 
@@ -19,6 +20,7 @@ interface HabitProviderProps {
 export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
   const [habits, setHabits] = useState<Habit[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const { addExperienceWithBobr, addStatRewards } = useUser();
 
   useEffect(() => {
     // Load habits from storage on mount
@@ -93,6 +95,9 @@ export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
   };
 
   const completeHabit = (id: string): boolean => {
+    const habit = habits.find((h) => h.id === id);
+    if (!habit) return false;
+
     const success = habitService.completeHabit(id);
     if (success) {
       // Reload habits from service to get updated streak and bestStreak
@@ -100,6 +105,37 @@ export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
       setHabits(updatedHabits);
       saveHabitsWithFeedback(updatedHabits);
       console.log('Habit completed and auto-saved');
+
+      // Award experience and stat rewards when completing a habit
+      console.log('🎯 Habit completion triggered for habit:', habit);
+      console.log('🎯 Habit statRewards:', habit.statRewards);
+      
+      if (habit.statRewards) {
+        console.log('🎯 Applying stat rewards:', habit.statRewards);
+        
+        // Use addExperienceWithBobr to handle XP + Bóbr evolution
+        const xpAmount = habit.statRewards.xp || 10;
+        console.log('🎯 Adding XP:', xpAmount);
+        addExperienceWithBobr(xpAmount);
+        
+        // Add the specific stat rewards (body, mind, soul)
+        if (habit.statRewards.body || habit.statRewards.mind || habit.statRewards.soul) {
+          console.log('🎯 Adding stat rewards:', {
+            body: habit.statRewards.body,
+            mind: habit.statRewards.mind,
+            soul: habit.statRewards.soul,
+          });
+          addStatRewards({
+            body: habit.statRewards.body,
+            mind: habit.statRewards.mind,
+            soul: habit.statRewards.soul,
+          });
+        }
+      } else {
+        console.log('⚠️  No stat rewards found, applying default XP');
+        // Fallback to base XP if no stat rewards
+        addExperienceWithBobr(10);
+      }
     }
     return success;
   };

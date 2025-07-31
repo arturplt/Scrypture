@@ -21,6 +21,14 @@ export const AchievementNotification: React.FC<AchievementNotificationProps> = (
   // Use 8000 as default only if duration is undefined, but allow 0 to disable
   const effectiveDuration = duration === undefined ? 0 : duration;
 
+  // Scroll to top when achievement notification appears
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  }, []);
+
   useEffect(() => {
     // Don't set up timers if duration is 0, null, or undefined
     if (!effectiveDuration || effectiveDuration <= 0) return;

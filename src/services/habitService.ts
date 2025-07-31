@@ -68,12 +68,8 @@ export const habitService = {
     try {
       console.log('🏪 habitService.addHabit called with:', habit);
       
-      // Check if there are incomplete habits
-      if (this.hasIncompleteHabits()) {
-        const incompleteHabit = this.getFirstIncompleteHabit();
-        console.log('❌ Cannot create new habit - incomplete habit exists:', incompleteHabit?.name);
-        return null;
-      }
+      // Remove the restriction that prevents creating new habits when there are incomplete habits
+      // This was blocking the "start here" functionality
       
       const habits = this.getHabits();
       console.log('📊 Current habits in storage:', habits.length);

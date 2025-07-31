@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Advanced Pixel Grid Converter</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      background: #1a1a1a;
+      color: #fff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      font-size: 16px;
+      overflow-x: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+      padding: 16px;
+      text-align: center;
+      border-bottom: 2px solid #444;
+    }
+
+    .header h1 {
+      margin: 0;
+      color: #d4af37;
+      font-size: 24px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .toolbar {
+      position: sticky;
+      top: 0;
+      background: rgba(42, 42, 42, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      border-bottom: 2px solid #444;
+      z-index: 999;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    .toolbar-group {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      padding: 4px 8px;
+      background: rgba(26, 26, 26, 0.8);
+      border-radius: 6px;
+      border: 1px solid #444;
+    }
+
+    .toolbar button,
+    .toolbar input[type="number"],
+    .toolbar input[type="file"] {
+      padding: 8px 12px;
+      background: #1a1a1a;
+      border: 2px solid #444;
+      color: #d4af37;
+      cursor: pointer;
+      font-size: 14px;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+    }
+
+    .toolbar button:hover {
+      background-color: #333;
+      border-color: #d4af37;
+      transform: translateY(-1px);
+    }
+
+    .toolbar button:active {
+      transform: translateY(0);
+    }
+
+    .toolbar button.primary {
+      background: #d4af37;
+      color: #1a1a1a;
+      font-weight: bold;
+    }
+
+    .toolbar button.primary:hover {
+      background: #f4d03f;
+    }
+
+    .toolbar button.danger {
+      background: #e74c3c;
+      color: white;
+    }
+
+    .toolbar button.danger:hover {
+      background: #c0392b;
+    }
+
+    .main-container {
+      display: flex;
+      gap: 16px;
+      padding: 16px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .canvas-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .canvas-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: rgba(26, 26, 26, 0.8);
+      border-radius: 8px;
+      padding: 16px;
+      border: 1px solid #444;
+    }
+
+    .canvas-box label {
+      margin-bottom: 8px;
+      color: #d4af37;
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .canvas-wrapper {
+      position: relative;
+      border: 2px solid #444;
+      border-radius: 4px;
+      overflow: hidden;
+      background: #000;
+    }
+
+    canvas {
+      display: block;
+      cursor: crosshair;
+    }
+
+    .canvas-controls {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .canvas-controls button {
+      padding: 4px 8px;
+      font-size: 12px;
+      background: #333;
+      border: 1px solid #555;
+      color: #ccc;
+      border-radius: 3px;
+    }
+
+    .info-panel {
+      background: rgba(26, 26, 26, 0.9);
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 16px;
+      border: 1px solid #444;
+      max-width: 1400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .info-item {
+      background: rgba(42, 42, 42, 0.8);
+      padding: 12px;
+      border-radius: 6px;
+      border: 1px solid #555;
+    }
+
+    .info-item h3 {
+      margin: 0 0 8px 0;
+      color: #d4af37;
+      font-size: 14px;
+    }
+
+    .info-item p {
+      margin: 0;
+      color: #ccc;
+      font-size: 12px;
+    }
+
+    .palette {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .palette-color {
+      width: 24px;
+      height: 24px;
+      border: 1px solid #444;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .palette-color:hover {
+      transform: scale(1.2);
+    }
+
+    .thumbnail {
+      width: 80px;
+      height: 80px;
+      border: 2px solid #444;
+      border-radius: 4px;
+      object-fit: cover;
+      margin: 8px;
+    }
+
+    .settings-panel {
+      background: rgba(26, 26, 26, 0.9);
+      border-radius: 8px;
+      padding: 16px;
+      margin: 16px auto;
+      max-width: 1400px;
+      border: 1px solid #444;
+    }
+
+    .settings-toggle {
+      background: none;
+      border: none;
+      color: #d4af37;
+      cursor: pointer;
+      font-size: 14px;
+      text-decoration: underline;
+    }
+
+    .settings-content {
+      display: none;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #444;
+    }
+
+    .settings-content.show {
+      display: block;
+    }
+
+    .zoom-controls {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      z-index: 10;
+    }
+
+    .zoom-controls button {
+      width: 32px;
+      height: 32px;
+      background: rgba(26, 26, 26, 0.9);
+      border: 1px solid #444;
+      color: #d4af37;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .grid-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .grid-coordinates {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.7);
+      background: rgba(0, 0, 0, 0.5);
+      padding: 2px 4px;
+      border-radius: 2px;
+    }
+
+    .snap-indicator {
+      position: absolute;
+      border: 2px solid #00ff00;
+      background: rgba(0, 255, 0, 0.1);
+      pointer-events: none;
+      z-index: 6;
+      animation: snapPulse 1s ease-in-out;
+    }
+
+    @keyframes snapPulse {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 0.8; }
+    }
+
+    .loading {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: #d4af37;
+      padding: 20px;
+      border-radius: 8px;
+      z-index: 1000;
+    }
+
+    .loading.show {
+      display: block;
+    }
+
+    @media (max-width: 768px) {
+      .main-container {
+        flex-direction: column;
+        padding: 8px;
+      }
+      
+      .toolbar {
+        padding: 8px;
+      }
+      
+      .toolbar-group {
+        flex-wrap: wrap;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🎨 Advanced Pixel Grid Converter</h1>
+  </div>
+
+  <div class="toolbar">
+    <div class="toolbar-group">
+      <input type="file" id="imageLoader" accept="image/*" title="Load Image">
+      <button id="resetBtn" class="danger" title="Reset Everything">🔄 Reset</button>
+    </div>
+    
+    <div class="toolbar-group">
+             <button id="gridSizeMinus" title="Decrease Grid Size">-</button>
+       <input type="number" id="gridSize" value="64" min="1" max="100" title="Grid Size">
+       <button id="gridSizePlus" title="Increase Grid Size">+</button>
+      <button id="autoDetectBtn" title="Auto-detect Grid Size">🔍 Auto</button>
+    </div>
+    
+    <div class="toolbar-group">
+      <button id="offsetXMinus" title="Move Grid Left">←</button>
+      <button id="offsetXPlus" title="Move Grid Right">→</button>
+      <button id="offsetYMinus" title="Move Grid Up">↑</button>
+      <button id="offsetYPlus" title="Move Grid Down">↓</button>
+    </div>
+    
+         <div class="toolbar-group">
+       <button id="convertBtn" class="primary" title="Convert to Pixel Art">🧮 Convert</button>
+       <button id="cellShadeBtn" title="Cell Shade (Clean)">🎨 Cell Shade</button>
+       <button id="aggressiveCellShadeBtn" title="Aggressive Cell Shade (Very Clean)">🎨 Aggressive</button>
+       <button id="saveBtn" title="Save as PNG">💾 Save</button>
+       <button id="copyBtn" title="Copy to Clipboard">📋 Copy</button>
+       <button id="preview1x" title="1x Preview">1x</button>
+       <button id="preview2x" title="2x Preview">2x</button>
+     </div>
+    
+    <div class="toolbar-group">
+      <button id="settingsToggle" class="settings-toggle" title="Toggle Settings">⚙️ Settings</button>
+      <button id="livePreviewToggle" title="Toggle Live Preview">👁 Live</button>
+    </div>
+  </div>
+
+  <div class="settings-panel">
+    <button class="settings-toggle" id="settingsToggleBtn">⚙️ Advanced Settings</button>
+    <div class="settings-content" id="settingsContent">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+        <div>
+          <h4>Grid Options</h4>
+          <label><input type="checkbox" id="showCoordinates" checked> Show coordinates</label><br>
+          <label><input type="checkbox" id="snapToGrid" checked> Snap to grid</label><br>
+          <label><input type="checkbox" id="showSnapIndicator" checked> Show snap indicator</label>
+        </div>
+        <div>
+          <h4>Preview Options</h4>
+          <label><input type="checkbox" id="livePreview" checked> Live preview</label><br>
+          <label><input type="checkbox" id="showPalette" checked> Show color palette</label><br>
+          <label><input type="checkbox" id="showThumbnail" checked> Show thumbnail</label>
+        </div>
+        <div>
+          <h4>Zoom Options</h4>
+          <label>Zoom Level: <input type="range" id="zoomLevel" min="0.5" max="3" step="0.1" value="1"></label><br>
+          <label>Zoom Step: <input type="number" id="zoomStep" min="0.1" max="0.5" step="0.1" value="0.2"></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-container">
+    <div class="canvas-section">
+      <div class="canvas-box">
+        <label>📐 Original Image with Grid</label>
+        <div class="canvas-wrapper" id="mainCanvasWrapper">
+          <canvas id="mainCanvas"></canvas>
+          <canvas id="gridOverlay" class="grid-overlay"></canvas>
+          <div class="zoom-controls">
+            <button id="zoomIn" title="Zoom In">+</button>
+            <button id="zoomOut" title="Zoom Out">-</button>
+            <button id="resetZoom" title="Reset Zoom">⌂</button>
+          </div>
+          <div class="grid-coordinates" id="coordinates"></div>
+        </div>
+        <div class="canvas-controls">
+          <button id="panMode">🖐️ Pan</button>
+          <button id="zoomMode">🔍 Zoom</button>
+          <button id="fitToScreen">📐 Fit</button>
+        </div>
+      </div>
+    </div>
+
+         <div class="canvas-section">
+       <div class="canvas-box">
+         <label>🎯 Converted Pixel Art</label>
+         <div class="canvas-wrapper">
+           <canvas id="resultCanvas"></canvas>
+         </div>
+         <div class="canvas-controls">
+           <button id="downloadBtn">💾 Download</button>
+           <button id="copyResultBtn">📋 Copy</button>
+           <button id="previewBtn">👁 Preview</button>
+         </div>
+         <img id="thumbnail" class="thumbnail" style="display: none;">
+       </div>
+       
+       <div class="canvas-box">
+         <label>🔍 Preview (1x/2x)</label>
+         <div class="canvas-wrapper">
+           <canvas id="previewCanvas"></canvas>
+         </div>
+         <div class="canvas-controls">
+           <button id="preview1xBtn">1x</button>
+           <button id="preview2xBtn">2x</button>
+           <button id="preview4xBtn">4x</button>
+         </div>
+       </div>
+     </div>
+  </div>
+
+  <div class="info-panel">
+    <div class="info-grid">
+      <div class="info-item">
+        <h3>📊 Image Info</h3>
+        <p id="imageInfo">No image loaded</p>
+      </div>
+      <div class="info-item">
+        <h3>🔲 Grid Info</h3>
+        <p id="gridInfo">Grid size: 64px</p>
+      </div>
+      <div class="info-item">
+        <h3>📏 Output Size</h3>
+        <p id="outputInfo">No conversion yet</p>
+      </div>
+             <div class="info-item">
+         <h3>🎨 Color Palette</h3>
+         <div id="paletteContainer">
+           <p>No colors extracted</p>
+         </div>
+         <div style="margin-top: 8px;">
+           <button id="extractPaletteBtn" style="font-size: 12px; padding: 4px 8px;">Extract Palette</button>
+           <button id="applyPaletteBtn" style="font-size: 12px; padding: 4px 8px;">Apply to Image</button>
+           <button id="resetCellShadeBtn" style="font-size: 12px; padding: 4px 8px;">Reset to Original</button>
+         </div>
+       </div>
+    </div>
+  </div>
+
+  <div class="loading" id="loading">
+    <div>Processing...</div>
+  </div>
+
+  <script>
+         // Global variables
+     let image = new Image();
+     let offsetX = 0;
+     let offsetY = 0;
+     let zoom = 1;
+     let isPanning = false;
+     let isZooming = false;
+     let lastMousePos = { x: 0, y: 0 };
+     let livePreviewEnabled = true;
+     let extractedColors = [];
+     let snapIndicator = null;
+     let previewScale = 2; // Default to 2x preview
+     let cellShadedImage = null; // Store cell-shaded version
+
+    // DOM elements
+         const elements = {
+       imageLoader: document.getElementById('imageLoader'),
+       gridSize: document.getElementById('gridSize'),
+       gridSizeMinus: document.getElementById('gridSizeMinus'),
+       gridSizePlus: document.getElementById('gridSizePlus'),
+       autoDetectBtn: document.getElementById('autoDetectBtn'),
+       offsetXMinus: document.getElementById('offsetXMinus'),
+       offsetXPlus: document.getElementById('offsetXPlus'),
+       offsetYMinus: document.getElementById('offsetYMinus'),
+       offsetYPlus: document.getElementById('offsetYPlus'),
+       convertBtn: document.getElementById('convertBtn'),
+       cellShadeBtn: document.getElementById('cellShadeBtn'),
+       aggressiveCellShadeBtn: document.getElementById('aggressiveCellShadeBtn'),
+       saveBtn: document.getElementById('saveBtn'),
+       copyBtn: document.getElementById('copyBtn'),
+       preview1x: document.getElementById('preview1x'),
+       preview2x: document.getElementById('preview2x'),
+       extractPaletteBtn: document.getElementById('extractPaletteBtn'),
+       applyPaletteBtn: document.getElementById('applyPaletteBtn'),
+       resetCellShadeBtn: document.getElementById('resetCellShadeBtn'),
+       resetBtn: document.getElementById('resetBtn'),
+       settingsToggleBtn: document.getElementById('settingsToggleBtn'),
+       livePreviewToggle: document.getElementById('livePreviewToggle'),
+       mainCanvas: document.getElementById('mainCanvas'),
+       resultCanvas: document.getElementById('resultCanvas'),
+       previewCanvas: document.getElementById('previewCanvas'),
+       gridOverlay: document.getElementById('gridOverlay'),
+       coordinates: document.getElementById('coordinates'),
+       thumbnail: document.getElementById('thumbnail'),
+       imageInfo: document.getElementById('imageInfo'),
+       gridInfo: document.getElementById('gridInfo'),
+       outputInfo: document.getElementById('outputInfo'),
+       paletteContainer: document.getElementById('paletteContainer'),
+       loading: document.getElementById('loading'),
+       mainCanvasWrapper: document.getElementById('mainCanvasWrapper')
+     };
+
+         const mainCtx = elements.mainCanvas.getContext('2d');
+     const gridCtx = elements.gridOverlay.getContext('2d');
+     const previewCtx = elements.previewCanvas.getContext('2d');
+
+    // Event listeners
+    elements.imageLoader.addEventListener('change', handleImage);
+    elements.gridSize.addEventListener('input', () => {
+      updateGridInfo();
+      if (livePreviewEnabled) drawGrid();
+    });
+    elements.resetBtn.addEventListener('click', resetAll);
+    elements.autoDetectBtn.addEventListener('click', autoDetectGrid);
+         elements.convertBtn.addEventListener('click', convertImage);
+     elements.cellShadeBtn.addEventListener('click', cellShadeImage);
+     elements.aggressiveCellShadeBtn.addEventListener('click', aggressiveCellShade);
+     elements.saveBtn.addEventListener('click', saveImage);
+     elements.copyBtn.addEventListener('click', copyToClipboard);
+     elements.preview1x.addEventListener('click', () => setPreviewScale(1));
+     elements.preview2x.addEventListener('click', () => setPreviewScale(2));
+     elements.extractPaletteBtn.addEventListener('click', extractColors);
+     elements.applyPaletteBtn.addEventListener('click', applyPaletteToImage);
+     elements.resetCellShadeBtn.addEventListener('click', resetCellShade);
+     elements.settingsToggleBtn.addEventListener('click', toggleSettings);
+     elements.livePreviewToggle.addEventListener('click', toggleLivePreview);
+
+    // Grid controls
+    elements.gridSizeMinus.onclick = () => {
+      elements.gridSize.value = Math.max(1, parseInt(elements.gridSize.value) - 1);
+      updateGridInfo();
+      if (livePreviewEnabled) drawGrid();
+    };
+    elements.gridSizePlus.onclick = () => {
+      elements.gridSize.value = Math.min(100, parseInt(elements.gridSize.value) + 1);
+      updateGridInfo();
+      if (livePreviewEnabled) drawGrid();
+    };
+
+    // Offset controls
+    elements.offsetXMinus.onclick = () => { offsetX--; drawGrid(); };
+    elements.offsetXPlus.onclick = () => { offsetX++; drawGrid(); };
+    elements.offsetYMinus.onclick = () => { offsetY--; drawGrid(); };
+    elements.offsetYPlus.onclick = () => { offsetY++; drawGrid(); };
+
+    // Zoom controls
+    elements.zoomIn.addEventListener('click', () => setZoom(zoom + 0.2));
+    elements.zoomOut.addEventListener('click', () => setZoom(zoom - 0.2));
+    elements.resetZoom.addEventListener('click', () => setZoom(1));
+
+    // Canvas interaction
+    elements.mainCanvas.addEventListener('mousedown', startPan);
+    elements.mainCanvas.addEventListener('mousemove', handleMouseMove);
+    elements.mainCanvas.addEventListener('mouseup', stopPan);
+    elements.mainCanvas.addEventListener('wheel', handleWheel);
+
+    function handleImage(e) {
+      showLoading(true);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        image = new Image();
+        image.onload = () => {
+          elements.mainCanvas.width = image.width;
+          elements.mainCanvas.height = image.height;
+          elements.gridOverlay.width = image.width;
+          elements.gridOverlay.height = image.height;
+          
+          mainCtx.drawImage(image, 0, 0);
+          drawGrid();
+          extractColors();
+          updateImageInfo();
+          showLoading(false);
+          
+                   // Auto-detect grid size for sprite work
+         setTimeout(autoDetectGrid, 100);
+        };
+        image.src = event.target.result;
+      };
+      reader.readAsDataURL(e.target.files[0]);
+    }
+
+         function drawGrid() {
+       if (!image.src) return;
+       
+       const size = parseInt(elements.gridSize.value);
+       
+       // Clear and redraw image (use cell-shaded version if available)
+       mainCtx.clearRect(0, 0, elements.mainCanvas.width, elements.mainCanvas.height);
+       if (cellShadedImage && cellShadedImage.src) {
+         mainCtx.drawImage(cellShadedImage, 0, 0);
+       } else {
+         mainCtx.drawImage(image, 0, 0);
+       }
+       
+       // Draw grid overlay
+       gridCtx.clearRect(0, 0, elements.gridOverlay.width, elements.gridOverlay.height);
+       gridCtx.strokeStyle = 'rgba(255,255,255,0.3)';
+       gridCtx.lineWidth = 1;
+       
+       // Vertical lines
+       for (let x = offsetX; x < elements.mainCanvas.width; x += size) {
+         gridCtx.beginPath();
+         gridCtx.moveTo(x, 0);
+         gridCtx.lineTo(x, elements.mainCanvas.height);
+         gridCtx.stroke();
+       }
+       
+       // Horizontal lines
+       for (let y = offsetY; y < elements.mainCanvas.height; y += size) {
+         gridCtx.beginPath();
+         gridCtx.moveTo(0, y);
+         gridCtx.lineTo(elements.mainCanvas.width, y);
+         gridCtx.stroke();
+       }
+       
+       // Draw coordinates if enabled
+       if (document.getElementById('showCoordinates')?.checked) {
+         drawCoordinates();
+       }
+       
+       // Live preview
+       if (livePreviewEnabled) {
+         convertImage();
+         updatePreview();
+       }
+     }
+
+    function drawCoordinates() {
+      const size = parseInt(elements.gridSize.value);
+      gridCtx.fillStyle = 'rgba(255,255,255,0.7)';
+      gridCtx.font = '10px monospace';
+      
+      // Column numbers
+      for (let x = offsetX; x < elements.mainCanvas.width; x += size) {
+        gridCtx.fillText(Math.floor((x - offsetX) / size), x + 2, 12);
+      }
+      
+      // Row numbers
+      for (let y = offsetY; y < elements.mainCanvas.height; y += size) {
+        gridCtx.fillText(Math.floor((y - offsetY) / size), 2, y + 12);
+      }
+    }
+
+    function convertImage() {
+      if (!image.src) return;
+      
+      const size = parseInt(elements.gridSize.value);
+      const outW = Math.floor((elements.mainCanvas.width - offsetX) / size);
+      const outH = Math.floor((elements.mainCanvas.height - offsetY) / size);
+      
+      if (outW <= 0 || outH <= 0) return;
+      
+      elements.resultCanvas.width = outW;
+      elements.resultCanvas.height = outH;
+      
+      const resultCtx = elements.resultCanvas.getContext('2d');
+      const src = mainCtx.getImageData(0, 0, elements.mainCanvas.width, elements.mainCanvas.height);
+      const dest = resultCtx.createImageData(outW, outH);
+      
+      for (let y = 0; y < outH; y++) {
+        for (let x = 0; x < outW; x++) {
+          const px = (y * outW + x) * 4;
+          const sx = offsetX + x * size + Math.floor(size / 2);
+          const sy = offsetY + y * size + Math.floor(size / 2);
+          const srcIdx = (sy * elements.mainCanvas.width + sx) * 4;
+          
+          dest.data[px] = src.data[srcIdx];
+          dest.data[px + 1] = src.data[srcIdx + 1];
+          dest.data[px + 2] = src.data[srcIdx + 2];
+          dest.data[px + 3] = 255;
+        }
+      }
+      
+      resultCtx.putImageData(dest, 0, 0);
+      updateOutputInfo(outW, outH);
+      
+             // Update thumbnail
+       if (document.getElementById('showThumbnail')?.checked) {
+         elements.thumbnail.src = elements.resultCanvas.toDataURL();
+         elements.thumbnail.style.display = 'block';
+       }
+       
+       // Update preview
+       updatePreview();
+    }
+
+         function autoDetectGrid() {
+       if (!image.src) return;
+       
+       showLoading(true);
+       
+       // Improved grid detection using multiple approaches
+       const canvas = document.createElement('canvas');
+       const ctx = canvas.getContext('2d');
+       canvas.width = image.width;
+       canvas.height = image.height;
+       ctx.drawImage(image, 0, 0);
+       
+       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+       const data = imageData.data;
+       
+       // Approach 1: Find horizontal edges
+       const horizontalIntervals = [];
+       for (let y = 0; y < canvas.height; y++) {
+         let lastChange = 0;
+         for (let x = 1; x < canvas.width; x++) {
+           const idx1 = (y * canvas.width + x) * 4;
+           const idx2 = (y * canvas.width + x - 1) * 4;
+           
+           const diff = Math.abs(data[idx1] - data[idx2]) + 
+                       Math.abs(data[idx1 + 1] - data[idx2 + 1]) + 
+                       Math.abs(data[idx1 + 2] - data[idx2 + 2]);
+           
+           if (diff > 25) {
+             if (lastChange > 0) {
+               const interval = x - lastChange;
+               if (interval > 4 && interval < 64) {
+                 horizontalIntervals.push(interval);
+               }
+             }
+             lastChange = x;
+           }
+         }
+       }
+       
+       // Approach 2: Find vertical edges
+       const verticalIntervals = [];
+       for (let x = 0; x < canvas.width; x++) {
+         let lastChange = 0;
+         for (let y = 1; y < canvas.height; y++) {
+           const idx1 = (y * canvas.width + x) * 4;
+           const idx2 = ((y - 1) * canvas.width + x) * 4;
+           
+           const diff = Math.abs(data[idx1] - data[idx2]) + 
+                       Math.abs(data[idx1 + 1] - data[idx2 + 1]) + 
+                       Math.abs(data[idx1 + 2] - data[idx2 + 2]);
+           
+           if (diff > 25) {
+             if (lastChange > 0) {
+               const interval = y - lastChange;
+               if (interval > 4 && interval < 64) {
+                 verticalIntervals.push(interval);
+               }
+             }
+             lastChange = y;
+           }
+         }
+       }
+       
+       // Combine both approaches
+       const allIntervals = [...horizontalIntervals, ...verticalIntervals];
+       
+       // Count intervals and find the most common
+       const intervalCounts = {};
+       allIntervals.forEach(interval => {
+         intervalCounts[interval] = (intervalCounts[interval] || 0) + 1;
+       });
+       
+               let bestInterval = 64; // default to 64px for sprite work
+        let maxCount = 0;
+        
+        // Look for common sprite grid sizes
+        const commonSizes = [16, 32, 64];
+       
+       // First check for common sizes
+       for (const size of commonSizes) {
+         const count = intervalCounts[size] || 0;
+         if (count > maxCount) {
+           maxCount = count;
+           bestInterval = size;
+         }
+       }
+       
+       // If no common size found, use the most frequent interval
+       if (maxCount === 0) {
+         Object.keys(intervalCounts).forEach(interval => {
+           const count = intervalCounts[interval];
+           if (count > maxCount && interval > 4 && interval < 64) {
+             maxCount = count;
+             bestInterval = parseInt(interval);
+           }
+         });
+       }
+       
+               // Ensure we have a reasonable value for sprite work
+        if (bestInterval < 8 || bestInterval > 128) {
+          bestInterval = 64;
+        }
+       
+       elements.gridSize.value = bestInterval;
+       updateGridInfo();
+       drawGrid();
+       showLoading(false);
+       
+       showNotification(`Auto-detected grid size: ${bestInterval}px`);
+     }
+
+         function extractColors() {
+       if (!image.src) return;
+       
+       showLoading(true);
+       
+       const canvas = document.createElement('canvas');
+       const ctx = canvas.getContext('2d');
+       canvas.width = image.width;
+       canvas.height = image.height;
+       ctx.drawImage(image, 0, 0);
+       
+       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+       const data = imageData.data;
+       const colorMap = new Map();
+       
+       // Sample colors (every 3rd pixel for better coverage)
+       for (let i = 0; i < data.length; i += 12) {
+         const r = data[i];
+         const g = data[i + 1];
+         const b = data[i + 2];
+         const a = data[i + 3];
+         
+         if (a > 128) { // Only consider non-transparent pixels
+           // Quantize colors to reduce noise (group similar colors)
+           const quantizedR = Math.round(r / 32) * 32;
+           const quantizedG = Math.round(g / 32) * 32;
+           const quantizedB = Math.round(b / 32) * 32;
+           
+           const colorKey = `${quantizedR},${quantizedG},${quantizedB}`;
+           colorMap.set(colorKey, (colorMap.get(colorKey) || 0) + 1);
+         }
+       }
+       
+       // Sort by frequency and take top 16
+       let sortedColors = Array.from(colorMap.entries())
+         .sort((a, b) => b[1] - a[1])
+         .slice(0, 24) // Get more colors initially
+         .map(([colorKey]) => colorKey.split(',').map(Number));
+       
+       // Filter out very similar colors
+       const filteredColors = [];
+       for (const color of sortedColors) {
+         let isUnique = true;
+         for (const existingColor of filteredColors) {
+           if (colorDistance(color, existingColor) < 50) { // Minimum distance threshold
+             isUnique = false;
+             break;
+           }
+         }
+         if (isUnique && filteredColors.length < 16) {
+           filteredColors.push(color);
+         }
+       }
+       
+       extractedColors = filteredColors;
+       updatePalette();
+       showLoading(false);
+       showNotification(`Extracted ${filteredColors.length} unique colors`);
+     }
+     
+     function applyPaletteToImage() {
+       if (!image.src || extractedColors.length === 0) {
+         showNotification('Please extract colors first', 'error');
+         return;
+       }
+       
+       showLoading(true);
+       
+       const canvas = document.createElement('canvas');
+       const ctx = canvas.getContext('2d');
+       canvas.width = image.width;
+       canvas.height = image.height;
+       ctx.drawImage(image, 0, 0);
+       
+       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+       const data = imageData.data;
+       
+       // Apply palette to each pixel with stronger quantization
+       for (let i = 0; i < data.length; i += 4) {
+         const r = data[i];
+         const g = data[i + 1];
+         const b = data[i + 2];
+         const a = data[i + 3];
+         
+         if (a > 128) {
+           // Find closest color in palette
+           const closestColor = findClosestColor([r, g, b], extractedColors);
+           data[i] = closestColor[0];
+           data[i + 1] = closestColor[1];
+           data[i + 2] = closestColor[2];
+         }
+       }
+       
+       ctx.putImageData(imageData, 0, 0);
+       
+       // Create new image from cell-shaded canvas
+       cellShadedImage = new Image();
+       cellShadedImage.onload = () => {
+         // Redraw with cell-shaded image
+         mainCtx.clearRect(0, 0, elements.mainCanvas.width, elements.mainCanvas.height);
+         mainCtx.drawImage(cellShadedImage, 0, 0);
+         drawGrid();
+         convertImage(); // Convert to pixel art
+         updatePreview(); // Update preview
+         showLoading(false);
+         showNotification('Applied palette to image and updated preview');
+       };
+       cellShadedImage.src = canvas.toDataURL();
+     }
+     
+     function findClosestColor(targetColor, palette) {
+       let minDistance = Infinity;
+       let closestColor = palette[0];
+       
+       for (const color of palette) {
+         const distance = colorDistance(targetColor, color);
+         if (distance < minDistance) {
+           minDistance = distance;
+           closestColor = color;
+         }
+       }
+       
+       return closestColor;
+     }
+     
+     function colorDistance(color1, color2) {
+       // Use perceptual color distance (CIE76)
+       const r1 = color1[0], g1 = color1[1], b1 = color1[2];
+       const r2 = color2[0], g2 = color2[1], b2 = color2[2];
+       
+       return Math.sqrt(
+         Math.pow(r1 - r2, 2) + 
+         Math.pow(g1 - g2, 2) + 
+         Math.pow(b1 - b2, 2)
+       );
+     }
+     
+     function cellShadeImage() {
+       if (!image.src) {
+         showNotification('Please load an image first', 'error');
+         return;
+       }
+       
+       showLoading(true);
+       
+       // First extract colors if not already done
+       if (extractedColors.length === 0) {
+         extractColors();
+       }
+       
+       // Apply palette to create cell-shaded version
+       setTimeout(() => {
+         applyPaletteToImage();
+         setTimeout(() => {
+           // Convert the cell-shaded image
+           convertImage();
+           showNotification('Cell-shaded conversion complete');
+         }, 500);
+       }, 500);
+     }
+     
+     function aggressiveCellShade() {
+       if (!image.src) {
+         showNotification('Please load an image first', 'error');
+         return;
+       }
+       
+       showLoading(true);
+       
+       const canvas = document.createElement('canvas');
+       const ctx = canvas.getContext('2d');
+       canvas.width = image.width;
+       canvas.height = image.height;
+       ctx.drawImage(image, 0, 0);
+       
+       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+       const data = imageData.data;
+       
+       // Create a very limited palette (4-8 colors) for aggressive cell-shading
+       const limitedPalette = createLimitedPalette(data);
+       
+       // Apply the limited palette
+       for (let i = 0; i < data.length; i += 4) {
+         const r = data[i];
+         const g = data[i + 1];
+         const b = data[i + 2];
+         const a = data[i + 3];
+         
+         if (a > 128) {
+           const closestColor = findClosestColor([r, g, b], limitedPalette);
+           data[i] = closestColor[0];
+           data[i + 1] = closestColor[1];
+           data[i + 2] = closestColor[2];
+         }
+       }
+       
+       ctx.putImageData(imageData, 0, 0);
+       
+       // Create new image from aggressive cell-shaded canvas
+       cellShadedImage = new Image();
+       cellShadedImage.onload = () => {
+         mainCtx.clearRect(0, 0, elements.mainCanvas.width, elements.mainCanvas.height);
+         mainCtx.drawImage(cellShadedImage, 0, 0);
+         drawGrid();
+         convertImage();
+         showLoading(false);
+         showNotification('Aggressive cell-shading complete');
+       };
+       cellShadedImage.src = canvas.toDataURL();
+     }
+     
+     function createLimitedPalette(data) {
+       const colorMap = new Map();
+       
+       // Sample colors with heavy quantization
+       for (let i = 0; i < data.length; i += 16) {
+         const r = data[i];
+         const g = data[i + 1];
+         const b = data[i + 2];
+         const a = data[i + 3];
+         
+         if (a > 128) {
+           // Very aggressive quantization (8 levels per channel)
+           const quantizedR = Math.round(r / 64) * 64;
+           const quantizedG = Math.round(g / 64) * 64;
+           const quantizedB = Math.round(b / 64) * 64;
+           
+           const colorKey = `${quantizedR},${quantizedG},${quantizedB}`;
+           colorMap.set(colorKey, (colorMap.get(colorKey) || 0) + 1);
+         }
+       }
+       
+       // Get top 6-8 colors
+       const sortedColors = Array.from(colorMap.entries())
+         .sort((a, b) => b[1] - a[1])
+         .slice(0, 8)
+         .map(([colorKey]) => colorKey.split(',').map(Number));
+       
+       return sortedColors;
+     }
+     
+     function resetCellShade() {
+       cellShadedImage = null;
+       drawGrid();
+       convertImage();
+       updatePreview();
+       showNotification('Reset to original image');
+     }
+
+         function updatePalette() {
+       const paletteHtml = extractedColors.map((color, index) => 
+         `<div class="palette-color" style="background: rgb(${color[0]}, ${color[1]}, ${color[2]})" 
+               title="RGB(${color[0]}, ${color[1]}, ${color[2]}) - Color ${index + 1}"></div>`
+       ).join('');
+       
+       elements.paletteContainer.innerHTML = paletteHtml || '<p>No colors extracted</p>';
+     }
+
+    function setZoom(newZoom) {
+      zoom = Math.max(0.5, Math.min(3, newZoom));
+      elements.mainCanvas.style.transform = `scale(${zoom})`;
+      elements.gridOverlay.style.transform = `scale(${zoom})`;
+      elements.mainCanvasWrapper.style.transformOrigin = 'top left';
+    }
+
+    function startPan(e) {
+      if (e.button === 0) { // Left click
+        isPanning = true;
+        lastMousePos = { x: e.clientX, y: e.clientY };
+        elements.mainCanvas.style.cursor = 'grabbing';
+      }
+    }
+
+    function handleMouseMove(e) {
+      if (isPanning) {
+        const deltaX = e.clientX - lastMousePos.x;
+        const deltaY = e.clientY - lastMousePos.y;
+        
+        offsetX -= deltaX / zoom;
+        offsetY -= deltaY / zoom;
+        
+        lastMousePos = { x: e.clientX, y: e.clientY };
+        drawGrid();
+      }
+      
+      // Update coordinates display
+      const rect = elements.mainCanvas.getBoundingClientRect();
+      const x = Math.floor((e.clientX - rect.left) / zoom);
+      const y = Math.floor((e.clientY - rect.top) / zoom);
+      elements.coordinates.textContent = `(${x}, ${y})`;
+    }
+
+    function stopPan() {
+      isPanning = false;
+      elements.mainCanvas.style.cursor = 'crosshair';
+    }
+
+    function handleWheel(e) {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? -0.1 : 0.1;
+      setZoom(zoom + delta);
+    }
+
+    function saveImage() {
+      elements.resultCanvas.toBlob(blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'pixel-art.png';
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+    }
+
+    async function copyToClipboard() {
+      try {
+        const blob = await new Promise(resolve => elements.resultCanvas.toBlob(resolve));
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            'image/png': blob
+          })
+        ]);
+        showNotification('Image copied to clipboard!');
+      } catch (err) {
+        showNotification('Failed to copy to clipboard', 'error');
+      }
+    }
+
+              function resetAll() {
+       image = new Image();
+       cellShadedImage = null;
+       offsetX = 0;
+       offsetY = 0;
+       zoom = 1;
+       previewScale = 2;
+       extractedColors = [];
+       elements.gridSize.value = 64;
+       elements.imageLoader.value = '';
+       elements.mainCanvas.width = 400;
+       elements.mainCanvas.height = 300;
+       elements.gridOverlay.width = 400;
+       elements.gridOverlay.height = 300;
+       elements.resultCanvas.width = 400;
+       elements.resultCanvas.height = 300;
+       elements.previewCanvas.width = 800;
+       elements.previewCanvas.height = 600;
+       
+       mainCtx.clearRect(0, 0, elements.mainCanvas.width, elements.mainCanvas.height);
+       gridCtx.clearRect(0, 0, elements.gridOverlay.width, elements.gridOverlay.height);
+       previewCtx.clearRect(0, 0, elements.previewCanvas.width, elements.previewCanvas.height);
+       
+       updateImageInfo();
+       updateGridInfo();
+       updateOutputInfo();
+       elements.paletteContainer.innerHTML = '<p>No colors extracted</p>';
+       elements.thumbnail.style.display = 'none';
+       
+       setZoom(1);
+       setPreviewScale(2);
+     }
+
+    function toggleSettings() {
+      const content = document.getElementById('settingsContent');
+      content.classList.toggle('show');
+    }
+
+    function toggleLivePreview() {
+      livePreviewEnabled = !livePreviewEnabled;
+      elements.livePreviewToggle.textContent = livePreviewEnabled ? '👁 Live' : '👁 Off';
+      if (livePreviewEnabled) {
+        convertImage();
+      }
+    }
+
+    function updateImageInfo() {
+      if (image.src) {
+        elements.imageInfo.textContent = `Size: ${image.width}×${image.height}px`;
+      } else {
+        elements.imageInfo.textContent = 'No image loaded';
+      }
+    }
+
+    function updateGridInfo() {
+      const size = parseInt(elements.gridSize.value);
+      elements.gridInfo.textContent = `Grid size: ${size}px, Offset: (${offsetX}, ${offsetY})`;
+    }
+
+    function updateOutputInfo(w = 0, h = 0) {
+      if (w && h) {
+        elements.outputInfo.textContent = `Output: ${w}×${h} pixels`;
+      } else {
+        elements.outputInfo.textContent = 'No conversion yet';
+      }
+    }
+
+    function showLoading(show) {
+      elements.loading.classList.toggle('show', show);
+    }
+
+         function setPreviewScale(scale) {
+       previewScale = scale;
+       updatePreview();
+       
+       // Update button states
+       elements.preview1x.style.background = scale === 1 ? '#d4af37' : '#1a1a1a';
+       elements.preview2x.style.background = scale === 2 ? '#d4af37' : '#1a1a1a';
+       
+       showNotification(`Preview scale: ${scale}x`);
+     }
+     
+     function updatePreview() {
+       if (!elements.resultCanvas.width || !elements.resultCanvas.height) return;
+       
+       const scale = previewScale;
+       const width = elements.resultCanvas.width * scale;
+       const height = elements.resultCanvas.height * scale;
+       
+       elements.previewCanvas.width = width;
+       elements.previewCanvas.height = height;
+       
+       // Clear and draw scaled version
+       previewCtx.clearRect(0, 0, width, height);
+       previewCtx.imageSmoothingEnabled = false; // Pixel-perfect scaling
+       previewCtx.drawImage(elements.resultCanvas, 0, 0, width, height);
+     }
+     
+     function showNotification(message, type = 'success') {
+       const notification = document.createElement('div');
+       notification.textContent = message;
+       notification.style.cssText = `
+         position: fixed;
+         top: 20px;
+         right: 20px;
+         background: ${type === 'error' ? '#e74c3c' : '#27ae60'};
+         color: white;
+         padding: 12px 20px;
+         border-radius: 6px;
+         z-index: 1001;
+         animation: slideIn 0.3s ease;
+       `;
+       
+       document.body.appendChild(notification);
+       
+       setTimeout(() => {
+         notification.remove();
+       }, 3000);
+     }
+
+    // Settings event listeners
+    document.getElementById('showCoordinates')?.addEventListener('change', drawGrid);
+    document.getElementById('showPalette')?.addEventListener('change', updatePalette);
+    document.getElementById('showThumbnail')?.addEventListener('change', () => {
+      elements.thumbnail.style.display = 
+        document.getElementById('showThumbnail').checked ? 'block' : 'none';
+    });
+
+    // Initialize
+    resetAll();
+  </script>
+</body>
+</html> 

@@ -4,6 +4,7 @@ import { UserProvider, useUser } from './hooks/useUser';
 import { HabitProvider, useHabits } from './hooks/useHabits';
 import { AchievementProvider, useAchievements } from './hooks/useAchievements';
 import { TutorialProvider, useTutorial } from './hooks/useTutorial';
+import { initializeMobileViewportFix } from './utils/mobileViewportFix';
 import { TaskForm } from './components/TaskForm';
 import { TaskList, TaskListRef } from './components/TaskList';
 import { HabitList } from './components/HabitList';
@@ -22,6 +23,9 @@ import { FirstTaskWizard } from './components/FirstTaskWizard';
 import { TutorialCompletionCelebration } from './components/TutorialCompletionCelebration';
 import WelcomeScreen from './components/WelcomeScreen';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
+import Pixelite from './components/Pixelite';
+import { Synthesizer } from './components/Synthesizer';
+import { CombinationLockModal } from './components/CombinationLockModal';
 
 import { Task, Achievement } from './types';
 import styles from './App.module.css';
@@ -36,14 +40,24 @@ function LevelUpModal({
   level: number;
   onClose: () => void;
 }) {
+  // Scroll to top when level up modal appears
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  }, []);
+
   return (
     <div
       style={{
         position: 'fixed',
         top: 0,
         left: 0,
+        right: 0,
+        bottom: 0,
         width: '100vw',
-        height: '100vh',
+        height: 'calc(var(--vh, 1vh) * 100)',
         background: 'rgba(0,0,0,0.7)',
         zIndex: 9999,
         display: 'flex',
@@ -104,7 +118,7 @@ function SpinnerOverlay() {
         top: 0,
         left: 0,
         width: '100vw',
-        height: '100vh',
+        height: 'calc(var(--vh, 1vh) * 100)',
         background: 'var(--color-bg-primary)',
         zIndex: 10000,
         display: 'flex',
@@ -241,6 +255,11 @@ function AppContent() {
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const [showAchievements, setShowAchievements] = useState(false);
   const [showAnalytics, setShowAnalytics] = useState(false);
+  const [showPixelite, setShowPixelite] = useState(false);
+  const [showSynthesizer, setShowSynthesizer] = useState(false);
+  const [showCombinationLock, setShowCombinationLock] = useState(false);
+  const [isSecretMenuUnlocked, setIsSecretMenuUnlocked] = useState(false);
+  const [isClosingLock, setIsClosingLock] = useState(false);
 
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [achievementNotifications, setAchievementNotifications] = useState<Achievement[]>([]);
@@ -498,6 +517,56 @@ function AppContent() {
         <TaskList ref={taskListRef} onEditTask={handleEditTask} />
         <HabitList />
         <DataManager onDataChange={refreshTasks} />
+        
+        {/* Secret Menu Section */}
+        <div className={styles.secretMenuSection}>
+          <h3 className={styles.secretMenuTitle}>🔐 Secret Menu</h3>
+          <div className={styles.secretMenuButtons}>
+            {!isSecretMenuUnlocked ? (
+              <button 
+                className={styles.secretMenuButton}
+                onClick={() => setShowCombinationLock(true)}
+                title="Enter combination to unlock"
+              >
+                🔒 LOCKED
+              </button>
+            ) : (
+              <>
+                <button 
+                  className={styles.secretMenuButton}
+                  onClick={() => setShowPixelite(true)}
+                  title="Advanced Pixel Grid Converter"
+                >
+                  🎨 Pixelite
+                </button>
+                <button 
+                  className={styles.secretMenuButton}
+                  onClick={() => setShowSynthesizer(!showSynthesizer)}
+                  title="8-Bit Synthesizer"
+                >
+                  🎵 Synthesizer
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Synthesizer Container */}
+        {showSynthesizer && (
+          <div style={{
+            position: 'fixed',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            background: 'var(--color-bg-primary)',
+            borderTop: '2px solid var(--color-border-primary)',
+            zIndex: 1000,
+            maxHeight: '50vh',
+            overflow: 'auto'
+          }}>
+            <Synthesizer />
+          </div>
+        )}
       </main>
 
       {/* Analytics Dashboard */}
@@ -505,6 +574,53 @@ function AppContent() {
         isOpen={showAnalytics}
         onClose={() => setShowAnalytics(false)}
       />
+
+      {/* Pixelite Modal */}
+      <Pixelite
+        isOpen={showPixelite}
+        onClose={() => setShowPixelite(false)}
+      />
+
+      {/* Combination Lock - Expanding from Secret Menu */}
+      {showCombinationLock && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.8)',
+          zIndex: 1000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          animation: isClosingLock ? 'fadeOut 0.3s ease-in' : 'fadeIn 0.3s ease-out'
+        }}>
+          <div style={{
+            animation: isClosingLock ? 'shrinkToCenter 0.3s ease-in' : 'expandFromCenter 0.4s ease-out',
+            transformOrigin: 'center'
+          }}>
+            <CombinationLockModal
+              isOpen={showCombinationLock}
+              onClose={() => {
+                setIsClosingLock(true);
+                setTimeout(() => {
+                  setShowCombinationLock(false);
+                  setIsClosingLock(false);
+                }, 300);
+              }}
+              onUnlock={() => {
+                setIsSecretMenuUnlocked(true);
+                setIsClosingLock(true);
+                setTimeout(() => {
+                  setShowCombinationLock(false);
+                  setIsClosingLock(false);
+                }, 300);
+              }}
+            />
+          </div>
+        </div>
+      )}
 
 
 
@@ -544,6 +660,12 @@ function AppContent() {
 }
 
 function App() {
+  useEffect(() => {
+    // Initialize mobile viewport fix
+    const cleanup = initializeMobileViewportFix();
+    return cleanup;
+  }, []);
+
   return (
     <UserProvider>
       <TutorialProvider>

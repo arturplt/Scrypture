@@ -146,18 +146,26 @@
     /* Use min-height to ensure proper centering on mobile */
     min-height: 100vh;
     min-height: 100dvh; /* Use dynamic viewport height when supported */
+    min-height: calc(var(--vh, 1vh) * 100);
+    min-height: calc(var(--mobile-vh, 100vh));
+    /* Ensure proper positioning on mobile */
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
   }
 
   .modal {
     max-width: 100%;
     max-height: 85vh;
     max-height: 85dvh; /* Use dynamic viewport height when supported */
+    max-height: calc(85 * var(--vh, 1vh));
+    max-height: calc(85 * var(--mobile-vh, 1vh));
     width: 100%;
     margin: 0;
-    /* Ensure modal stays centered even with dynamic viewport */
+    /* Remove conflicting transform that might cause positioning issues */
     position: relative;
-    top: 50%;
-    transform: translateY(-50%);
   }
 
   .header {
@@ -188,16 +196,24 @@
     justify-content: center;
     min-height: 100vh;
     min-height: 100dvh; /* Use dynamic viewport height when supported */
+    min-height: calc(var(--vh, 1vh) * 100);
+    min-height: calc(var(--mobile-vh, 100vh));
+    /* Ensure proper positioning on mobile */
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
   }
 
   .modal {
     max-height: 90vh;
     max-height: 90dvh; /* Use dynamic viewport height when supported */
+    max-height: calc(90 * var(--vh, 1vh));
+    max-height: calc(90 * var(--mobile-vh, 1vh));
     width: calc(100% - var(--spacing-xs) * 2);
-    /* Ensure modal stays centered */
+    /* Remove conflicting transform that might cause positioning issues */
     position: relative;
-    top: 50%;
-    transform: translateY(-50%);
   }
 
   .header {

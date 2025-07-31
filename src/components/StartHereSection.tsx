@@ -38,6 +38,29 @@ export const StartHereSection: React.FC<StartHereSectionProps> = ({ isVisible, o
   const [isSavingProgress, setIsSavingProgress] = useState(false);
   const [isSavingUI, setIsSavingUI] = useState(false);
 
+  // Load saved given tasks and habits from localStorage on mount
+  useEffect(() => {
+    try {
+      // Load given tasks
+      const savedGivenTasks = localStorage.getItem('startHereGivenTasks');
+      if (savedGivenTasks) {
+        const parsedTasks = JSON.parse(savedGivenTasks);
+        setGivenTasks(new Set(parsedTasks));
+        console.log('📋 Loaded given tasks from localStorage:', parsedTasks);
+      }
+
+      // Load given habits
+      const savedGivenHabits = localStorage.getItem('startHereGivenHabits');
+      if (savedGivenHabits) {
+        const parsedHabits = JSON.parse(savedGivenHabits);
+        setGivenHabits(new Set(parsedHabits));
+        console.log('🔄 Loaded given habits from localStorage:', parsedHabits);
+      }
+    } catch (error) {
+      console.error('Error loading saved given tasks/habits:', error);
+    }
+  }, []);
+
   // Helper function to calculate XP based on priority and difficulty
   const calculateXp = (priority: 'low' | 'medium' | 'high', difficulty: number): number => {
     const priorityXp = priority === 'high' ? 15 : priority === 'medium' ? 10 : 5;
@@ -609,6 +632,11 @@ export const StartHereSection: React.FC<StartHereSectionProps> = ({ isVisible, o
       // Mark this task as given
       const taskKey = `${category}_${task.difficulty}`;
       setGivenTasks(prev => new Set([...prev, taskKey]));
+      
+      // Auto-save given tasks
+      setIsSavingProgress(true);
+      localStorage.setItem('startHereGivenTasks', JSON.stringify(Array.from([...givenTasks, taskKey])));
+      setTimeout(() => setIsSavingProgress(false), 300);
     }
   };
 

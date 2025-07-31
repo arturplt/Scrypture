@@ -14,7 +14,7 @@ A fully-featured 8-bit synthesizer available in both React TypeScript and standa
 - **Circle of Fifths**: Interactive music theory exploration
 - **Step Sequencer**: 32-step sequencer with 20 advanced patterns, 8 sequencer-specific presets, 8 basic rhythm presets, 8 rhythm patterns, and 8 Scrypture rhythm patterns
 - **Scrypture Integration**: Game-themed sound presets for achievements and UI feedback
-- **DataManager Integration**: Easy access through the DataManager's Tools section
+- **Secret Menu Integration**: Easy access through the Secret Menu section
 
 ### Technical Features
 - **Dual Implementation**: React TypeScript + Standalone HTML/JavaScript
@@ -66,9 +66,9 @@ The main UI component featuring:
 - Responsive design for all screen sizes
 - Touch and mouse support
 
-#### React Version: `DataManager` Integration
-The synthesizer is integrated into the DataManager component:
-- **Tools Section**: "Show/Hide Synthesizer" button in the DataManager
+#### React Version: `Secret Menu` Integration
+The synthesizer is integrated into the Secret Menu section:
+- **Secret Menu Section**: "🎵 Synthesizer" button in the Secret Menu
 - **Bottom Placement**: Synthesizer appears at the bottom of the page when activated
 - **Seamless Integration**: Maintains the Scrypture design system and styling
 - **Easy Access**: Quick access to the synthesizer without leaving the main app
@@ -428,23 +428,21 @@ function App() {
 - **0-9**: Load sequencer patterns
 - **Mouse**: Click and drag to play keys
 
-#### DataManager Integration
-The synthesizer is now integrated into the DataManager component for easy access:
+#### Secret Menu Integration
+The synthesizer is now integrated into the Secret Menu section for easy access:
 
 ```tsx
-import { DataManager } from './components/DataManager';
+import { App } from './App';
 
-function App() {
+function MainApp() {
   return (
-    <div>
-      <DataManager />
-      {/* Synthesizer can be accessed via the "Show Synthesizer" button */}
-    </div>
+    <App />
+    {/* Synthesizer can be accessed via the "🎵 Synthesizer" button in the Secret Menu */}
   );
 }
 ```
 
-The synthesizer appears at the bottom of the page when activated through the DataManager's Tools section.
+The synthesizer appears at the bottom of the page when activated through the Secret Menu section.
 
 #### Custom Hook Usage
 ```tsx

@@ -12,6 +12,7 @@ A modern, gamified habit and task management application built with React, TypeS
 - **Stat Rewards**: Earn Body, Mind, and Soul stats through habit completion
 - **XP System**: Gain experience points based on task priority and difficulty
 - **Data Persistence**: All data saved to localStorage for offline functionality
+- **Secret Menu**: Password-protected access to advanced tools including 8-Bit Synthesizer and Pixel Grid Converter
 
 ### Habit System
 - **Frequency Options**: Daily, Weekly, Monthly habits
@@ -138,12 +139,15 @@ src/
 │   ├── AchievementCard.tsx     # Individual achievement display
 │   ├── AchievementGrid.tsx     # Achievement grid with filtering
 │   ├── AchievementNotification.tsx # Achievement unlock celebrations
+│   ├── Synthesizer.tsx         # 8-Bit synthesizer component
+│   ├── Pixelite.tsx            # Pixel grid converter
 │   └── ...
 ├── hooks/               # Custom React hooks
 │   ├── useHabits.tsx           # Habit state management
 │   ├── useTasks.tsx            # Task state management
 │   ├── useUser.tsx             # User state management
-│   └── useAchievements.tsx     # Achievement state management
+│   ├── useAchievements.tsx     # Achievement state management
+│   └── useSynthesizer.tsx      # Synthesizer audio logic
 ├── services/            # Business logic services
 │   ├── habitService.ts         # Habit CRUD operations
 │   ├── taskService.ts          # Task CRUD operations
@@ -151,10 +155,14 @@ src/
 │   ├── achievementService.ts   # Achievement logic and checking
 │   └── storageService.ts       # localStorage operations
 ├── types/               # TypeScript type definitions
-│   └── index.ts               # Habit, Task, Achievement interfaces
+│   ├── index.ts               # Habit, Task, Achievement interfaces
+│   └── synthesizer.ts         # Synthesizer type definitions
+├── data/                # Data constants
+│   └── synthesizerData.ts     # Musical data and presets
 └── __tests__/           # Test files
     ├── habit-system-simple.test.tsx
-    └── habit-system.test.tsx
+    ├── habit-system.test.tsx
+    └── Synthesizer.test.tsx
 ```
 
 ## 🎮 Usage Guide
@@ -197,6 +205,21 @@ src/
    - **🗺️ Exploration**: Category and variety achievements
    - **✨ Special**: High-value and legendary achievements
 
+### Secret Menu
+1. **Accessing Tools**: Scroll to the bottom of the page to find the "🔐 Secret Menu" section
+2. **Unlocking**: Click the "🔒 LOCKED" button to open the combination lock
+   - **Combination Code**: 2137
+   - **Default Position**: 2136 (only one number needs to be changed)
+   - **Hint**: Try moving just one number from the default position
+3. **Available Tools** (after unlocking):
+   - **🎨 Pixelite**: Click to open the advanced pixel grid converter for image processing
+   - **🎵 Synthesizer**: Click to toggle the 8-Bit synthesizer at the bottom of the page
+4. **Synthesizer Features**: 
+   - Use keyboard shortcuts (A-K keys) or click/drag on the piano keyboard
+   - Explore chord progressions organized by genre and mood
+   - Create patterns with the step sequencer
+   - Try Scrypture-themed sound presets for achievements and UI feedback
+
 ### Available Achievements
 - **First Steps** 🌱 - Complete your first task
 - **Dam Builder** 🏗️ - Complete 10 tasks  
@@ -213,6 +236,16 @@ src/
 - **Habit Collector** 📚 - Create your first habit
 - **Experience Master** 💎 - Accumulate 1000 total XP
 - **Streak Legend** 🏆 - Achieve a 100-day best streak (LEGENDARY!)
+
+### Secret Menu Tools
+- **🔐 Combination Lock**: Suitcase-style 4-digit combination lock (Code: 2137)
+- **🎨 Pixelite**: Advanced pixel grid converter for image processing
+- **🎵 Synthesizer**: 8-Bit synthesizer with comprehensive musical features including:
+  - Interactive piano keyboard with multiple waveforms
+  - Chord progressions and music theory tools
+  - Step sequencer with 20+ patterns
+  - Scrypture-themed sound presets for achievements and UI feedback
+  - Real-time audio synthesis with anti-clipping protection
 
 ## 🔧 Technical Details
 
@@ -279,6 +312,13 @@ interface AchievementCondition {
 - **Lazy Loading**: Component lazy loading for large lists
 - **Efficient Rendering**: Optimized re-renders with proper dependencies
 - **Memory Management**: Proper cleanup of event listeners and timers
+
+### Audio System
+- **8-Bit Synthesizer**: Web Audio API-based real-time synthesis
+- **Anti-Clipping Protection**: Advanced audio processing with dynamic limiting
+- **Multiple Waveforms**: Sine, Square, Triangle, Sawtooth synthesis
+- **Real-time Effects**: Reverb, LFO, compression, and stereo processing
+- **Scrypture Integration**: Custom sound presets for achievements and UI feedback
 
 ## 🎨 Styling
 
