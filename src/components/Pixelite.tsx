@@ -56,6 +56,9 @@ const Pixelite: React.FC<PixeliteProps> = ({ isOpen, onClose }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isOffsetMode, setIsOffsetMode] = useState(false);
+  const [offsetDragStart, setOffsetDragStart] = useState({ x: 0, y: 0 });
+  const [lastMouseMoveTime, setLastMouseMoveTime] = useState(0);
   const [colorPalette, setColorPalette] = useState<ColorPalette>({
     colors: [],
     dominantColors: []
@@ -211,18 +214,57 @@ const Pixelite: React.FC<PixeliteProps> = ({ isOpen, onClose }) => {
     }
   }, [handleFileLoad]);
 
-  // Mouse event handlers for pan and zoom
+  // Mouse event handlers for pan, zoom, and offset dragging
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    setIsDragging(true);
-    setDragStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
-  }, [pan]);
+    if (isOffsetMode) {
+      // In offset mode, start dragging to adjust grid offset
+      setIsDragging(true);
+      setOffsetDragStart({ 
+        x: e.clientX, 
+        y: e.clientY 
+      });
+    } else {
+      // In normal mode, start panning
+      setIsDragging(true);
+      setDragStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
+    }
+  }, [isOffsetMode, pan.x, pan.y]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    const now = Date.now();
+    
+    // Throttle mouse move events to improve performance (16ms = ~60fps)
+    if (now - lastMouseMoveTime < 16) {
+      return;
+    }
+    setLastMouseMoveTime(now);
+    
     if (isDragging) {
-      setPan({
-        x: e.clientX - dragStart.x,
-        y: e.clientY - dragStart.y
-      });
+      if (isOffsetMode) {
+        // Update grid offset based on drag - reversed for intuitive behavior
+        // When dragging left, offset moves left (negative)
+        const dragDeltaX = e.clientX - offsetDragStart.x;
+        const dragDeltaY = e.clientY - offsetDragStart.y;
+        
+        // Use functional update to avoid stale closure issues
+        setGridSettings(prev => {
+          // Reverse the direction: drag left = offset left, drag right = offset right
+          const newOffsetX = prev.offsetX - dragDeltaX;
+          const newOffsetY = prev.offsetY - dragDeltaY;
+          
+          return {
+            ...prev,
+            offsetX: Math.max(-imageData.width, Math.min(imageData.width, newOffsetX)),
+            offsetY: Math.max(-imageData.height, Math.min(imageData.height, newOffsetY))
+          };
+        });
+      } else {
+        // Update pan position
+        setPan({
+          x: e.clientX - dragStart.x,
+          y: e.clientY - dragStart.y
+        });
+      }
     }
     
     // Update mouse position for coordinates
@@ -233,7 +275,7 @@ const Pixelite: React.FC<PixeliteProps> = ({ isOpen, onClose }) => {
         y: Math.floor((e.clientY - rect.top - pan.y) / zoom)
       });
     }
-  }, [isDragging, dragStart, pan, zoom]);
+  }, [isDragging, isOffsetMode, offsetDragStart, dragStart, pan, zoom, imageData.width, imageData.height, lastMouseMoveTime]);
 
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
@@ -961,17 +1003,25 @@ const Pixelite: React.FC<PixeliteProps> = ({ isOpen, onClose }) => {
                 />
                 <label>Show Coordinates</label>
               </div>
-                             <div className={styles.checkbox}>
-                 <input
-                   type="checkbox"
-                   checked={gridSettings.snapToGrid}
-                   onChange={(e) => setGridSettings(prev => ({ 
-                     ...prev, 
-                     snapToGrid: e.target.checked 
-                   }))}
-                 />
-                 <label>Snap to Grid</label>
-               </div>
+                                           <div className={styles.checkbox}>
+                <input
+                  type="checkbox"
+                  checked={gridSettings.snapToGrid}
+                  onChange={(e) => setGridSettings(prev => ({ 
+                    ...prev, 
+                    snapToGrid: e.target.checked 
+                  }))}
+                />
+                <label>Snap to Grid</label>
+              </div>
+              <div className={styles.checkbox}>
+                <input
+                  type="checkbox"
+                  checked={isOffsetMode}
+                  onChange={(e) => setIsOffsetMode(e.target.checked)}
+                />
+                <label>Drag to Adjust Offset</label>
+              </div>
                                {imageData.url && (
                   <>
                     <button 
@@ -1238,12 +1288,21 @@ const Pixelite: React.FC<PixeliteProps> = ({ isOpen, onClose }) => {
                  onMouseUp={handleMouseUp}
                  style={{
                    transform: `scale(${zoom}) translate(${pan.x / zoom}px, ${pan.y / zoom}px)`,
-                   cursor: isDragging ? 'grabbing' : 'grab'
+                   cursor: isDragging 
+                     ? (isOffsetMode ? 'grabbing' : 'grabbing') 
+                     : (isOffsetMode ? 'move' : 'grab')
                  }}
                />
               {imageData.url && (
                 <div className={styles.coordinates}>
-                  Mouse: ({mousePosition.x}, {mousePosition.y})
+                  <div>Mouse: ({mousePosition.x}, {mousePosition.y})</div>
+                  <div style={{ 
+                    fontSize: '12px', 
+                    color: isOffsetMode ? '#4CAF50' : '#666',
+                    fontWeight: isOffsetMode ? 'bold' : 'normal'
+                  }}>
+                    {isOffsetMode ? '🖱️ Offset Mode - Drag to adjust grid' : '🖱️ Pan Mode - Drag to move view'}
+                  </div>
                 </div>
               )}
             </div>
