@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Track Sequencer Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        .test-section {
+            background-color: #2a2a2a;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        button {
+            background-color: #4ecdc4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45b7aa;
+        }
+        .sequencer-grid {
+            display: grid;
+            grid-template-columns: 100px repeat(16, 1fr);
+            gap: 2px;
+            margin: 20px 0;
+        }
+        .track-header {
+            background-color: #333;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .step-header {
+            background-color: #333;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .step {
+            background-color: #444;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            border: 1px solid #555;
+        }
+        .step.active {
+            background-color: #4ecdc4;
+        }
+        .step.current {
+            border-color: #ff6b6b;
+            border-width: 2px;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .status {
+            background-color: #333;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Multi-Track Sequencer Test</h1>
+    
+    <div class="test-section">
+        <h2>Audio Context Test</h2>
+        <button onclick="testAudioContext()">Test Audio Context</button>
+        <div id="audioStatus" class="status">Audio context status will appear here...</div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Track Management Test</h2>
+        <button onclick="testTrackCreation()">Create Test Tracks</button>
+        <button onclick="testTrackNodes()">Test Track Nodes</button>
+        <div id="trackStatus" class="status">Track status will appear here...</div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Sequencer Test</h2>
+        <div class="controls">
+            <button onclick="playSequencer()">▶️ Play</button>
+            <button onclick="stopSequencer()">⏹️ Stop</button>
+            <button onclick="clearSequencer()">🗑️ Clear</button>
+        </div>
+        
+        <div class="sequencer-grid" id="sequencerGrid">
+            <!-- Sequencer grid will be generated here -->
+        </div>
+        
+        <div id="sequencerStatus" class="status">Sequencer status will appear here...</div>
+    </div>
+
+    <script type="module">
+        // Import the synthesizer hook
+        import { useSynthesizer } from './src/hooks/useSynthesizer.tsx';
+        
+        let synth = null;
+        let sequencerData = {
+            tracks: [
+                { id: 'track-1', name: 'C', frequency: 261.63, sequence: new Array(16).fill(false), color: '#ff6b6b' },
+                { id: 'track-2', name: 'E', frequency: 329.63, sequence: new Array(16).fill(false), color: '#4ecdc4' },
+                { id: 'track-3', name: 'G', frequency: 392.00, sequence: new Array(16).fill(false), color: '#45b7aa' },
+                { id: 'track-4', name: 'A', frequency: 440.00, sequence: new Array(16).fill(false), color: '#96ceb4' }
+            ],
+            currentStep: 0,
+            isPlaying: false,
+            bpm: 120
+        };
+
+        // Initialize synthesizer
+        async function initSynthesizer() {
+            try {
+                // Create a mock React environment
+                const mockReact = {
+                    useState: (initial) => {
+                        let state = initial;
+                        const setState = (newState) => {
+                            state = typeof newState === 'function' ? newState(state) : newState;
+                        };
+                        return [state, setState];
+                    },
+                    useRef: (initial) => ({ current: initial }),
+                    useCallback: (fn) => fn,
+                    useEffect: (fn) => fn()
+                };
+
+                // Mock the synthesizer hook
+                synth = {
+                    state: {
+                        bpm: 120,
+                        steps: 16,
+                        isPlaying: false,
+                        currentStep: 0,
+                        trackState: {
+                            tracks: sequencerData.tracks
+                        }
+                    },
+                    startNote: (freq, element, trackId) => {
+                        console.log('startNote called:', { freq, trackId });
+                        updateStatus('sequencerStatus', `Playing note: ${freq}Hz${trackId ? ` (track: ${trackId})` : ''}`);
+                    },
+                    stopNote: (freq, element) => {
+                        console.log('stopNote called:', { freq });
+                    },
+                    playSequence: () => {
+                        sequencerData.isPlaying = true;
+                        updateStatus('sequencerStatus', 'Sequencer playing...');
+                        playSequencerStep();
+                    },
+                    stopSequence: () => {
+                        sequencerData.isPlaying = false;
+                        updateStatus('sequencerStatus', 'Sequencer stopped');
+                    },
+                    clearSequence: () => {
+                        sequencerData.tracks.forEach(track => {
+                            track.sequence.fill(false);
+                        });
+                        updateStatus('sequencerStatus', 'Sequence cleared');
+                        renderSequencer();
+                    },
+                    testAudio: () => {
+                        console.log('Test audio called');
+                        updateStatus('audioStatus', 'Test audio triggered - check console');
+                    },
+                    debugTrackNodes: () => {
+                        console.log('Debug track nodes called');
+                        updateStatus('trackStatus', 'Track nodes debug triggered - check console');
+                    }
+                };
+
+                updateStatus('audioStatus', 'Synthesizer initialized successfully');
+                renderSequencer();
+            } catch (error) {
+                console.error('Failed to initialize synthesizer:', error);
+                updateStatus('audioStatus', `Failed to initialize: ${error.message}`);
+            }
+        }
+
+        function updateStatus(elementId, message) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = message;
+            }
+        }
+
+        function testAudioContext() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                updateStatus('audioStatus', `Audio context created successfully. State: ${audioContext.state}`);
+                
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume().then(() => {
+                        updateStatus('audioStatus', 'Audio context resumed successfully');
+                    });
+                }
+            } catch (error) {
+                updateStatus('audioStatus', `Audio context error: ${error.message}`);
+            }
+        }
+
+        function testTrackCreation() {
+            if (synth) {
+                synth.debugTrackNodes();
+                updateStatus('trackStatus', 'Track creation test completed - check console');
+            } else {
+                updateStatus('trackStatus', 'Synthesizer not initialized');
+            }
+        }
+
+        function testTrackNodes() {
+            if (synth) {
+                synth.testAudio();
+                updateStatus('trackStatus', 'Track nodes test completed - check console');
+            } else {
+                updateStatus('trackStatus', 'Synthesizer not initialized');
+            }
+        }
+
+        function playSequencer() {
+            if (synth) {
+                synth.playSequence();
+            }
+        }
+
+        function stopSequencer() {
+            if (synth) {
+                synth.stopSequence();
+            }
+        }
+
+        function clearSequencer() {
+            if (synth) {
+                synth.clearSequence();
+            }
+        }
+
+        function playSequencerStep() {
+            if (!sequencerData.isPlaying) return;
+
+            // Play current step
+            sequencerData.tracks.forEach(track => {
+                if (track.sequence[sequencerData.currentStep]) {
+                    synth.startNote(track.frequency, null, track.id);
+                    
+                    // Stop note after a short duration
+                    setTimeout(() => {
+                        synth.stopNote(track.frequency, null);
+                    }, 200);
+                }
+            });
+
+            // Update visual
+            updateCurrentStep();
+
+            // Move to next step
+            sequencerData.currentStep = (sequencerData.currentStep + 1) % 16;
+
+            // Schedule next step
+            const stepTime = (60 / sequencerData.bpm) * 4 / 16 * 1000;
+            setTimeout(playSequencerStep, stepTime);
+        }
+
+        function updateCurrentStep() {
+            const steps = document.querySelectorAll('.step');
+            steps.forEach((step, index) => {
+                step.classList.remove('current');
+                if (index % 16 === sequencerData.currentStep) {
+                    step.classList.add('current');
+                }
+            });
+        }
+
+        function renderSequencer() {
+            const grid = document.getElementById('sequencerGrid');
+            grid.innerHTML = '';
+
+            // Add headers
+            const headerRow = document.createElement('div');
+            headerRow.className = 'track-header';
+            headerRow.textContent = 'Track';
+            grid.appendChild(headerRow);
+
+            for (let i = 0; i < 16; i++) {
+                const stepHeader = document.createElement('div');
+                stepHeader.className = 'step-header';
+                stepHeader.textContent = i + 1;
+                grid.appendChild(stepHeader);
+            }
+
+            // Add tracks
+            sequencerData.tracks.forEach(track => {
+                const trackHeader = document.createElement('div');
+                trackHeader.className = 'track-header';
+                trackHeader.textContent = track.name;
+                trackHeader.style.backgroundColor = track.color;
+                grid.appendChild(trackHeader);
+
+                for (let step = 0; step < 16; step++) {
+                    const stepElement = document.createElement('div');
+                    stepElement.className = `step ${track.sequence[step] ? 'active' : ''}`;
+                    stepElement.onclick = () => {
+                        track.sequence[step] = !track.sequence[step];
+                        stepElement.classList.toggle('active');
+                    };
+                    grid.appendChild(stepElement);
+                }
+            });
+        }
+
+        // Initialize when page loads
+        window.addEventListener('load', initSynthesizer);
+
+        // Make functions globally available
+        window.testAudioContext = testAudioContext;
+        window.testTrackCreation = testTrackCreation;
+        window.testTrackNodes = testTrackNodes;
+        window.playSequencer = playSequencer;
+        window.stopSequencer = stopSequencer;
+        window.clearSequencer = clearSequencer;
+    </script>
+</body>
+</html> 

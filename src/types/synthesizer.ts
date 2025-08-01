@@ -130,6 +130,9 @@ export interface SynthesizerState {
   isBpmSliding: boolean;
   pendingBpmChange: number | null;
   gridAlignment: 'quantize' | 'free';
+  
+  // Track Management
+  trackState: TrackState;
 }
 
 export interface SequencerStep {
@@ -303,11 +306,12 @@ export interface SynthesizerContextType {
   updateState: (updates: Partial<SynthesizerState>) => void;
   
   // Audio functions
-  startNote: (freq: number, element?: HTMLElement | null) => void;
+  startNote: (freq: number, element?: HTMLElement | null, trackId?: string) => void;
   stopNote: (freq: number, element?: HTMLElement | null) => void;
   playChord: (chordName: string) => void;
   playProgression: (progressionName: string) => void;
   loadPreset: (presetName: string) => void;
+  loadTrackPreset: (presetName: string) => void;
   
   // Sequencer functions
   playSequence: () => void;
@@ -357,4 +361,103 @@ export interface SynthesizerContextType {
   handleKeyUp: (event: KeyboardEvent) => void;
   handleMouseDown: (event: MouseEvent) => void;
   handleMouseUp: (event: MouseEvent) => void;
+  
+  // Track Management Functions
+  createTrack: (trackData: Partial<Track>) => Track;
+  updateTrack: (trackId: string, updates: Partial<Track>) => void;
+  deleteTrack: (trackId: string) => void;
+  selectTrack: (trackId: string | null) => void;
+  toggleTrackMute: (trackId: string) => void;
+  toggleTrackSolo: (trackId: string) => void;
+  reorderTracks: (trackIds: string[]) => void;
+  updateTrackSequence: (trackId: string, stepIndex: number, active: boolean) => void;
+  clearTrackSequence: (trackId: string) => void;
+  clearAllTracks: () => void;
+  duplicateTrack: (trackId: string) => void;
+  toggleTrackList: () => void;
+  toggleTrackEditor: () => void;
+  updateMasterVolume: (volume: number) => void;
+  updateMasterPan: (pan: number) => void;
+  getSelectedTrack: () => Track | null;
+  getActiveTracks: () => Track[];
+  getSoloTracks: () => Track[];
+  testAudio: () => void;
+  debugTrackNodes: () => void;
+} 
+
+export interface Track {
+  id: string;
+  name: string;
+  frequency: number;
+  note: string;
+  category: 'melody' | 'bass' | 'rhythm' | 'ambient' | 'fx';
+  instrument: 'sine' | 'square' | 'triangle' | 'sawtooth' | 'noise' | 'custom';
+  volume: number;
+  pan: number;
+  muted: boolean;
+  solo: boolean;
+  effects: TrackEffects;
+  envelope: TrackEnvelope;
+  lfo: TrackLFO;
+  sequence: boolean[];
+  color: string;
+  order: number;
+}
+
+export interface TrackEffects {
+  delay: {
+    enabled: boolean;
+    time: number;
+    feedback: number;
+    mix: number;
+  };
+  chorus: {
+    enabled: boolean;
+    rate: number;
+    depth: number;
+    mix: number;
+  };
+  distortion: {
+    enabled: boolean;
+    amount: number;
+    type: 'soft' | 'hard' | 'bitcrusher';
+  };
+  filter: {
+    enabled: boolean;
+    type: 'lowpass' | 'highpass' | 'bandpass' | 'notch';
+    frequency: number;
+    resonance: number;
+  };
+  compression: {
+    enabled: boolean;
+    threshold: number;
+    ratio: number;
+    attack: number;
+    release: number;
+  };
+}
+
+export interface TrackEnvelope {
+  attack: number;
+  decay: number;
+  sustain: number;
+  release: number;
+}
+
+export interface TrackLFO {
+  enabled: boolean;
+  rate: number;
+  depth: number;
+  target: 'pitch' | 'volume' | 'filter';
+  waveform: 'sine' | 'square' | 'triangle' | 'sawtooth';
+}
+
+export interface TrackState {
+  tracks: Track[];
+  selectedTrackId: string | null;
+  masterVolume: number;
+  masterPan: number;
+  trackOrder: string[];
+  showTrackList: boolean;
+  showTrackEditor: boolean;
 } 

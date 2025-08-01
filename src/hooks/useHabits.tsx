@@ -152,7 +152,6 @@ export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
     deleteHabit,
     completeHabit,
     isSaving,
-    lastSaved: null,
     refreshHabits,
   };
 

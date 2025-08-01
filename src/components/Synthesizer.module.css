@@ -1820,3 +1820,1443 @@
   background: var(--color-urgent);
   box-shadow: 0 0 4px var(--color-urgent-border);
 } 
+
+/* Track Management Styles */
+.trackManagementSection {
+  background: var(--color-bg-secondary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-xl);
+  margin-bottom: var(--spacing-xl);
+  box-shadow: var(--shadow-button);
+}
+
+.trackManagementControls {
+  display: flex;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+  flex-wrap: wrap;
+}
+
+.trackControlBtn {
+  background: var(--color-bg-tertiary);
+  border: var(--border-width-thin) solid var(--color-border-secondary);
+  border-radius: var(--border-radius-sm);
+  padding: var(--spacing-md) var(--spacing-lg);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  font-family: 'Press Start 2P', monospace;
+  font-size: var(--font-size-xs);
+  font-weight: normal;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  box-shadow: var(--shadow-button);
+}
+
+.trackControlBtn:hover {
+  background: var(--color-bg-primary);
+  border-color: var(--color-accent-gold);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-active);
+}
+
+.trackControlBtn.active {
+  background: var(--color-focus);
+  border-color: var(--color-focus-border);
+  box-shadow: var(--shadow-active);
+}
+
+.trackPresetButtons {
+  display: flex;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+  margin-top: var(--spacing-sm);
+  padding-top: var(--spacing-sm);
+  border-top: var(--border-width-thin) solid var(--color-border-secondary);
+}
+
+.trackPresetButtons .trackControlBtn {
+  font-size: var(--font-size-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  min-width: auto;
+  flex: 1;
+  min-width: 120px;
+}
+
+.trackEditor {
+  background: var(--color-bg-tertiary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: var(--border-radius-sm);
+  padding: var(--spacing-xl);
+  margin-top: var(--spacing-xl);
+  box-shadow: var(--shadow-button);
+}
+
+.trackEditor h4 {
+  margin: 0 0 var(--spacing-lg) 0;
+  color: var(--color-accent-gold);
+  font-family: 'Press Start 2P', monospace;
+  font-size: var(--font-size-sm);
+  font-weight: normal;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+}
+
+.trackEditor p {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  margin: 0;
+  font-family: 'Press Start 2P', monospace;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+} 
+
+/* Track Editor Styles */
+.trackEditor {
+  background: var(--color-bg-secondary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: var(--border-radius-md);
+  margin-top: var(--spacing-lg);
+  overflow: hidden;
+}
+
+.trackEditorHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-lg);
+  background: var(--color-bg-tertiary);
+  border-bottom: var(--border-width-thin) solid var(--color-border-primary);
+}
+
+.trackEditorHeader h4 {
+  color: var(--color-accent-gold);
+  margin: 0;
+  font-family: 'Press Start 2P', monospace;
+  font-size: var(--font-size-sm);
+}
+
+.trackEditorContent {
+  padding: var(--spacing-lg);
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.trackBasicSettings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.trackNameSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.trackNameSection label {
+  color: var(--color-text-primary);
+  font-weight: bold;
+  font-size: var(--font-size-sm);
+}
+
+.trackNameInput {
+  background: var(--color-bg-primary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  color: var(--color-text-primary);
+  padding: var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+}
+
+.trackNameInput:focus {
+  outline: none;
+  border-color: var(--color-accent-gold);
+  box-shadow: 0 0 0 2px rgba(182, 164, 50, 0.3);
+}
+
+.trackControls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.trackActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+}
+
+.trackActionBtn {
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-family: inherit;
+}
+
+.trackActionBtn:hover {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-border-secondary);
+}
+
+.trackActionBtn.active {
+  background: var(--color-accent-gold);
+  color: var(--color-bg-primary);
+  border-color: var(--color-accent-gold);
+}
+
+.trackActionBtn.danger {
+  background: var(--color-urgent);
+  border-color: var(--color-urgent-border);
+}
+
+.trackActionBtn.danger:hover {
+  background: #8a4a4a;
+}
+
+.instrumentSettings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.instrumentType,
+.trackCategory {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.instrumentType label,
+.trackCategory label {
+  color: var(--color-text-primary);
+  font-weight: bold;
+  font-size: var(--font-size-sm);
+}
+
+.instrumentSelect,
+.categorySelect {
+  background: var(--color-bg-primary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  color: var(--color-text-primary);
+  padding: var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.instrumentSelect:focus,
+.categorySelect:focus {
+  outline: none;
+  border-color: var(--color-accent-gold);
+  box-shadow: 0 0 0 2px rgba(182, 164, 50, 0.3);
+}
+
+.envelopeSettings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.lfoSettings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.lfoEnable {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.lfoEnable label {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  cursor: pointer;
+}
+
+.lfoEnable input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-accent-gold);
+}
+
+.lfoTarget,
+.lfoWaveform {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.lfoTarget label,
+.lfoWaveform label {
+  color: var(--color-text-primary);
+  font-weight: bold;
+  font-size: var(--font-size-sm);
+}
+
+.lfoTarget select,
+.lfoWaveform select {
+  background: var(--color-bg-primary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  color: var(--color-text-primary);
+  padding: var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.lfoTarget select:focus,
+.lfoWaveform select:focus {
+  outline: none;
+  border-color: var(--color-accent-gold);
+  box-shadow: 0 0 0 2px rgba(182, 164, 50, 0.3);
+}
+
+.effectsSettings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.effectSection {
+  background: var(--color-bg-primary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: var(--border-radius-sm);
+  padding: var(--spacing-md);
+}
+
+.effectHeader {
+  margin-bottom: var(--spacing-md);
+}
+
+.effectHeader label {
+  color: var(--color-text-primary);
+  font-weight: bold;
+  font-size: var(--font-size-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  cursor: pointer;
+}
+
+.effectHeader input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-accent-gold);
+}
+
+.effectControls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.filterType,
+.distortionType {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.filterType label,
+.distortionType label {
+  color: var(--color-text-primary);
+  font-weight: bold;
+  font-size: var(--font-size-sm);
+}
+
+.filterType select,
+.distortionType select {
+  background: var(--color-bg-secondary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  color: var(--color-text-primary);
+  padding: var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.filterType select:focus,
+.distortionType select:focus {
+  outline: none;
+  border-color: var(--color-accent-gold);
+  box-shadow: 0 0 0 2px rgba(182, 164, 50, 0.3);
+}
+
+/* Responsive adjustments for track editor */
+@media (max-width: 768px) {
+  .trackEditorContent {
+    max-height: 300px;
+  }
+  
+  .trackActions {
+    flex-direction: column;
+  }
+  
+  .trackActionBtn {
+    width: 100%;
+    text-align: center;
+  }
+} 
+
+/* Instrument Selector Styles */
+.instrumentSelector {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  max-height: 500px;
+  overflow: hidden;
+}
+
+.instrumentSearch {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.instrumentSearchInput {
+  flex: 1;
+  background: var(--color-bg-primary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  color: var(--color-text-primary);
+  padding: var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+}
+
+.instrumentSearchInput:focus {
+  outline: none;
+  border-color: var(--color-accent-gold);
+  box-shadow: 0 0 0 2px rgba(182, 164, 50, 0.3);
+}
+
+.categoryTabs {
+  display: flex;
+  gap: var(--spacing-sm);
+  overflow-x: auto;
+  padding-bottom: var(--spacing-sm);
+}
+
+.categoryTab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+  background: var(--color-bg-primary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  color: var(--color-text-secondary);
+  padding: var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-family: inherit;
+  font-size: var(--font-size-xs);
+  min-width: 60px;
+  white-space: nowrap;
+}
+
+.categoryTab:hover {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-border-secondary);
+  color: var(--color-text-primary);
+}
+
+.categoryTab.active {
+  background: var(--color-accent-gold);
+  color: var(--color-bg-primary);
+  border-color: var(--color-accent-gold);
+}
+
+.categoryIcon {
+  font-size: var(--font-size-lg);
+}
+
+.categoryName {
+  font-weight: bold;
+}
+
+.instrumentsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+  overflow-y: auto;
+  max-height: 300px;
+  padding-right: var(--spacing-sm);
+}
+
+.instrumentCard {
+  background: var(--color-bg-primary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: var(--border-radius-sm);
+  padding: var(--spacing-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.instrumentCard:hover {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-border-secondary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-button);
+}
+
+.instrumentCard.selected {
+  background: var(--color-accent-gold);
+  color: var(--color-bg-primary);
+  border-color: var(--color-accent-gold);
+}
+
+.instrumentCard.selected .instrumentDescription,
+.instrumentCard.selected .instrumentTag {
+  color: var(--color-bg-primary);
+}
+
+.instrumentCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.instrumentCardHeader h4 {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  font-weight: bold;
+}
+
+.instrumentWaveform {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-xs);
+  font-family: 'Courier New', monospace;
+  text-transform: uppercase;
+}
+
+.instrumentCard.selected .instrumentWaveform {
+  background: var(--color-bg-primary);
+  color: var(--color-accent-gold);
+}
+
+.instrumentDescription {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.instrumentTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.instrumentTag {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-muted);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-xs);
+  border: 1px solid var(--color-border-primary);
+}
+
+.instrumentCard.selected .instrumentTag {
+  background: var(--color-bg-primary);
+  color: var(--color-accent-gold);
+  border-color: var(--color-accent-gold);
+}
+
+/* Responsive adjustments for instrument selector */
+@media (max-width: 768px) {
+  .categoryTabs {
+    flex-wrap: wrap;
+  }
+  
+  .categoryTab {
+    min-width: 50px;
+    padding: var(--spacing-xs);
+  }
+  
+  .instrumentsGrid {
+    grid-template-columns: 1fr;
+    max-height: 250px;
+  }
+  
+  .instrumentCard {
+    padding: var(--spacing-sm);
+  }
+} 
+
+/* Effects Routing Styles */
+.effectsRouting {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.effectsRoutingHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.effectsRoutingHeader h4 {
+  color: var(--color-accent-gold);
+  margin: 0;
+  font-size: var(--font-size-sm);
+}
+
+.effectsChainToggle {
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-family: inherit;
+}
+
+.effectsChainToggle:hover {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-border-secondary);
+}
+
+.tracksEffectsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.trackEffectsCard {
+  background: var(--color-bg-primary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: var(--border-radius-sm);
+  padding: var(--spacing-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.trackEffectsCard:hover {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-border-secondary);
+}
+
+.trackEffectsCard.selected {
+  background: var(--color-accent-gold);
+  color: var(--color-bg-primary);
+  border-color: var(--color-accent-gold);
+}
+
+.trackEffectsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
+}
+
+.trackEffectsHeader h5 {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  font-weight: bold;
+}
+
+.trackColorIndicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border-primary);
+}
+
+.effectsStatus {
+  display: flex;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+.effectStatus {
+  width: 24px;
+  height: 24px;
+  border: 2px solid;
+  border-radius: var(--border-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xs);
+  transition: all var(--transition-fast);
+}
+
+.effectStatus.enabled {
+  background: rgba(255, 255, 255, 0.1);
+  opacity: 1;
+}
+
+.effectStatus.disabled {
+  opacity: 0.3;
+}
+
+.effectsChainEditor {
+  background: var(--color-bg-secondary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: var(--border-radius-sm);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+}
+
+.effectsChainEditor h5 {
+  color: var(--color-accent-gold);
+  margin: 0 0 var(--spacing-md) 0;
+  font-size: var(--font-size-sm);
+}
+
+.effectsChain {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.chainInput,
+.chainOutput {
+  background: var(--color-bg-primary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: var(--border-radius-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  text-align: center;
+  min-width: 60px;
+}
+
+.chainEffect {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.effectNode {
+  background: var(--color-bg-primary);
+  border: 2px solid;
+  border-radius: var(--border-radius-sm);
+  padding: var(--spacing-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+  min-width: 80px;
+  transition: all var(--transition-fast);
+}
+
+.effectNode.enabled {
+  background: rgba(255, 255, 255, 0.1);
+  opacity: 1;
+}
+
+.effectNode.disabled {
+  opacity: 0.5;
+}
+
+.effectIcon {
+  font-size: var(--font-size-lg);
+}
+
+.effectName {
+  font-size: var(--font-size-xs);
+  font-weight: bold;
+  text-align: center;
+}
+
+.effectToggle {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-family: inherit;
+}
+
+.effectToggle:hover {
+  background: var(--color-accent-gold);
+  color: var(--color-bg-primary);
+}
+
+.chainConnection {
+  width: 2px;
+  height: 20px;
+  background: var(--color-border-primary);
+  margin: var(--spacing-xs) 0;
+}
+
+.globalEffectsChain {
+  background: var(--color-bg-secondary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: var(--border-radius-sm);
+  padding: var(--spacing-lg);
+}
+
+.globalEffectsChain h5 {
+  color: var(--color-accent-gold);
+  margin: 0 0 var(--spacing-md) 0;
+  font-size: var(--font-size-sm);
+}
+
+.globalChainVisualization {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.trackChain {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-sm);
+  background: var(--color-bg-primary);
+  border-radius: var(--border-radius-sm);
+}
+
+.trackChainLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  min-width: 120px;
+  font-size: var(--font-size-xs);
+  font-weight: bold;
+}
+
+.trackChainEffects {
+  display: flex;
+  gap: var(--spacing-sm);
+  flex: 1;
+}
+
+.globalEffectNode {
+  width: 20px;
+  height: 20px;
+  border: 2px solid;
+  border-radius: var(--border-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xs);
+  transition: all var(--transition-fast);
+}
+
+.globalEffectNode.enabled {
+  background: rgba(255, 255, 255, 0.1);
+  opacity: 1;
+}
+
+.globalEffectNode.disabled {
+  opacity: 0.3;
+}
+
+/* Responsive adjustments for effects routing */
+@media (max-width: 768px) {
+  .tracksEffectsGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .effectsChain {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .chainEffect {
+    flex-direction: row;
+    justify-content: center;
+  }
+  
+  .chainConnection {
+    width: 20px;
+    height: 2px;
+  }
+  
+  .trackChain {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-sm);
+  }
+  
+  .trackChainLabel {
+    min-width: auto;
+  }
+} 
+
+/* Ambient Presets Styles */
+.ambientPresets {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.ambientPresetsHeader {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.ambientPresetsHeader h4 {
+  color: var(--color-accent-gold);
+  margin: 0;
+  font-size: var(--font-size-sm);
+}
+
+.moodFilter {
+  display: flex;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.moodFilterBtn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  background: var(--color-bg-primary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  color: var(--color-text-secondary);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-family: inherit;
+  font-size: var(--font-size-xs);
+}
+
+.moodFilterBtn:hover {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-border-secondary);
+  color: var(--color-text-primary);
+}
+
+.moodFilterBtn.active {
+  background: var(--color-accent-gold);
+  color: var(--color-bg-primary);
+  border-color: var(--color-accent-gold);
+}
+
+.moodIcon {
+  font-size: var(--font-size-sm);
+}
+
+.moodName {
+  font-weight: bold;
+}
+
+.ambientPresetsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: var(--spacing-md);
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.ambientPresetCard {
+  background: var(--color-bg-primary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: var(--border-radius-sm);
+  padding: var(--spacing-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.ambientPresetCard:hover {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-border-secondary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-button);
+}
+
+.ambientPresetHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ambientPresetHeader h5 {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  font-weight: bold;
+  color: var(--color-text-primary);
+}
+
+.ambientPresetMood {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-muted);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-xs);
+  text-transform: capitalize;
+}
+
+.ambientPresetDescription {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.ambientPresetInfo {
+  display: flex;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.ambientPresetBpm,
+.ambientPresetKey,
+.ambientPresetTracks {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-muted);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-xs);
+  border: 1px solid var(--color-border-primary);
+}
+
+.ambientPresetTracks {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.ambientTrack {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-xs);
+  background: var(--color-bg-secondary);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-xs);
+}
+
+.ambientTrackName {
+  color: var(--color-text-primary);
+  font-weight: bold;
+}
+
+.ambientTrackInstrument {
+  color: var(--color-text-muted);
+  font-family: 'Courier New', monospace;
+  text-transform: uppercase;
+}
+
+/* Responsive adjustments for ambient presets */
+@media (max-width: 768px) {
+  .moodFilter {
+    justify-content: center;
+  }
+  
+  .ambientPresetsGrid {
+    grid-template-columns: 1fr;
+    max-height: 300px;
+  }
+  
+  .ambientPresetInfo {
+    flex-direction: column;
+  }
+}
+
+/* Multi-Track Sequencer Styles */
+.multiTrackSequencer {
+  background: var(--color-bg-secondary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: var(--border-radius-sm);
+  padding: var(--spacing-lg);
+  margin: var(--spacing-md) 0;
+  box-shadow: var(--shadow-button);
+}
+
+.sequencerHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-md);
+  border-bottom: var(--border-width-thin) solid var(--color-border-primary);
+}
+
+.sequencerHeader h3 {
+  margin: 0;
+  color: var(--color-accent-gold);
+  font-size: var(--font-size-sm);
+  font-family: 'Press Start 2P', monospace;
+  font-weight: normal;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+}
+
+.sequencerControls {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+}
+
+.sequencerBtn {
+  background: var(--color-bg-primary);
+  color: var(--color-accent-gold);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: var(--border-radius-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: var(--font-size-xs);
+  font-family: 'Press Start 2P', monospace;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+}
+
+.sequencerBtn:hover {
+  background: var(--color-bg-tertiary);
+  border-color: var(--color-accent-gold);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-active);
+}
+
+.sequencerBtn.active {
+  background: var(--color-accent-gold);
+  color: var(--color-bg-primary);
+  box-shadow: var(--shadow-active);
+}
+
+.sequencerGrid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  max-height: 400px;
+  overflow-y: auto;
+  padding: var(--spacing-md);
+  background: var(--color-bg-tertiary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: var(--border-radius-sm);
+}
+
+.stepNumbers {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-sm);
+  position: sticky;
+  top: 0;
+  background: var(--color-bg-primary);
+  padding: var(--spacing-sm) 0;
+  z-index: 10;
+  border-bottom: var(--border-width-thin) solid var(--color-border-primary);
+}
+
+.trackHeader {
+  width: 120px;
+  min-width: 120px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: var(--color-accent-gold);
+  background: var(--color-bg-secondary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: var(--border-radius-sm);
+  margin-right: var(--spacing-sm);
+  font-size: var(--font-size-xs);
+  font-family: 'Press Start 2P', monospace;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+}
+
+.stepNumber {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xs);
+  font-weight: bold;
+  color: var(--color-text-secondary);
+  background: var(--color-bg-primary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: var(--border-radius-sm);
+  transition: all var(--transition-fast);
+  font-family: 'Press Start 2P', monospace;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+}
+
+.stepNumber.currentStep {
+  background: var(--color-accent-gold);
+  color: var(--color-bg-primary);
+  border-color: var(--color-accent-gold);
+  box-shadow: var(--shadow-active);
+  animation: pulse 1s infinite;
+}
+
+.sequencerTrack {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  background: var(--color-bg-primary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: var(--border-radius-sm);
+  transition: all var(--transition-normal);
+}
+
+.sequencerTrack:hover {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-border-secondary);
+  transform: translateX(2px);
+}
+
+.trackControls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 120px;
+  min-width: 120px;
+  padding: var(--spacing-sm);
+  background: var(--color-bg-secondary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: var(--border-radius-sm);
+  margin-right: var(--spacing-sm);
+}
+
+.trackInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex: 1;
+}
+
+.trackColor {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: var(--border-width-thin) solid var(--color-border-primary);
+}
+
+.trackName {
+  font-size: var(--font-size-xs);
+  font-weight: bold;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: 'Press Start 2P', monospace;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+}
+
+.trackActions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.muteBtn, .soloBtn {
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: var(--border-radius-sm);
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-size: var(--font-size-xs);
+  font-family: 'Press Start 2P', monospace;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+}
+
+.muteBtn:hover, .soloBtn:hover {
+  background: var(--color-bg-tertiary);
+  border-color: var(--color-accent-gold);
+  transform: scale(1.1);
+}
+
+.muteBtn.active {
+  background: var(--color-urgent);
+  color: var(--color-text-primary);
+  border-color: var(--color-urgent-border);
+  box-shadow: var(--shadow-active);
+}
+
+.soloBtn.active {
+  background: var(--color-easy);
+  color: var(--color-text-primary);
+  border-color: var(--color-easy-border);
+  box-shadow: var(--shadow-active);
+}
+
+.volumeSlider {
+  width: 40px;
+  height: 4px;
+  background: var(--color-bg-primary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: var(--border-radius-sm);
+  outline: none;
+  cursor: pointer;
+  -webkit-appearance: none;
+}
+
+.volumeSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 8px;
+  height: 8px;
+  background: var(--color-accent-gold);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: var(--shadow-button);
+}
+
+.volumeSlider::-moz-range-thumb {
+  width: 8px;
+  height: 8px;
+  background: var(--color-accent-gold);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+  box-shadow: var(--shadow-button);
+}
+
+.trackSteps {
+  display: flex;
+  gap: var(--spacing-xs);
+  flex: 1;
+}
+
+.step {
+  width: 24px;
+  height: 24px;
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  position: relative;
+  background: var(--color-bg-primary);
+}
+
+.step:hover {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-accent-gold);
+  transform: scale(1.1);
+  z-index: 5;
+}
+
+.step.active {
+  border-color: var(--color-accent-gold);
+  box-shadow: var(--shadow-active);
+  animation: stepGlow 0.3s ease-out;
+}
+
+.step.currentStep {
+  border-color: var(--color-accent-gold);
+  box-shadow: var(--shadow-active);
+  animation: currentStepPulse 1s infinite;
+}
+
+.step.muted {
+  opacity: 0.3;
+  filter: grayscale(1);
+}
+
+@keyframes stepGlow {
+  0% { box-shadow: 0 0 0 var(--color-accent-gold); }
+  50% { box-shadow: 0 0 8px var(--color-accent-gold); }
+  100% { box-shadow: var(--shadow-active); }
+}
+
+@keyframes currentStepPulse {
+  0%, 100% { 
+    box-shadow: var(--shadow-active);
+    transform: scale(1);
+  }
+  50% { 
+    box-shadow: 0 0 12px var(--color-accent-gold);
+    transform: scale(1.05);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .multiTrackSequencer {
+    padding: var(--spacing-md);
+  }
+  
+  .sequencerHeader {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    align-items: flex-start;
+  }
+  
+  .sequencerControls {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .trackControls {
+    width: 100px;
+    min-width: 100px;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+  
+  .trackActions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .volumeSlider {
+    width: 100%;
+  }
+  
+  .step {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .stepNumber {
+    width: 20px;
+    height: 20px;
+    font-size: var(--font-size-xs);
+  }
+  
+  .trackHeader {
+    width: 100px;
+    min-width: 100px;
+  }
+}

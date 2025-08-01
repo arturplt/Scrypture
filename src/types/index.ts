@@ -106,6 +106,7 @@ export interface HabitContextType {
   deleteHabit: (id: string) => void;
   completeHabit: (id: string) => boolean;
   isSaving: boolean;
+  refreshHabits: () => void;
 }
 
 export interface UserContextType {

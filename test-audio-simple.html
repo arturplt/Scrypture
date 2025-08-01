@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Audio Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        button {
+            padding: 15px 30px;
+            margin: 10px;
+            font-size: 16px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border-color: #f5c6cb;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border-color: #c3e6cb;
+        }
+    </style>
+</head>
+<body>
+    <h1>Simple Audio Context Test</h1>
+    
+    <button onclick="testBasicAudio()">Test Basic Audio (440Hz)</button>
+    <button onclick="testSynthesizerAudio()">Test Synthesizer-like Audio</button>
+    <button onclick="checkAudioContext()">Check Audio Context Status</button>
+    
+    <div id="status"></div>
+
+    <script>
+        let audioContext = null;
+        
+        function log(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+            statusDiv.appendChild(div);
+            console.log(message);
+        }
+        
+        function clearLog() {
+            document.getElementById('status').innerHTML = '';
+        }
+        
+        function checkAudioContext() {
+            clearLog();
+            
+            if (!audioContext) {
+                log('No audio context created yet', 'error');
+                return;
+            }
+            
+            log(`Audio context state: ${audioContext.state}`, 'success');
+            log(`Sample rate: ${audioContext.sampleRate}`, 'success');
+            log(`Current time: ${audioContext.currentTime}`, 'success');
+        }
+        
+        function testBasicAudio() {
+            clearLog();
+            
+            try {
+                // Create audio context if it doesn't exist
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    log('Audio context created', 'success');
+                }
+                
+                // Check if context is suspended
+                if (audioContext.state === 'suspended') {
+                    log('Audio context is suspended, resuming...', 'info');
+                    audioContext.resume();
+                }
+                
+                // Create simple oscillator
+                const osc = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+                
+                osc.frequency.value = 440; // A4
+                gain.gain.value = 0.1;
+                
+                // Connect nodes
+                osc.connect(gain);
+                gain.connect(audioContext.destination);
+                
+                // Start and stop
+                osc.start();
+                log('Oscillator started - you should hear a 440Hz tone', 'success');
+                
+                setTimeout(() => {
+                    osc.stop();
+                    log('Oscillator stopped', 'info');
+                }, 2000);
+                
+            } catch (error) {
+                log(`Error: ${error.message}`, 'error');
+            }
+        }
+        
+        function testSynthesizerAudio() {
+            clearLog();
+            
+            try {
+                // Create audio context if it doesn't exist
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    log('Audio context created', 'success');
+                }
+                
+                // Check if context is suspended
+                if (audioContext.state === 'suspended') {
+                    log('Audio context is suspended, resuming...', 'info');
+                    audioContext.resume();
+                }
+                
+                // Create synthesizer-like chain
+                const osc = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+                const filter = audioContext.createBiquadFilter();
+                const masterGain = audioContext.createGain();
+                
+                // Configure nodes
+                osc.frequency.value = 220; // A3
+                osc.type = 'sawtooth';
+                
+                gain.gain.value = 0.3;
+                
+                filter.type = 'lowpass';
+                filter.frequency.value = 1000;
+                filter.Q.value = 2;
+                
+                masterGain.gain.value = 0.5;
+                
+                // Connect chain: osc -> gain -> filter -> masterGain -> destination
+                osc.connect(gain);
+                gain.connect(filter);
+                filter.connect(masterGain);
+                masterGain.connect(audioContext.destination);
+                
+                // Start and stop
+                osc.start();
+                log('Synthesizer audio started - you should hear a filtered sawtooth wave', 'success');
+                
+                setTimeout(() => {
+                    osc.stop();
+                    log('Synthesizer audio stopped', 'info');
+                }, 3000);
+                
+            } catch (error) {
+                log(`Error: ${error.message}`, 'error');
+            }
+        }
+        
+        // Auto-check on load
+        window.addEventListener('load', () => {
+            log('Page loaded. Click buttons to test audio.', 'info');
+        });
+    </script>
+</body>
+</html> 

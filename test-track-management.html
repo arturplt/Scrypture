@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Management Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            margin: 0;
+            padding: 20px;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+        }
+        .test-button {
+            background: linear-gradient(135deg, rgba(100, 150, 255, 0.3) 0%, rgba(100, 150, 255, 0.2) 100%);
+            border: 1px solid rgba(100, 150, 255, 0.5);
+            border-radius: 6px;
+            padding: 10px 16px;
+            color: white;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        .test-button:hover {
+            background: linear-gradient(135deg, rgba(100, 150, 255, 0.4) 0%, rgba(100, 150, 255, 0.3) 100%);
+            transform: translateY(-2px);
+        }
+        .status {
+            background: rgba(0, 255, 0, 0.2);
+            border: 1px solid rgba(0, 255, 0, 0.5);
+            border-radius: 6px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .error {
+            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid rgba(255, 0, 0, 0.5);
+        }
+        .track-info {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🎛️ Track Management System Test</h1>
+        
+        <div class="test-section">
+            <h2>Track Creation & Management</h2>
+            <button class="test-button" onclick="testTrackCreation()">Test Track Creation</button>
+            <button class="test-button" onclick="testTrackUpdate()">Test Track Update</button>
+            <button class="test-button" onclick="testTrackDeletion()">Test Track Deletion</button>
+            <button class="test-button" onclick="testTrackMuteSolo()">Test Mute/Solo</button>
+            <button class="test-button" onclick="testTrackAudio()">Test Audio Routing</button>
+            <div id="trackTestResults"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>Track List Display</h2>
+            <div id="trackListDisplay"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>Audio Context Status</h2>
+            <div id="audioStatus"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import the synthesizer hook and types
+        import { useSynthesizer } from './src/hooks/useSynthesizer.tsx';
+        import { Track } from './src/types/synthesizer.ts';
+
+        let synth = null;
+
+        // Initialize synthesizer
+        function initSynthesizer() {
+            try {
+                synth = useSynthesizer();
+                updateStatus('Synthesizer initialized successfully', 'success');
+                displayTrackList();
+                updateAudioStatus();
+            } catch (error) {
+                updateStatus(`Failed to initialize synthesizer: ${error.message}`, 'error');
+            }
+        }
+
+        // Test functions
+        window.testTrackCreation = function() {
+            if (!synth) {
+                updateStatus('Synthesizer not initialized', 'error');
+                return;
+            }
+
+            try {
+                const newTrack = synth.createTrack({
+                    name: 'Test Melody Track',
+                    frequency: 440,
+                    note: 'A',
+                    category: 'melody',
+                    instrument: 'sine',
+                    volume: 80,
+                    pan: 0
+                });
+
+                updateStatus(`Created track: ${newTrack.name} (ID: ${newTrack.id})`, 'success');
+                displayTrackList();
+            } catch (error) {
+                updateStatus(`Track creation failed: ${error.message}`, 'error');
+            }
+        };
+
+        window.testTrackUpdate = function() {
+            if (!synth || !synth.state.trackState.tracks.length) {
+                updateStatus('No tracks available for update', 'error');
+                return;
+            }
+
+            try {
+                const firstTrack = synth.state.trackState.tracks[0];
+                synth.updateTrack(firstTrack.id, {
+                    volume: 90,
+                    pan: 20,
+                    name: 'Updated Track'
+                });
+
+                updateStatus(`Updated track: ${firstTrack.name}`, 'success');
+                displayTrackList();
+            } catch (error) {
+                updateStatus(`Track update failed: ${error.message}`, 'error');
+            }
+        };
+
+        window.testTrackDeletion = function() {
+            if (!synth || !synth.state.trackState.tracks.length) {
+                updateStatus('No tracks available for deletion', 'error');
+                return;
+            }
+
+            try {
+                const firstTrack = synth.state.trackState.tracks[0];
+                synth.deleteTrack(firstTrack.id);
+
+                updateStatus(`Deleted track: ${firstTrack.name}`, 'success');
+                displayTrackList();
+            } catch (error) {
+                updateStatus(`Track deletion failed: ${error.message}`, 'error');
+            }
+        };
+
+        window.testTrackMuteSolo = function() {
+            if (!synth || !synth.state.trackState.tracks.length) {
+                updateStatus('No tracks available for mute/solo test', 'error');
+                return;
+            }
+
+            try {
+                const firstTrack = synth.state.trackState.tracks[0];
+                synth.toggleTrackMute(firstTrack.id);
+                synth.toggleTrackSolo(firstTrack.id);
+
+                updateStatus(`Toggled mute/solo for track: ${firstTrack.name}`, 'success');
+                displayTrackList();
+            } catch (error) {
+                updateStatus(`Mute/solo test failed: ${error.message}`, 'error');
+            }
+        };
+
+        window.testTrackAudio = function() {
+            if (!synth || !synth.state.trackState.tracks.length) {
+                updateStatus('No tracks available for audio test', 'error');
+                return;
+            }
+
+            try {
+                const firstTrack = synth.state.trackState.tracks[0];
+                synth.startNote(firstTrack.frequency, null, firstTrack.id);
+
+                updateStatus(`Playing note through track: ${firstTrack.name}`, 'success');
+                
+                // Stop the note after 2 seconds
+                setTimeout(() => {
+                    synth.stopNote(firstTrack.frequency);
+                    updateStatus('Note stopped', 'success');
+                }, 2000);
+            } catch (error) {
+                updateStatus(`Audio test failed: ${error.message}`, 'error');
+            }
+        };
+
+        // Helper functions
+        function updateStatus(message, type = 'success') {
+            const resultsDiv = document.getElementById('trackTestResults');
+            const statusDiv = document.createElement('div');
+            statusDiv.className = `status ${type}`;
+            statusDiv.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            resultsDiv.appendChild(statusDiv);
+            
+            // Keep only last 5 messages
+            while (resultsDiv.children.length > 5) {
+                resultsDiv.removeChild(resultsDiv.firstChild);
+            }
+        }
+
+        function displayTrackList() {
+            if (!synth) return;
+
+            const displayDiv = document.getElementById('trackListDisplay');
+            const tracks = synth.state.trackState.tracks;
+            
+            if (tracks.length === 0) {
+                displayDiv.innerHTML = '<p>No tracks available</p>';
+                return;
+            }
+
+            let html = '<h3>Current Tracks:</h3>';
+            tracks.forEach((track, index) => {
+                html += `
+                    <div class="track-info">
+                        <strong>${index + 1}. ${track.name}</strong><br>
+                        ID: ${track.id}<br>
+                        Note: ${track.note} (${track.frequency}Hz)<br>
+                        Category: ${track.category}<br>
+                        Instrument: ${track.instrument}<br>
+                        Volume: ${track.volume}% | Pan: ${track.pan}<br>
+                        Muted: ${track.muted} | Solo: ${track.solo}<br>
+                        Color: <span style="color: ${track.color}">${track.color}</span>
+                    </div>
+                `;
+            });
+            
+            displayDiv.innerHTML = html;
+        }
+
+        function updateAudioStatus() {
+            if (!synth) return;
+
+            const statusDiv = document.getElementById('audioStatus');
+            const audioContext = synth.audioContext;
+            
+            if (audioContext) {
+                statusDiv.innerHTML = `
+                    <div class="status">
+                        <strong>Audio Context Status:</strong> ${audioContext.state}<br>
+                        <strong>Sample Rate:</strong> ${audioContext.sampleRate}Hz<br>
+                        <strong>Current Time:</strong> ${audioContext.currentTime.toFixed(2)}s<br>
+                        <strong>Active Notes:</strong> ${Object.keys(synth.activeNotes).length}<br>
+                        <strong>Track Nodes:</strong> ${synth.state.trackState.tracks.length}
+                    </div>
+                `;
+            } else {
+                statusDiv.innerHTML = '<div class="status error">Audio Context not available</div>';
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            initSynthesizer();
+            
+            // Update status periodically
+            setInterval(updateAudioStatus, 1000);
+        });
+    </script>
+</body>
+</html> 

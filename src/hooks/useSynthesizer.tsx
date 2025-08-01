@@ -3,15 +3,74 @@ import {
   SynthesizerState, 
   SynthesizerContextType, 
   ActiveNote, 
-  WaveformType 
+  WaveformType,
+  Track,
+  TrackState,
+  TrackEffects,
+  TrackEnvelope,
+  TrackLFO
 } from '../types/synthesizer';
-import { CHORDS, CHORD_PROGRESSIONS, PRESETS, NUMBER_KEY_PATTERNS, RHYTHM_PATTERNS, SCRYPTURE_RHYTHM_PATTERNS, SEQUENCER_TRACKS, NOTES } from '../data/synthesizerData';
+import { CHORDS, CHORD_PROGRESSIONS, PRESETS, NUMBER_KEY_PATTERNS, RHYTHM_PATTERNS, SCRYPTURE_RHYTHM_PATTERNS, SEQUENCER_TRACKS, NOTES, TRACK_PRESETS } from '../data/synthesizerData';
 
+// Default track effects
+const defaultTrackEffects: TrackEffects = {
+  delay: {
+    enabled: false,
+    time: 0.3,
+    feedback: 0.3,
+    mix: 0.5
+  },
+  chorus: {
+    enabled: false,
+    rate: 1.5,
+    depth: 0.002,
+    mix: 0.5
+  },
+  distortion: {
+    enabled: false,
+    amount: 0.3,
+    type: 'soft'
+  },
+  filter: {
+    enabled: false,
+    type: 'lowpass',
+    frequency: 2000,
+    resonance: 1
+  },
+  compression: {
+    enabled: false,
+    threshold: -24,
+    ratio: 4,
+    attack: 0.003,
+    release: 0.25
+  }
+};
 
+// Default track envelope
+const defaultTrackEnvelope: TrackEnvelope = {
+  attack: 0.1,
+  decay: 0.3,
+  sustain: 0.5,
+  release: 0.5
+};
+
+// Default track LFO
+const defaultTrackLFO: TrackLFO = {
+  enabled: false,
+  rate: 0,
+  depth: 5,
+  target: 'pitch',
+  waveform: 'sine'
+};
+
+// Create initial tracks - start with empty array for user-created tracks
+const createInitialTracks = (): Track[] => {
+  return [];
+};
 
 const initialState: SynthesizerState = {
   waveform: 'sine',
-  volume: 50, // Increased default volume from 1 to 50 for better initial loudness
+  volume: 80, // Increased default volume for better initial loudness
   attack: 1,
   release: 10,
   detune: 0,
@@ -69,6 +128,17 @@ const initialState: SynthesizerState = {
   isBpmSliding: false,
   pendingBpmChange: null,
   gridAlignment: 'quantize',
+  
+  // Track Management
+  trackState: {
+    tracks: createInitialTracks(),
+    selectedTrackId: null,
+    masterVolume: 100,
+    masterPan: 0,
+    trackOrder: [],
+    showTrackList: false,
+    showTrackEditor: false
+  }
 };
 
 export const useSynthesizer = (): SynthesizerContextType => {
@@ -91,6 +161,19 @@ export const useSynthesizer = (): SynthesizerContextType => {
   const stereoWidthRef = useRef<GainNode | null>(null);
   const panningRef = useRef<StereoPannerNode | null>(null);
   
+  // Track-specific audio nodes
+  const trackNodesRef = useRef<Map<string, {
+    gain: GainNode;
+    pan: StereoPannerNode;
+    filter: BiquadFilterNode;
+    delay: DelayNode;
+    delayGain: GainNode;
+    delayFeedback: GainNode;
+    chorus: GainNode;
+    distortion: WaveShaperNode;
+    compressor: DynamicsCompressorNode;
+  }>>(new Map());
+  
   const activeNotesRef = useRef<Record<string, ActiveNote>>({});
   const sequenceRef = useRef<Record<string, boolean[]>>({});
   const sequenceIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -99,6 +182,215 @@ export const useSynthesizer = (): SynthesizerContextType => {
   const arpeggiatorNotesRef = useRef<number[]>([]);
   const arpeggiatorIndexRef = useRef<number>(0);
   const arpeggiatorDirectionRef = useRef<number>(1);
+
+  // Create track-specific audio nodes
+  const createTrackNodes = useCallback((trackId: string) => {
+    if (!audioContextRef.current) {
+      console.warn(`Cannot create track nodes for ${trackId}: Audio context not available`);
+      return;
+    }
+
+    const context = audioContextRef.current;
+    
+    // Check if track nodes already exist and are from the same context
+    const existingNodes = trackNodesRef.current.get(trackId);
+    if (existingNodes && existingNodes.gain.context === context) {
+      console.log(`Track nodes for ${trackId} already exist and are valid`);
+      return;
+    }
+    
+    // Remove existing nodes if they exist but are from a different context
+    if (existingNodes) {
+      console.log(`Removing existing track nodes for ${trackId} from different context`);
+      removeTrackNodes(trackId);
+    }
+    
+    console.log(`Creating track nodes for ${trackId}`);
+    
+    const trackNodes = {
+      gain: context.createGain(),
+      pan: context.createStereoPanner(),
+      filter: context.createBiquadFilter(),
+      delay: context.createDelay(2.0),
+      delayGain: context.createGain(),
+      delayFeedback: context.createGain(),
+      chorus: context.createGain(),
+      distortion: context.createWaveShaper(),
+      compressor: context.createDynamicsCompressor()
+    };
+
+    // Configure default values
+    trackNodes.gain.gain.value = 1.0;
+    trackNodes.pan.pan.value = 0;
+    trackNodes.filter.type = 'lowpass';
+    trackNodes.filter.frequency.value = 20000;
+    trackNodes.filter.Q.value = 1;
+    trackNodes.delay.delayTime.value = 0.3;
+    trackNodes.delayGain.gain.value = 1.0; // Changed from 0 to 1.0 - delay output should pass through when disabled
+    trackNodes.delayFeedback.gain.value = 0;
+    trackNodes.chorus.gain.value = 1.0; // Changed from 0 to 1.0 - chorus output should pass through when disabled
+    trackNodes.distortion.curve = new Float32Array(44100);
+    trackNodes.compressor.threshold.value = -100;
+    trackNodes.compressor.ratio.value = 1;
+
+    // Connect track audio chain
+    trackNodes.gain.connect(trackNodes.pan);
+    trackNodes.pan.connect(trackNodes.filter);
+    trackNodes.filter.connect(trackNodes.distortion);
+    trackNodes.distortion.connect(trackNodes.compressor);
+    trackNodes.compressor.connect(trackNodes.delay);
+    trackNodes.delay.connect(trackNodes.delayGain);
+    trackNodes.delayGain.connect(trackNodes.delayFeedback);
+    trackNodes.delayFeedback.connect(trackNodes.delay);
+    trackNodes.delayGain.connect(trackNodes.chorus);
+    
+    // Connect to master gain
+    if (masterGainRef.current) {
+      trackNodes.chorus.connect(masterGainRef.current);
+      console.log(`Track ${trackId} connected to master gain successfully`);
+    } else {
+      console.error(`Master gain not available for track ${trackId} - this will prevent audio output`);
+      // Try to connect directly to destination as fallback
+      trackNodes.chorus.connect(context.destination);
+      console.log(`Track ${trackId} connected directly to destination as fallback`);
+    }
+
+    trackNodesRef.current.set(trackId, trackNodes);
+    console.log(`Track nodes for ${trackId} created and stored`);
+  }, []);
+
+  // Remove track-specific audio nodes
+  const removeTrackNodes = useCallback((trackId: string) => {
+    const trackNodes = trackNodesRef.current.get(trackId);
+    if (trackNodes) {
+      // Disconnect all nodes
+      trackNodes.gain.disconnect();
+      trackNodes.pan.disconnect();
+      trackNodes.filter.disconnect();
+      trackNodes.delay.disconnect();
+      trackNodes.delayGain.disconnect();
+      trackNodes.delayFeedback.disconnect();
+      trackNodes.chorus.disconnect();
+      trackNodes.distortion.disconnect();
+      trackNodes.compressor.disconnect();
+      
+      trackNodesRef.current.delete(trackId);
+    }
+  }, []);
+
+
+
+  // Create distortion curve based on type and amount
+  const createDistortionCurve = useCallback((amount: number, type: 'soft' | 'hard' | 'bitcrusher'): Float32Array => {
+    const samples = 44100;
+    const curve = new Float32Array(samples);
+    const deg = Math.PI / 180;
+
+    for (let i = 0; i < samples; i++) {
+      const x = (i * 2) / samples - 1;
+      
+      switch (type) {
+        case 'soft':
+          curve[i] = (Math.PI + amount) * x / (Math.PI + amount * Math.abs(x));
+          break;
+        case 'hard':
+          curve[i] = Math.sign(x) * (1 - Math.exp(-Math.abs(x) * amount));
+          break;
+        case 'bitcrusher':
+          const bits = Math.max(1, Math.floor(16 * (1 - amount)));
+          const levels = Math.pow(2, bits);
+          curve[i] = Math.round(x * levels) / levels;
+          break;
+      }
+    }
+    return curve;
+  }, []);
+
+  // Update track audio parameters
+  const updateTrackAudio = useCallback((trackId: string, track: Track) => {
+    const trackNodes = trackNodesRef.current.get(trackId);
+    if (!trackNodes || !audioContextRef.current) return;
+
+    const context = audioContextRef.current;
+    const currentTime = context.currentTime;
+
+    // Update volume
+    trackNodes.gain.gain.setValueAtTime(track.volume / 100, currentTime);
+    
+    // Update pan
+    trackNodes.pan.pan.setValueAtTime(track.pan / 100, currentTime);
+    
+    // Update filter
+    if (track.effects.filter.enabled) {
+      trackNodes.filter.type = track.effects.filter.type;
+      trackNodes.filter.frequency.setValueAtTime(track.effects.filter.frequency, currentTime);
+      trackNodes.filter.Q.setValueAtTime(track.effects.filter.resonance, currentTime);
+    } else {
+      trackNodes.filter.frequency.setValueAtTime(20000, currentTime);
+      trackNodes.filter.Q.setValueAtTime(0, currentTime);
+    }
+    
+    // Update delay
+    if (track.effects.delay.enabled) {
+      trackNodes.delay.delayTime.setValueAtTime(track.effects.delay.time, currentTime);
+      trackNodes.delayGain.gain.setValueAtTime(track.effects.delay.mix, currentTime);
+      trackNodes.delayFeedback.gain.setValueAtTime(track.effects.delay.feedback, currentTime);
+    } else {
+      trackNodes.delayGain.gain.setValueAtTime(1.0, currentTime); // Changed from 0 to 1.0 - pass through when disabled
+      trackNodes.delayFeedback.gain.setValueAtTime(0, currentTime);
+    }
+    
+    // Update chorus
+    if (track.effects.chorus.enabled) {
+      trackNodes.chorus.gain.setValueAtTime(track.effects.chorus.mix, currentTime);
+    } else {
+      trackNodes.chorus.gain.setValueAtTime(1.0, currentTime); // Changed from 0 to 1.0 - pass through when disabled
+    }
+    
+    // Update distortion
+    if (track.effects.distortion.enabled) {
+      trackNodes.distortion.curve = createDistortionCurve(track.effects.distortion.amount, track.effects.distortion.type);
+    } else {
+      const linearCurve = new Float32Array(44100);
+      for (let i = 0; i < 44100; i++) {
+        const x = (i * 2) / 44100 - 1;
+        linearCurve[i] = x;
+      }
+      trackNodes.distortion.curve = linearCurve;
+    }
+    
+    // Update compression
+    if (track.effects.compression.enabled) {
+      trackNodes.compressor.threshold.setValueAtTime(track.effects.compression.threshold, currentTime);
+      trackNodes.compressor.ratio.setValueAtTime(track.effects.compression.ratio, currentTime);
+      trackNodes.compressor.attack.setValueAtTime(track.effects.compression.attack, currentTime);
+      trackNodes.compressor.release.setValueAtTime(track.effects.compression.release, currentTime);
+    } else {
+      trackNodes.compressor.threshold.setValueAtTime(-100, currentTime);
+      trackNodes.compressor.ratio.setValueAtTime(1, currentTime);
+      trackNodes.compressor.attack.setValueAtTime(0.001, currentTime);
+      trackNodes.compressor.release.setValueAtTime(0.001, currentTime);
+    }
+  }, [createDistortionCurve]);
+
+  // Recreate all track nodes (useful when audio context changes)
+  const recreateAllTrackNodes = useCallback(() => {
+    if (!audioContextRef.current) return;
+    
+    // Get all track IDs before clearing
+    const trackIds = Array.from(trackNodesRef.current.keys());
+    
+    // Clear all existing track nodes
+    trackIds.forEach(trackId => {
+      removeTrackNodes(trackId);
+    });
+    
+    // Recreate track nodes for all tracks
+    state.trackState.tracks.forEach(track => {
+      createTrackNodes(track.id);
+      updateTrackAudio(track.id, track);
+    });
+  }, [state.trackState.tracks, createTrackNodes, updateTrackAudio, removeTrackNodes]);
 
   // Initialize audio context and nodes
   useEffect(() => {
@@ -150,6 +442,9 @@ export const useSynthesizer = (): SynthesizerContextType => {
         masterGain.connect(limiter);
         limiter.connect(audioContext.destination);
         masterGain.gain.value = state.volume / 100;
+        
+        console.log('Audio chain connected: masterGain -> limiter -> destination');
+        console.log('Master gain value:', masterGain.gain.value);
 
         // Main audio path with effects (effects will be bypassed when disabled)
         dryGain.connect(filter);
@@ -199,13 +494,16 @@ export const useSynthesizer = (): SynthesizerContextType => {
         distortionRef.current = distortion;
         filterRef.current = filter;
         compressorRef.current = compressor;
+        
+        // Clear any existing track nodes since they're from the old context
+        trackNodesRef.current.clear();
         stereoWidthRef.current = stereoWidth;
         panningRef.current = panning;
 
-        // Initialize sequence
-        SEQUENCER_TRACKS.forEach(track => {
-          sequenceRef.current[track.note] = new Array(32).fill(false);
-        });
+
+
+        // Initialize sequence - now handled by track management system
+        // Each track has its own sequence property
       } catch (error) {
         console.error('Failed to initialize audio context:', error);
       }
@@ -270,12 +568,31 @@ export const useSynthesizer = (): SynthesizerContextType => {
       delayRef.current.delayTime.setValueAtTime(state.delayTime, audioContextRef.current!.currentTime);
     }
     if (delayGainRef.current) {
-      delayGainRef.current.gain.setValueAtTime(state.delayMix, audioContextRef.current!.currentTime);
+      if (state.delayEnabled) {
+        delayGainRef.current.gain.setValueAtTime(state.delayMix, audioContextRef.current!.currentTime);
+      } else {
+        delayGainRef.current.gain.setValueAtTime(0, audioContextRef.current!.currentTime);
+      }
     }
     if (delayFeedbackRef.current) {
-      delayFeedbackRef.current.gain.setValueAtTime(state.delayFeedback, audioContextRef.current!.currentTime);
+      if (state.delayEnabled) {
+        delayFeedbackRef.current.gain.setValueAtTime(state.delayFeedback, audioContextRef.current!.currentTime);
+      } else {
+        delayFeedbackRef.current.gain.setValueAtTime(0, audioContextRef.current!.currentTime);
+      }
     }
-  }, [state.delayTime, state.delayMix, state.delayFeedback]);
+  }, [state.delayTime, state.delayMix, state.delayFeedback, state.delayEnabled]);
+
+  // Update chorus parameters
+  useEffect(() => {
+    if (chorusRef.current) {
+      if (state.chorusEnabled) {
+        chorusRef.current.gain.setValueAtTime(state.chorusMix, audioContextRef.current!.currentTime);
+      } else {
+        chorusRef.current.gain.setValueAtTime(0, audioContextRef.current!.currentTime);
+      }
+    }
+  }, [state.chorusEnabled, state.chorusMix]);
 
   // Update filter parameters
   useEffect(() => {
@@ -305,34 +622,6 @@ export const useSynthesizer = (): SynthesizerContextType => {
       panningRef.current.pan.setValueAtTime(state.panningAmount, audioContextRef.current!.currentTime);
     }
   }, [state.stereoWidth, state.panningAmount]);
-
-  // Create distortion curve based on type and amount
-  const createDistortionCurve = useCallback((amount: number, type: 'soft' | 'hard' | 'bitcrusher'): Float32Array => {
-    const samples = 44100;
-    const curve = new Float32Array(samples);
-    const deg = Math.PI / 180;
-
-    for (let i = 0; i < samples; i++) {
-      const x = (i * 2) / samples - 1;
-      
-      switch (type) {
-        case 'soft':
-          curve[i] = (Math.PI + amount) * x / (Math.PI + amount * Math.abs(x));
-          break;
-        case 'hard':
-          curve[i] = Math.sign(x) * (1 - Math.exp(-Math.abs(x) * amount));
-          break;
-        case 'bitcrusher':
-          const bits = Math.max(1, Math.floor(16 * (1 - amount)));
-          const levels = Math.pow(2, bits);
-          curve[i] = Math.round(x * levels) / levels;
-          break;
-      }
-    }
-    return curve;
-  }, []);
-
-
 
   // Update effect bypass states by adjusting effect parameters
   useEffect(() => {
@@ -408,11 +697,34 @@ export const useSynthesizer = (): SynthesizerContextType => {
     });
   }, []);
 
-  const startNote = useCallback((freq: number, element?: HTMLElement | null) => {
-    if (!audioContextRef.current || !dryGainRef.current || !wetGainRef.current) return;
+  const startNote = useCallback((freq: number, element?: HTMLElement | null, trackId?: string) => {
+    console.log('startNote called with:', { freq, trackId });
+    
+    if (!audioContextRef.current) {
+      console.warn('Audio context not available');
+      return;
+    }
+
+    // Ensure audio context is running
+    if (audioContextRef.current.state === 'suspended') {
+      console.log('Resuming suspended audio context');
+      audioContextRef.current.resume();
+      
+      // Recreate all track nodes after resuming to ensure they're from the same context
+      setTimeout(() => {
+        const trackIds = Array.from(trackNodesRef.current.keys());
+        trackIds.forEach(trackId => {
+          removeTrackNodes(trackId);
+          createTrackNodes(trackId);
+        });
+      }, 100);
+    }
 
     const frequency = parseFloat(freq.toString());
-    if (isNaN(frequency) || frequency <= 0) return;
+    if (isNaN(frequency) || frequency <= 0) {
+      console.warn('Invalid frequency:', freq);
+      return;
+    }
 
     const noteId = frequency + '_' + Date.now() + '_' + Math.random();
     
@@ -456,7 +768,67 @@ export const useSynthesizer = (): SynthesizerContextType => {
       osc.connect(gain);
     }
     
-    // Route through effects based on state
+    // Route through track-specific audio chain if trackId is provided
+    if (trackId) {
+      console.log(`Attempting to route note through track ${trackId}`);
+      
+      // Ensure track nodes exist
+      if (!trackNodesRef.current.has(trackId)) {
+        console.log(`Creating track nodes for ${trackId}`);
+        createTrackNodes(trackId);
+      }
+      
+      let trackNodes = trackNodesRef.current.get(trackId);
+      const track = state.trackState.tracks.find(t => t.id === trackId);
+      
+      if (!trackNodes) {
+        console.error(`Failed to get track nodes for ${trackId}`);
+        return;
+      }
+      
+      // Check if track nodes are from the same audio context
+      if (trackNodes.gain.context !== audioContextRef.current) {
+        console.warn('Track nodes from different audio context, recreating...');
+        removeTrackNodes(trackId);
+        createTrackNodes(trackId);
+        const newTrackNodes = trackNodesRef.current.get(trackId);
+        if (!newTrackNodes) {
+          console.error('Failed to recreate track nodes');
+          return;
+        }
+        trackNodes = newTrackNodes;
+      }
+      
+      if (track && !track.muted && trackNodes && trackNodes.gain) {
+        console.log(`Routing note through track ${trackId} (${track.name})`);
+        
+        // Connect to track-specific audio chain
+        gain.connect(trackNodes.gain);
+        
+        // Apply track-specific envelope
+        const attackTime = track.envelope.attack;
+        const releaseTime = track.envelope.release;
+        
+        gain.gain.setValueAtTime(0, audioContextRef.current.currentTime);
+        gain.gain.linearRampToValueAtTime(optimalGain, audioContextRef.current.currentTime + attackTime);
+        
+        osc.start();
+        lfo.start();
+        activeNotesRef.current[noteId] = { osc, gain, lfo, freq: frequency };
+        
+        if (element) {
+          element.classList.add('active');
+        }
+        console.log(`Note started successfully through track ${trackId}`);
+        return;
+      } else {
+        console.warn(`Track ${trackId} is muted or invalid, falling back to global chain`);
+      }
+    }
+    
+    // Fallback to global effects chain
+    console.log('Using global effects chain');
+    
     if (state.delayEnabled && delayRef.current) {
       gain.connect(delayRef.current);
     }
@@ -466,7 +838,16 @@ export const useSynthesizer = (): SynthesizerContextType => {
     }
     
     // Main audio path through effects
-    gain.connect(dryGainRef.current);
+    if (dryGainRef.current) {
+      gain.connect(dryGainRef.current);
+    } else {
+      // Fallback: connect directly to master gain or destination
+      if (masterGainRef.current) {
+        gain.connect(masterGainRef.current);
+      } else {
+        gain.connect(audioContextRef.current.destination);
+      }
+    }
     
     // Reverb path
     if (state.reverbEnabled && convolverRef.current) {
@@ -485,7 +866,9 @@ export const useSynthesizer = (): SynthesizerContextType => {
     if (element) {
       element.classList.add('active');
     }
-  }, [state.waveform, state.detune, state.lfoRate, state.lfoDepth, state.lfoTarget, state.reverbEnabled, state.attack, calculateOptimalGain]);
+    
+    console.log(`Note started successfully through global chain`);
+  }, [state.waveform, state.detune, state.lfoRate, state.lfoDepth, state.lfoTarget, state.reverbEnabled, state.attack, calculateOptimalGain, state.trackState.tracks, createTrackNodes, removeTrackNodes]);
 
   const stopNote = useCallback((freq: number, element?: HTMLElement | null) => {
     const frequency = parseFloat(freq.toString());
@@ -679,6 +1062,8 @@ export const useSynthesizer = (): SynthesizerContextType => {
     });
   }, [updateState]);
 
+
+
   const playSequence = useCallback(() => {
     if (state.isPlaying) return;
     
@@ -690,14 +1075,28 @@ export const useSynthesizer = (): SynthesizerContextType => {
       setState(prev => {
         const newStep = (prev.currentStep + 1) % prev.steps;
         
-        // Play notes for current step
-        SEQUENCER_TRACKS.forEach(track => {
-          if (sequenceRef.current[track.note] && sequenceRef.current[track.note][prev.currentStep]) {
-            startNote(track.frequency);
+        // Play notes for current step using track management system
+        const tracks = prev.trackState.tracks;
+        const soloTracks = tracks.filter(track => track.solo);
+        const activeTracks = tracks.filter(track => !track.muted);
+        const tracksToPlay = soloTracks.length > 0 ? soloTracks : activeTracks;
+        
+        tracksToPlay.forEach(track => {
+          if (track.sequence && track.sequence[prev.currentStep]) {
+            // Use track's frequency and properties
+            const frequency = track.frequency;
+            
+            // Start note with track ID for proper routing
+            startNote(frequency, null, track.id);
+            
+            // Calculate note duration based on track envelope
+            const noteDuration = (track.envelope.attack + track.envelope.decay + track.envelope.release) * 1000;
+            const stepDuration = stepTime * 1000;
+            const actualDuration = Math.min(noteDuration, stepDuration * 0.8);
             
             setTimeout(() => {
-              stopNote(track.frequency);
-            }, stepTime * 1000 * 0.6);
+              stopNote(frequency, null);
+            }, actualDuration);
           }
         });
         
@@ -723,10 +1122,17 @@ export const useSynthesizer = (): SynthesizerContextType => {
   }, [state.isPlaying, stopNote, updateState]);
 
   const clearSequence = useCallback(() => {
-    Object.keys(sequenceRef.current).forEach(note => {
-      sequenceRef.current[note].fill(false);
-    });
-    updateState({ currentStep: 0 });
+    // Clear all track sequences
+    updateState(prev => ({
+      currentStep: 0,
+      trackState: {
+        ...prev.trackState,
+        tracks: prev.trackState.tracks.map(track => ({
+          ...track,
+          sequence: new Array(32).fill(false)
+        }))
+      }
+    }));
   }, [updateState]);
 
   const toggleDrawMode = useCallback(() => {
@@ -737,71 +1143,98 @@ export const useSynthesizer = (): SynthesizerContextType => {
     const pattern = NUMBER_KEY_PATTERNS[number];
     if (!pattern) return;
     
-    clearSequence();
-    
-    const noteNames = SEQUENCER_TRACKS.map(track => track.note);
-    
-    pattern.forEach(step => {
-      if (step < state.steps) {
-        const trackIndex = step % noteNames.length;
-        const note = noteNames[trackIndex];
-        if (!sequenceRef.current[note]) {
-          sequenceRef.current[note] = new Array(32).fill(false);
+    // Clear all track sequences and load pattern
+    updateState(prev => {
+      const tracks = prev.trackState.tracks;
+      const updatedTracks = tracks.map(track => ({
+        ...track,
+        sequence: new Array(32).fill(false)
+      }));
+      
+      // Apply pattern to tracks
+      pattern.forEach(step => {
+        if (step < prev.steps) {
+          const trackIndex = step % tracks.length;
+          if (trackIndex < tracks.length) {
+            updatedTracks[trackIndex].sequence[step] = true;
+          }
         }
-        sequenceRef.current[note][step] = true;
-      }
+      });
+      
+      return {
+        trackState: {
+          ...prev.trackState,
+          tracks: updatedTracks
+        }
+      };
     });
-  }, [state.steps, clearSequence]);
+  }, [state.steps, updateState]);
 
   const loadRhythmPattern = useCallback((patternName: string) => {
     const pattern = RHYTHM_PATTERNS[patternName];
     if (!pattern) return;
     
-    clearSequence();
-    
-    const noteNames = SEQUENCER_TRACKS.map(track => track.note);
-    
-    Object.entries(pattern).forEach(([trackIndexStr, steps]) => {
-      const trackIndex = parseInt(trackIndexStr);
-      if (trackIndex < noteNames.length) {
-        const note = noteNames[trackIndex];
-        if (!sequenceRef.current[note]) {
-          sequenceRef.current[note] = new Array(32).fill(false);
+    // Clear all track sequences and load rhythm pattern
+    updateState(prev => {
+      const tracks = prev.trackState.tracks;
+      const updatedTracks = tracks.map(track => ({
+        ...track,
+        sequence: new Array(32).fill(false)
+      }));
+      
+      // Apply rhythm pattern to tracks
+      Object.entries(pattern).forEach(([trackIndexStr, steps]) => {
+        const trackIndex = parseInt(trackIndexStr);
+        if (trackIndex < tracks.length) {
+          steps.forEach(step => {
+            if (step < prev.steps) {
+              updatedTracks[trackIndex].sequence[step] = true;
+            }
+          });
         }
-        
-        steps.forEach(step => {
-          if (step < state.steps) {
-            sequenceRef.current[note][step] = true;
-          }
-        });
-      }
+      });
+      
+      return {
+        trackState: {
+          ...prev.trackState,
+          tracks: updatedTracks
+        }
+      };
     });
-  }, [state.steps, clearSequence]);
+  }, [state.steps, updateState]);
 
   const loadScryptureRhythmPattern = useCallback((patternName: string) => {
     const pattern = SCRYPTURE_RHYTHM_PATTERNS[patternName];
     if (!pattern) return;
     
-    clearSequence();
-    
-    const noteNames = SEQUENCER_TRACKS.map(track => track.note);
-    
-    Object.entries(pattern).forEach(([trackIndexStr, steps]) => {
-      const trackIndex = parseInt(trackIndexStr);
-      if (trackIndex < noteNames.length) {
-        const note = noteNames[trackIndex];
-        if (!sequenceRef.current[note]) {
-          sequenceRef.current[note] = new Array(32).fill(false);
+    // Clear all track sequences and load Scrypture rhythm pattern
+    updateState(prev => {
+      const tracks = prev.trackState.tracks;
+      const updatedTracks = tracks.map(track => ({
+        ...track,
+        sequence: new Array(32).fill(false)
+      }));
+      
+      // Apply Scrypture rhythm pattern to tracks
+      Object.entries(pattern).forEach(([trackIndexStr, steps]) => {
+        const trackIndex = parseInt(trackIndexStr);
+        if (trackIndex < tracks.length) {
+          steps.forEach(step => {
+            if (step < prev.steps) {
+              updatedTracks[trackIndex].sequence[step] = true;
+            }
+          });
         }
-        
-        steps.forEach(step => {
-          if (step < state.steps) {
-            sequenceRef.current[note][step] = true;
-          }
-        });
-      }
+      });
+      
+      return {
+        trackState: {
+          ...prev.trackState,
+          tracks: updatedTracks
+        }
+      };
     });
-  }, [state.steps, clearSequence]);
+  }, [state.steps, updateState]);
 
   const resetDetune = useCallback(() => {
     updateState({ detune: 0 });
@@ -1099,12 +1532,139 @@ export const useSynthesizer = (): SynthesizerContextType => {
   const handleMouseDown = useCallback(() => {
     if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
       audioContextRef.current.resume();
+      
+      // Recreate all track nodes after resuming to ensure they're from the same context
+      setTimeout(() => {
+        const trackIds = Array.from(trackNodesRef.current.keys());
+        trackIds.forEach(trackId => {
+          removeTrackNodes(trackId);
+          createTrackNodes(trackId);
+        });
+      }, 100);
     }
-  }, []);
+  }, [removeTrackNodes, createTrackNodes]);
 
   const handleMouseUp = useCallback(() => {
     // Mouse up handling if needed
   }, []);
+
+  // Simple test function to verify basic audio is working
+  const testAudio = useCallback(() => {
+    console.log('testAudio called');
+    console.log('audioContextRef.current:', audioContextRef.current);
+    
+    if (!audioContextRef.current) {
+      console.warn('No audio context available');
+      return;
+    }
+    
+    console.log('Audio context state:', audioContextRef.current.state);
+    
+    // Ensure audio context is running
+    if (audioContextRef.current.state === 'suspended') {
+      console.log('Resuming audio context for test');
+      audioContextRef.current.resume();
+      
+      // Recreate all track nodes after resuming to ensure they're from the same context
+      setTimeout(() => {
+        const trackIds = Array.from(trackNodesRef.current.keys());
+        trackIds.forEach(trackId => {
+          removeTrackNodes(trackId);
+          createTrackNodes(trackId);
+        });
+      }, 100);
+    }
+    
+    // Test 1: Direct connection to destination
+    console.log('Test 1: Direct connection to destination');
+    const osc1 = audioContextRef.current.createOscillator();
+    const gain1 = audioContextRef.current.createGain();
+    
+    osc1.frequency.value = 440;
+    gain1.gain.value = 0.3; // Higher gain for testing
+    
+    osc1.connect(gain1);
+    gain1.connect(audioContextRef.current.destination);
+    
+    osc1.start();
+    setTimeout(() => {
+      osc1.stop();
+      console.log('Test 1 complete');
+    }, 1000);
+    
+    // Test 2: Through master gain (like the synthesizer does)
+    setTimeout(() => {
+      console.log('Test 2: Through master gain');
+      if (masterGainRef.current && audioContextRef.current) {
+        const osc2 = audioContextRef.current.createOscillator();
+        const gain2 = audioContextRef.current.createGain();
+        
+        osc2.frequency.value = 660; // Different frequency
+        gain2.gain.value = 0.3;
+        
+        osc2.connect(gain2);
+        gain2.connect(masterGainRef.current);
+        
+        osc2.start();
+        setTimeout(() => {
+          osc2.stop();
+          console.log('Test 2 complete');
+        }, 1000);
+      } else {
+        console.warn('Master gain not available for test 2');
+      }
+    }, 1200);
+    
+    // Test 3: Through dry gain (like the synthesizer does)
+    setTimeout(() => {
+      console.log('Test 3: Through dry gain');
+      if (dryGainRef.current && audioContextRef.current) {
+        const osc3 = audioContextRef.current.createOscillator();
+        const gain3 = audioContextRef.current.createGain();
+        
+        osc3.frequency.value = 880; // Different frequency
+        gain3.gain.value = 0.3;
+        
+        osc3.connect(gain3);
+        gain3.connect(dryGainRef.current);
+        
+        osc3.start();
+        setTimeout(() => {
+          osc3.stop();
+          console.log('Test 3 complete');
+        }, 1000);
+      } else {
+        console.warn('Dry gain not available for test 3');
+      }
+    }, 2400);
+    
+    // Test 4: Through track nodes (test multi-track sequencer)
+    setTimeout(() => {
+      console.log('Test 4: Through track nodes');
+      if (state.trackState.tracks.length > 0) {
+        const firstTrack = state.trackState.tracks[0];
+        console.log(`Testing track: ${firstTrack.name} (${firstTrack.id})`);
+        
+        // Ensure track nodes exist
+        if (!trackNodesRef.current.has(firstTrack.id)) {
+          console.log(`Creating track nodes for ${firstTrack.id}`);
+          createTrackNodes(firstTrack.id);
+        }
+        
+        // Test note through track
+        startNote(firstTrack.frequency, null, firstTrack.id);
+        
+        setTimeout(() => {
+          stopNote(firstTrack.frequency, null);
+          console.log('Test 4 complete');
+        }, 1000);
+      } else {
+        console.warn('No tracks available for test 4');
+      }
+    }, 3600);
+    
+    console.log('All test audio setup complete');
+  }, [state.trackState.tracks, createTrackNodes, startNote, stopNote]);
 
   // Update sequencer interval when BPM or steps change
   useEffect(() => {
@@ -1129,16 +1689,30 @@ export const useSynthesizer = (): SynthesizerContextType => {
             }, 0);
           }
           
-          // Play notes for current step
-          SEQUENCER_TRACKS.forEach(track => {
-            if (sequenceRef.current[track.note] && sequenceRef.current[track.note][prev.currentStep]) {
-              startNote(track.frequency);
-              
-              setTimeout(() => {
-                stopNote(track.frequency);
-              }, stepTime * 1000 * 0.6);
-            }
-          });
+                  // Play notes for current step using track management system
+        const tracks = prev.trackState.tracks;
+        const soloTracks = tracks.filter(track => track.solo);
+        const activeTracks = tracks.filter(track => !track.muted);
+        const tracksToPlay = soloTracks.length > 0 ? soloTracks : activeTracks;
+        
+        tracksToPlay.forEach(track => {
+          if (track.sequence && track.sequence[prev.currentStep]) {
+            // Use track's frequency and properties
+            const frequency = track.frequency;
+            
+            // Start note with track ID for proper routing
+            startNote(frequency, null, track.id);
+            
+            // Calculate note duration based on track envelope
+            const noteDuration = (track.envelope.attack + track.envelope.decay + track.envelope.release) * 1000;
+            const stepDuration = stepTime * 1000;
+            const actualDuration = Math.min(noteDuration, stepDuration * 0.8);
+            
+            setTimeout(() => {
+              stopNote(frequency, null);
+            }, actualDuration);
+          }
+        });
           
           return { ...prev, currentStep: newStep, bpm: newBpm };
         });
@@ -1146,14 +1720,24 @@ export const useSynthesizer = (): SynthesizerContextType => {
     }
   }, [state.bpm, state.steps, state.isPlaying, startNote, stopNote, updateState]);
 
-  // Initialize sequence state properly
+  // Initialize sequence state properly - now handled by track management system
+  // Each track has its own sequence property in the track state
+
+  // Initialize track nodes for existing tracks
   useEffect(() => {
-    SEQUENCER_TRACKS.forEach(track => {
-      if (!sequenceRef.current[track.note]) {
-        sequenceRef.current[track.note] = new Array(32).fill(false);
-      }
-    });
-  }, []);
+    if (audioContextRef.current && state.trackState.tracks.length > 0) {
+      console.log('Initializing track nodes for', state.trackState.tracks.length, 'tracks');
+      state.trackState.tracks.forEach(track => {
+        if (!trackNodesRef.current.has(track.id)) {
+          console.log(`Creating initial track nodes for ${track.id} (${track.name})`);
+          createTrackNodes(track.id);
+          updateTrackAudio(track.id, track);
+        } else {
+          console.log(`Track nodes already exist for ${track.id}`);
+        }
+      });
+    }
+  }, [audioContextRef.current, state.trackState.tracks, createTrackNodes, updateTrackAudio]);
 
   // Cleanup arpeggiator on unmount
   useEffect(() => {
@@ -1170,6 +1754,354 @@ export const useSynthesizer = (): SynthesizerContextType => {
       startArpeggiator(arpeggiatorNotesRef.current);
     }
   }, [state.arpeggiatorRate, startArpeggiator]);
+
+  // Track Management Functions
+  const createTrack = useCallback((trackData: Partial<Track>): Track => {
+    const newTrack: Track = {
+      id: `track-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      name: trackData.name || 'New Track',
+      frequency: trackData.frequency || 440,
+      note: trackData.note || 'A',
+      category: trackData.category || 'melody',
+      instrument: trackData.instrument || 'sine',
+      volume: trackData.volume ?? 100,
+      pan: trackData.pan ?? 0,
+      muted: trackData.muted ?? false,
+      solo: trackData.solo ?? false,
+      effects: { ...defaultTrackEffects, ...trackData.effects },
+      envelope: { ...defaultTrackEnvelope, ...trackData.envelope },
+      lfo: { ...defaultTrackLFO, ...trackData.lfo },
+      sequence: trackData.sequence || new Array(32).fill(false),
+      color: trackData.color || `hsl(${Math.random() * 360}, 70%, 60%)`,
+      order: trackData.order ?? state.trackState.tracks.length
+    };
+
+    updateState(prev => ({
+      trackState: {
+        ...prev.trackState,
+        tracks: [...prev.trackState.tracks, newTrack],
+        trackOrder: [...prev.trackState.trackOrder, newTrack.id],
+        selectedTrackId: newTrack.id // Auto-select the new track
+      }
+    }));
+
+    // Create audio nodes for the new track
+    createTrackNodes(newTrack.id);
+    updateTrackAudio(newTrack.id, newTrack);
+
+    return newTrack;
+  }, [updateState, createTrackNodes, updateTrackAudio, state.trackState.tracks.length]);
+
+  const updateTrack = useCallback((trackId: string, updates: Partial<Track>) => {
+    updateState(prev => {
+      const updatedTracks = prev.trackState.tracks.map(track =>
+        track.id === trackId ? { ...track, ...updates } : track
+      );
+      
+      return {
+        trackState: {
+          ...prev.trackState,
+          tracks: updatedTracks
+        }
+      };
+    });
+
+    // Update audio parameters for the track
+    const updatedTrack = state.trackState.tracks.find(track => track.id === trackId);
+    if (updatedTrack) {
+      const newTrack = { ...updatedTrack, ...updates };
+      updateTrackAudio(trackId, newTrack);
+    }
+  }, [updateState, updateTrackAudio, state.trackState.tracks]);
+
+  const deleteTrack = useCallback((trackId: string) => {
+    // Remove audio nodes for the track
+    removeTrackNodes(trackId);
+    
+    updateState(prev => {
+      const remainingTracks = prev.trackState.tracks.filter(track => track.id !== trackId);
+      const remainingOrder = prev.trackState.trackOrder.filter(id => id !== trackId);
+      
+      // If we're deleting the selected track, select the first remaining track or null
+      let newSelectedTrackId = prev.trackState.selectedTrackId;
+      if (prev.trackState.selectedTrackId === trackId) {
+        newSelectedTrackId = remainingTracks.length > 0 ? remainingTracks[0].id : null;
+      }
+      
+      return {
+        trackState: {
+          ...prev.trackState,
+          tracks: remainingTracks,
+          trackOrder: remainingOrder,
+          selectedTrackId: newSelectedTrackId
+        }
+      };
+    });
+  }, [updateState, removeTrackNodes]);
+
+  const selectTrack = useCallback((trackId: string | null) => {
+    updateState(prev => ({
+      trackState: {
+        ...prev.trackState,
+        selectedTrackId: trackId
+      }
+    }));
+  }, [updateState]);
+
+  const toggleTrackMute = useCallback((trackId: string) => {
+    updateState(prev => {
+      const updatedTracks = prev.trackState.tracks.map(track =>
+        track.id === trackId ? { ...track, muted: !track.muted } : track
+      );
+      
+      return {
+        trackState: {
+          ...prev.trackState,
+          tracks: updatedTracks
+        }
+      };
+    });
+
+    // Update audio parameters for the track
+    const updatedTrack = state.trackState.tracks.find(track => track.id === trackId);
+    if (updatedTrack) {
+      const newTrack = { ...updatedTrack, muted: !updatedTrack.muted };
+      updateTrackAudio(trackId, newTrack);
+    }
+  }, [updateState, updateTrackAudio, state.trackState.tracks]);
+
+  const toggleTrackSolo = useCallback((trackId: string) => {
+    updateState(prev => {
+      const updatedTracks = prev.trackState.tracks.map(track =>
+        track.id === trackId ? { ...track, solo: !track.solo } : track
+      );
+      
+      return {
+        trackState: {
+          ...prev.trackState,
+          tracks: updatedTracks
+        }
+      };
+    });
+
+    // Update audio parameters for the track
+    const updatedTrack = state.trackState.tracks.find(track => track.id === trackId);
+    if (updatedTrack) {
+      const newTrack = { ...updatedTrack, solo: !updatedTrack.solo };
+      updateTrackAudio(trackId, newTrack);
+    }
+  }, [updateState, updateTrackAudio, state.trackState.tracks]);
+
+  const reorderTracks = useCallback((trackIds: string[]) => {
+    updateState(prev => ({
+      trackState: {
+        ...prev.trackState,
+        trackOrder: trackIds,
+        tracks: prev.trackState.tracks.map((track) => ({
+          ...track,
+          order: trackIds.indexOf(track.id)
+        })).sort((a, b) => a.order - b.order)
+      }
+    }));
+  }, [updateState]);
+
+  const updateTrackSequence = useCallback((trackId: string, stepIndex: number, active: boolean) => {
+    updateState(prev => ({
+      trackState: {
+        ...prev.trackState,
+        tracks: prev.trackState.tracks.map(track =>
+          track.id === trackId
+            ? {
+                ...track,
+                sequence: track.sequence.map((step, index) =>
+                  index === stepIndex ? active : step
+                )
+              }
+            : track
+        )
+      }
+    }));
+  }, [updateState]);
+
+  const clearTrackSequence = useCallback((trackId: string) => {
+    updateState(prev => ({
+      trackState: {
+        ...prev.trackState,
+        tracks: prev.trackState.tracks.map(track =>
+          track.id === trackId
+            ? { ...track, sequence: new Array(32).fill(false) }
+            : track
+        )
+      }
+    }));
+  }, [updateState]);
+
+  const clearAllTracks = useCallback(() => {
+    updateState(prev => ({
+      trackState: {
+        ...prev.trackState,
+        tracks: [],
+        trackOrder: [],
+        selectedTrackId: null
+      }
+    }));
+    
+    // Clear all track nodes
+    trackNodesRef.current.forEach((_, trackId) => {
+      removeTrackNodes(trackId);
+    });
+    trackNodesRef.current.clear();
+  }, [updateState, removeTrackNodes]);
+
+  const loadTrackPreset = useCallback((presetName: string) => {
+    const preset = TRACK_PRESETS[presetName];
+    if (!preset) {
+      console.warn(`Track preset "${presetName}" not found`);
+      return;
+    }
+
+    console.log(`Loading track preset: ${preset.name}`);
+
+    // Clear existing tracks
+    clearAllTracks();
+
+    // Set BPM
+    updateState({ bpm: preset.bpm });
+
+    // Create tracks from preset
+    preset.tracks.forEach((trackData, index) => {
+      const newTrack: Track = {
+        id: `track-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        name: trackData.name,
+        frequency: trackData.frequency,
+        note: trackData.note,
+        category: trackData.category,
+        instrument: trackData.instrument,
+        volume: trackData.volume,
+        pan: trackData.pan,
+        muted: trackData.muted,
+        solo: trackData.solo,
+        effects: trackData.effects,
+        envelope: trackData.envelope,
+        lfo: trackData.lfo,
+        sequence: trackData.sequence,
+        color: trackData.color,
+        order: index
+      };
+
+      // Add track to state
+      updateState(prev => ({
+        trackState: {
+          ...prev.trackState,
+          tracks: [...prev.trackState.tracks, newTrack],
+          trackOrder: [...prev.trackState.trackOrder, newTrack.id],
+          selectedTrackId: newTrack.id // Select the last created track
+        }
+      }));
+
+      // Create audio nodes for the track
+      createTrackNodes(newTrack.id);
+      updateTrackAudio(newTrack.id, newTrack);
+    });
+
+    console.log(`Loaded ${preset.tracks.length} tracks from preset "${preset.name}"`);
+  }, [clearAllTracks, updateState, createTrackNodes, updateTrackAudio]);
+
+  const duplicateTrack = useCallback((trackId: string) => {
+    const originalTrack = state.trackState.tracks.find(track => track.id === trackId);
+    if (!originalTrack) return;
+
+    const duplicatedTrack: Track = {
+      ...originalTrack,
+      id: `track-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      name: `${originalTrack.name} (Copy)`,
+      order: state.trackState.tracks.length
+    };
+
+    updateState(prev => ({
+      trackState: {
+        ...prev.trackState,
+        tracks: [...prev.trackState.tracks, duplicatedTrack],
+        trackOrder: [...prev.trackState.trackOrder, duplicatedTrack.id],
+        selectedTrackId: duplicatedTrack.id // Auto-select the duplicated track
+      }
+    }));
+
+    // Create audio nodes for the duplicated track
+    createTrackNodes(duplicatedTrack.id);
+    updateTrackAudio(duplicatedTrack.id, duplicatedTrack);
+  }, [state.trackState.tracks, updateState, createTrackNodes, updateTrackAudio]);
+
+  const toggleTrackList = useCallback(() => {
+    updateState(prev => ({
+      trackState: {
+        ...prev.trackState,
+        showTrackList: !prev.trackState.showTrackList
+      }
+    }));
+  }, [updateState]);
+
+  const toggleTrackEditor = useCallback(() => {
+    updateState(prev => ({
+      trackState: {
+        ...prev.trackState,
+        showTrackEditor: !prev.trackState.showTrackEditor
+      }
+    }));
+  }, [updateState]);
+
+  const updateMasterVolume = useCallback((volume: number) => {
+    updateState(prev => ({
+      trackState: {
+        ...prev.trackState,
+        masterVolume: volume
+      }
+    }));
+  }, [updateState]);
+
+  const updateMasterPan = useCallback((pan: number) => {
+    updateState(prev => ({
+      trackState: {
+        ...prev.trackState,
+        masterPan: pan
+      }
+    }));
+  }, [updateState]);
+
+  const getSelectedTrack = useCallback(() => {
+    return state.trackState.tracks.find(track => track.id === state.trackState.selectedTrackId) || null;
+  }, [state.trackState.tracks, state.trackState.selectedTrackId]);
+
+  const getActiveTracks = useCallback(() => {
+    return state.trackState.tracks.filter(track => !track.muted);
+  }, [state.trackState.tracks]);
+
+  const getSoloTracks = useCallback(() => {
+    return state.trackState.tracks.filter(track => track.solo);
+  }, [state.trackState.tracks]);
+
+  // Debug function to check track node status
+  const debugTrackNodes = useCallback(() => {
+    console.log('=== Track Nodes Debug ===');
+    console.log('Audio context state:', audioContextRef.current?.state);
+    console.log('Master gain available:', !!masterGainRef.current);
+    console.log('Number of tracks:', state.trackState.tracks.length);
+    console.log('Number of track nodes:', trackNodesRef.current.size);
+    
+    state.trackState.tracks.forEach(track => {
+      const trackNodes = trackNodesRef.current.get(track.id);
+      console.log(`Track ${track.id} (${track.name}):`, {
+        hasNodes: !!trackNodes,
+        muted: track.muted,
+        solo: track.solo,
+        volume: track.volume,
+        frequency: track.frequency,
+        contextMatch: trackNodes ? trackNodes.gain.context === audioContextRef.current : 'N/A'
+      });
+    });
+    
+    console.log('=== End Debug ===');
+  }, [state.trackState.tracks]);
 
   return {
     state,
@@ -1223,6 +2155,28 @@ export const useSynthesizer = (): SynthesizerContextType => {
     handleKeyDown,
     handleKeyUp,
     handleMouseDown,
-    handleMouseUp
+    handleMouseUp,
+    // Track Management Functions
+    createTrack,
+    updateTrack,
+    deleteTrack,
+    selectTrack,
+    toggleTrackMute,
+    toggleTrackSolo,
+    reorderTracks,
+    updateTrackSequence,
+    clearTrackSequence,
+    clearAllTracks,
+    duplicateTrack,
+    toggleTrackList,
+    toggleTrackEditor,
+    updateMasterVolume,
+    updateMasterPan,
+    getSelectedTrack,
+    getActiveTracks,
+    getSoloTracks,
+    testAudio,
+    debugTrackNodes,
+    loadTrackPreset
   };
 }; 

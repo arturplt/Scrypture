@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useSynthesizer } from '../hooks/useSynthesizer';
-import { NOTES, CHORDS, CHORD_PROGRESSIONS, CIRCLE_OF_FIFTHS, PRESETS, SEQUENCER_TRACKS } from '../data/synthesizerData';
+import { NOTES, CHORDS, CHORD_PROGRESSIONS, CIRCLE_OF_FIFTHS, PRESETS, SEQUENCER_TRACKS, INSTRUMENT_CATEGORIES, InstrumentPreset } from '../data/synthesizerData';
 import { WaveformType } from '../types/synthesizer';
+import { TrackList } from './TrackList';
 import styles from './Synthesizer.module.css';
 
 interface SynthesizerProps {
@@ -105,6 +106,336 @@ const SliderControl: React.FC<SliderControlProps> = ({
           </button>
         )}
         {additionalControls}
+      </div>
+    </div>
+  );
+};
+
+interface InstrumentSelectorProps {
+  selectedInstrument: string;
+  onSelectInstrument: (instrument: InstrumentPreset) => void;
+}
+
+const InstrumentSelector: React.FC<InstrumentSelectorProps> = ({ 
+  selectedInstrument, 
+  onSelectInstrument 
+}) => {
+  const [selectedCategory, setSelectedCategory] = useState<string>('electronic');
+  const [searchTerm, setSearchTerm] = useState<string>('');
+
+  const filteredInstruments = INSTRUMENT_CATEGORIES
+    .find(cat => cat.id === selectedCategory)
+    ?.instruments.filter(instrument => 
+      instrument.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      instrument.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+    ) || [];
+
+  return (
+    <div className={styles.instrumentSelector}>
+      <div className={styles.instrumentSearch}>
+        <input
+          type="text"
+          placeholder="Search instruments..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className={styles.instrumentSearchInput}
+        />
+      </div>
+      
+      <div className={styles.categoryTabs}>
+        {INSTRUMENT_CATEGORIES.map(category => (
+          <button
+            key={category.id}
+            onClick={() => setSelectedCategory(category.id)}
+            className={`${styles.categoryTab} ${selectedCategory === category.id ? styles.active : ''}`}
+          >
+            <span className={styles.categoryIcon}>{category.icon}</span>
+            <span className={styles.categoryName}>{category.name}</span>
+          </button>
+        ))}
+      </div>
+      
+      <div className={styles.instrumentsGrid}>
+        {filteredInstruments.map(instrument => (
+          <div
+            key={instrument.id}
+            onClick={() => onSelectInstrument(instrument)}
+            className={`${styles.instrumentCard} ${selectedInstrument === instrument.id ? styles.selected : ''}`}
+          >
+            <div className={styles.instrumentCardHeader}>
+              <h4>{instrument.name}</h4>
+              <span className={styles.instrumentWaveform}>{instrument.waveform}</span>
+            </div>
+            <p className={styles.instrumentDescription}>{instrument.description}</p>
+            <div className={styles.instrumentTags}>
+              {instrument.tags.map(tag => (
+                <span key={tag} className={styles.instrumentTag}>{tag}</span>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+interface EffectsRoutingProps {
+  tracks: any[];
+  onUpdateTrackEffects: (trackId: string, effects: any) => void;
+}
+
+const EffectsRouting: React.FC<EffectsRoutingProps> = ({ tracks, onUpdateTrackEffects }) => {
+  const [selectedTrackId, setSelectedTrackId] = useState<string | null>(null);
+  const [showEffectsChain, setShowEffectsChain] = useState<boolean>(false);
+
+  const selectedTrack = tracks.find(track => track.id === selectedTrackId);
+
+  const effectTypes = [
+    { id: 'delay', name: 'Delay', icon: '⏱️', color: 'var(--color-accent-gold)' },
+    { id: 'chorus', name: 'Chorus', icon: '🌊', color: 'var(--color-accent-beaver)' },
+    { id: 'distortion', name: 'Distortion', icon: '⚡', color: 'var(--color-urgent)' },
+    { id: 'filter', name: 'Filter', icon: '🔧', color: 'var(--color-easy)' },
+    { id: 'compression', name: 'Compression', icon: '📊', color: 'var(--color-focus)' }
+  ];
+
+  return (
+    <div className={styles.effectsRouting}>
+      <div className={styles.effectsRoutingHeader}>
+        <h4>Effects Routing</h4>
+        <button
+          onClick={() => setShowEffectsChain(!showEffectsChain)}
+          className={styles.effectsChainToggle}
+        >
+          {showEffectsChain ? 'Hide Chain' : 'Show Chain'}
+        </button>
+      </div>
+
+      <div className={styles.tracksEffectsGrid}>
+        {tracks.map(track => (
+          <div
+            key={track.id}
+            className={`${styles.trackEffectsCard} ${selectedTrackId === track.id ? styles.selected : ''}`}
+            onClick={() => setSelectedTrackId(track.id)}
+          >
+            <div className={styles.trackEffectsHeader}>
+              <h5>{track.name}</h5>
+              <div 
+                className={styles.trackColorIndicator}
+                style={{ backgroundColor: track.color }}
+              />
+            </div>
+            
+            <div className={styles.effectsStatus}>
+              {effectTypes.map(effect => (
+                <div
+                  key={effect.id}
+                  className={`${styles.effectStatus} ${track.effects[effect.id]?.enabled ? styles.enabled : styles.disabled}`}
+                  style={{ borderColor: effect.color }}
+                >
+                  <span className={styles.effectIcon}>{effect.icon}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {selectedTrack && (
+        <div className={styles.effectsChainEditor}>
+          <h5>Effects Chain: {selectedTrack.name}</h5>
+          
+          <div className={styles.effectsChain}>
+            <div className={styles.chainInput}>
+              <span>Input</span>
+            </div>
+            
+            {effectTypes.map((effect, index) => (
+              <div key={effect.id} className={styles.chainEffect}>
+                <div
+                  className={`${styles.effectNode} ${selectedTrack.effects[effect.id]?.enabled ? styles.enabled : styles.disabled}`}
+                  style={{ borderColor: effect.color }}
+                >
+                  <span className={styles.effectIcon}>{effect.icon}</span>
+                  <span className={styles.effectName}>{effect.name}</span>
+                  <button
+                    onClick={() => {
+                      const newEffects = {
+                        ...selectedTrack.effects,
+                        [effect.id]: {
+                          ...selectedTrack.effects[effect.id],
+                          enabled: !selectedTrack.effects[effect.id]?.enabled
+                        }
+                      };
+                      onUpdateTrackEffects(selectedTrack.id, newEffects);
+                    }}
+                    className={styles.effectToggle}
+                  >
+                    {selectedTrack.effects[effect.id]?.enabled ? 'ON' : 'OFF'}
+                  </button>
+                </div>
+                {index < effectTypes.length - 1 && (
+                  <div className={styles.chainConnection} />
+                )}
+              </div>
+            ))}
+            
+            <div className={styles.chainOutput}>
+              <span>Output</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showEffectsChain && (
+        <div className={styles.globalEffectsChain}>
+          <h5>Global Effects Chain</h5>
+          <div className={styles.globalChainVisualization}>
+            {tracks.map((track) => (
+              <div key={track.id} className={styles.trackChain}>
+                <div className={styles.trackChainLabel}>
+                  <div 
+                    className={styles.trackColorIndicator}
+                    style={{ backgroundColor: track.color }}
+                  />
+                  <span>{track.name}</span>
+                </div>
+                <div className={styles.trackChainEffects}>
+                  {effectTypes.map(effect => (
+                    <div
+                      key={effect.id}
+                      className={`${styles.globalEffectNode} ${track.effects[effect.id]?.enabled ? styles.enabled : styles.disabled}`}
+                      style={{ borderColor: effect.color }}
+                    >
+                      {effect.icon}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+interface MultiTrackSequencerProps {
+  tracks: any[];
+  currentStep: number;
+  steps: number;
+  onStepClick: (trackId: string, stepIndex: number) => void;
+  onStepMouseEnter: (trackId: string, stepIndex: number) => void;
+  onTrackMute: (trackId: string) => void;
+  onTrackSolo: (trackId: string) => void;
+  onTrackVolumeChange: (trackId: string, volume: number) => void;
+}
+
+const MultiTrackSequencer: React.FC<MultiTrackSequencerProps> = ({
+  tracks,
+  currentStep,
+  steps,
+  onStepClick,
+  onStepMouseEnter,
+  onTrackMute,
+  onTrackSolo,
+  onTrackVolumeChange
+}) => {
+  const [drawMode, setDrawMode] = useState(false);
+
+  const handleStepClick = (trackId: string, stepIndex: number) => {
+    onStepClick(trackId, stepIndex);
+  };
+
+  const handleStepMouseEnter = (trackId: string, stepIndex: number) => {
+    if (drawMode) {
+      onStepClick(trackId, stepIndex);
+    }
+    onStepMouseEnter(trackId, stepIndex);
+  };
+
+  return (
+    <div className={styles.multiTrackSequencer}>
+      <div className={styles.sequencerControls}>
+        <button 
+          className={`${styles.sequencerBtn} ${drawMode ? styles.active : ''}`}
+          onClick={() => setDrawMode(!drawMode)}
+          title="Toggle draw mode"
+        >
+          ✏️ Draw Mode
+        </button>
+      </div>
+      
+      <div className={styles.sequencerGrid}>
+        {/* Step numbers header */}
+        <div className={styles.stepNumbers}>
+          <div className={styles.trackHeader}></div>
+          {Array.from({ length: steps }, (_, i) => (
+            <div key={i} className={`${styles.stepNumber} ${currentStep === i ? styles.currentStep : ''}`}>
+              {i + 1}
+            </div>
+          ))}
+        </div>
+        
+        {/* Tracks */}
+        {tracks.map((track) => (
+          <div key={track.id} className={styles.sequencerTrack}>
+            {/* Track controls */}
+            <div className={styles.trackControls}>
+              <div className={styles.trackInfo}>
+                <span 
+                  className={styles.trackColor} 
+                  style={{ backgroundColor: track.color }}
+                ></span>
+                <span className={styles.trackName}>{track.name}</span>
+              </div>
+              <div className={styles.trackActions}>
+                <button
+                  className={`${styles.muteBtn} ${track.muted ? styles.active : ''}`}
+                  onClick={() => onTrackMute(track.id)}
+                  title="Mute track"
+                >
+                  🔇
+                </button>
+                <button
+                  className={`${styles.soloBtn} ${track.solo ? styles.active : ''}`}
+                  onClick={() => onTrackSolo(track.id)}
+                  title="Solo track"
+                >
+                  🎧
+                </button>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={track.volume}
+                  onChange={(e) => onTrackVolumeChange(track.id, parseInt(e.target.value))}
+                  className={styles.volumeSlider}
+                  title={`Volume: ${track.volume}%`}
+                />
+              </div>
+            </div>
+            
+            {/* Track steps */}
+            <div className={styles.trackSteps}>
+              {Array.from({ length: steps }, (_, stepIndex) => (
+                <div
+                  key={stepIndex}
+                  className={`${styles.step} ${
+                    track.sequence[stepIndex] ? styles.active : ''
+                  } ${currentStep === stepIndex ? styles.currentStep : ''} ${
+                    track.muted ? styles.muted : ''
+                  }`}
+                  onClick={() => handleStepClick(track.id, stepIndex)}
+                  onMouseEnter={() => handleStepMouseEnter(track.id, stepIndex)}
+                  style={{
+                    backgroundColor: track.sequence[stepIndex] ? track.color : 'transparent',
+                    borderColor: currentStep === stepIndex ? 'var(--color-accent-gold)' : 'var(--color-border-secondary)'
+                  }}
+                ></div>
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -225,24 +556,27 @@ export const Synthesizer: React.FC<SynthesizerProps> = ({ isOpen, onClose }) => 
     setLastPlayedKey(null);
   };
 
-  const handleStepClick = (note: string, stepIndex: number) => {
-    if (!synth.sequence[note]) {
-      synth.sequence[note] = new Array(32).fill(false);
-    }
-    synth.sequence[note][stepIndex] = !synth.sequence[note][stepIndex];
-    // Force re-render
-    setCurrentPlayingNote(prev => ({ ...prev }));
+  // Multi-Track Sequencer handlers
+  const handleMultiTrackStepClick = (trackId: string, stepIndex: number) => {
+    synth.updateTrackSequence(trackId, stepIndex, !synth.state.trackState.tracks.find(t => t.id === trackId)?.sequence[stepIndex]);
   };
 
-  const handleStepMouseEnter = (note: string, stepIndex: number) => {
+  const handleMultiTrackStepMouseEnter = (trackId: string, stepIndex: number) => {
     if (synth.state.drawMode && isDrawing) {
-      if (!synth.sequence[note]) {
-        synth.sequence[note] = new Array(32).fill(false);
-      }
-      synth.sequence[note][stepIndex] = true;
-      // Force re-render
-      setCurrentPlayingNote(prev => ({ ...prev }));
+      synth.updateTrackSequence(trackId, stepIndex, true);
     }
+  };
+
+  const handleTrackMute = (trackId: string) => {
+    synth.toggleTrackMute(trackId);
+  };
+
+  const handleTrackSolo = (trackId: string) => {
+    synth.toggleTrackSolo(trackId);
+  };
+
+  const handleTrackVolumeChange = (trackId: string, volume: number) => {
+    synth.updateTrack(trackId, { volume });
   };
 
   const playCircleKey = (circleKey: typeof CIRCLE_OF_FIFTHS[0]) => {
@@ -339,9 +673,525 @@ export const Synthesizer: React.FC<SynthesizerProps> = ({ isOpen, onClose }) => 
 
             <h1>8-BIT SYNTHESIZER</h1>
 
-            {/* 🎛️ SEQUENCER SECTION */}
-            <CollapsibleSection title="🎛️ Step Sequencer" defaultCollapsed={false}>
+            {/* 🎛️ MULTI-TRACK SEQUENCER SECTION */}
+            <CollapsibleSection title="🎛️ Multi-Track Sequencer" defaultCollapsed={false}>
               <div className={styles.sequencerSection}>
+                {/* Track Management Controls */}
+                <div className={styles.trackManagementControls}>
+                  <button
+                    onClick={synth.testAudio}
+                    className={styles.trackControlBtn}
+                    style={{ backgroundColor: '#ff6b6b', color: 'white' }}
+                  >
+                    🔊 Test Audio
+                  </button>
+                  <button
+                    onClick={synth.debugTrackNodes}
+                    className={styles.trackControlBtn}
+                    style={{ backgroundColor: '#4ecdc4', color: 'white' }}
+                  >
+                    🐛 Debug Tracks
+                  </button>
+                  <button
+                    onClick={synth.clearAllTracks}
+                    className={styles.trackControlBtn}
+                    style={{ backgroundColor: '#ff4757', color: 'white' }}
+                  >
+                    🗑️ Clear All Tracks
+                  </button>
+                  <button
+                    onClick={synth.toggleTrackList}
+                    className={`${styles.trackControlBtn} ${synth.state.trackState.showTrackList ? styles.active : ''}`}
+                  >
+                    {synth.state.trackState.showTrackList ? '📋 Hide Tracks' : '📋 Show Tracks'}
+                  </button>
+                  
+                  <button
+                    onClick={() => synth.createTrack({
+                      name: 'New Track',
+                      frequency: 440,
+                      note: 'A',
+                      category: 'melody',
+                      instrument: 'sine'
+                    })}
+                    className={styles.trackControlBtn}
+                  >
+                    ➕ Add Track
+                  </button>
+                  
+                  <button
+                    onClick={synth.toggleTrackEditor}
+                    className={`${styles.trackControlBtn} ${synth.state.trackState.showTrackEditor ? styles.active : ''}`}
+                  >
+                    {synth.state.trackState.showTrackEditor ? '⚙️ Hide Editor' : '⚙️ Show Editor'}
+                  </button>
+
+                  {/* Track Presets */}
+                  <div className={styles.trackPresetButtons}>
+                    <button
+                      onClick={() => synth.loadTrackPreset('electronic-beat')}
+                      className={styles.trackControlBtn}
+                      title="Load Electronic Beat preset (4 tracks)"
+                    >
+                      🎵 Electronic Beat
+                    </button>
+                    <button
+                      onClick={() => synth.loadTrackPreset('ambient-pad')}
+                      className={styles.trackControlBtn}
+                      title="Load Ambient Pad preset (4 tracks)"
+                    >
+                      🌊 Ambient Pad
+                    </button>
+                    <button
+                      onClick={() => synth.loadTrackPreset('jazz-quartet')}
+                      className={styles.trackControlBtn}
+                      title="Load Jazz Quartet preset (4 tracks)"
+                    >
+                      🎷 Jazz Quartet
+                    </button>
+                  </div>
+                </div>
+
+                {/* Track List */}
+                {synth.state.trackState.showTrackList && (
+                  <TrackList
+                    tracks={synth.state.trackState.tracks}
+                    selectedTrackId={synth.state.trackState.selectedTrackId}
+                    onSelectTrack={synth.selectTrack}
+                    onToggleMute={synth.toggleTrackMute}
+                    onToggleSolo={synth.toggleTrackSolo}
+                    onUpdateTrackVolume={(trackId, volume) => synth.updateTrack(trackId, { volume })}
+                    onUpdateTrackPan={(trackId, pan) => synth.updateTrack(trackId, { pan })}
+                    onUpdateTrackInstrument={(trackId, instrument) => synth.updateTrack(trackId, { instrument: instrument as 'sine' | 'square' | 'triangle' | 'sawtooth' | 'noise' | 'custom' })}
+                    onDeleteTrack={synth.deleteTrack}
+                    onDuplicateTrack={synth.duplicateTrack}
+                    onReorderTracks={synth.reorderTracks}
+                  />
+                )}
+
+                {/* Track Editor */}
+                {synth.state.trackState.showTrackEditor && synth.getSelectedTrack() && (
+                  <div className={styles.trackEditor}>
+                    <div className={styles.trackEditorHeader}>
+                      <h4>Track Editor: {synth.getSelectedTrack()?.name}</h4>
+                      <button 
+                        onClick={() => synth.toggleTrackEditor()}
+                        className={styles.closeButton}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                    
+                    <div className={styles.trackEditorContent}>
+                      {/* Track Basic Settings */}
+                      <CollapsibleSection title="Basic Settings" defaultCollapsed={false}>
+                        <div className={styles.trackBasicSettings}>
+                          <div className={styles.trackNameSection}>
+                            <label>Track Name:</label>
+                            <input
+                              type="text"
+                              value={synth.getSelectedTrack()?.name || ''}
+                              onChange={(e) => synth.updateTrack(synth.getSelectedTrack()!.id, { name: e.target.value })}
+                              className={styles.trackNameInput}
+                            />
+                          </div>
+                          
+                          <div className={styles.trackControls}>
+                            <SliderControl
+                              label="Volume"
+                              value={synth.getSelectedTrack()?.volume || 100}
+                              min={0}
+                              max={100}
+                              onChange={(value) => synth.updateTrack(synth.getSelectedTrack()!.id, { volume: value })}
+                              showValue={true}
+                              valueDisplay={`${synth.getSelectedTrack()?.volume || 100}%`}
+                            />
+                            
+                            <SliderControl
+                              label="Pan"
+                              value={synth.getSelectedTrack()?.pan || 0}
+                              min={-100}
+                              max={100}
+                              onChange={(value) => synth.updateTrack(synth.getSelectedTrack()!.id, { pan: value })}
+                              showValue={true}
+                              valueDisplay={`${synth.getSelectedTrack()?.pan || 0}%`}
+                            />
+                          </div>
+                          
+                          <div className={styles.trackActions}>
+                            <button
+                              onClick={() => synth.toggleTrackMute(synth.getSelectedTrack()!.id)}
+                              className={`${styles.trackActionBtn} ${synth.getSelectedTrack()?.muted ? styles.active : ''}`}
+                            >
+                              {synth.getSelectedTrack()?.muted ? '🔇 Unmute' : '🔊 Mute'}
+                            </button>
+                            <button
+                              onClick={() => synth.toggleTrackSolo(synth.getSelectedTrack()!.id)}
+                              className={`${styles.trackActionBtn} ${synth.getSelectedTrack()?.solo ? styles.active : ''}`}
+                            >
+                              {synth.getSelectedTrack()?.solo ? '🎧 Unsolo' : '🎧 Solo'}
+                            </button>
+                            <button
+                              onClick={() => synth.duplicateTrack(synth.getSelectedTrack()!.id)}
+                              className={styles.trackActionBtn}
+                            >
+                              📋 Duplicate
+                            </button>
+                            <button
+                              onClick={() => synth.deleteTrack(synth.getSelectedTrack()!.id)}
+                              className={`${styles.trackActionBtn} ${styles.danger}`}
+                            >
+                              🗑️ Delete
+                            </button>
+                          </div>
+                        </div>
+                      </CollapsibleSection>
+
+                      {/* Instrument Settings */}
+                      <CollapsibleSection title="Instrument" defaultCollapsed={false}>
+                        <div className={styles.instrumentSettings}>
+                          <div className={styles.instrumentType}>
+                            <label>Instrument Type:</label>
+                            <select
+                              value={synth.getSelectedTrack()?.instrument || 'sine'}
+                              onChange={(e) => synth.updateTrack(synth.getSelectedTrack()!.id, { instrument: e.target.value as any })}
+                              className={styles.instrumentSelect}
+                            >
+                              <option value="sine">Sine Wave</option>
+                              <option value="square">Square Wave</option>
+                              <option value="triangle">Triangle Wave</option>
+                              <option value="sawtooth">Sawtooth Wave</option>
+                              <option value="noise">Noise</option>
+                            </select>
+                          </div>
+                          
+                          <div className={styles.trackCategory}>
+                            <label>Category:</label>
+                            <select
+                              value={synth.getSelectedTrack()?.category || 'melody'}
+                              onChange={(e) => synth.updateTrack(synth.getSelectedTrack()!.id, { category: e.target.value as any })}
+                              className={styles.instrumentSelect}
+                            >
+                              <option value="melody">Melody</option>
+                              <option value="bass">Bass</option>
+                              <option value="rhythm">Rhythm</option>
+                              <option value="ambient">Ambient</option>
+                              <option value="fx">Effects</option>
+                            </select>
+                          </div>
+                        </div>
+                      </CollapsibleSection>
+
+                      {/* Envelope Settings */}
+                      <CollapsibleSection title="Envelope" defaultCollapsed={true}>
+                        <div className={styles.envelopeSettings}>
+                          <SliderControl
+                            label="Attack"
+                            value={synth.getSelectedTrack()?.envelope.attack || 0.1}
+                            min={0}
+                            max={2}
+                            step={0.01}
+                            onChange={(value) => synth.updateTrack(synth.getSelectedTrack()!.id, { 
+                              envelope: { ...synth.getSelectedTrack()!.envelope, attack: value }
+                            })}
+                            showValue={true}
+                            valueDisplay={`${(synth.getSelectedTrack()?.envelope.attack || 0.1).toFixed(2)}s`}
+                          />
+                          
+                          <SliderControl
+                            label="Decay"
+                            value={synth.getSelectedTrack()?.envelope.decay || 0.3}
+                            min={0}
+                            max={2}
+                            step={0.01}
+                            onChange={(value) => synth.updateTrack(synth.getSelectedTrack()!.id, { 
+                              envelope: { ...synth.getSelectedTrack()!.envelope, decay: value }
+                            })}
+                            showValue={true}
+                            valueDisplay={`${(synth.getSelectedTrack()?.envelope.decay || 0.3).toFixed(2)}s`}
+                          />
+                          
+                          <SliderControl
+                            label="Sustain"
+                            value={synth.getSelectedTrack()?.envelope.sustain || 0.5}
+                            min={0}
+                            max={1}
+                            step={0.01}
+                            onChange={(value) => synth.updateTrack(synth.getSelectedTrack()!.id, { 
+                              envelope: { ...synth.getSelectedTrack()!.envelope, sustain: value }
+                            })}
+                            showValue={true}
+                            valueDisplay={`${(synth.getSelectedTrack()?.envelope.sustain || 0.5).toFixed(2)}`}
+                          />
+                          
+                          <SliderControl
+                            label="Release"
+                            value={synth.getSelectedTrack()?.envelope.release || 0.5}
+                            min={0}
+                            max={2}
+                            step={0.01}
+                            onChange={(value) => synth.updateTrack(synth.getSelectedTrack()!.id, { 
+                              envelope: { ...synth.getSelectedTrack()!.envelope, release: value }
+                            })}
+                            showValue={true}
+                            valueDisplay={`${(synth.getSelectedTrack()?.envelope.release || 0.5).toFixed(2)}s`}
+                          />
+                        </div>
+                      </CollapsibleSection>
+
+                      {/* LFO Settings */}
+                      <CollapsibleSection title="LFO" defaultCollapsed={true}>
+                        <div className={styles.lfoSettings}>
+                          <div className={styles.lfoEnable}>
+                            <label>
+                              <input
+                                type="checkbox"
+                                checked={synth.getSelectedTrack()?.lfo.enabled || false}
+                                onChange={(e) => synth.updateTrack(synth.getSelectedTrack()!.id, { 
+                                  lfo: { ...synth.getSelectedTrack()!.lfo, enabled: e.target.checked }
+                                })}
+                              />
+                              Enable LFO
+                            </label>
+                          </div>
+                          
+                          {synth.getSelectedTrack()?.lfo.enabled && (
+                            <div className={styles.lfoControls}>
+                              <SliderControl
+                                label="LFO Rate"
+                                value={synth.getSelectedTrack()?.lfo.rate || 1}
+                                min={0.1}
+                                max={10}
+                                step={0.1}
+                                onChange={(value) => synth.updateTrack(synth.getSelectedTrack()!.id, { 
+                                  lfo: { ...synth.getSelectedTrack()!.lfo, rate: value }
+                                })}
+                                showValue={true}
+                                valueDisplay={`${(synth.getSelectedTrack()?.lfo.rate || 1).toFixed(1)}Hz`}
+                              />
+                              
+                              <SliderControl
+                                label="LFO Depth"
+                                value={synth.getSelectedTrack()?.lfo.depth || 0.1}
+                                min={0}
+                                max={1}
+                                step={0.01}
+                                onChange={(value) => synth.updateTrack(synth.getSelectedTrack()!.id, { 
+                                  lfo: { ...synth.getSelectedTrack()!.lfo, depth: value }
+                                })}
+                                showValue={true}
+                                valueDisplay={`${(synth.getSelectedTrack()?.lfo.depth || 0.1).toFixed(2)}`}
+                              />
+                              
+                                                             <div className={styles.lfoWaveform}>
+                                 <label>LFO Waveform:</label>
+                                 <select
+                                   value={synth.getSelectedTrack()?.lfo.waveform || 'sine'}
+                                   onChange={(e) => synth.updateTrack(synth.getSelectedTrack()!.id, { 
+                                     lfo: { ...synth.getSelectedTrack()!.lfo, waveform: e.target.value as any }
+                                   })}
+                                   className={styles.instrumentSelect}
+                                 >
+                                   <option value="sine">Sine</option>
+                                   <option value="square">Square</option>
+                                   <option value="triangle">Triangle</option>
+                                   <option value="sawtooth">Sawtooth</option>
+                                 </select>
+                               </div>
+                            </div>
+                          )}
+                        </div>
+                      </CollapsibleSection>
+
+                      {/* Effects Settings */}
+                      <CollapsibleSection title="Effects" defaultCollapsed={true}>
+                        <div className={styles.effectsSettings}>
+                          {/* Delay Effect */}
+                          <div className={styles.effectGroup}>
+                            <div className={styles.effectHeader}>
+                              <label>
+                                <input
+                                  type="checkbox"
+                                  checked={synth.getSelectedTrack()?.effects.delay.enabled || false}
+                                  onChange={(e) => synth.updateTrack(synth.getSelectedTrack()!.id, { 
+                                    effects: { 
+                                      ...synth.getSelectedTrack()!.effects, 
+                                      delay: { ...synth.getSelectedTrack()!.effects.delay, enabled: e.target.checked }
+                                    }
+                                  })}
+                                />
+                                Delay
+                              </label>
+                            </div>
+                            
+                            {synth.getSelectedTrack()?.effects.delay.enabled && (
+                              <div className={styles.effectControls}>
+                                <SliderControl
+                                  label="Delay Time"
+                                  value={synth.getSelectedTrack()?.effects.delay.time || 0.3}
+                                  min={0.1}
+                                  max={2}
+                                  step={0.1}
+                                  onChange={(value) => synth.updateTrack(synth.getSelectedTrack()!.id, { 
+                                    effects: { 
+                                      ...synth.getSelectedTrack()!.effects, 
+                                      delay: { ...synth.getSelectedTrack()!.effects.delay, time: value }
+                                    }
+                                  })}
+                                  showValue={true}
+                                  valueDisplay={`${(synth.getSelectedTrack()?.effects.delay.time || 0.3).toFixed(1)}s`}
+                                />
+                                
+                                <SliderControl
+                                  label="Delay Feedback"
+                                  value={synth.getSelectedTrack()?.effects.delay.feedback || 0.3}
+                                  min={0}
+                                  max={0.9}
+                                  step={0.1}
+                                  onChange={(value) => synth.updateTrack(synth.getSelectedTrack()!.id, { 
+                                    effects: { 
+                                      ...synth.getSelectedTrack()!.effects, 
+                                      delay: { ...synth.getSelectedTrack()!.effects.delay, feedback: value }
+                                    }
+                                  })}
+                                  showValue={true}
+                                  valueDisplay={`${(synth.getSelectedTrack()?.effects.delay.feedback || 0.3).toFixed(1)}`}
+                                />
+                                
+                                <SliderControl
+                                  label="Delay Mix"
+                                  value={synth.getSelectedTrack()?.effects.delay.mix || 0.5}
+                                  min={0}
+                                  max={1}
+                                  step={0.1}
+                                  onChange={(value) => synth.updateTrack(synth.getSelectedTrack()!.id, { 
+                                    effects: { 
+                                      ...synth.getSelectedTrack()!.effects, 
+                                      delay: { ...synth.getSelectedTrack()!.effects.delay, mix: value }
+                                    }
+                                  })}
+                                  showValue={true}
+                                  valueDisplay={`${(synth.getSelectedTrack()?.effects.delay.mix || 0.5).toFixed(1)}`}
+                                />
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Chorus Effect */}
+                          <div className={styles.effectGroup}>
+                            <div className={styles.effectHeader}>
+                              <label>
+                                <input
+                                  type="checkbox"
+                                  checked={synth.getSelectedTrack()?.effects.chorus.enabled || false}
+                                  onChange={(e) => synth.updateTrack(synth.getSelectedTrack()!.id, { 
+                                    effects: { 
+                                      ...synth.getSelectedTrack()!.effects, 
+                                      chorus: { ...synth.getSelectedTrack()!.effects.chorus, enabled: e.target.checked }
+                                    }
+                                  })}
+                                />
+                                Chorus
+                              </label>
+                            </div>
+                            
+                            {synth.getSelectedTrack()?.effects.chorus.enabled && (
+                              <div className={styles.effectControls}>
+                                <SliderControl
+                                  label="Chorus Rate"
+                                  value={synth.getSelectedTrack()?.effects.chorus.rate || 1.5}
+                                  min={0.1}
+                                  max={10}
+                                  step={0.1}
+                                  onChange={(value) => synth.updateTrack(synth.getSelectedTrack()!.id, { 
+                                    effects: { 
+                                      ...synth.getSelectedTrack()!.effects, 
+                                      chorus: { ...synth.getSelectedTrack()!.effects.chorus, rate: value }
+                                    }
+                                  })}
+                                  showValue={true}
+                                  valueDisplay={`${(synth.getSelectedTrack()?.effects.chorus.rate || 1.5).toFixed(1)}Hz`}
+                                />
+                                
+                                <SliderControl
+                                  label="Chorus Depth"
+                                  value={synth.getSelectedTrack()?.effects.chorus.depth || 0.002}
+                                  min={0.001}
+                                  max={0.01}
+                                  step={0.001}
+                                  onChange={(value) => synth.updateTrack(synth.getSelectedTrack()!.id, { 
+                                    effects: { 
+                                      ...synth.getSelectedTrack()!.effects, 
+                                      chorus: { ...synth.getSelectedTrack()!.effects.chorus, depth: value }
+                                    }
+                                  })}
+                                  showValue={true}
+                                  valueDisplay={`${(synth.getSelectedTrack()?.effects.chorus.depth || 0.002).toFixed(3)}`}
+                                />
+                                
+                                <SliderControl
+                                  label="Chorus Mix"
+                                  value={synth.getSelectedTrack()?.effects.chorus.mix || 0.5}
+                                  min={0}
+                                  max={1}
+                                  step={0.1}
+                                  onChange={(value) => synth.updateTrack(synth.getSelectedTrack()!.id, { 
+                                    effects: { 
+                                      ...synth.getSelectedTrack()!.effects, 
+                                      chorus: { ...synth.getSelectedTrack()!.effects.chorus, mix: value }
+                                    }
+                                  })}
+                                  showValue={true}
+                                  valueDisplay={`${(synth.getSelectedTrack()?.effects.chorus.mix || 0.5).toFixed(1)}`}
+                                />
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Distortion Effect */}
+                          <div className={styles.effectGroup}>
+                            <div className={styles.effectHeader}>
+                              <label>
+                                <input
+                                  type="checkbox"
+                                  checked={synth.getSelectedTrack()?.effects.distortion.enabled || false}
+                                  onChange={(e) => synth.updateTrack(synth.getSelectedTrack()!.id, { 
+                                    effects: { 
+                                      ...synth.getSelectedTrack()!.effects, 
+                                      distortion: { ...synth.getSelectedTrack()!.effects.distortion, enabled: e.target.checked }
+                                    }
+                                  })}
+                                />
+                                Distortion
+                              </label>
+                            </div>
+                            
+                            {synth.getSelectedTrack()?.effects.distortion.enabled && (
+                              <div className={styles.effectControls}>
+                                <SliderControl
+                                  label="Distortion Amount"
+                                  value={synth.getSelectedTrack()?.effects.distortion.amount || 0.3}
+                                  min={0}
+                                  max={1}
+                                  step={0.1}
+                                  onChange={(value) => synth.updateTrack(synth.getSelectedTrack()!.id, { 
+                                    effects: { 
+                                      ...synth.getSelectedTrack()!.effects, 
+                                      distortion: { ...synth.getSelectedTrack()!.effects.distortion, amount: value }
+                                    }
+                                  })}
+                                  showValue={true}
+                                  valueDisplay={`${Math.round((synth.getSelectedTrack()?.effects.distortion.amount || 0.3) * 100)}%`}
+                                />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </CollapsibleSection>
+                    </div>
+                  </div>
+                )}
+
                 {/* Sequencer Controls */}
                 <div className={styles.sequencerControls}>
                   <div className={styles.sequencerControlGroup}>
@@ -404,38 +1254,21 @@ export const Synthesizer: React.FC<SynthesizerProps> = ({ isOpen, onClose }) => 
                   </div>
                 </div>
 
-                {/* Sequencer Grid */}
-                <div className={styles.sequencerGrid}>
-                  <div className={styles.sequencerHeader}>
-                    <div className={styles.trackHeader}>Track</div>
-                    {Array.from({ length: synth.state.steps }, (_, i) => (
-                      <div key={i} className={`${styles.stepHeader} ${synth.state.currentStep === i ? styles.currentStep : ''}`}>
-                        {i + 1}
-                      </div>
-                    ))}
-                  </div>
-                  
-                  {SEQUENCER_TRACKS.slice(0, 12).map((track, trackIndex) => (
-                    <div key={trackIndex} className={styles.sequencerRow}>
-                      <div className={styles.trackLabel}>{track.note}</div>
-                      {Array.from({ length: synth.state.steps }, (_, stepIndex) => (
-                        <div
-                          key={stepIndex}
-                          className={`${styles.sequencerStep} ${
-                            synth.sequence[track.note]?.[stepIndex] ? styles.active : ''
-                          } ${synth.state.currentStep === stepIndex ? styles.currentStep : ''}`}
-                          onClick={() => handleStepClick(track.note, stepIndex)}
-                          onMouseEnter={() => handleStepMouseEnter(track.note, stepIndex)}
-                        />
-                      ))}
-                    </div>
-                  ))}
-                </div>
+                {/* Multi-Track Sequencer Component */}
+                <MultiTrackSequencer
+                  tracks={synth.state.trackState.tracks}
+                  currentStep={synth.state.currentStep}
+                  steps={synth.state.steps}
+                  onStepClick={handleMultiTrackStepClick}
+                  onStepMouseEnter={handleMultiTrackStepMouseEnter}
+                  onTrackMute={handleTrackMute}
+                  onTrackSolo={handleTrackSolo}
+                  onTrackVolumeChange={handleTrackVolumeChange}
+                />
               </div>
             </CollapsibleSection>
 
-            {/* 🎼 CHORD PROGRESSIONS SECTION */}
-            <CollapsibleSection title="🎼 Chord Progressions">
+            <CollapsibleSection title="🎼 CHORD PROGRESSIONS SECTION">
               <div className={styles.progressionsSection}>
                 {/* Classic Progressions */}
                 <div className={styles.progressionGroup}>
@@ -614,6 +1447,31 @@ export const Synthesizer: React.FC<SynthesizerProps> = ({ isOpen, onClose }) => 
                 <button onClick={() => synth.playChord('Amin')} className={`${styles.chordBtn} ${styles.minor}`}>Am</button>
                 <button onClick={() => synth.playChord('Bdim')} className={`${styles.chordBtn} ${styles.diminished}`}>B°</button>
               </div>
+            </CollapsibleSection>
+
+            {/* 🎛️ INSTRUMENT SELECTOR SECTION */}
+            <CollapsibleSection title="🎛️ Instrument Selector" defaultCollapsed={true}>
+              <InstrumentSelector
+                selectedInstrument={synth.getSelectedTrack()?.instrument || 'sine'}
+                onSelectInstrument={(instrument) => {
+                  synth.updateTrack(synth.getSelectedTrack()!.id, {
+                    instrument: instrument.waveform,
+                    envelope: instrument.envelope,
+                    lfo: instrument.lfo,
+                    effects: instrument.effects
+                  });
+                }}
+              />
+            </CollapsibleSection>
+
+            {/* 🎛️ EFFECTS ROUTING SECTION */}
+            <CollapsibleSection title="🎛️ Effects Routing" defaultCollapsed={true}>
+              <EffectsRouting
+                tracks={synth.state.trackState.tracks}
+                onUpdateTrackEffects={(trackId, effects) => {
+                  synth.updateTrack(trackId, { effects });
+                }}
+              />
             </CollapsibleSection>
 
             <div className={styles.keyboard} ref={keyboardRef} onMouseLeave={handleKeyboardMouseLeave}>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Context Fix Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .error {
+            color: #dc3545;
+            background: #f8d7da;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .success {
+            color: #155724;
+            background: #d4edda;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .info {
+            color: #0c5460;
+            background: #d1ecf1;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Audio Context Fix Test</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: Basic Audio Context Creation</h2>
+        <button onclick="testBasicContext()">Test Basic Context</button>
+        <div id="basic-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 2: Context Suspension and Resumption</h2>
+        <button onclick="testContextResumption()">Test Context Resumption</button>
+        <div id="resumption-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 3: Node Recreation After Context Change</h2>
+        <button onclick="testNodeRecreation()">Test Node Recreation</button>
+        <div id="recreation-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 4: Cross-Context Connection Prevention</h2>
+        <button onclick="testCrossContextPrevention()">Test Cross-Context Prevention</button>
+        <div id="cross-context-result"></div>
+    </div>
+
+    <script>
+        let audioContext1, audioContext2;
+        let nodes1 = {}, nodes2 = {};
+
+        function logResult(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="${type}">${message}</div>`;
+        }
+
+        function testBasicContext() {
+            try {
+                audioContext1 = new (window.AudioContext || window.webkitAudioContext)();
+                const gain = audioContext1.createGain();
+                const osc = audioContext1.createOscillator();
+                
+                osc.frequency.value = 440;
+                gain.gain.value = 0.1;
+                
+                osc.connect(gain);
+                gain.connect(audioContext1.destination);
+                
+                osc.start();
+                setTimeout(() => osc.stop(), 1000);
+                
+                logResult('basic-result', '✅ Basic audio context creation and connection successful!', 'success');
+            } catch (error) {
+                logResult('basic-result', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        function testContextResumption() {
+            try {
+                if (!audioContext1) {
+                    audioContext1 = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                
+                // Suspend the context
+                audioContext1.suspend();
+                logResult('resumption-result', '⏸️ Context suspended', 'info');
+                
+                // Try to create nodes while suspended
+                const gain = audioContext1.createGain();
+                const osc = audioContext1.createOscillator();
+                
+                // Resume the context
+                audioContext1.resume();
+                logResult('resumption-result', '▶️ Context resumed', 'info');
+                
+                // Connect and play
+                osc.frequency.value = 660;
+                gain.gain.value = 0.1;
+                osc.connect(gain);
+                gain.connect(audioContext1.destination);
+                
+                osc.start();
+                setTimeout(() => osc.stop(), 1000);
+                
+                logResult('resumption-result', '✅ Context resumption successful!', 'success');
+            } catch (error) {
+                logResult('resumption-result', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        function testNodeRecreation() {
+            try {
+                if (!audioContext1) {
+                    audioContext1 = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                
+                // Create initial nodes
+                nodes1.gain = audioContext1.createGain();
+                nodes1.osc = audioContext1.createOscillator();
+                
+                logResult('recreation-result', '🎵 Initial nodes created', 'info');
+                
+                // Suspend and resume context
+                audioContext1.suspend();
+                audioContext1.resume();
+                
+                // Create new nodes after resumption
+                const newGain = audioContext1.createGain();
+                const newOsc = audioContext1.createOscillator();
+                
+                // Test connection between new nodes
+                newOsc.frequency.value = 880;
+                newGain.gain.value = 0.1;
+                newOsc.connect(newGain);
+                newGain.connect(audioContext1.destination);
+                
+                newOsc.start();
+                setTimeout(() => newOsc.stop(), 1000);
+                
+                logResult('recreation-result', '✅ Node recreation after context resumption successful!', 'success');
+            } catch (error) {
+                logResult('recreation-result', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        function testCrossContextPrevention() {
+            try {
+                // Create two different audio contexts
+                audioContext1 = new (window.AudioContext || window.webkitAudioContext)();
+                audioContext2 = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Create nodes in different contexts
+                const gain1 = audioContext1.createGain();
+                const gain2 = audioContext2.createGain();
+                
+                logResult('cross-context-result', '🎵 Nodes created in different contexts', 'info');
+                
+                // This should throw an error
+                try {
+                    gain1.connect(gain2);
+                    logResult('cross-context-result', '❌ Cross-context connection should have failed!', 'error');
+                } catch (error) {
+                    if (error.name === 'InvalidAccessError') {
+                        logResult('cross-context-result', '✅ Cross-context connection properly prevented!', 'success');
+                    } else {
+                        logResult('cross-context-result', `❌ Unexpected error: ${error.message}`, 'error');
+                    }
+                }
+                
+                // Clean up
+                audioContext1.close();
+                audioContext2.close();
+                
+            } catch (error) {
+                logResult('cross-context-result', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+</html> 
