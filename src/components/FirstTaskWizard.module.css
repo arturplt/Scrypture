@@ -604,13 +604,22 @@
 
 /* Blue button for habit creation */
 .nextButton.habitButton {
-  border-color: var(--color-accent-blue, #007bff);
-  color: var(--color-accent-blue, #007bff);
+  border-color: var(--color-accent-blue, #007bff) !important;
+  color: var(--color-accent-blue, #007bff) !important;
 }
 
 .nextButton.habitButton:hover:not(:disabled) {
-  background: var(--color-accent-blue, #007bff);
-  color: var(--color-bg-primary);
+  background: var(--color-accent-blue, #007bff) !important;
+  color: var(--color-bg-primary) !important;
+}
+
+/* Ensure button has border even when disabled */
+.nextButton:not(.disabled) {
+  border: var(--border-width-thin) solid var(--color-accent-gold);
+}
+
+.nextButton.habitButton:not(.disabled) {
+  border: var(--border-width-thin) solid var(--color-accent-blue, #007bff) !important;
 }
 
 /* Stats section */

@@ -303,6 +303,14 @@ function AppContent() {
     };
   }, []);
 
+  // Check if tutorial is already completed on mount
+  useEffect(() => {
+    if (tutorialService.isTutorialCompleted() && !showTutorialCompletion) {
+      console.log('Tutorial already completed, showing celebration');
+      setShowTutorialCompletion(true);
+    }
+  }, [showTutorialCompletion]);
+
   // Show install prompt on mobile devices after a delay (only on first visit)
   useEffect(() => {
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);

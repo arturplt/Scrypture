@@ -176,12 +176,14 @@ class TutorialService {
    * Complete the tutorial
    */
   private completeTutorial(): void {
+    console.log('Completing tutorial');
     this.currentState.completed = true;
     this.currentState.currentStep = null;
     this.currentState.completedAt = new Date();
     this.saveTutorialState();
     
     // Trigger completion celebration
+    console.log('Triggering tutorial completion event');
     this.triggerTutorialCompletionEvent();
   }
 
@@ -287,11 +289,13 @@ class TutorialService {
    * Skip the tutorial entirely
    */
   skipTutorial(): void {
+    console.log('Skipping tutorial - marking all steps as completed');
     // Mark all steps as completed
     Object.keys(this.currentState.steps).forEach(stepId => {
       this.currentState.steps[stepId].completed = true;
     });
     
+    console.log('Calling completeTutorial after skipping');
     this.completeTutorial();
   }
 
