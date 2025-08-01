@@ -82,48 +82,32 @@
 
 @keyframes iconCelebration {
   0%, 100% {
-    transform: scale(1) rotate(0deg);
+    transform: translateY(0px);
     box-shadow: 0 0 8px rgba(182, 164, 50, 0.5);
   }
-  25% {
-    transform: scale(1.1) rotate(-5deg);
-    box-shadow: 0 0 16px rgba(182, 164, 50, 0.8);
-  }
   50% {
-    transform: scale(1.15) rotate(0deg);
-    box-shadow: 0 0 20px rgba(182, 164, 50, 1);
-  }
-  75% {
-    transform: scale(1.1) rotate(5deg);
-    box-shadow: 0 0 16px rgba(182, 164, 50, 0.8);
+    transform: translateY(-4px);
+    box-shadow: 0 0 12px rgba(182, 164, 50, 0.7);
   }
 }
 
 .icon::before {
   content: '';
   position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(
-    45deg,
-    transparent,
-    rgba(255, 255, 255, 0.1),
-    transparent
-  );
-  animation: iconShine 3s ease-in-out infinite;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  animation: iconPixelGlow 2s ease-in-out infinite;
 }
 
-@keyframes iconShine {
-  0% {
-    transform: translateX(-100%) translateY(-100%) rotate(45deg);
+@keyframes iconPixelGlow {
+  0%, 100% {
+    opacity: 0;
   }
   50% {
-    transform: translateX(0%) translateY(0%) rotate(45deg);
-  }
-  100% {
-    transform: translateX(100%) translateY(100%) rotate(45deg);
+    opacity: 1;
   }
 }
 
@@ -147,10 +131,10 @@
 
 @keyframes titleGlow {
   0%, 100% {
-    text-shadow: 0 0 4px rgba(182, 164, 50, 0.5);
+    text-shadow: 0 0 2px rgba(182, 164, 50, 0.5);
   }
   50% {
-    text-shadow: 0 0 8px rgba(182, 164, 50, 1);
+    text-shadow: 0 0 4px rgba(182, 164, 50, 0.8);
   }
 }
 
@@ -224,11 +208,9 @@
 @keyframes rarityLegendaryPulse {
   0%, 100% {
     box-shadow: 0 0 4px rgba(182, 164, 50, 0.5);
-    transform: scale(1);
   }
   50% {
-    box-shadow: 0 0 12px rgba(182, 164, 50, 1);
-    transform: scale(1.05);
+    box-shadow: 0 0 8px rgba(182, 164, 50, 0.8);
   }
 }
 
@@ -263,15 +245,11 @@
 @keyframes rewardPop {
   0% {
     opacity: 0;
-    transform: scale(0.5) translateY(10px);
-  }
-  60% {
-    opacity: 1;
-    transform: scale(1.1) translateY(-2px);
+    transform: translateY(4px);
   }
   100% {
     opacity: 1;
-    transform: scale(1) translateY(0);
+    transform: translateY(0px);
   }
 }
 
@@ -364,19 +342,11 @@
 @keyframes particleFloat {
   0%, 100% {
     opacity: 0.3;
-    transform: translateY(0) rotate(0deg);
-  }
-  25% {
-    opacity: 0.6;
-    transform: translateY(-5px) rotate(90deg);
+    transform: translateY(0px);
   }
   50% {
-    opacity: 0.8;
-    transform: translateY(-2px) rotate(180deg);
-  }
-  75% {
     opacity: 0.6;
-    transform: translateY(-7px) rotate(270deg);
+    transform: translateY(-3px);
   }
 }
 

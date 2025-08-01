@@ -169,11 +169,11 @@
 @keyframes loadingPulse {
   0%, 100% {
     opacity: 0.3;
-    transform: scale(1);
+    transform: translateY(0px);
   }
   50% {
     opacity: 1;
-    transform: scale(1.2);
+    transform: translateY(-2px);
   }
 }
 
