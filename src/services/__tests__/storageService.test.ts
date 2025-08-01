@@ -100,6 +100,10 @@ describe('StorageService', () => {
       storageService.saveTasks([testTask]);
       storageService.saveUser(testUser);
 
+      // Set Start Here specific localStorage items
+      storageService.setGenericItem('startHereGivenTasks', ['task1', 'task2']);
+      storageService.setGenericItem('startHereGivenHabits', ['habit1', 'habit2']);
+
       // Clear all data
       const result = storageService.clearAllData();
 
@@ -107,6 +111,10 @@ describe('StorageService', () => {
       // Verify scrypture data is cleared
       expect(storageService.getTasks()).toEqual([]);
       expect(storageService.getUser()).toBeNull();
+      
+      // Verify Start Here specific items are also cleared
+      expect(storageService.getGenericItem('startHereGivenTasks')).toBeNull();
+      expect(storageService.getGenericItem('startHereGivenHabits')).toBeNull();
     });
   });
 

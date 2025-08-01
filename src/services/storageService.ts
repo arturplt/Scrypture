@@ -338,6 +338,18 @@ export class StorageService {
       }
     });
 
+    // Also clear Start Here specific localStorage items
+    const startHereKeys = [
+      'startHereGivenTasks',
+      'startHereGivenHabits'
+    ];
+
+    startHereKeys.forEach((key) => {
+      if (!this.removeGenericItem(key)) {
+        success = false;
+      }
+    });
+
     return success;
   }
 
