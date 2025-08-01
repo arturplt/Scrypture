@@ -140,13 +140,20 @@ export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
     return success;
   };
 
+  const refreshHabits = () => {
+    const savedHabits = habitService.getHabits();
+    setHabits(savedHabits);
+  };
+
   const value: HabitContextType = {
     habits,
     addHabit,
     updateHabit,
     deleteHabit,
     completeHabit,
-    isSaving, // <-- add this line
+    isSaving,
+    lastSaved: null,
+    refreshHabits,
   };
 
   return (

@@ -602,6 +602,17 @@
   cursor: not-allowed;
 }
 
+/* Blue button for habit creation */
+.nextButton.habitButton {
+  border-color: var(--color-accent-blue, #007bff);
+  color: var(--color-accent-blue, #007bff);
+}
+
+.nextButton.habitButton:hover:not(:disabled) {
+  background: var(--color-accent-blue, #007bff);
+  color: var(--color-bg-primary);
+}
+
 /* Stats section */
 .statsExplanation {
   margin-bottom: var(--spacing-lg);

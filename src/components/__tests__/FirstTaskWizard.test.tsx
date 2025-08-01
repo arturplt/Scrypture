@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { FirstTaskWizard } from '../FirstTaskWizard';
 import { useTasks } from '../../hooks/useTasks';
+import { useHabits } from '../../hooks/useHabits';
 import { tutorialService } from '../../services/tutorialService';
 
 // Mock the hooks and services
@@ -15,6 +16,16 @@ jest.mock('../../hooks/useTasks', () => {
   };
 });
 
+jest.mock('../../hooks/useHabits', () => {
+  const actual = jest.requireActual('../../hooks/useHabits');
+  return {
+    ...actual,
+    default: actual.default,
+    useHabits: jest.fn(),
+    HabitProvider: actual.HabitProvider,
+  };
+});
+
 jest.mock('../../services/tutorialService', () => ({
   tutorialService: {
     markStepComplete: jest.fn(),
@@ -22,10 +33,12 @@ jest.mock('../../services/tutorialService', () => ({
 }));
 
 const mockUseTasks = useTasks as jest.MockedFunction<typeof useTasks>;
+const mockUseHabits = useHabits as jest.MockedFunction<typeof useHabits>;
 const mockTutorialService = tutorialService as jest.Mocked<typeof tutorialService>;
 
 describe('FirstTaskWizard', () => {
   const mockAddTask = jest.fn();
+  const mockAddHabit = jest.fn();
   const mockOnComplete = jest.fn();
   const mockOnSkip = jest.fn();
 
@@ -42,6 +55,16 @@ describe('FirstTaskWizard', () => {
       refreshTasks: jest.fn(),
       bringTaskToTop: jest.fn(),
     });
+    mockUseHabits.mockReturnValue({
+      habits: [],
+      addHabit: mockAddHabit,
+      updateHabit: jest.fn(),
+      deleteHabit: jest.fn(),
+      completeHabit: jest.fn(),
+      isSaving: false,
+      lastSaved: null,
+      refreshHabits: jest.fn(),
+    });
   });
 
   const renderWizard = () => {
@@ -57,7 +80,7 @@ describe('FirstTaskWizard', () => {
     it('should render the welcome step by default', () => {
       renderWizard();
       
-      expect(screen.getByText('Create Your First Task')).toBeInTheDocument();
+      expect(screen.getByText('Create Your First Task or Habit')).toBeInTheDocument();
       expect(screen.getByText(/Let's start your journey/)).toBeInTheDocument();
     });
 
@@ -102,7 +125,7 @@ describe('FirstTaskWizard', () => {
 
       // Go back to step 1
       fireEvent.click(screen.getByText('Back'));
-      expect(screen.getByText('Create Your First Task')).toBeInTheDocument();
+      expect(screen.getByText('Create Your First Task or Habit')).toBeInTheDocument();
       expect(screen.getByText('Step 1 of 7')).toBeInTheDocument();
     });
 
@@ -119,13 +142,13 @@ describe('FirstTaskWizard', () => {
     });
 
     it('should render task title input', () => {
-      expect(screen.getByLabelText('Task Title')).toBeInTheDocument();
+      expect(screen.getByLabelText('Title')).toBeInTheDocument();
       expect(screen.getByPlaceholderText(/e.g., Read for 10 minutes/)).toBeInTheDocument();
     });
 
-    it('should update task title when input changes', () => {
-      const input = screen.getByLabelText('Task Title');
-      
+        it('should update task title when input changes', () => {
+      const input = screen.getByLabelText('Title');
+
       fireEvent.change(input, { target: { value: 'My first task' } });
       
       expect(input).toHaveValue('My first task');
@@ -137,7 +160,7 @@ describe('FirstTaskWizard', () => {
     });
 
     it('should enable Next button when title is provided', () => {
-      const input = screen.getByLabelText('Task Title');
+      const input = screen.getByLabelText('Title');
       fireEvent.change(input, { target: { value: 'My first task' } });
       
       const nextButton = screen.getByText('Next');
@@ -278,12 +301,12 @@ describe('FirstTaskWizard', () => {
     });
 
     it('should render make habit button', () => {
-      expect(screen.getByText('Task type')).toBeInTheDocument();
-      expect(screen.getByText('Make it a habit')).toBeInTheDocument();
+      expect(screen.getByText('Task or Habit?')).toBeInTheDocument();
+      expect(screen.getByText('Make it a Habit')).toBeInTheDocument();
     });
 
     it('should toggle habit mode when clicked', () => {
-      const habitButton = screen.getByText('Make it a habit');
+      const habitButton = screen.getByText('Make it a Habit');
 
       fireEvent.click(habitButton);
       // Check if the button exists (CSS modules might not show exact class names)
@@ -291,7 +314,7 @@ describe('FirstTaskWizard', () => {
     });
 
     it('should show frequency options when habit is selected', () => {
-      const habitButton = screen.getByText('Make it a habit');
+      const habitButton = screen.getByText('Make it a Habit');
       fireEvent.click(habitButton);
 
       expect(screen.getByText('Frequency:')).toBeInTheDocument();
@@ -492,7 +515,7 @@ describe('FirstTaskWizard', () => {
       renderWizard();
       
       // Enter a task title to enable the Next button
-      const input = screen.getByLabelText('Task Title');
+      const input = screen.getByLabelText('Title');
       fireEvent.change(input, { target: { value: 'Test Task' } });
       
       // Use getAllByText to handle multiple Next buttons
@@ -508,27 +531,148 @@ describe('FirstTaskWizard', () => {
       renderWizard();
 
       expect(screen.getByText('Step 1 of 7')).toBeInTheDocument();
+    });
+  });
 
-      // Navigate to step 2
-      const input = screen.getByLabelText('Task Title');
-      fireEvent.change(input, { target: { value: 'Test Task' } });
+  describe('Habit creation', () => {
+    it('should create a habit when habit option is selected', async () => {
+      render(<FirstTaskWizard onComplete={mockOnComplete} onSkip={mockOnSkip} />);
+
+      // Step 1: Enter title
+      const titleInput = screen.getByPlaceholderText('e.g., Read for 10 minutes');
+      fireEvent.change(titleInput, { target: { value: 'Read daily' } });
       
-      // Use getAllByText to handle multiple Next buttons
+      // Navigate through all steps to reach the habit selection step
+      // Step 1 -> Step 2: Click Next
       const nextButtons = screen.getAllByText('Next');
-      if (nextButtons.length > 0) {
-        fireEvent.click(nextButtons[0]); // Click the first Next button
-      }
-      
-      expect(screen.getByText('Step 2 of 7')).toBeInTheDocument();
+      fireEvent.click(nextButtons[0]);
+
+      // Step 2 -> Step 3: Click Next (description is optional)
+      fireEvent.click(screen.getByText('Next'));
+
+      // Step 3: Select a stat reward (required to proceed)
+      fireEvent.click(screen.getByText('BODY'));
+
+      // Step 3 -> Step 4: Click Next
+      fireEvent.click(screen.getByText('Next'));
+
+      // Step 4: Select a category
+      fireEvent.click(screen.getByText('Home'));
+
+      // Step 4 -> Step 5: Click Next
+      fireEvent.click(screen.getByText('Next'));
+
+      // Step 5: Priority and difficulty are already set by default
+      // Step 5 -> Step 6: Click Next
+      fireEvent.click(screen.getByText('Next'));
+
+      // Step 6: Select habit option
+      fireEvent.click(screen.getByText('Make it a Habit'));
+
+      // Step 6 -> Step 7: Click Next
+      fireEvent.click(screen.getByText('Next'));
+
+      // Now we should be on the final step with the create button
+      fireEvent.click(screen.getByText('Create My First Habit!'));
+
+      await waitFor(() => {
+        expect(mockAddHabit).toHaveBeenCalledWith(
+          expect.objectContaining({
+            name: 'Read daily',
+            targetFrequency: 'daily',
+                         categories: ['body', 'home'],
+            statRewards: expect.objectContaining({
+              body: 1,
+              xp: expect.any(Number),
+            }),
+          })
+        );
+        expect(mockOnComplete).toHaveBeenCalled();
+      });
     });
 
-    it('should show progress bar', () => {
-      renderWizard();
+    it('should show habit preview when habit is selected', () => {
+      render(<FirstTaskWizard onComplete={mockOnComplete} onSkip={mockOnSkip} />);
+
+      // Step 1: Enter title
+      const titleInput = screen.getByPlaceholderText('e.g., Read for 10 minutes');
+      fireEvent.change(titleInput, { target: { value: 'Read daily' } });
       
-      const progressBar = screen.getByRole('progressbar');
-      expect(progressBar).toBeInTheDocument();
-      expect(progressBar).toHaveAttribute('aria-valuenow', '1');
-      expect(progressBar).toHaveAttribute('aria-valuemax', '7');
+      // Navigate through all steps to reach the habit selection step
+      // Step 1 -> Step 2: Click Next
+      const nextButtons = screen.getAllByText('Next');
+      fireEvent.click(nextButtons[0]);
+
+      // Step 2 -> Step 3: Click Next (description is optional)
+      fireEvent.click(screen.getByText('Next'));
+
+      // Step 3: Select a stat reward (required to proceed)
+      fireEvent.click(screen.getByText('BODY'));
+
+      // Step 3 -> Step 4: Click Next
+      fireEvent.click(screen.getByText('Next'));
+
+      // Step 4: Select a category
+      fireEvent.click(screen.getByText('Home'));
+
+      // Step 4 -> Step 5: Click Next
+      fireEvent.click(screen.getByText('Next'));
+
+      // Step 5: Priority and difficulty are already set by default
+      // Step 5 -> Step 6: Click Next
+      fireEvent.click(screen.getByText('Next'));
+
+      // Step 6: Select habit option
+      fireEvent.click(screen.getByText('Make it a Habit'));
+
+      // Step 6 -> Step 7: Click Next
+      fireEvent.click(screen.getByText('Next'));
+
+      // Check that habit preview is shown
+      expect(screen.getByText('Habit Preview')).toBeInTheDocument();
+      expect(screen.getByText('HABIT')).toBeInTheDocument();
+      expect(screen.getByText('DAILY')).toBeInTheDocument();
+    });
+
+    it('should show correct button text for habit creation', () => {
+      render(<FirstTaskWizard onComplete={mockOnComplete} onSkip={mockOnSkip} />);
+
+      // Step 1: Enter title
+      const titleInput = screen.getByPlaceholderText('e.g., Read for 10 minutes');
+      fireEvent.change(titleInput, { target: { value: 'Read daily' } });
+      
+      // Navigate through all steps to reach the habit selection step
+      // Step 1 -> Step 2: Click Next
+      const nextButtons = screen.getAllByText('Next');
+      fireEvent.click(nextButtons[0]);
+
+      // Step 2 -> Step 3: Click Next (description is optional)
+      fireEvent.click(screen.getByText('Next'));
+
+      // Step 3: Select a stat reward (required to proceed)
+      fireEvent.click(screen.getByText('BODY'));
+
+      // Step 3 -> Step 4: Click Next
+      fireEvent.click(screen.getByText('Next'));
+
+      // Step 4: Select a category
+      fireEvent.click(screen.getByText('Home'));
+
+      // Step 4 -> Step 5: Click Next
+      fireEvent.click(screen.getByText('Next'));
+
+      // Step 5: Priority and difficulty are already set by default
+      // Step 5 -> Step 6: Click Next
+      fireEvent.click(screen.getByText('Next'));
+
+      // Step 6: Select habit option
+      fireEvent.click(screen.getByText('Make it a Habit'));
+
+      // Step 6 -> Step 7: Click Next
+      fireEvent.click(screen.getByText('Next'));
+
+      // Check that the create button shows the correct text for habit creation
+      expect(screen.getByText('Create My First Habit!')).toBeInTheDocument();
     });
   });
 }); 

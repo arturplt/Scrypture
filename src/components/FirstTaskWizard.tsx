@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTasks } from '../hooks/useTasks';
+import { useHabits } from '../hooks/useHabits';
 import { tutorialService } from '../services/tutorialService';
 import styles from './FirstTaskWizard.module.css';
 
@@ -20,9 +21,10 @@ export const FirstTaskWizard: React.FC<FirstTaskWizardProps> = ({
   onSkip
 }) => {
   const { addTask } = useTasks();
+  const { addHabit } = useHabits();
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [taskTitle, setTaskTitle] = useState('');
-  const [taskCategory, setTaskCategory] = useState('personal');
+  const [taskCategory] = useState('body');
   const [taskDescription, setTaskDescription] = useState('');
   const [bodyReward, setBodyReward] = useState(0);
   const [mindReward, setMindReward] = useState(0);
@@ -63,8 +65,8 @@ export const FirstTaskWizard: React.FC<FirstTaskWizardProps> = ({
   const steps: WizardStep[] = [
     {
       id: 'welcome',
-      title: 'Create Your First Task',
-      description: 'Let\'s start your journey by creating your very first task! Give your task a clear, specific title.',
+      title: 'Create Your First Task or Habit',
+      description: 'Let\'s start your journey by creating your very first task or habit! Give it a clear, specific title.',
       component: null // Will be set after handlers are defined
     },
     {
@@ -94,12 +96,12 @@ export const FirstTaskWizard: React.FC<FirstTaskWizardProps> = ({
     {
       id: 'taskRewards',
       title: 'Choose stat rewards',
-      description: 'Select which stats you want to improve when you complete this task.',
+      description: 'Select which stats you want to improve when you complete this item.',
       component: (
         <div className={styles.stepContent}>
           <div className={styles.statsSelection}>
             <label className={styles.statsLabel}>
-              Choose rewards for this task:
+              Choose rewards for this item:
             </label>
             <div className={styles.statButtons}>
               <button
@@ -142,7 +144,7 @@ export const FirstTaskWizard: React.FC<FirstTaskWizardProps> = ({
     {
       id: 'taskCategory',
       title: 'Choose a category',
-      description: 'Categories help organize your tasks and group similar activities together.',
+      description: 'Categories help organize your items and group similar activities together.',
       component: (
         <div className={styles.stepContent}>
           <div className={styles.categoryGrid}>
@@ -272,7 +274,7 @@ export const FirstTaskWizard: React.FC<FirstTaskWizardProps> = ({
     },
     {
       id: 'taskType',
-      title: 'Task type',
+      title: 'Task or Habit?',
       description: 'Choose whether this is a one-time task or a habit you want to build.',
       component: (
         <div className={styles.stepContent}>
@@ -283,8 +285,8 @@ export const FirstTaskWizard: React.FC<FirstTaskWizardProps> = ({
               onClick={() => setIsHabit(!isHabit)}
             >
               <div className={styles.makeHabitIcon}>🔄</div>
-              <div className={styles.makeHabitText}>Make it a habit</div>
-            </button>
+              <div className={styles.makeHabitText}>{isHabit ? 'Creating a Habit' : 'Make it a Habit'}</div>
+            </button> 
             
             {isHabit && (
               <div className={styles.frequencySection}>
@@ -323,8 +325,8 @@ export const FirstTaskWizard: React.FC<FirstTaskWizardProps> = ({
     },
     {
       id: 'taskPreview',
-      title: 'Ready to create your task?',
-      description: 'Here\'s what your first task will look like. Once you create it, you can complete it to see Bóbr celebrate!',
+      title: `Ready to create your ${isHabit ? 'habit' : 'task'}?`,
+      description: `Here's what your first ${isHabit ? 'habit' : 'task'} will look like. Once you create it, you can complete it to see Bóbr celebrate!`,
       component: (
         <div className={styles.stepContent}>
           <div className={styles.taskPreview}>
@@ -333,7 +335,7 @@ export const FirstTaskWizard: React.FC<FirstTaskWizardProps> = ({
               <h3 className={styles.previewTitle}>{isHabit ? 'Habit Preview' : 'Task Preview'}</h3>
             </div>
             <div className={styles.previewContent}>
-              <h4 className={styles.previewTaskTitle}>{taskTitle || 'Your task title'}</h4>
+              <h4 className={styles.previewTaskTitle}>{taskTitle || 'Your title'}</h4>
               {taskDescription && (
                 <p className={styles.previewDescription}>{taskDescription}</p>
               )}
@@ -411,7 +413,7 @@ export const FirstTaskWizard: React.FC<FirstTaskWizardProps> = ({
     setIsCreating(true);
     
     try {
-      // Create the task with stat rewards
+      // Create the stat rewards
       const statRewards = {
         ...(bodyReward > 0 && { body: bodyReward }),
         ...(mindReward > 0 && { mind: mindReward }),
@@ -419,23 +421,41 @@ export const FirstTaskWizard: React.FC<FirstTaskWizardProps> = ({
         xp: totalXp, // Calculated XP based on priority and difficulty
       };
 
-      console.log('🎯 Creating first task with stat rewards:', statRewards);
+      console.log('🎯 Creating first item with stat rewards:', statRewards);
 
-      const taskData = {
-        title: taskTitle.trim(),
-        categories: [taskCategory, selectedCategory].filter(Boolean),
-        description: taskDescription.trim() || undefined,
-        priority,
-        difficulty,
-        completed: false,
-        isHabit,
-        habitFrequency: isHabit ? habitFrequency : undefined,
-        statRewards,
-      };
+      if (isHabit) {
+        // Create a habit instead of a task
+        const habitData = {
+          name: taskTitle.trim(),
+          description: taskDescription.trim() || undefined,
+          targetFrequency: habitFrequency,
+          categories: [taskCategory, selectedCategory].filter(Boolean),
+          statRewards,
+        };
 
-      console.log('📝 Task data being created:', taskData);
-      const createdTask = addTask(taskData);
-      console.log('✅ Task created:', createdTask);
+        console.log('🔄 Habit data being created:', habitData);
+        const createdHabit = addHabit(habitData);
+        console.log('✅ Habit created:', createdHabit);
+        
+        if (!createdHabit) {
+          throw new Error('Failed to create habit');
+        }
+      } else {
+        // Create a regular task
+        const taskData = {
+          title: taskTitle.trim(),
+          categories: [taskCategory, selectedCategory].filter(Boolean),
+          description: taskDescription.trim() || undefined,
+          priority,
+          difficulty,
+          completed: false,
+          statRewards,
+        };
+
+        console.log('📝 Task data being created:', taskData);
+        const createdTask = addTask(taskData);
+        console.log('✅ Task created:', createdTask);
+      }
       
       // Mark tutorial step as complete
       tutorialService.markStepComplete('firstTask');
@@ -447,7 +467,7 @@ export const FirstTaskWizard: React.FC<FirstTaskWizardProps> = ({
       }, 1000);
       
     } catch (error) {
-      console.error('Error creating first task:', error);
+      console.error('Error creating first item:', error);
       setIsCreating(false);
     }
   };
@@ -467,7 +487,7 @@ export const FirstTaskWizard: React.FC<FirstTaskWizardProps> = ({
         />
       </div>
       <div className={styles.inputGroup}>
-        <label className={styles.label} htmlFor="task-title-input">Task Title</label>
+        <label className={styles.label} htmlFor="task-title-input">Title</label>
         <div className={styles.titleInputContainer}>
           <input
             id="task-title-input"
@@ -503,7 +523,7 @@ export const FirstTaskWizard: React.FC<FirstTaskWizardProps> = ({
       </div>
       <div className={styles.tipBox}>
         <span className={styles.tipIcon}>💡</span>
-        <p>Tasks are the building blocks of your progress. Each task you complete helps build your mystical dam with Bóbr!</p>
+        <p>Tasks and habits are the building blocks of your progress. Each one you complete helps build your mystical dam with Bóbr!</p>
       </div>
     </div>
   );
@@ -550,14 +570,14 @@ export const FirstTaskWizard: React.FC<FirstTaskWizardProps> = ({
               </button>
               
               <button 
-                className={`${styles.nextButton} ${!canProceed ? styles.disabled : ''}`}
+                className={`${styles.nextButton} ${!canProceed ? styles.disabled : ''} ${isHabit && isLastStep ? styles.habitButton : ''}`}
                 onClick={handleNext}
                 disabled={!canProceed || isCreating}
               >
                 {isCreating ? (
                   <span>Creating...</span>
                 ) : isLastStep ? (
-                  'Create My First Task!'
+                  isHabit ? 'Create My First Habit!' : 'Create My First Task!'
                 ) : (
                   'Next'
                 )}
