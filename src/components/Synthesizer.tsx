@@ -339,6 +339,178 @@ export const Synthesizer: React.FC<SynthesizerProps> = ({ isOpen, onClose }) => 
 
             <h1>8-BIT SYNTHESIZER</h1>
 
+            {/* 🎛️ SEQUENCER SECTION */}
+            <CollapsibleSection title="🎛️ Step Sequencer" defaultCollapsed={false}>
+              <div className={styles.sequencerSection}>
+                {/* Sequencer Controls */}
+                <div className={styles.sequencerControls}>
+                  <div className={styles.sequencerControlGroup}>
+                    <label>BPM: {synth.state.bpm}</label>
+                    <input
+                      type="range"
+                      min="60"
+                      max="200"
+                      value={synth.state.bpm}
+                      onChange={(e) => synth.updateState({ bpm: parseInt(e.target.value) })}
+                      className={styles.bpmSlider}
+                    />
+                  </div>
+                  
+                  <div className={styles.sequencerControlGroup}>
+                    <label>Steps: {synth.state.steps}</label>
+                    <select
+                      value={synth.state.steps}
+                      onChange={(e) => synth.updateState({ steps: parseInt(e.target.value) })}
+                      className={styles.stepsSelect}
+                    >
+                      <option value={8}>8</option>
+                      <option value={16}>16</option>
+                      <option value={32}>32</option>
+                    </select>
+                  </div>
+                  
+                  <div className={styles.sequencerButtons}>
+                    <button
+                      onClick={synth.state.isPlaying ? synth.stopSequence : synth.playSequence}
+                      className={`${styles.sequencerBtn} ${synth.state.isPlaying ? styles.playing : ''}`}
+                    >
+                      {synth.state.isPlaying ? '⏹️ Stop' : '▶️ Play'}
+                    </button>
+                    <button onClick={synth.clearSequence} className={styles.sequencerBtn}>
+                      🗑️ Clear
+                    </button>
+                    <button
+                      onClick={synth.toggleDrawMode}
+                      className={`${styles.sequencerBtn} ${synth.state.drawMode ? styles.active : ''}`}
+                    >
+                      ✏️ Draw Mode
+                    </button>
+                  </div>
+                </div>
+
+                {/* Pattern Loading */}
+                <div className={styles.patternSection}>
+                  <h4>Quick Patterns (Press 0-9):</h4>
+                  <div className={styles.patternButtons}>
+                    {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
+                      <button
+                        key={num}
+                        onClick={() => synth.loadPattern(num)}
+                        className={styles.patternBtn}
+                      >
+                        {num}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Sequencer Grid */}
+                <div className={styles.sequencerGrid}>
+                  <div className={styles.sequencerHeader}>
+                    <div className={styles.trackHeader}>Track</div>
+                    {Array.from({ length: synth.state.steps }, (_, i) => (
+                      <div key={i} className={`${styles.stepHeader} ${synth.state.currentStep === i ? styles.currentStep : ''}`}>
+                        {i + 1}
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {SEQUENCER_TRACKS.slice(0, 12).map((track, trackIndex) => (
+                    <div key={trackIndex} className={styles.sequencerRow}>
+                      <div className={styles.trackLabel}>{track.note}</div>
+                      {Array.from({ length: synth.state.steps }, (_, stepIndex) => (
+                        <div
+                          key={stepIndex}
+                          className={`${styles.sequencerStep} ${
+                            synth.sequence[track.note]?.[stepIndex] ? styles.active : ''
+                          } ${synth.state.currentStep === stepIndex ? styles.currentStep : ''}`}
+                          onClick={() => handleStepClick(track.note, stepIndex)}
+                          onMouseEnter={() => handleStepMouseEnter(track.note, stepIndex)}
+                        />
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </CollapsibleSection>
+
+            {/* 🎼 CHORD PROGRESSIONS SECTION */}
+            <CollapsibleSection title="🎼 Chord Progressions">
+              <div className={styles.progressionsSection}>
+                {/* Classic Progressions */}
+                <div className={styles.progressionGroup}>
+                  <h4>🎵 Classic Progressions</h4>
+                  <div className={styles.progressionButtons}>
+                    {Object.entries(CHORD_PROGRESSIONS)
+                      .filter(([key]) => ['I-IV-V', 'ii-V-I', 'I-V-vi-IV', 'vi-IV-I-V', 'I-vi-ii-V', 'ii-vi-I-V'].includes(key))
+                      .map(([key, progression]) => (
+                        <button
+                          key={key}
+                          onClick={() => synth.playProgression(key)}
+                          className={styles.progressionBtn}
+                        >
+                          {progression.name}
+                        </button>
+                      ))}
+                  </div>
+                </div>
+
+                {/* Jazz Progressions */}
+                <div className={styles.progressionGroup}>
+                  <h4>🎷 Jazz Progressions</h4>
+                  <div className={styles.progressionButtons}>
+                    {Object.entries(CHORD_PROGRESSIONS)
+                      .filter(([key]) => key.includes('Jazz'))
+                      .map(([key, progression]) => (
+                        <button
+                          key={key}
+                          onClick={() => synth.playProgression(key)}
+                          className={styles.progressionBtn}
+                        >
+                          {progression.name}
+                        </button>
+                      ))}
+                  </div>
+                </div>
+
+                {/* Pop Progressions */}
+                <div className={styles.progressionGroup}>
+                  <h4>🎵 Pop Progressions</h4>
+                  <div className={styles.progressionButtons}>
+                    {Object.entries(CHORD_PROGRESSIONS)
+                      .filter(([key]) => key.includes('Pop'))
+                      .map(([key, progression]) => (
+                        <button
+                          key={key}
+                          onClick={() => synth.playProgression(key)}
+                          className={styles.progressionBtn}
+                        >
+                          {progression.name}
+                        </button>
+                      ))}
+                  </div>
+                </div>
+
+                {/* Mood-Based Progressions */}
+                <div className={styles.progressionGroup}>
+                  <h4>😊 Mood-Based Progressions</h4>
+                  <div className={styles.progressionButtons}>
+                    {Object.entries(CHORD_PROGRESSIONS)
+                      .filter(([key]) => ['Happy', 'Sad', 'Tense', 'Dreamy', 'Mysterious', 'Peaceful', 'Energetic', 'Melancholic'].includes(key))
+                      .map(([key, progression]) => (
+                        <button
+                          key={key}
+                          onClick={() => synth.playProgression(key)}
+                          className={styles.progressionBtn}
+                        >
+                          {progression.name}
+                        </button>
+                      ))}
+                  </div>
+                </div>
+              </div>
+            </CollapsibleSection>
+
             <CollapsibleSection title="🎯 Circle of Fifths">
               <div className={styles.circleOfFifthsGrid}>
                 {CIRCLE_OF_FIFTHS.map((circleKey, index) => {
@@ -469,7 +641,99 @@ export const Synthesizer: React.FC<SynthesizerProps> = ({ isOpen, onClose }) => 
               ))}
             </div>
 
-            {/* Add more sections here as needed */}
+            {/* 🎛️ ADVANCED CONTROLS SECTION */}
+            <CollapsibleSection title="🎛️ Advanced Controls">
+              <div className={styles.advancedControls}>
+                {/* LFO Controls */}
+                <div className={styles.controlGroup}>
+                  <h4>LFO (Low-Frequency Oscillator)</h4>
+                  <SliderControl
+                    label="LFO Rate"
+                    value={synth.state.lfoRate}
+                    min={0}
+                    max={10}
+                    step={0.1}
+                    onChange={(value) => synth.updateState({ lfoRate: value })}
+                    showValue
+                    valueDisplay={`${synth.state.lfoRate.toFixed(1)}Hz`}
+                    isLive={true}
+                    resetFunction={synth.resetLfoRate}
+                    defaultValue={0}
+                  />
+                  <SliderControl
+                    label="LFO Depth"
+                    value={synth.state.lfoDepth}
+                    min={0}
+                    max={50}
+                    onChange={(value) => synth.updateState({ lfoDepth: value })}
+                    showValue
+                    isLive={true}
+                    resetFunction={synth.resetLfoDepth}
+                    defaultValue={5}
+                  />
+                  <div className={styles.section}>
+                    <label>LFO Target</label>
+                    <div className={styles.lfoTargetButtons}>
+                      {(['pitch', 'volume', 'filter'] as const).map(target => (
+                        <button
+                          key={target}
+                          onClick={() => synth.updateState({ lfoTarget: target })}
+                          className={`${styles.lfoTargetBtn} ${synth.state.lfoTarget === target ? styles.active : ''}`}
+                        >
+                          {target.charAt(0).toUpperCase() + target.slice(1)}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Arpeggiator Controls */}
+                <div className={styles.controlGroup}>
+                  <h4>Arpeggiator</h4>
+                  <div className={styles.section}>
+                    <label>Mode</label>
+                    <div className={styles.arpeggiatorButtons}>
+                      {(['off', 'up', 'down', 'updown', 'random'] as const).map(mode => (
+                        <button
+                          key={mode}
+                          onClick={() => synth.setArpeggiatorMode(mode)}
+                          className={`${styles.arpeggiatorBtn} ${synth.state.arpeggiatorMode === mode ? styles.active : ''}`}
+                        >
+                          {mode.charAt(0).toUpperCase() + mode.slice(1)}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <SliderControl
+                    label="Arpeggiator Rate"
+                    value={synth.state.arpeggiatorRate}
+                    min={1}
+                    max={16}
+                    onChange={(value) => synth.updateState({ arpeggiatorRate: value })}
+                    showValue
+                    isLive={true}
+                    resetFunction={synth.resetArpeggiatorRate}
+                    defaultValue={8}
+                  />
+                </div>
+
+                {/* Preset Loading */}
+                <div className={styles.controlGroup}>
+                  <h4>Presets</h4>
+                  <div className={styles.presetButtons}>
+                    {Object.keys(PRESETS).slice(0, 8).map(presetName => (
+                      <button
+                        key={presetName}
+                        onClick={() => synth.loadPreset(presetName)}
+                        className={styles.presetBtn}
+                      >
+                        {presetName.charAt(0).toUpperCase() + presetName.slice(1)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </CollapsibleSection>
             
             <SliderControl
               label="Volume"
