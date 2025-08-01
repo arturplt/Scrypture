@@ -721,7 +721,7 @@ export const Synthesizer: React.FC<SynthesizerProps> = ({ isOpen, onClose }) => 
                 <div className={styles.controlGroup}>
                   <h4>Presets</h4>
                   <div className={styles.presetButtons}>
-                    {Object.keys(PRESETS).slice(0, 8).map(presetName => (
+                    {Object.keys(PRESETS).slice(0, 12).map(presetName => (
                       <button
                         key={presetName}
                         onClick={() => synth.loadPreset(presetName)}
@@ -732,6 +732,333 @@ export const Synthesizer: React.FC<SynthesizerProps> = ({ isOpen, onClose }) => 
                     ))}
                   </div>
                 </div>
+              </div>
+            </CollapsibleSection>
+
+            {/* 🎛️ EFFECTS SECTION */}
+            <CollapsibleSection title="🎛️ Effects" defaultCollapsed={false}>
+              <div className={styles.effectsControls}>
+                
+                {/* Delay Effect */}
+                <CollapsibleSection title="⏱️ Delay" defaultCollapsed={true}>
+                  <div className={styles.controlGroup}>
+                    <div className={styles.section}>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={synth.state.delayEnabled}
+                          onChange={(e) => synth.updateState({ delayEnabled: e.target.checked })}
+                        />
+                        Enable Delay
+                      </label>
+                    </div>
+                    <SliderControl
+                      label="Delay Time"
+                      value={synth.state.delayTime}
+                      min={0.1}
+                      max={2.0}
+                      step={0.1}
+                      onChange={(value) => synth.updateState({ delayTime: value })}
+                      showValue
+                      valueDisplay={`${synth.state.delayTime.toFixed(1)}s`}
+                      isLive={true}
+                      resetFunction={() => synth.updateState({ delayTime: 0.5 })}
+                      defaultValue={0.5}
+                    />
+                    <SliderControl
+                      label="Delay Feedback"
+                      value={synth.state.delayFeedback}
+                      min={0}
+                      max={0.9}
+                      step={0.1}
+                      onChange={(value) => synth.updateState({ delayFeedback: value })}
+                      showValue
+                      valueDisplay={`${(synth.state.delayFeedback * 100).toFixed(0)}%`}
+                      isLive={true}
+                      resetFunction={() => synth.updateState({ delayFeedback: 0.3 })}
+                      defaultValue={0.3}
+                    />
+                    <SliderControl
+                      label="Delay Mix"
+                      value={synth.state.delayMix}
+                      min={0}
+                      max={1}
+                      step={0.1}
+                      onChange={(value) => synth.updateState({ delayMix: value })}
+                      showValue
+                      valueDisplay={`${(synth.state.delayMix * 100).toFixed(0)}%`}
+                      isLive={true}
+                      resetFunction={() => synth.updateState({ delayMix: 0.5 })}
+                      defaultValue={0.5}
+                    />
+                  </div>
+                </CollapsibleSection>
+
+                {/* Chorus Effect */}
+                <CollapsibleSection title="🎵 Chorus" defaultCollapsed={true}>
+                  <div className={styles.controlGroup}>
+                    <div className={styles.section}>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={synth.state.chorusEnabled}
+                          onChange={(e) => synth.updateState({ chorusEnabled: e.target.checked })}
+                        />
+                        Enable Chorus
+                      </label>
+                    </div>
+                    <SliderControl
+                      label="Chorus Rate"
+                      value={synth.state.chorusRate}
+                      min={0.1}
+                      max={10}
+                      step={0.1}
+                      onChange={(value) => synth.updateState({ chorusRate: value })}
+                      showValue
+                      valueDisplay={`${synth.state.chorusRate.toFixed(1)}Hz`}
+                      isLive={true}
+                      resetFunction={() => synth.updateState({ chorusRate: 1.5 })}
+                      defaultValue={1.5}
+                    />
+                    <SliderControl
+                      label="Chorus Depth"
+                      value={synth.state.chorusDepth}
+                      min={0}
+                      max={1}
+                      step={0.1}
+                      onChange={(value) => synth.updateState({ chorusDepth: value })}
+                      showValue
+                      valueDisplay={`${(synth.state.chorusDepth * 100).toFixed(0)}%`}
+                      isLive={true}
+                      resetFunction={() => synth.updateState({ chorusDepth: 0.3 })}
+                      defaultValue={0.3}
+                    />
+                    <SliderControl
+                      label="Chorus Mix"
+                      value={synth.state.chorusMix}
+                      min={0}
+                      max={1}
+                      step={0.1}
+                      onChange={(value) => synth.updateState({ chorusMix: value })}
+                      showValue
+                      valueDisplay={`${(synth.state.chorusMix * 100).toFixed(0)}%`}
+                      isLive={true}
+                      resetFunction={() => synth.updateState({ chorusMix: 0.5 })}
+                      defaultValue={0.5}
+                    />
+                  </div>
+                </CollapsibleSection>
+
+                {/* Distortion Effect */}
+                <CollapsibleSection title="🔥 Distortion" defaultCollapsed={true}>
+                  <div className={styles.controlGroup}>
+                    <div className={styles.section}>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={synth.state.distortionEnabled}
+                          onChange={(e) => synth.updateState({ distortionEnabled: e.target.checked })}
+                        />
+                        Enable Distortion
+                      </label>
+                    </div>
+                    <div className={styles.section}>
+                      <label>Distortion Type</label>
+                      <div className={styles.distortionTypeButtons}>
+                        {(['soft', 'hard', 'bitcrusher'] as const).map(type => (
+                          <button
+                            key={type}
+                            onClick={() => synth.updateState({ distortionType: type })}
+                            className={`${styles.distortionTypeBtn} ${synth.state.distortionType === type ? styles.active : ''}`}
+                          >
+                            {type.charAt(0).toUpperCase() + type.slice(1)}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <SliderControl
+                      label="Distortion Amount"
+                      value={synth.state.distortionAmount}
+                      min={0}
+                      max={1}
+                      step={0.1}
+                      onChange={(value) => synth.updateState({ distortionAmount: value })}
+                      showValue
+                      valueDisplay={`${(synth.state.distortionAmount * 100).toFixed(0)}%`}
+                      isLive={true}
+                      resetFunction={() => synth.updateState({ distortionAmount: 0.5 })}
+                      defaultValue={0.5}
+                    />
+                  </div>
+                </CollapsibleSection>
+
+                {/* Filter Effect */}
+                <CollapsibleSection title="🎚️ Filter" defaultCollapsed={true}>
+                  <div className={styles.controlGroup}>
+                    <div className={styles.section}>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={synth.state.filterEnabled}
+                          onChange={(e) => synth.updateState({ filterEnabled: e.target.checked })}
+                        />
+                        Enable Filter
+                      </label>
+                    </div>
+                    <div className={styles.section}>
+                      <label>Filter Type</label>
+                      <div className={styles.filterTypeButtons}>
+                        {(['lowpass', 'highpass', 'bandpass', 'notch'] as const).map(type => (
+                          <button
+                            key={type}
+                            onClick={() => synth.updateState({ filterType: type })}
+                            className={`${styles.filterTypeBtn} ${synth.state.filterType === type ? styles.active : ''}`}
+                          >
+                            {type.charAt(0).toUpperCase() + type.slice(1)}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <SliderControl
+                      label="Filter Frequency"
+                      value={synth.state.filterFrequency}
+                      min={20}
+                      max={20000}
+                      step={1}
+                      onChange={(value) => synth.updateState({ filterFrequency: value })}
+                      showValue
+                      valueDisplay={`${synth.state.filterFrequency.toFixed(0)}Hz`}
+                      isLive={true}
+                      resetFunction={() => synth.updateState({ filterFrequency: 1000 })}
+                      defaultValue={1000}
+                    />
+                    <SliderControl
+                      label="Filter Resonance"
+                      value={synth.state.filterResonance}
+                      min={0}
+                      max={20}
+                      step={0.1}
+                      onChange={(value) => synth.updateState({ filterResonance: value })}
+                      showValue
+                      valueDisplay={`${synth.state.filterResonance.toFixed(1)}`}
+                      isLive={true}
+                      resetFunction={() => synth.updateState({ filterResonance: 1 })}
+                      defaultValue={1}
+                    />
+                  </div>
+                </CollapsibleSection>
+
+                {/* Compression Effect */}
+                <CollapsibleSection title="📊 Compression" defaultCollapsed={true}>
+                  <div className={styles.controlGroup}>
+                    <div className={styles.section}>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={synth.state.compressionEnabled}
+                          onChange={(e) => synth.updateState({ compressionEnabled: e.target.checked })}
+                        />
+                        Enable Compression
+                      </label>
+                    </div>
+                    <SliderControl
+                      label="Compression Threshold"
+                      value={synth.state.compressionThreshold}
+                      min={-60}
+                      max={0}
+                      step={1}
+                      onChange={(value) => synth.updateState({ compressionThreshold: value })}
+                      showValue
+                      valueDisplay={`${synth.state.compressionThreshold}dB`}
+                      isLive={true}
+                      resetFunction={() => synth.updateState({ compressionThreshold: -20 })}
+                      defaultValue={-20}
+                    />
+                    <SliderControl
+                      label="Compression Ratio"
+                      value={synth.state.compressionRatio}
+                      min={1}
+                      max={20}
+                      step={0.1}
+                      onChange={(value) => synth.updateState({ compressionRatio: value })}
+                      showValue
+                      valueDisplay={`${synth.state.compressionRatio.toFixed(1)}:1`}
+                      isLive={true}
+                      resetFunction={() => synth.updateState({ compressionRatio: 4 })}
+                      defaultValue={4}
+                    />
+                    <SliderControl
+                      label="Compression Attack"
+                      value={synth.state.compressionAttack}
+                      min={0.001}
+                      max={1}
+                      step={0.001}
+                      onChange={(value) => synth.updateState({ compressionAttack: value })}
+                      showValue
+                      valueDisplay={`${(synth.state.compressionAttack * 1000).toFixed(1)}ms`}
+                      isLive={true}
+                      resetFunction={() => synth.updateState({ compressionAttack: 0.003 })}
+                      defaultValue={0.003}
+                    />
+                    <SliderControl
+                      label="Compression Release"
+                      value={synth.state.compressionRelease}
+                      min={0.001}
+                      max={1}
+                      step={0.001}
+                      onChange={(value) => synth.updateState({ compressionRelease: value })}
+                      showValue
+                      valueDisplay={`${(synth.state.compressionRelease * 1000).toFixed(1)}ms`}
+                      isLive={true}
+                      resetFunction={() => synth.updateState({ compressionRelease: 0.25 })}
+                      defaultValue={0.25}
+                    />
+                  </div>
+                </CollapsibleSection>
+
+                {/* Stereo Effects */}
+                <CollapsibleSection title="🎧 Stereo Effects" defaultCollapsed={true}>
+                  <div className={styles.controlGroup}>
+                    <SliderControl
+                      label="Stereo Width"
+                      value={synth.state.stereoWidth}
+                      min={0}
+                      max={2}
+                      step={0.1}
+                      onChange={(value) => synth.updateState({ stereoWidth: value })}
+                      showValue
+                      valueDisplay={`${synth.state.stereoWidth.toFixed(1)}x`}
+                      isLive={true}
+                      resetFunction={() => synth.updateState({ stereoWidth: 1 })}
+                      defaultValue={1}
+                    />
+                    <div className={styles.section}>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={synth.state.panningEnabled}
+                          onChange={(e) => synth.updateState({ panningEnabled: e.target.checked })}
+                        />
+                        Enable Panning
+                      </label>
+                    </div>
+                    <SliderControl
+                      label="Panning Amount"
+                      value={synth.state.panningAmount}
+                      min={-1}
+                      max={1}
+                      step={0.1}
+                      onChange={(value) => synth.updateState({ panningAmount: value })}
+                      showValue
+                      valueDisplay={synth.state.panningAmount === 0 ? 'Center' : 
+                        synth.state.panningAmount > 0 ? `Right ${(synth.state.panningAmount * 100).toFixed(0)}%` : 
+                        `Left ${(Math.abs(synth.state.panningAmount) * 100).toFixed(0)}%`}
+                      isLive={true}
+                      resetFunction={() => synth.updateState({ panningAmount: 0 })}
+                      defaultValue={0}
+                    />
+                  </div>
+                </CollapsibleSection>
               </div>
             </CollapsibleSection>
             

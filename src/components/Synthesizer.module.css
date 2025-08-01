@@ -1664,4 +1664,159 @@
 .arpeggiatorBtn.active {
   background: var(--color-accent-gold);
   color: var(--color-bg-primary);
+}
+
+/* Effects Controls Styles */
+.effectsControls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-md);
+  width: 100%;
+}
+
+.effectsControls .controlGroup {
+  background: var(--color-bg-tertiary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: var(--border-radius-sm);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.effectsControls .controlGroup h4 {
+  color: var(--color-accent-gold);
+  font-family: 'Press Start 2P', monospace;
+  font-size: var(--font-size-sm);
+  margin: 0 0 var(--spacing-md) 0;
+  text-align: center;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+}
+
+/* Distortion Type Buttons */
+.distortionTypeButtons {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.distortionTypeBtn {
+  flex: 1;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: var(--border-radius-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-family: 'Press Start 2P', monospace;
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+}
+
+.distortionTypeBtn:hover {
+  background: var(--color-border-secondary);
+  border-color: var(--color-accent-gold);
+}
+
+.distortionTypeBtn.active {
+  background: var(--color-accent-gold);
+  color: var(--color-bg-primary);
+  box-shadow: var(--shadow-active);
+}
+
+/* Filter Type Buttons */
+.filterTypeButtons {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.filterTypeBtn {
+  flex: 1;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: var(--border-radius-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-family: 'Press Start 2P', monospace;
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+}
+
+.filterTypeBtn:hover {
+  background: var(--color-border-secondary);
+  border-color: var(--color-accent-gold);
+}
+
+.filterTypeBtn.active {
+  background: var(--color-accent-gold);
+  color: var(--color-bg-primary);
+  box-shadow: var(--shadow-active);
+}
+
+/* Effect Enable/Disable Checkboxes */
+.effectsControls .section input[type="checkbox"] {
+  margin-right: var(--spacing-sm);
+  transform: scale(1.2);
+  accent-color: var(--color-accent-gold);
+}
+
+/* Ensure collapsible sections within effects fill container */
+.effectsControls .collapsible {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.effectsControls .collapsible .sectionHeader {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.effectsControls .collapsible .sectionContent {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Ensure all sections within effects fill width */
+.effectsControls .section {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.effectsControls .section label {
+  display: flex;
+  align-items: center;
+  color: var(--color-text-primary);
+  font-family: 'Press Start 2P', monospace;
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+}
+
+/* Effect Status Indicators */
+.effectStatus {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-left: var(--spacing-sm);
+  transition: all var(--transition-fast);
+}
+
+.effectStatus.enabled {
+  background: var(--color-easy);
+  box-shadow: 0 0 4px var(--color-easy-border);
+}
+
+.effectStatus.disabled {
+  background: var(--color-urgent);
+  box-shadow: 0 0 4px var(--color-urgent-border);
 } 

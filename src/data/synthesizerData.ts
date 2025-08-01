@@ -279,7 +279,7 @@ export const PRESETS: Record<string, Preset> = {
   piano: {
     name: 'piano',
     waveform: 'sine',
-    volume: 5,
+    volume: 60, // Updated for new volume scale
     attack: 5,
     release: 20,
     detune: 0,
@@ -301,7 +301,7 @@ export const PRESETS: Record<string, Preset> = {
   bass: {
     name: 'bass',
     waveform: 'square',
-    volume: 8,
+    volume: 70, // Updated for new volume scale
     attack: 1,
     release: 50,
     detune: 0,
@@ -326,7 +326,7 @@ export const PRESETS: Record<string, Preset> = {
   lead: {
     name: 'lead',
     waveform: 'sawtooth',
-    volume: 6,
+    volume: 65, // Updated for new volume scale
     attack: 2,
     release: 15,
     detune: 5,
@@ -350,7 +350,7 @@ export const PRESETS: Record<string, Preset> = {
   pad: {
     name: 'pad',
     waveform: 'sine',
-    volume: 3,
+    volume: 40, // Updated for new volume scale
     attack: 100,
     release: 100,
     detune: 10,
@@ -372,7 +372,7 @@ export const PRESETS: Record<string, Preset> = {
   pluck: {
     name: 'pluck',
     waveform: 'square',
-    volume: 7,
+    volume: 75, // Updated for new volume scale
     attack: 1,
     release: 5,
     detune: 0,
@@ -393,7 +393,7 @@ export const PRESETS: Record<string, Preset> = {
   bell: {
     name: 'bell',
     waveform: 'triangle',
-    volume: 30,
+    volume: 80, // Updated for new volume scale
     attack: 1,
     release: 80,
     detune: 0,
@@ -415,7 +415,7 @@ export const PRESETS: Record<string, Preset> = {
   chord: {
     name: 'chord',
     waveform: 'sine',
-    volume: 5,
+    volume: 55, // Updated for new volume scale
     attack: 10,
     release: 60,
     detune: 5,
@@ -437,7 +437,7 @@ export const PRESETS: Record<string, Preset> = {
   arp: {
     name: 'arp',
     waveform: 'square',
-    volume: 6,
+    volume: 70, // Updated for new volume scale
     attack: 1,
     release: 10,
     detune: 0,
@@ -460,7 +460,7 @@ export const PRESETS: Record<string, Preset> = {
   'achievement-common': {
     name: 'achievement-common',
     waveform: 'sine',
-    volume: 5,
+    volume: 60, // Updated for new volume scale
     attack: 1,
     release: 15,
     detune: 0,
@@ -486,7 +486,7 @@ export const PRESETS: Record<string, Preset> = {
   'achievement-rare': {
     name: 'achievement-rare',
     waveform: 'triangle',
-    volume: 6,
+    volume: 70, // Updated for new volume scale
     attack: 2,
     release: 25,
     detune: 5,
@@ -512,7 +512,7 @@ export const PRESETS: Record<string, Preset> = {
   'achievement-legendary': {
     name: 'achievement-legendary',
     waveform: 'sawtooth',
-    volume: 7,
+    volume: 80, // Updated for new volume scale
     attack: 5,
     release: 40,
     detune: 10,

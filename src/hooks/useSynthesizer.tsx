@@ -11,7 +11,7 @@ import { CHORDS, CHORD_PROGRESSIONS, PRESETS, NUMBER_KEY_PATTERNS, RHYTHM_PATTER
 
 const initialState: SynthesizerState = {
   waveform: 'sine',
-  volume: 1,
+  volume: 50, // Increased default volume from 1 to 50 for better initial loudness
   attack: 1,
   release: 10,
   detune: 0,
@@ -223,9 +223,9 @@ export const useSynthesizer = (): SynthesizerContextType => {
   // Update volume when state changes with anti-clipping protection
   useEffect(() => {
     if (masterGainRef.current) {
-      // Apply volume with much more conservative scaling
-      // 1% = 0.01, 50% = 0.25, 100% = 0.5 (max)
-      const safeVolume = Math.min(state.volume / 200, 0.5); // Much more conservative scaling
+      // Apply volume with proper scaling - much louder now
+      // 1% = 0.01, 50% = 0.5, 100% = 1.0 (max)
+      const safeVolume = Math.min(state.volume / 100, 1.0); // Proper scaling for full volume range
       masterGainRef.current.gain.value = safeVolume;
     }
   }, [state.volume]);
@@ -386,8 +386,8 @@ export const useSynthesizer = (): SynthesizerContextType => {
 
   // Calculate optimal gain to prevent clipping based on number of notes
   const calculateOptimalGain = useCallback((numNotes: number): number => {
-    // Base gain for single notes - much more conservative to prevent clipping
-    const baseGain = 0.3;
+    // Base gain for single notes - increased for better volume
+    const baseGain = 0.6; // Increased from 0.3 to 0.6 for louder output
     
     // Reduce gain logarithmically as more notes are added
     // This prevents the sum of multiple sine waves from clipping
