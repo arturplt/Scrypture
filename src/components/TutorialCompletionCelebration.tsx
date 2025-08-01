@@ -27,24 +27,7 @@ export const TutorialCompletionCelebration: React.FC<TutorialCompletionCelebrati
             You've completed the Scrypture tutorial!
           </div>
           
-          <div className={styles.achievementGrid}>
-            <div className={styles.achievementItem}>
-              <span className={styles.achievementIcon}>🦫</span>
-              <span className={styles.achievementText}>Met your companion Bóbr</span>
-            </div>
-            <div className={styles.achievementItem}>
-              <span className={styles.achievementIcon}>📝</span>
-              <span className={styles.achievementText}>Created your first task</span>
-            </div>
-            <div className={styles.achievementItem}>
-              <span className={styles.achievementIcon}>🏗️</span>
-              <span className={styles.achievementText}>Started building your mystical dam</span>
-            </div>
-            <div className={styles.achievementItem}>
-              <span className={styles.achievementIcon}>🌱</span>
-              <span className={styles.achievementText}>Began your journey of growth</span>
-            </div>
-          </div>
+
           
           <div className={styles.unlockedFeatures}>
             <h3 className={styles.featuresTitle}>Features Now Available:</h3>
@@ -80,8 +63,7 @@ export const TutorialCompletionCelebration: React.FC<TutorialCompletionCelebrati
                 className={styles.bobrAvatar}
               />
               <div className={styles.messageText}>
-                "Great job! I'm excited to grow alongside you. Every task you complete 
-                helps us build something amazing together. Let's start this journey!"
+                "Great job! Let's start this journey together!"
               </div>
             </div>
           </div>

@@ -84,7 +84,7 @@ describe('TutorialCompletionCelebration', () => {
   });
 
   describe('Achievement grid', () => {
-    it('should display all tutorial achievements', () => {
+    it('should not display tutorial achievements (removed)', () => {
       const user = createMockUser();
       render(
         <TutorialCompletionCelebration
@@ -93,13 +93,13 @@ describe('TutorialCompletionCelebration', () => {
         />
       );
 
-      expect(screen.getByText('Met your companion Bóbr')).toBeInTheDocument();
-      expect(screen.getByText('Created your first task')).toBeInTheDocument();
-      expect(screen.getByText('Started building your mystical dam')).toBeInTheDocument();
-      expect(screen.getByText('Began your journey of growth')).toBeInTheDocument();
+      expect(screen.queryByText('Met your companion Bóbr')).not.toBeInTheDocument();
+      expect(screen.queryByText('Created your first task')).not.toBeInTheDocument();
+      expect(screen.queryByText('Started building your mystical dam')).not.toBeInTheDocument();
+      expect(screen.queryByText('Began your journey of growth')).not.toBeInTheDocument();
     });
 
-    it('should display achievement icons', () => {
+    it('should not display achievement icons (removed)', () => {
       const user = createMockUser();
       render(
         <TutorialCompletionCelebration
@@ -108,10 +108,10 @@ describe('TutorialCompletionCelebration', () => {
         />
       );
 
-      expect(screen.getByText('🦫')).toBeInTheDocument();
-      expect(screen.getByText('📝')).toBeInTheDocument();
-      expect(screen.getByText('🏗️')).toBeInTheDocument();
-      expect(screen.getByText('🌱')).toBeInTheDocument();
+      expect(screen.queryByText('🦫')).not.toBeInTheDocument();
+      expect(screen.queryByText('📝')).not.toBeInTheDocument();
+      expect(screen.queryByText('🏗️')).not.toBeInTheDocument();
+      expect(screen.queryByText('🌱')).not.toBeInTheDocument();
     });
   });
 
@@ -185,8 +185,7 @@ describe('TutorialCompletionCelebration', () => {
         />
       );
 
-      expect(screen.getByText(/Great job! I'm excited to grow alongside you/)).toBeInTheDocument();
-      expect(screen.getByText(/Every task you complete helps us build something amazing/)).toBeInTheDocument();
+      expect(screen.getByText(/Great job! Let's start this journey together!/)).toBeInTheDocument();
     });
   });
 
@@ -376,7 +375,6 @@ describe('TutorialCompletionCelebration', () => {
 
       // Check for main content instead of CSS classes
       expect(screen.getByText(/Congratulations/)).toBeInTheDocument();
-      expect(screen.getByText(/Met your companion Bóbr/)).toBeInTheDocument();
       expect(screen.getByText(/Features Now Available/)).toBeInTheDocument();
       expect(screen.getByText(/Tip: Start by completing/)).toBeInTheDocument();
     });
@@ -446,11 +444,11 @@ describe('TutorialCompletionCelebration', () => {
       // Fireworks
       expect(screen.getByText('🎆🎇✨🎉')).toBeInTheDocument();
       
-      // Achievement icons
-      expect(screen.getByText('🦫')).toBeInTheDocument();
-      expect(screen.getByText('📝')).toBeInTheDocument();
-      expect(screen.getByText('🏗️')).toBeInTheDocument();
-      expect(screen.getByText('🌱')).toBeInTheDocument();
+      // Achievement icons (removed)
+      expect(screen.queryByText('🦫')).not.toBeInTheDocument();
+      expect(screen.queryByText('📝')).not.toBeInTheDocument();
+      expect(screen.queryByText('🏗️')).not.toBeInTheDocument();
+      expect(screen.queryByText('🌱')).not.toBeInTheDocument();
       
       // Feature icons
       expect(screen.getByText('✅')).toBeInTheDocument();
