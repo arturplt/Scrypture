@@ -247,11 +247,14 @@ function AppContent() {
     markStepComplete,
     startTutorial,
     skipTutorial,
+    resetTutorial,
     isTutorialCompleted,
     getCurrentStep,
   } = useTutorial();
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [showTutorialCompletion, setShowTutorialCompletion] = useState(false);
+  const [hasSeenTutorialCompletion, setHasSeenTutorialCompletion] = useState(false);
+  const [isTutorialStateLoaded, setIsTutorialStateLoaded] = useState(false);
   const [showStartHere, setShowStartHere] = useState(false);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const [showAchievements, setShowAchievements] = useState(false);
@@ -290,11 +293,26 @@ function AppContent() {
     }
   }, [user, tasks, habits, checkAchievements]);
 
+  // Load tutorial completion state from localStorage on mount
+  useEffect(() => {
+    const hasSeen = localStorage.getItem('hasSeenTutorialCompletion') === 'true';
+    console.log('Loading tutorial state from localStorage:', { hasSeen });
+    setHasSeenTutorialCompletion(hasSeen);
+    setIsTutorialStateLoaded(true);
+  }, []);
+
+  // Helper function to mark tutorial completion as seen
+  const markTutorialCompletionAsSeen = () => {
+    setHasSeenTutorialCompletion(true);
+    localStorage.setItem('hasSeenTutorialCompletion', 'true');
+  };
+
   // Listen for tutorial completion
   useEffect(() => {
     const handleTutorialCompleted = () => {
       console.log('Tutorial completion event received in App');
       setShowTutorialCompletion(true);
+      markTutorialCompletionAsSeen();
     };
 
     window.addEventListener('tutorialCompleted', handleTutorialCompleted);
@@ -304,13 +322,21 @@ function AppContent() {
     };
   }, []);
 
-  // Check if tutorial is already completed on mount
+  // Check if tutorial is already completed on mount (only show once)
   useEffect(() => {
-    if (tutorialService.isTutorialCompleted() && !showTutorialCompletion) {
+    console.log('Tutorial completion check:', { 
+      isTutorialStateLoaded, 
+      isTutorialCompleted: tutorialService.isTutorialCompleted(), 
+      hasSeenTutorialCompletion 
+    });
+    
+    // Only check after we've loaded the state AND the tutorial is completed AND we haven't seen it
+    if (isTutorialStateLoaded && tutorialService.isTutorialCompleted() && !hasSeenTutorialCompletion) {
       console.log('Tutorial already completed, showing celebration');
       setShowTutorialCompletion(true);
+      markTutorialCompletionAsSeen();
     }
-  }, [showTutorialCompletion]);
+  }, [isTutorialStateLoaded, hasSeenTutorialCompletion]);
 
   // Show install prompt on mobile devices after a delay (only on first visit)
   useEffect(() => {
@@ -387,6 +413,8 @@ function AppContent() {
         onSkip={() => {
           console.log('⏭️ Skipping entire tutorial from welcome screen');
           skipTutorial();
+          setHasSeenTutorialCompletion(false); // Reset so completion modal can show again
+          localStorage.removeItem('hasSeenTutorialCompletion'); // Clear localStorage
         }}
       />
     );
@@ -405,6 +433,8 @@ function AppContent() {
         onSkip={() => {
           console.log('Skipping entire tutorial from Bóbr introduction');
           skipTutorial();
+          setHasSeenTutorialCompletion(false); // Reset so completion modal can show again
+          localStorage.removeItem('hasSeenTutorialCompletion'); // Clear localStorage
         }}
       />
     );
@@ -421,6 +451,8 @@ function AppContent() {
         onSkip={() => {
           console.log('Skipping entire tutorial from task wizard');
           skipTutorial();
+          setHasSeenTutorialCompletion(false); // Reset so completion modal can show again
+          localStorage.removeItem('hasSeenTutorialCompletion'); // Clear localStorage
         }}
       />
     );
@@ -455,10 +487,13 @@ function AppContent() {
       {showInstallPrompt && (
         <InstallPrompt onClose={() => setShowInstallPrompt(false)} />
       )}
-      {showTutorialCompletion && (
+      {showTutorialCompletion && isTutorialStateLoaded && (
         <TutorialCompletionCelebration 
           user={user}
-          onClose={() => setShowTutorialCompletion(false)}
+          onClose={() => {
+            setShowTutorialCompletion(false);
+            markTutorialCompletionAsSeen();
+          }}
         />
       )}
       <header className={styles.header}>
