@@ -57,7 +57,7 @@ describe('TutorialCompletionCelebration', () => {
       expect(screen.getByText("You've completed the Scrypture tutorial!")).toBeInTheDocument();
     });
 
-    it('should render fireworks celebration elements', () => {
+    it('should not render fireworks celebration elements (removed)', () => {
       const user = createMockUser();
       render(
         <TutorialCompletionCelebration
@@ -66,7 +66,7 @@ describe('TutorialCompletionCelebration', () => {
         />
       );
 
-      expect(screen.getByText('🎆🎇✨🎉')).toBeInTheDocument();
+      expect(screen.queryByText('🎆🎇✨🎉')).not.toBeInTheDocument();
     });
 
     it('should render continue button', () => {
@@ -441,8 +441,8 @@ describe('TutorialCompletionCelebration', () => {
         />
       );
 
-      // Fireworks
-      expect(screen.getByText('🎆🎇✨🎉')).toBeInTheDocument();
+      // Fireworks (removed)
+      expect(screen.queryByText('🎆🎇✨🎉')).not.toBeInTheDocument();
       
       // Achievement icons (removed)
       expect(screen.queryByText('🦫')).not.toBeInTheDocument();

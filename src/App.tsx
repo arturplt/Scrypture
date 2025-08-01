@@ -4,6 +4,7 @@ import { UserProvider, useUser } from './hooks/useUser';
 import { HabitProvider, useHabits } from './hooks/useHabits';
 import { AchievementProvider, useAchievements } from './hooks/useAchievements';
 import { TutorialProvider, useTutorial } from './hooks/useTutorial';
+import { tutorialService } from './services/tutorialService';
 import { initializeMobileViewportFix } from './utils/mobileViewportFix';
 import { TaskForm } from './components/TaskForm';
 import { TaskList, TaskListRef } from './components/TaskList';

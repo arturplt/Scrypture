@@ -15,9 +15,7 @@ export const TutorialCompletionCelebration: React.FC<TutorialCompletionCelebrati
     <div className={styles.overlay} onClick={(e) => e.stopPropagation()}>
       <div className={styles.modal}>
         <div className={styles.celebration}>
-          <div className={styles.fireworks}>
-            🎆🎇✨🎉
-          </div>
+
           
           <h1 className={styles.title}>
             Congratulations, {user.name}!
