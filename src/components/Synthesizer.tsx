@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useSynthesizer } from '../hooks/useSynthesizer';
-import { NOTES, CHORDS, CHORD_PROGRESSIONS, CIRCLE_OF_FIFTHS, PRESETS, SEQUENCER_TRACKS, INSTRUMENT_CATEGORIES, InstrumentPreset } from '../data/synthesizerData';
+import { NOTES, CHORDS, CHORD_PROGRESSIONS, CIRCLE_OF_FIFTHS, PRESETS, INSTRUMENT_CATEGORIES, InstrumentPreset } from '../data/synthesizerData';
 import { WaveformType } from '../types/synthesizer';
-import { TrackList } from './TrackList';
+import { INSTRUMENT_PRESETS } from '../../music-theory-presets';
+
 import styles from './Synthesizer.module.css';
 
 interface SynthesizerProps {
@@ -323,24 +324,40 @@ interface MultiTrackSequencerProps {
   tracks: any[];
   currentStep: number;
   steps: number;
+  drawMode: boolean;
   onStepClick: (trackId: string, stepIndex: number) => void;
   onStepMouseEnter: (trackId: string, stepIndex: number) => void;
   onTrackMute: (trackId: string) => void;
   onTrackSolo: (trackId: string) => void;
   onTrackVolumeChange: (trackId: string, volume: number) => void;
+  onTrackNameChange: (trackId: string, name: string) => void;
+  onTrackNoteChange: (trackId: string, note: string) => void;
+  onTrackCategoryChange: (trackId: string, category: string) => void;
+  onTrackInstrumentChange: (trackId: string, instrument: string) => void;
+  onTrackPanChange: (trackId: string, pan: number) => void;
+  onTrackSelect: (trackId: string) => void;
 }
 
 const MultiTrackSequencer: React.FC<MultiTrackSequencerProps> = ({
   tracks,
   currentStep,
   steps,
+  drawMode,
   onStepClick,
   onStepMouseEnter,
   onTrackMute,
   onTrackSolo,
-  onTrackVolumeChange
+  onTrackVolumeChange,
+  onTrackNameChange,
+  onTrackNoteChange,
+  onTrackCategoryChange,
+  onTrackInstrumentChange,
+  onTrackPanChange,
+  onTrackSelect
 }) => {
-  const [drawMode, setDrawMode] = useState(false);
+  const [editingTrackId, setEditingTrackId] = useState<string | null>(null);
+  const [editingField, setEditingField] = useState<'name' | 'note' | 'category' | null>(null);
+  const [selectedTrackId, setSelectedTrackId] = useState<string | null>(null);
 
   const handleStepClick = (trackId: string, stepIndex: number) => {
     onStepClick(trackId, stepIndex);
@@ -355,64 +372,224 @@ const MultiTrackSequencer: React.FC<MultiTrackSequencerProps> = ({
 
   return (
     <div className={styles.multiTrackSequencer}>
-      <div className={styles.sequencerControls}>
-        <button 
-          className={`${styles.sequencerBtn} ${drawMode ? styles.active : ''}`}
-          onClick={() => setDrawMode(!drawMode)}
-          title="Toggle draw mode"
-        >
-          ✏️ Draw Mode
-        </button>
-      </div>
       
       <div className={styles.sequencerGrid}>
-        {/* Step numbers header */}
-        <div className={styles.stepNumbers}>
-          <div className={styles.trackHeader}></div>
-          {Array.from({ length: steps }, (_, i) => (
-            <div key={i} className={`${styles.stepNumber} ${currentStep === i ? styles.currentStep : ''}`}>
-              {i + 1}
-            </div>
-          ))}
+        {/* Step numbers as a track row */}
+        <div className={styles.sequencerTrack}>
+          <div className={styles.trackHeader}>Steps</div>
+          <div className={styles.trackSteps}>
+            {Array.from({ length: steps }, (_, i) => (
+              <div key={i} className={`${styles.stepNumber} ${currentStep === i ? styles.currentStep : ''}`}>
+                {i + 1}
+              </div>
+            ))}
+          </div>
         </div>
         
         {/* Tracks */}
         {tracks.map((track) => (
           <div key={track.id} className={styles.sequencerTrack}>
             {/* Track controls */}
-            <div className={styles.trackControls}>
+            <div 
+              className={`${styles.trackControls} ${selectedTrackId === track.id ? styles.selected : ''}`}
+              onClick={() => {
+                setSelectedTrackId(selectedTrackId === track.id ? null : track.id);
+                onTrackSelect(track.id);
+              }}
+              title="Click to edit this track"
+              style={{ cursor: 'pointer' }}
+            >
               <div className={styles.trackInfo}>
                 <span 
                   className={styles.trackColor} 
                   style={{ backgroundColor: track.color }}
                 ></span>
-                <span className={styles.trackName}>{track.name}</span>
+                
+                {/* Editable Track Name */}
+                <div className={styles.trackNameSection}>
+                  {editingTrackId === track.id && editingField === 'name' ? (
+                    <input
+                      type="text"
+                      value={track.name}
+                      onChange={(e) => onTrackNameChange(track.id, e.target.value)}
+                      onBlur={() => {
+                        setEditingTrackId(null);
+                        setEditingField(null);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === 'Escape') {
+                          setEditingTrackId(null);
+                          setEditingField(null);
+                        }
+                      }}
+                      className={styles.trackNameInput}
+                      autoFocus
+                    />
+                  ) : (
+                    <span 
+                      className={styles.trackName}
+                      onDoubleClick={() => {
+                        setEditingTrackId(track.id);
+                        setEditingField('name');
+                      }}
+                      title="Double-click to edit name"
+                    >
+                      {track.name}
+                    </span>
+                  )}
+                </div>
+                
+                {/* Editable Track Note */}
+                <div className={styles.trackNoteSection}>
+                  {editingTrackId === track.id && editingField === 'note' ? (
+                    <select
+                      value={track.note}
+                      onChange={(e) => {
+                        onTrackNoteChange(track.id, e.target.value);
+                        setEditingTrackId(null);
+                        setEditingField(null);
+                      }}
+                      onBlur={() => {
+                        setEditingTrackId(null);
+                        setEditingField(null);
+                      }}
+                      className={styles.trackNoteSelect}
+                      autoFocus
+                    >
+                      <option value="C">C</option>
+                      <option value="C#">C#</option>
+                      <option value="D">D</option>
+                      <option value="D#">D#</option>
+                      <option value="E">E</option>
+                      <option value="F">F</option>
+                      <option value="F#">F#</option>
+                      <option value="G">G</option>
+                      <option value="G#">G#</option>
+                      <option value="A">A</option>
+                      <option value="A#">A#</option>
+                      <option value="B">B</option>
+                    </select>
+                  ) : (
+                    <span 
+                      className={styles.trackNote}
+                      onDoubleClick={() => {
+                        setEditingTrackId(track.id);
+                        setEditingField('note');
+                      }}
+                      title="Double-click to change note"
+                    >
+                      {track.note}
+                    </span>
+                  )}
+                </div>
+                
+                {/* Editable Track Category */}
+                <div className={styles.trackCategorySection}>
+                  {editingTrackId === track.id && editingField === 'category' ? (
+                    <select
+                      value={track.category}
+                      onChange={(e) => {
+                        onTrackCategoryChange(track.id, e.target.value);
+                        setEditingTrackId(null);
+                        setEditingField(null);
+                      }}
+                      onBlur={() => {
+                        setEditingTrackId(null);
+                        setEditingField(null);
+                      }}
+                      className={styles.trackCategorySelect}
+                      autoFocus
+                    >
+                      <option value="melody">🎵 Melody</option>
+                      <option value="bass">🎸 Bass</option>
+                      <option value="rhythm">🥁 Rhythm</option>
+                      <option value="ambient">🌊 Ambient</option>
+                      <option value="fx">✨ FX</option>
+                    </select>
+                  ) : (
+                    <span 
+                      className={styles.trackCategory}
+                      onDoubleClick={() => {
+                        setEditingTrackId(track.id);
+                        setEditingField('category');
+                      }}
+                      title="Double-click to change category"
+                    >
+                      {track.category}
+                    </span>
+                  )}
+                </div>
               </div>
-              <div className={styles.trackActions}>
-                <button
-                  className={`${styles.muteBtn} ${track.muted ? styles.active : ''}`}
-                  onClick={() => onTrackMute(track.id)}
-                  title="Mute track"
-                >
-                  🔇
-                </button>
-                <button
-                  className={`${styles.soloBtn} ${track.solo ? styles.active : ''}`}
-                  onClick={() => onTrackSolo(track.id)}
-                  title="Solo track"
-                >
-                  🎧
-                </button>
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={track.volume}
-                  onChange={(e) => onTrackVolumeChange(track.id, parseInt(e.target.value))}
-                  className={styles.volumeSlider}
-                  title={`Volume: ${track.volume}%`}
-                />
-              </div>
+              
+              {/* Track Actions - Only show for selected track */}
+              {selectedTrackId === track.id && (
+                <div className={styles.trackActions}>
+                  {/* Instrument Selector */}
+                  <div className={styles.instrumentControl}>
+                    <label title="Instrument">🎹</label>
+                    <select
+                      value={track.instrument}
+                      onChange={(e) => onTrackInstrumentChange(track.id, e.target.value)}
+                      className={styles.instrumentSelect}
+                      title={`Current: ${track.instrument}`}
+                    >
+                      <option value="sine">🌊 Sine</option>
+                      <option value="square">⬜ Square</option>
+                      <option value="triangle">🔺 Triangle</option>
+                      <option value="sawtooth">🔺 Sawtooth</option>
+                      <option value="noise">📻 Noise</option>
+                      <option value="custom">🎛️ Custom</option>
+                    </select>
+                  </div>
+                  
+                  {/* Volume Control */}
+                  <div className={styles.volumeControl}>
+                    <label title="Volume">🔊</label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={track.volume}
+                      onChange={(e) => onTrackVolumeChange(track.id, parseInt(e.target.value))}
+                      className={styles.volumeSlider}
+                      title={`Volume: ${track.volume}%`}
+                    />
+                    <span className={styles.valueDisplay}>{track.volume}%</span>
+                  </div>
+                  
+                  {/* Pan Control */}
+                  <div className={styles.panControl}>
+                    <label title="Pan">🎛️</label>
+                    <input
+                      type="range"
+                      min="-100"
+                      max="100"
+                      value={track.pan}
+                      onChange={(e) => onTrackPanChange(track.id, parseInt(e.target.value))}
+                      className={styles.panSlider}
+                      title={`Pan: ${track.pan}%`}
+                    />
+                    <span className={styles.valueDisplay}>
+                      {track.pan === 0 ? 'C' : track.pan > 0 ? `R${track.pan}` : `L${Math.abs(track.pan)}`}
+                    </span>
+                  </div>
+                  
+                  <button
+                    className={`${styles.muteBtn} ${track.muted ? styles.active : ''}`}
+                    onClick={() => onTrackMute(track.id)}
+                    title={track.muted ? 'Unmute track' : 'Mute track'}
+                  >
+                    {track.muted ? '🔇' : '🔊'}
+                  </button>
+                  <button
+                    className={`${styles.soloBtn} ${track.solo ? styles.active : ''}`}
+                    onClick={() => onTrackSolo(track.id)}
+                    title={track.solo ? 'Unsolo track' : 'Solo track'}
+                  >
+                    🎧
+                  </button>
+                </div>
+              )}
             </div>
             
             {/* Track steps */}
@@ -442,6 +619,8 @@ const MultiTrackSequencer: React.FC<MultiTrackSequencerProps> = ({
 };
 
 export const Synthesizer: React.FC<SynthesizerProps> = ({ isOpen, onClose }) => {
+  // State for instrument preset filtering
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const synth = useSynthesizer();
   const [isDragging, setIsDragging] = useState(false);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -579,6 +758,11 @@ export const Synthesizer: React.FC<SynthesizerProps> = ({ isOpen, onClose }) => 
     synth.updateTrack(trackId, { volume });
   };
 
+  const handleTrackSelect = (trackId: string) => {
+    synth.selectTrack(trackId);
+    synth.toggleTrackEditor();
+  };
+
   const playCircleKey = (circleKey: typeof CIRCLE_OF_FIFTHS[0]) => {
     let chordName: string;
     if (circleKey.chordType === 'dominant') {
@@ -674,24 +858,10 @@ export const Synthesizer: React.FC<SynthesizerProps> = ({ isOpen, onClose }) => 
             <h1>8-BIT SYNTHESIZER</h1>
 
             {/* 🎛️ MULTI-TRACK SEQUENCER SECTION */}
-            <CollapsibleSection title="🎛️ Multi-Track Sequencer" defaultCollapsed={false}>
-              <div className={styles.sequencerSection}>
+            
+            <div className={styles.sequencerSection}>
                 {/* Track Management Controls */}
                 <div className={styles.trackManagementControls}>
-                  <button
-                    onClick={synth.testAudio}
-                    className={styles.trackControlBtn}
-                    style={{ backgroundColor: '#ff6b6b', color: 'white' }}
-                  >
-                    🔊 Test Audio
-                  </button>
-                  <button
-                    onClick={synth.debugTrackNodes}
-                    className={styles.trackControlBtn}
-                    style={{ backgroundColor: '#4ecdc4', color: 'white' }}
-                  >
-                    🐛 Debug Tracks
-                  </button>
                   <button
                     onClick={synth.clearAllTracks}
                     className={styles.trackControlBtn}
@@ -699,12 +869,7 @@ export const Synthesizer: React.FC<SynthesizerProps> = ({ isOpen, onClose }) => 
                   >
                     🗑️ Clear All Tracks
                   </button>
-                  <button
-                    onClick={synth.toggleTrackList}
-                    className={`${styles.trackControlBtn} ${synth.state.trackState.showTrackList ? styles.active : ''}`}
-                  >
-                    {synth.state.trackState.showTrackList ? '📋 Hide Tracks' : '📋 Show Tracks'}
-                  </button>
+
                   
                   <button
                     onClick={() => synth.createTrack({
@@ -749,43 +914,100 @@ export const Synthesizer: React.FC<SynthesizerProps> = ({ isOpen, onClose }) => 
                     >
                       🎷 Jazz Quartet
                     </button>
+                    <button
+                      onClick={() => synth.loadTrackPreset('orchestral-suite')}
+                      className={styles.trackControlBtn}
+                      title="Load Orchestral Suite preset (8 tracks)"
+                    >
+                      🎼 Orchestral Suite
+                    </button>
+                    <button
+                      onClick={() => synth.loadTrackPreset('synthwave-dream')}
+                      className={styles.trackControlBtn}
+                      title="Load Synthwave Dream preset (8 tracks)"
+                    >
+                      🌆 Synthwave Dream
+                    </button>
+                    <button
+                      onClick={() => synth.loadTrackPreset('lofi-chill')}
+                      className={styles.trackControlBtn}
+                      title="Load Lo-Fi Chill preset (8 tracks)"
+                    >
+                      ☕ Lo-Fi Chill
+                    </button>
+                    <button
+                      onClick={() => synth.loadTrackPreset('dubstep-bass')}
+                      className={styles.trackControlBtn}
+                      title="Load Dubstep Bass preset (8 tracks)"
+                    >
+                      🎛️ Dubstep Bass
+                    </button>
                   </div>
                 </div>
 
-                {/* Track List */}
-                {synth.state.trackState.showTrackList && (
-                  <TrackList
-                    tracks={synth.state.trackState.tracks}
-                    selectedTrackId={synth.state.trackState.selectedTrackId}
-                    onSelectTrack={synth.selectTrack}
-                    onToggleMute={synth.toggleTrackMute}
-                    onToggleSolo={synth.toggleTrackSolo}
-                    onUpdateTrackVolume={(trackId, volume) => synth.updateTrack(trackId, { volume })}
-                    onUpdateTrackPan={(trackId, pan) => synth.updateTrack(trackId, { pan })}
-                    onUpdateTrackInstrument={(trackId, instrument) => synth.updateTrack(trackId, { instrument: instrument as 'sine' | 'square' | 'triangle' | 'sawtooth' | 'noise' | 'custom' })}
-                    onDeleteTrack={synth.deleteTrack}
-                    onDuplicateTrack={synth.duplicateTrack}
-                    onReorderTracks={synth.reorderTracks}
-                  />
-                )}
 
-                {/* Track Editor */}
+
+                {/* Enhanced Track Editor - Integrated with MultiTrackSequencer */}
                 {synth.state.trackState.showTrackEditor && synth.getSelectedTrack() && (
-                  <div className={styles.trackEditor}>
+                  <div className={styles.enhancedTrackEditor}>
                     <div className={styles.trackEditorHeader}>
-                      <h4>Track Editor: {synth.getSelectedTrack()?.name}</h4>
+                      <div className={styles.trackEditorTitle}>
+                        <div className={styles.trackColorIndicator} style={{ backgroundColor: synth.getSelectedTrack()?.color }}></div>
+                        <h4>🎛️ Track Editor: {synth.getSelectedTrack()?.name}</h4>
+                        <span className={styles.trackCategoryBadge}>
+                          {synth.getSelectedTrack()?.category === 'melody' && '🎵'}
+                          {synth.getSelectedTrack()?.category === 'bass' && '🎸'}
+                          {synth.getSelectedTrack()?.category === 'rhythm' && '🥁'}
+                          {synth.getSelectedTrack()?.category === 'ambient' && '🌊'}
+                          {synth.getSelectedTrack()?.category === 'fx' && '✨'}
+                          {synth.getSelectedTrack()?.category}
+                        </span>
+                      </div>
                       <button 
                         onClick={() => synth.toggleTrackEditor()}
                         className={styles.closeButton}
+                        title="Close editor"
                       >
                         ✕
                       </button>
                     </div>
                     
                     <div className={styles.trackEditorContent}>
-                      {/* Track Basic Settings */}
-                      <CollapsibleSection title="Basic Settings" defaultCollapsed={false}>
-                        <div className={styles.trackBasicSettings}>
+                      {/* Quick Actions Bar */}
+                      <div className={styles.quickActionsBar}>
+                        <button
+                          onClick={() => synth.toggleTrackMute(synth.getSelectedTrack()!.id)}
+                          className={`${styles.quickActionBtn} ${synth.getSelectedTrack()?.muted ? styles.active : ''}`}
+                          title={synth.getSelectedTrack()?.muted ? 'Unmute track' : 'Mute track'}
+                        >
+                          {synth.getSelectedTrack()?.muted ? '🔇' : '🔊'}
+                        </button>
+                        <button
+                          onClick={() => synth.toggleTrackSolo(synth.getSelectedTrack()!.id)}
+                          className={`${styles.quickActionBtn} ${synth.getSelectedTrack()?.solo ? styles.active : ''}`}
+                          title={synth.getSelectedTrack()?.solo ? 'Unsolo track' : 'Solo track'}
+                        >
+                          🎧
+                        </button>
+                        <button
+                          onClick={() => synth.duplicateTrack(synth.getSelectedTrack()!.id)}
+                          className={styles.quickActionBtn}
+                          title="Duplicate track"
+                        >
+                          📋
+                        </button>
+                        <button
+                          onClick={() => synth.deleteTrack(synth.getSelectedTrack()!.id)}
+                          className={`${styles.quickActionBtn} ${styles.danger}`}
+                          title="Delete track"
+                        >
+                          🗑️
+                        </button>
+                      </div>
+
+                      {/* Track Identity Section */}
+                      <CollapsibleSection title="🎯 Track Identity" defaultCollapsed={false}>
+                        <div className={styles.trackIdentitySection}>
                           <div className={styles.trackNameSection}>
                             <label>Track Name:</label>
                             <input
@@ -793,12 +1015,55 @@ export const Synthesizer: React.FC<SynthesizerProps> = ({ isOpen, onClose }) => 
                               value={synth.getSelectedTrack()?.name || ''}
                               onChange={(e) => synth.updateTrack(synth.getSelectedTrack()!.id, { name: e.target.value })}
                               className={styles.trackNameInput}
+                              placeholder="Enter track name..."
                             />
                           </div>
                           
-                          <div className={styles.trackControls}>
+                          <div className={styles.trackNoteSection}>
+                            <label>Base Note:</label>
+                            <select
+                              value={synth.getSelectedTrack()?.note || 'C'}
+                              onChange={(e) => synth.updateTrack(synth.getSelectedTrack()!.id, { note: e.target.value })}
+                              className={styles.trackNoteSelect}
+                            >
+                              <option value="C">C</option>
+                              <option value="C#">C#</option>
+                              <option value="D">D</option>
+                              <option value="D#">D#</option>
+                              <option value="E">E</option>
+                              <option value="F">F</option>
+                              <option value="F#">F#</option>
+                              <option value="G">G</option>
+                              <option value="G#">G#</option>
+                              <option value="A">A</option>
+                              <option value="A#">A#</option>
+                              <option value="B">B</option>
+                            </select>
+                          </div>
+                          
+                          <div className={styles.trackCategorySection}>
+                            <label>Category:</label>
+                            <select
+                              value={synth.getSelectedTrack()?.category || 'melody'}
+                              onChange={(e) => synth.updateTrack(synth.getSelectedTrack()!.id, { category: e.target.value as any })}
+                              className={styles.trackCategorySelect}
+                            >
+                              <option value="melody">🎵 Melody</option>
+                              <option value="bass">🎸 Bass</option>
+                              <option value="rhythm">🥁 Rhythm</option>
+                              <option value="ambient">🌊 Ambient</option>
+                              <option value="fx">✨ Effects</option>
+                            </select>
+                          </div>
+                        </div>
+                      </CollapsibleSection>
+
+                      {/* Mixing Controls */}
+                      <CollapsibleSection title="🎚️ Mixing" defaultCollapsed={false}>
+                        <div className={styles.mixingSection}>
+                          <div className={styles.controlGroup}>
                             <SliderControl
-                              label="Volume"
+                              label="VOLUME"
                               value={synth.getSelectedTrack()?.volume || 100}
                               min={0}
                               max={100}
@@ -806,9 +1071,11 @@ export const Synthesizer: React.FC<SynthesizerProps> = ({ isOpen, onClose }) => 
                               showValue={true}
                               valueDisplay={`${synth.getSelectedTrack()?.volume || 100}%`}
                             />
-                            
+                          </div>
+                          
+                          <div className={styles.controlGroup}>
                             <SliderControl
-                              label="Pan"
+                              label="PAN"
                               value={synth.getSelectedTrack()?.pan || 0}
                               min={-100}
                               max={100}
@@ -817,73 +1084,31 @@ export const Synthesizer: React.FC<SynthesizerProps> = ({ isOpen, onClose }) => 
                               valueDisplay={`${synth.getSelectedTrack()?.pan || 0}%`}
                             />
                           </div>
-                          
-                          <div className={styles.trackActions}>
-                            <button
-                              onClick={() => synth.toggleTrackMute(synth.getSelectedTrack()!.id)}
-                              className={`${styles.trackActionBtn} ${synth.getSelectedTrack()?.muted ? styles.active : ''}`}
-                            >
-                              {synth.getSelectedTrack()?.muted ? '🔇 Unmute' : '🔊 Mute'}
-                            </button>
-                            <button
-                              onClick={() => synth.toggleTrackSolo(synth.getSelectedTrack()!.id)}
-                              className={`${styles.trackActionBtn} ${synth.getSelectedTrack()?.solo ? styles.active : ''}`}
-                            >
-                              {synth.getSelectedTrack()?.solo ? '🎧 Unsolo' : '🎧 Solo'}
-                            </button>
-                            <button
-                              onClick={() => synth.duplicateTrack(synth.getSelectedTrack()!.id)}
-                              className={styles.trackActionBtn}
-                            >
-                              📋 Duplicate
-                            </button>
-                            <button
-                              onClick={() => synth.deleteTrack(synth.getSelectedTrack()!.id)}
-                              className={`${styles.trackActionBtn} ${styles.danger}`}
-                            >
-                              🗑️ Delete
-                            </button>
-                          </div>
                         </div>
                       </CollapsibleSection>
 
                       {/* Instrument Settings */}
-                      <CollapsibleSection title="Instrument" defaultCollapsed={false}>
+                      <CollapsibleSection title="🎹 Instrument" defaultCollapsed={false}>
                         <div className={styles.instrumentSettings}>
                           <div className={styles.instrumentType}>
-                            <label>Instrument Type:</label>
+                            <label>Waveform:</label>
                             <select
                               value={synth.getSelectedTrack()?.instrument || 'sine'}
                               onChange={(e) => synth.updateTrack(synth.getSelectedTrack()!.id, { instrument: e.target.value as any })}
                               className={styles.instrumentSelect}
                             >
-                              <option value="sine">Sine Wave</option>
-                              <option value="square">Square Wave</option>
-                              <option value="triangle">Triangle Wave</option>
-                              <option value="sawtooth">Sawtooth Wave</option>
-                              <option value="noise">Noise</option>
-                            </select>
-                          </div>
-                          
-                          <div className={styles.trackCategory}>
-                            <label>Category:</label>
-                            <select
-                              value={synth.getSelectedTrack()?.category || 'melody'}
-                              onChange={(e) => synth.updateTrack(synth.getSelectedTrack()!.id, { category: e.target.value as any })}
-                              className={styles.instrumentSelect}
-                            >
-                              <option value="melody">Melody</option>
-                              <option value="bass">Bass</option>
-                              <option value="rhythm">Rhythm</option>
-                              <option value="ambient">Ambient</option>
-                              <option value="fx">Effects</option>
+                              <option value="sine">🌊 Sine Wave</option>
+                              <option value="square">⬜ Square Wave</option>
+                              <option value="triangle">🔺 Triangle Wave</option>
+                              <option value="sawtooth">🔺 Sawtooth Wave</option>
+                              <option value="noise">📻 Noise</option>
                             </select>
                           </div>
                         </div>
                       </CollapsibleSection>
 
                       {/* Envelope Settings */}
-                      <CollapsibleSection title="Envelope" defaultCollapsed={true}>
+                      <CollapsibleSection title="📈 Envelope" defaultCollapsed={true}>
                         <div className={styles.envelopeSettings}>
                           <SliderControl
                             label="Attack"
@@ -940,7 +1165,7 @@ export const Synthesizer: React.FC<SynthesizerProps> = ({ isOpen, onClose }) => 
                       </CollapsibleSection>
 
                       {/* LFO Settings */}
-                      <CollapsibleSection title="LFO" defaultCollapsed={true}>
+                      <CollapsibleSection title="🌊 LFO" defaultCollapsed={true}>
                         <div className={styles.lfoSettings}>
                           <div className={styles.lfoEnable}>
                             <label>
@@ -1259,12 +1484,128 @@ export const Synthesizer: React.FC<SynthesizerProps> = ({ isOpen, onClose }) => 
                   tracks={synth.state.trackState.tracks}
                   currentStep={synth.state.currentStep}
                   steps={synth.state.steps}
+                  drawMode={synth.state.drawMode}
                   onStepClick={handleMultiTrackStepClick}
                   onStepMouseEnter={handleMultiTrackStepMouseEnter}
                   onTrackMute={handleTrackMute}
                   onTrackSolo={handleTrackSolo}
                   onTrackVolumeChange={handleTrackVolumeChange}
+                  onTrackNameChange={(trackId, name) => synth.updateTrack(trackId, { name })}
+                  onTrackNoteChange={(trackId, note) => synth.updateTrack(trackId, { note })}
+                  onTrackCategoryChange={(trackId, category) => synth.updateTrack(trackId, { category: category as 'melody' | 'bass' | 'rhythm' | 'ambient' | 'fx' })}
+                  onTrackInstrumentChange={(trackId, instrument) => synth.updateTrack(trackId, { instrument: instrument as 'sine' | 'square' | 'triangle' | 'sawtooth' | 'noise' | 'custom' })}
+                  onTrackPanChange={(trackId, pan) => synth.updateTrack(trackId, { pan })}
+                  onTrackSelect={handleTrackSelect}
                 />
+              </div>
+
+            {/* 🎹 INSTRUMENT PRESET LIBRARY SECTION */}
+            <CollapsibleSection title="🎹 Instrument Preset Library" defaultCollapsed={false}>
+              <div className={styles.presetLibrarySection}>
+                {/* Category Filter */}
+                <div className={styles.presetCategories}>
+                  {['All', 'Pianos', 'Guitars', 'Drums', 'Brass', 'Woodwinds', 'Synths', 'Tools'].map(category => (
+                    <button
+                      key={category}
+                      className={`${styles.presetCategoryBtn} ${selectedCategory === category ? styles.active : ''}`}
+                      onClick={() => setSelectedCategory(category)}
+                    >
+                      {category}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Compact Preset Grid */}
+                <div className={styles.presetGrid}>
+                  {Object.entries(INSTRUMENT_PRESETS)
+                    .filter(([presetKey, preset]) => {
+                      if (selectedCategory === 'All') return true;
+                      
+                      // Determine category based on preset key
+                      let category = 'Other';
+                      if (presetKey.includes('piano') || presetKey.includes('clavinet')) {
+                        category = 'Pianos';
+                      } else if (presetKey.includes('guitar') || presetKey.includes('bass')) {
+                        category = 'Guitars';
+                      } else if (presetKey.includes('drum') || presetKey.includes('cymbal') || presetKey.includes('tom')) {
+                        category = 'Drums';
+                      } else if (presetKey.includes('trumpet') || presetKey.includes('saxophone') || presetKey.includes('trombone')) {
+                        category = 'Brass';
+                      } else if (presetKey.includes('flute') || presetKey.includes('clarinet')) {
+                        category = 'Woodwinds';
+                      } else if (presetKey.includes('synth') || presetKey.includes('moog') || presetKey.includes('prophet') || presetKey.includes('dx7') || presetKey.includes('juno')) {
+                        category = 'Synths';
+                      } else if (presetKey.includes('metronome') || presetKey.includes('tuning') || presetKey.includes('drone')) {
+                        category = 'Tools';
+                      }
+                      
+                      return category === selectedCategory;
+                    })
+                    .map(([presetKey, preset]) => {
+                      // Determine category and icon
+                      let category = 'Other';
+                      let categoryIcon = '🎵';
+                      
+                      if (presetKey.includes('piano') || presetKey.includes('clavinet')) {
+                        category = 'Pianos';
+                        categoryIcon = '🎹';
+                      } else if (presetKey.includes('guitar') || presetKey.includes('bass')) {
+                        category = 'Guitars';
+                        categoryIcon = '🎸';
+                      } else if (presetKey.includes('drum') || presetKey.includes('cymbal') || presetKey.includes('tom')) {
+                        category = 'Drums';
+                        categoryIcon = '🥁';
+                      } else if (presetKey.includes('trumpet') || presetKey.includes('saxophone') || presetKey.includes('trombone')) {
+                        category = 'Brass';
+                        categoryIcon = '🎺';
+                      } else if (presetKey.includes('flute') || presetKey.includes('clarinet')) {
+                        category = 'Woodwinds';
+                        categoryIcon = '🎷';
+                      } else if (presetKey.includes('synth') || presetKey.includes('moog') || presetKey.includes('prophet') || presetKey.includes('dx7') || presetKey.includes('juno')) {
+                        category = 'Synths';
+                        categoryIcon = '🎛️';
+                      } else if (presetKey.includes('metronome') || presetKey.includes('tuning') || presetKey.includes('drone')) {
+                        category = 'Tools';
+                        categoryIcon = '🔧';
+                      }
+
+                      return (
+                        <div key={presetKey} className={styles.presetCard}>
+                          <div className={styles.presetCardHeader}>
+                            <div className={styles.presetIcon}>{categoryIcon}</div>
+                            <div className={styles.presetInfo}>
+                              <div className={styles.presetName}>{preset.name.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</div>
+                            </div>
+                          </div>
+                          <div className={styles.presetCardActions}>
+                            <button
+                              onClick={() => {
+                                synth.updateState({
+                                  waveform: preset.waveform as any,
+                                  volume: preset.volume,
+                                  attack: preset.attack,
+                                  release: preset.release,
+                                  detune: preset.detune,
+                                  reverbEnabled: preset.reverb === 'on',
+                                  lfoRate: preset.lfoRate,
+                                  lfoDepth: preset.lfoDepth,
+                                  lfoTarget: preset.lfoTarget as any,
+                                  filterEnabled: preset.filterEnabled ?? false,
+                                  filterType: preset.filterType as any ?? 'lowpass',
+                                  filterFrequency: preset.filterFrequency ?? 2000,
+                                  filterResonance: preset.filterResonance ?? 1
+                                });
+                              }}
+                              className={styles.presetLoadBtn}
+                              title={`Load ${preset.name}`}
+                            >
+                              Load
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
               </div>
             </CollapsibleSection>
 
@@ -1452,7 +1793,24 @@ export const Synthesizer: React.FC<SynthesizerProps> = ({ isOpen, onClose }) => 
             {/* 🎛️ INSTRUMENT SELECTOR SECTION */}
             <CollapsibleSection title="🎛️ Instrument Selector" defaultCollapsed={true}>
               <InstrumentSelector
-                selectedInstrument={synth.getSelectedTrack()?.instrument || 'sine'}
+                selectedInstrument={(() => {
+                  // Find the instrument ID that matches the current track's waveform
+                  const currentWaveform = synth.getSelectedTrack()?.instrument || 'sine';
+                  for (const category of INSTRUMENT_CATEGORIES) {
+                    const matchingInstrument = category.instruments.find(instr => instr.waveform === currentWaveform);
+                    if (matchingInstrument) {
+                      return matchingInstrument.id;
+                    }
+                  }
+                  // Fallback to first instrument with matching waveform, or 'sine' instruments
+                  for (const category of INSTRUMENT_CATEGORIES) {
+                    const sineInstrument = category.instruments.find(instr => instr.waveform === 'sine');
+                    if (sineInstrument) {
+                      return sineInstrument.id;
+                    }
+                  }
+                  return 'violin'; // Ultimate fallback
+                })()}
                 onSelectInstrument={(instrument) => {
                   synth.updateTrack(synth.getSelectedTrack()!.id, {
                     instrument: instrument.waveform,
@@ -1528,6 +1886,11 @@ export const Synthesizer: React.FC<SynthesizerProps> = ({ isOpen, onClose }) => 
                     isLive={true}
                     resetFunction={synth.resetLfoDepth}
                     defaultValue={5}
+                    additionalControls={
+                      <span style={{ fontSize: '0.8em', color: 'var(--color-text-secondary)' }}>
+                        Note: Use 0.1-0.5 for volume, 5-20 for pitch/filter
+                      </span>
+                    }
                   />
                   <div className={styles.section}>
                     <label>LFO Target</label>

@@ -374,15 +374,12 @@ export interface SynthesizerContextType {
   clearTrackSequence: (trackId: string) => void;
   clearAllTracks: () => void;
   duplicateTrack: (trackId: string) => void;
-  toggleTrackList: () => void;
   toggleTrackEditor: () => void;
   updateMasterVolume: (volume: number) => void;
   updateMasterPan: (pan: number) => void;
   getSelectedTrack: () => Track | null;
   getActiveTracks: () => Track[];
   getSoloTracks: () => Track[];
-  testAudio: () => void;
-  debugTrackNodes: () => void;
 } 
 
 export interface Track {
@@ -458,6 +455,5 @@ export interface TrackState {
   masterVolume: number;
   masterPan: number;
   trackOrder: string[];
-  showTrackList: boolean;
   showTrackEditor: boolean;
 } 

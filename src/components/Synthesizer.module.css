@@ -1922,6 +1922,146 @@
   border-radius: var(--border-radius-md);
   margin-top: var(--spacing-lg);
   overflow: hidden;
+  box-shadow: var(--shadow-button);
+  max-width: 100%;
+}
+
+/* Enhanced Track Editor Styles */
+.enhancedTrackEditor {
+  background: var(--color-bg-secondary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: var(--border-radius-md);
+  margin-top: var(--spacing-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-button);
+  max-width: 100%;
+  position: relative;
+}
+
+.enhancedTrackEditor::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-accent-gold), var(--color-accent-beaver), var(--color-accent-gold));
+  opacity: 0.8;
+}
+
+.trackEditorTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex: 1;
+}
+
+.trackColorIndicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border-primary);
+  flex-shrink: 0;
+}
+
+.trackCategoryBadge {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+  padding: 2px 8px;
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-xs);
+  font-family: 'Press Start 2P', monospace;
+  border: 1px solid var(--color-border-primary);
+  margin-left: auto;
+}
+
+.quickActionsBar {
+  display: flex;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background: var(--color-bg-tertiary);
+  border-bottom: 1px solid var(--color-border-primary);
+  justify-content: center;
+}
+
+.quickActionBtn {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-primary);
+  color: var(--color-text-primary);
+  padding: var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  transition: all 0.2s ease;
+  min-width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quickActionBtn:hover {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-accent-gold);
+  transform: translateY(-1px);
+}
+
+.quickActionBtn.active {
+  background: var(--color-accent-gold);
+  color: var(--color-bg-primary);
+  border-color: var(--color-accent-gold);
+}
+
+.quickActionBtn.danger:hover {
+  background: #ff4757;
+  border-color: #ff4757;
+  color: white;
+}
+
+.trackIdentitySection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.trackNoteSection,
+.trackCategorySection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.trackNoteSection label,
+.trackCategorySection label {
+  color: var(--color-text-primary);
+  font-weight: bold;
+  font-size: var(--font-size-sm);
+  font-family: 'Press Start 2P', monospace;
+}
+
+.trackNoteSelect,
+.trackCategorySelect {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-primary);
+  color: var(--color-text-primary);
+  padding: var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.trackNoteSelect:focus,
+.trackCategorySelect:focus {
+  outline: none;
+  border-color: var(--color-accent-gold);
+  box-shadow: 0 0 0 2px rgba(182, 164, 50, 0.3);
+}
+
+.mixingSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
 }
 
 .trackEditorHeader {
@@ -1984,6 +2124,10 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--color-bg-tertiary);
+  border-radius: var(--border-radius-sm);
+  border: var(--border-width-thin) solid var(--color-border-secondary);
 }
 
 .trackActions {
@@ -1991,10 +2135,15 @@
   flex-wrap: wrap;
   gap: var(--spacing-sm);
   margin-top: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--color-bg-primary);
+  border-radius: var(--border-radius-sm);
+  border: var(--border-width-thin) solid var(--color-border-secondary);
+  justify-content: center;
 }
 
 .trackActionBtn {
-  background: var(--color-bg-primary);
+  background: var(--color-bg-secondary);
   color: var(--color-text-primary);
   border: var(--border-width-thin) solid var(--color-border-primary);
   padding: var(--spacing-sm) var(--spacing-md);
@@ -2003,6 +2152,9 @@
   cursor: pointer;
   transition: all var(--transition-fast);
   font-family: inherit;
+  min-width: 80px;
+  text-align: center;
+  font-weight: 500;
 }
 
 .trackActionBtn:hover {
@@ -2954,12 +3106,13 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
-  max-height: 400px;
+  max-height: 500px;
   overflow-y: auto;
   padding: var(--spacing-md);
   background: var(--color-bg-tertiary);
   border: var(--border-width-thin) solid var(--color-border-primary);
   border-radius: var(--border-radius-sm);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .stepNumbers {
@@ -2970,14 +3123,14 @@
   position: sticky;
   top: 0;
   background: var(--color-bg-primary);
-  padding: var(--spacing-sm) 0;
+  padding: var(--spacing-sm);
   z-index: 10;
   border-bottom: var(--border-width-thin) solid var(--color-border-primary);
 }
 
 .trackHeader {
-  width: 120px;
-  min-width: 120px;
+  width: 280px;
+  min-width: 280px;
   height: 24px;
   display: flex;
   align-items: center;
@@ -3010,6 +3163,22 @@
   font-family: 'Press Start 2P', monospace;
   -webkit-font-smoothing: none;
   -moz-osx-font-smoothing: none;
+  cursor: default;
+}
+
+/* Step numbers track styling */
+.sequencerTrack:first-child {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-border-secondary);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.sequencerTrack:first-child .trackHeader {
+  background: var(--color-bg-tertiary);
+  color: var(--color-accent-gold);
+  font-weight: bold;
 }
 
 .stepNumber.currentStep {
@@ -3041,13 +3210,30 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: 120px;
-  min-width: 120px;
+  width: 280px;
+  min-width: 280px;
   padding: var(--spacing-sm);
   background: var(--color-bg-secondary);
   border: var(--border-width-thin) solid var(--color-border-primary);
   border-radius: var(--border-radius-sm);
   margin-right: var(--spacing-sm);
+  box-shadow: var(--shadow-button);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.trackControls:hover {
+  border-color: var(--color-accent-gold);
+  box-shadow: var(--shadow-active);
+  transform: translateY(-1px);
+  background: var(--color-bg-tertiary);
+}
+
+.trackControls.selected {
+  border-color: var(--color-accent-gold);
+  background: var(--color-bg-tertiary);
+  box-shadow: var(--shadow-active);
+  transform: translateY(-1px);
 }
 
 .trackInfo {
@@ -3074,12 +3260,252 @@
   font-family: 'Press Start 2P', monospace;
   -webkit-font-smoothing: none;
   -moz-osx-font-smoothing: none;
+  max-width: 80px;
+  text-align: center;
+  cursor: pointer;
+  padding: var(--spacing-xs);
+  border-radius: var(--border-radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.trackName:hover {
+  background: var(--color-bg-primary);
+  color: var(--color-accent-gold);
+}
+
+.trackNameInput {
+  background: var(--color-bg-primary);
+  border: var(--border-width-thin) solid var(--color-accent-gold);
+  border-radius: var(--border-radius-sm);
+  padding: var(--spacing-xs);
+  font-family: 'Press Start 2P', monospace;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  min-width: 60px;
+  max-width: 80px;
+}
+
+.trackNameInput:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(182, 164, 50, 0.3);
+}
+
+.trackNameSection,
+.trackNoteSection,
+.trackCategorySection {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.trackNote {
+  color: var(--color-accent-gold);
+  font-weight: bold;
+  font-family: 'Press Start 2P', monospace;
+  font-size: var(--font-size-xs);
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  cursor: pointer;
+  padding: var(--spacing-xs);
+  border-radius: var(--border-radius-sm);
+  transition: all var(--transition-fast);
+  min-width: 20px;
+  text-align: center;
+}
+
+.trackNote:hover {
+  background: var(--color-bg-primary);
+  color: var(--color-accent-beaver);
+}
+
+.trackNoteSelect {
+  background: var(--color-bg-primary);
+  border: var(--border-width-thin) solid var(--color-accent-gold);
+  border-radius: var(--border-radius-sm);
+  padding: var(--spacing-xs);
+  font-family: 'Press Start 2P', monospace;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  min-width: 40px;
+  cursor: pointer;
+}
+
+.trackNoteSelect:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(182, 164, 50, 0.3);
+}
+
+.trackCategory {
+  color: var(--color-text-muted);
+  font-family: 'Press Start 2P', monospace;
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  cursor: pointer;
+  padding: var(--spacing-xs);
+  border-radius: var(--border-radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.trackCategory:hover {
+  background: var(--color-bg-primary);
+  color: var(--color-accent-gold);
+}
+
+.trackCategorySelect {
+  background: var(--color-bg-primary);
+  border: var(--border-width-thin) solid var(--color-accent-gold);
+  border-radius: var(--border-radius-sm);
+  padding: var(--spacing-xs);
+  font-family: 'Press Start 2P', monospace;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  min-width: 60px;
+  cursor: pointer;
+}
+
+.trackCategorySelect:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(182, 164, 50, 0.3);
 }
 
 .trackActions {
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.instrumentControl,
+.volumeControl,
+.panControl {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  min-width: 50px;
+}
+
+.instrumentControl label,
+.volumeControl label,
+.panControl label {
+  font-family: 'Press Start 2P', monospace;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  font-weight: normal;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  min-width: 16px;
+}
+
+.instrumentSelect {
+  background: var(--color-bg-primary);
+  border: var(--border-width-thin) solid var(--color-border-secondary);
+  border-radius: var(--border-radius-sm);
+  padding: var(--spacing-xs);
+  font-family: 'Press Start 2P', monospace;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  min-width: 60px;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  box-shadow: var(--shadow-button);
+  transition: all var(--transition-normal);
+}
+
+.instrumentSelect:hover {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-accent-gold);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-active);
+}
+
+.instrumentSelect:focus {
+  outline: none;
+  border-color: var(--color-focus-border);
+  box-shadow: var(--shadow-active);
+}
+
+.panSlider {
+  width: 30px;
+  height: 4px;
+  border-radius: var(--border-radius-sm);
+  background: var(--color-bg-primary);
+  outline: none;
+  cursor: pointer;
+  -webkit-appearance: none;
+  border: var(--border-width-thin) solid var(--color-border-secondary);
+}
+
+.panSlider::-webkit-slider-track {
+  background: var(--color-bg-primary);
+  border: var(--border-width-thin) solid var(--color-border-secondary);
+  border-radius: var(--border-radius-sm);
+  height: 4px;
+}
+
+.panSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-accent-gold);
+  cursor: pointer;
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  box-shadow: var(--shadow-button);
+}
+
+.panSlider::-webkit-slider-thumb:hover {
+  background: var(--color-accent-beaver);
+  transform: scale(1.1);
+}
+
+.panSlider::-moz-range-track {
+  background: var(--color-bg-primary);
+  border: var(--border-width-thin) solid var(--color-border-secondary);
+  border-radius: var(--border-radius-sm);
+  height: 4px;
+}
+
+.panSlider::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-accent-gold);
+  cursor: pointer;
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  box-shadow: var(--shadow-button);
+}
+
+.valueDisplay {
+  font-family: 'Press Start 2P', monospace;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-primary);
+  font-weight: normal;
+  text-align: center;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  min-width: 20px;
 }
 
 .muteBtn, .soloBtn {
@@ -3168,6 +3594,7 @@
   transition: all var(--transition-fast);
   position: relative;
   background: var(--color-bg-primary);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .step:hover {
@@ -3229,10 +3656,15 @@
   }
   
   .trackControls {
-    width: 100px;
-    min-width: 100px;
+    width: 200px;
+    min-width: 200px;
     flex-direction: column;
     gap: var(--spacing-xs);
+  }
+  
+  .trackHeader {
+    width: 200px;
+    min-width: 200px;
   }
   
   .trackActions {
@@ -3259,4 +3691,267 @@
     width: 100px;
     min-width: 100px;
   }
+
+  /* Enhanced Track Editor Mobile Styles */
+  .enhancedTrackEditor {
+    margin-top: var(--spacing-md);
+  }
+
+  .trackEditorTitle {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+
+  .trackCategoryBadge {
+    margin-left: 0;
+    align-self: flex-start;
+  }
+
+  .quickActionsBar {
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+  }
+
+  .quickActionBtn {
+    min-width: 36px;
+    height: 36px;
+    font-size: var(--font-size-xs);
+  }
+
+  .trackIdentitySection {
+    gap: var(--spacing-sm);
+  }
+
+  .trackNoteSection,
+  .trackCategorySection {
+    gap: var(--spacing-xs);
+  }
+
+  .trackNoteSelect,
+  .trackCategorySelect {
+    font-size: var(--font-size-xs);
+    padding: var(--spacing-xs);
+  }
+}
+
+/* 🎼 PRESET LIBRARY STYLES */
+.presetLibrarySection {
+  background: var(--color-bg-secondary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-lg);
+  margin: var(--spacing-lg) 0;
+}
+
+.presetLibraryControls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.presetSearch {
+  display: flex;
+  align-items: center;
+}
+
+.presetSearchInput {
+  flex: 1;
+  background: var(--color-bg-primary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: var(--border-radius-sm);
+  color: var(--color-text-primary);
+  padding: var(--spacing-md);
+  font-size: var(--font-size-sm);
+  font-family: inherit;
+}
+
+.presetSearchInput:focus {
+  outline: none;
+  border-color: var(--color-accent-gold);
+  box-shadow: 0 0 0 2px rgba(182, 164, 50, 0.2);
+}
+
+.presetCategories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.presetCategoryBtn {
+  background: var(--color-bg-primary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: var(--border-radius-sm);
+  color: var(--color-text-secondary);
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: var(--font-size-sm);
+  font-family: inherit;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  white-space: nowrap;
+}
+
+.presetCategoryBtn:hover {
+  background: var(--color-bg-tertiary);
+  border-color: var(--color-border-secondary);
+  color: var(--color-text-primary);
+}
+
+.presetCategoryBtn.active {
+  background: var(--color-accent-gold);
+  border-color: var(--color-accent-gold);
+  color: var(--color-bg-primary);
+  font-weight: bold;
+}
+
+.presetGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.presetCard {
+  background: var(--color-bg-primary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-sm);
+  transition: var(--transition-normal);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+}
+
+.presetCard:hover {
+  border-color: var(--color-border-secondary);
+  box-shadow: var(--shadow-button);
+  transform: translateY(-1px);
+}
+
+.presetCardHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex: 1;
+  min-width: 0;
+}
+
+.presetIcon {
+  font-size: var(--font-size-md);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-secondary);
+  border-radius: var(--border-radius-sm);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  flex-shrink: 0;
+}
+
+.presetInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.presetName {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: bold;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.presetCardActions {
+  display: flex;
+  gap: var(--spacing-xs);
+  flex-shrink: 0;
+}
+
+.presetLoadBtn {
+  background: var(--color-bg-secondary);
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: var(--border-radius-sm);
+  color: var(--color-text-primary);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--font-size-xs);
+  font-family: inherit;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  text-align: center;
+  min-width: 60px;
+}
+
+.presetLoadBtn:hover {
+  background: var(--color-easy);
+  border-color: var(--color-easy-border);
+  color: var(--color-text-primary);
+}
+
+.presetLoadBtn:active {
+  transform: translateY(1px);
+  box-shadow: var(--shadow-inset);
+}
+
+
+
+/* Mobile Responsive for Preset Library */
+@media (max-width: 768px) {
+  .presetLibraryControls {
+    gap: var(--spacing-sm);
+  }
+  
+  .presetCategories {
+    gap: var(--spacing-xs);
+  }
+  
+  .presetCategoryBtn {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--font-size-xs);
+  }
+  
+  .presetGrid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
+  }
+  
+  .presetCard {
+    padding: var(--spacing-sm);
+  }
+  
+  .presetCardHeader {
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+  }
+  
+  .presetIcon {
+    width: 32px;
+    height: 32px;
+    font-size: var(--font-size-md);
+  }
+  
+  .presetName {
+    font-size: var(--font-size-sm);
+  }
+  
+  .presetDetails {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-xs);
+  }
+  
+  .presetDetail {
+    padding: var(--spacing-xs);
+  }
+  
+  .presetCardActions {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+  
+
 }

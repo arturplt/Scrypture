@@ -357,7 +357,7 @@ export const PRESETS: Record<string, Preset> = {
     reverb: 'on',
     arpeggiator: 'off',
     lfoRate: 0.5,
-    lfoDepth: 15,
+    lfoDepth: 0.5,
     lfoTarget: 'volume',
     chorusEnabled: true,
     chorusRate: 1.2,
@@ -1879,7 +1879,7 @@ export interface TrackPreset {
   }[];
 }
 
-// 4-Track Presets
+// Enhanced Track Presets
 export const TRACK_PRESETS: Record<string, TrackPreset> = {
   'electronic-beat': {
     id: 'electronic-beat',
@@ -2021,7 +2021,7 @@ export const TRACK_PRESETS: Record<string, TrackPreset> = {
           compression: { enabled: false, threshold: -24, ratio: 4, attack: 0.003, release: 0.25 }
         },
         envelope: { attack: 2.0, decay: 1.0, sustain: 0.8, release: 3.0 },
-        lfo: { enabled: true, rate: 0.3, depth: 15, target: 'volume', waveform: 'sine' },
+        lfo: { enabled: true, rate: 0.3, depth: 0.3, target: 'volume', waveform: 'sine' },
         sequence: [
           true, true, true, true, true, true, true, true,
           true, true, true, true, true, true, true, true,
@@ -2048,7 +2048,7 @@ export const TRACK_PRESETS: Record<string, TrackPreset> = {
           compression: { enabled: false, threshold: -24, ratio: 4, attack: 0.003, release: 0.25 }
         },
         envelope: { attack: 1.5, decay: 0.8, sustain: 0.7, release: 2.5 },
-        lfo: { enabled: true, rate: 0.4, depth: 12, target: 'volume', waveform: 'triangle' },
+        lfo: { enabled: true, rate: 0.4, depth: 0.4, target: 'volume', waveform: 'triangle' },
         sequence: [
           false, false, true, true, false, false, true, true,
           false, false, true, true, false, false, true, true,
@@ -2228,5 +2228,907 @@ export const TRACK_PRESETS: Record<string, TrackPreset> = {
         color: 'hsl(15, 70%, 60%)'
       }
     ]
-  }
+  },
+  
+  // 🎵 EXPANDED PRESETS WITH MORE TRACKS AND STEPS
+  
+  'orchestral-suite': {
+    id: 'orchestral-suite',
+    name: 'Orchestral Suite',
+    description: 'A full 8-track orchestral arrangement with strings, brass, woodwinds, and percussion',
+    bpm: 90,
+    tracks: [
+      {
+        name: 'Violins',
+        frequency: 440,
+        note: 'A4',
+        category: 'melody',
+        instrument: 'sine',
+        volume: 75,
+        pan: -40,
+        muted: false,
+        solo: false,
+        effects: {
+          delay: { enabled: true, time: 0.8, feedback: 0.3, mix: 0.4 },
+          chorus: { enabled: true, rate: 0.8, depth: 0.002, mix: 0.6 },
+          distortion: { enabled: false, amount: 0.3, type: 'soft' },
+          filter: { enabled: true, type: 'lowpass', frequency: 8000, resonance: 0.3 },
+          compression: { enabled: true, threshold: -24, ratio: 2, attack: 0.01, release: 0.1 }
+        },
+        envelope: { attack: 0.3, decay: 0.5, sustain: 0.7, release: 1.2 },
+        lfo: { enabled: true, rate: 0.5, depth: 0.5, target: 'volume', waveform: 'sine' },
+        sequence: [
+          true, true, true, true, true, true, true, true,
+          true, true, true, true, true, true, true, true,
+          true, true, true, true, true, true, true, true,
+          true, true, true, true, true, true, true, true
+        ],
+        color: 'hsl(30, 70%, 60%)'
+      },
+      {
+        name: 'Cellos',
+        frequency: 220,
+        note: 'A3',
+        category: 'melody',
+        instrument: 'sine',
+        volume: 70,
+        pan: -20,
+        muted: false,
+        solo: false,
+        effects: {
+          delay: { enabled: true, time: 1.0, feedback: 0.4, mix: 0.5 },
+          chorus: { enabled: true, rate: 0.6, depth: 0.003, mix: 0.5 },
+          distortion: { enabled: false, amount: 0.3, type: 'soft' },
+          filter: { enabled: true, type: 'lowpass', frequency: 4000, resonance: 0.4 },
+          compression: { enabled: true, threshold: -20, ratio: 2.5, attack: 0.01, release: 0.15 }
+        },
+        envelope: { attack: 0.4, decay: 0.6, sustain: 0.8, release: 1.5 },
+        lfo: { enabled: true, rate: 0.4, depth: 0.4, target: 'volume', waveform: 'sine' },
+        sequence: [
+          true, true, true, true, true, true, true, true,
+          true, true, true, true, true, true, true, true,
+          true, true, true, true, true, true, true, true,
+          true, true, true, true, true, true, true, true
+        ],
+        color: 'hsl(45, 70%, 60%)'
+      },
+      {
+        name: 'French Horns',
+        frequency: 330,
+        note: 'E4',
+        category: 'melody',
+        instrument: 'square',
+        volume: 65,
+        pan: 20,
+        muted: false,
+        solo: false,
+        effects: {
+          delay: { enabled: true, time: 0.6, feedback: 0.2, mix: 0.3 },
+          chorus: { enabled: true, rate: 1.0, depth: 0.002, mix: 0.4 },
+          distortion: { enabled: false, amount: 0.3, type: 'soft' },
+          filter: { enabled: true, type: 'lowpass', frequency: 3000, resonance: 0.5 },
+          compression: { enabled: true, threshold: -18, ratio: 3, attack: 0.01, release: 0.1 }
+        },
+        envelope: { attack: 0.2, decay: 0.4, sustain: 0.6, release: 0.8 },
+        lfo: { enabled: true, rate: 0.7, depth: 0.6, target: 'volume', waveform: 'sine' },
+        sequence: [
+          true, false, true, false, true, false, true, false,
+          false, true, false, true, false, true, false, true,
+          true, false, true, false, true, false, true, false,
+          false, true, false, true, false, true, false, true
+        ],
+        color: 'hsl(60, 70%, 60%)'
+      },
+      {
+        name: 'Timpani',
+        frequency: 80,
+        note: 'E2',
+        category: 'rhythm',
+        instrument: 'sine',
+        volume: 85,
+        pan: 0,
+        muted: false,
+        solo: false,
+        effects: {
+          delay: { enabled: false, time: 0.3, feedback: 0.3, mix: 0.5 },
+          chorus: { enabled: false, rate: 1.5, depth: 0.002, mix: 0.5 },
+          distortion: { enabled: false, amount: 0.3, type: 'soft' },
+          filter: { enabled: true, type: 'lowpass', frequency: 300, resonance: 3 },
+          compression: { enabled: true, threshold: -15, ratio: 4, attack: 0.001, release: 0.2 }
+        },
+        envelope: { attack: 0.05, decay: 0.3, sustain: 0.4, release: 0.5 },
+        lfo: { enabled: false, rate: 0, depth: 5, target: 'pitch', waveform: 'sine' },
+        sequence: [
+          true, false, false, false, true, false, false, false,
+          true, false, false, false, true, false, false, false,
+          true, false, false, false, true, false, false, false,
+          true, false, false, false, true, false, false, false
+        ],
+        color: 'hsl(75, 70%, 60%)'
+      },
+      {
+        name: 'Flutes',
+        frequency: 660,
+        note: 'E5',
+        category: 'melody',
+        instrument: 'sine',
+        volume: 60,
+        pan: 40,
+        muted: false,
+        solo: false,
+        effects: {
+          delay: { enabled: true, time: 0.4, feedback: 0.2, mix: 0.3 },
+          chorus: { enabled: true, rate: 1.2, depth: 0.002, mix: 0.4 },
+          distortion: { enabled: false, amount: 0.3, type: 'soft' },
+          filter: { enabled: true, type: 'highpass', frequency: 2000, resonance: 0.3 },
+          compression: { enabled: false, threshold: -24, ratio: 4, attack: 0.003, release: 0.25 }
+        },
+        envelope: { attack: 0.1, decay: 0.2, sustain: 0.5, release: 0.6 },
+        lfo: { enabled: true, rate: 1.0, depth: 4, target: 'pitch', waveform: 'sine' },
+        sequence: [
+          false, false, true, false, false, false, true, false,
+          false, false, true, false, false, false, true, false,
+          false, false, true, false, false, false, true, false,
+          false, false, true, false, false, false, true, false
+        ],
+        color: 'hsl(90, 70%, 60%)'
+      },
+      {
+        name: 'Bassoons',
+        frequency: 110,
+        note: 'A2',
+        category: 'bass',
+        instrument: 'square',
+        volume: 75,
+        pan: 0,
+        muted: false,
+        solo: false,
+        effects: {
+          delay: { enabled: true, time: 0.5, feedback: 0.3, mix: 0.4 },
+          chorus: { enabled: true, rate: 0.8, depth: 0.003, mix: 0.5 },
+          distortion: { enabled: false, amount: 0.3, type: 'soft' },
+          filter: { enabled: true, type: 'lowpass', frequency: 800, resonance: 1.2 },
+          compression: { enabled: true, threshold: -18, ratio: 3, attack: 0.01, release: 0.2 }
+        },
+        envelope: { attack: 0.3, decay: 0.5, sustain: 0.7, release: 1.0 },
+        lfo: { enabled: true, rate: 0.6, depth: 0.6, target: 'volume', waveform: 'sine' },
+        sequence: [
+          true, false, false, false, true, false, false, false,
+          true, false, false, false, true, false, false, false,
+          true, false, false, false, true, false, false, false,
+          true, false, false, false, true, false, false, false
+        ],
+        color: 'hsl(105, 70%, 60%)'
+      },
+      {
+        name: 'Harp',
+        frequency: 440,
+        note: 'A4',
+        category: 'melody',
+        instrument: 'triangle',
+        volume: 55,
+        pan: 0,
+        muted: false,
+        solo: false,
+        effects: {
+          delay: { enabled: true, time: 1.2, feedback: 0.4, mix: 0.6 },
+          chorus: { enabled: true, rate: 0.5, depth: 0.004, mix: 0.7 },
+          distortion: { enabled: false, amount: 0.3, type: 'soft' },
+          filter: { enabled: true, type: 'lowpass', frequency: 6000, resonance: 0.2 },
+          compression: { enabled: false, threshold: -24, ratio: 4, attack: 0.003, release: 0.25 }
+        },
+        envelope: { attack: 0.01, decay: 0.8, sustain: 0.4, release: 2.0 },
+        lfo: { enabled: true, rate: 0.3, depth: 0.3, target: 'volume', waveform: 'sine' },
+        sequence: [
+          true, false, false, true, false, false, true, false,
+          false, true, false, false, true, false, false, true,
+          true, false, false, true, false, false, true, false,
+          false, true, false, false, true, false, false, true
+        ],
+        color: 'hsl(120, 70%, 60%)'
+      },
+      {
+        name: 'Cymbals',
+        frequency: 2000,
+        note: 'C6',
+        category: 'rhythm',
+        instrument: 'noise',
+        volume: 50,
+        pan: 0,
+        muted: false,
+        solo: false,
+        effects: {
+          delay: { enabled: true, time: 0.3, feedback: 0.5, mix: 0.7 },
+          chorus: { enabled: false, rate: 1.5, depth: 0.002, mix: 0.5 },
+          distortion: { enabled: false, amount: 0.3, type: 'soft' },
+          filter: { enabled: true, type: 'highpass', frequency: 3000, resonance: 0.5 },
+          compression: { enabled: true, threshold: -20, ratio: 3, attack: 0.001, release: 0.1 }
+        },
+        envelope: { attack: 0.01, decay: 0.1, sustain: 0.2, release: 0.8 },
+        lfo: { enabled: false, rate: 0, depth: 5, target: 'pitch', waveform: 'sine' },
+        sequence: [
+          false, false, false, false, true, false, false, false,
+          false, false, false, false, true, false, false, false,
+          false, false, false, false, true, false, false, false,
+          false, false, false, false, true, false, false, false
+        ],
+        color: 'hsl(135, 70%, 60%)'
+      }
+    ]
+  },
+  
+  'synthwave-dream': {
+    id: 'synthwave-dream',
+    name: 'Synthwave Dream',
+    description: 'A retro-futuristic 8-track synthwave arrangement with arpeggios and pads',
+    bpm: 110,
+    tracks: [
+      {
+        name: 'Kick',
+        frequency: 60,
+        note: 'C2',
+        category: 'rhythm',
+        instrument: 'sine',
+        volume: 100,
+        pan: 0,
+        muted: false,
+        solo: false,
+        effects: {
+          delay: { enabled: false, time: 0.3, feedback: 0.3, mix: 0.5 },
+          chorus: { enabled: false, rate: 1.5, depth: 0.002, mix: 0.5 },
+          distortion: { enabled: false, amount: 0.3, type: 'soft' },
+          filter: { enabled: true, type: 'lowpass', frequency: 200, resonance: 2 },
+          compression: { enabled: true, threshold: -20, ratio: 4, attack: 0.001, release: 0.1 }
+        },
+        envelope: { attack: 0.01, decay: 0.1, sustain: 0.3, release: 0.2 },
+        lfo: { enabled: false, rate: 0, depth: 5, target: 'pitch', waveform: 'sine' },
+        sequence: [
+          true, false, false, false, true, false, false, false,
+          true, false, false, false, true, false, false, false,
+          true, false, false, false, true, false, false, false,
+          true, false, false, false, true, false, false, false
+        ],
+        color: 'hsl(0, 70%, 60%)'
+      },
+      {
+        name: 'Snare',
+        frequency: 200,
+        note: 'G3',
+        category: 'rhythm',
+        instrument: 'noise',
+        volume: 80,
+        pan: 0,
+        muted: false,
+        solo: false,
+        effects: {
+          delay: { enabled: false, time: 0.3, feedback: 0.3, mix: 0.5 },
+          chorus: { enabled: false, rate: 1.5, depth: 0.002, mix: 0.5 },
+          distortion: { enabled: false, amount: 0.3, type: 'soft' },
+          filter: { enabled: true, type: 'highpass', frequency: 800, resonance: 1 },
+          compression: { enabled: true, threshold: -15, ratio: 3, attack: 0.001, release: 0.05 }
+        },
+        envelope: { attack: 0.01, decay: 0.05, sustain: 0.1, release: 0.1 },
+        lfo: { enabled: false, rate: 0, depth: 5, target: 'pitch', waveform: 'sine' },
+        sequence: [
+          false, false, true, false, false, false, true, false,
+          false, false, true, false, false, false, true, false,
+          false, false, true, false, false, false, true, false,
+          false, false, true, false, false, false, true, false
+        ],
+        color: 'hsl(60, 70%, 60%)'
+      },
+      {
+        name: 'Bass',
+        frequency: 110,
+        note: 'A2',
+        category: 'bass',
+        instrument: 'square',
+        volume: 85,
+        pan: 0,
+        muted: false,
+        solo: false,
+        effects: {
+          delay: { enabled: false, time: 0.3, feedback: 0.3, mix: 0.5 },
+          chorus: { enabled: false, rate: 1.5, depth: 0.002, mix: 0.5 },
+          distortion: { enabled: true, amount: 0.3, type: 'soft' },
+          filter: { enabled: true, type: 'lowpass', frequency: 400, resonance: 1.5 },
+          compression: { enabled: true, threshold: -18, ratio: 4, attack: 0.01, release: 0.2 }
+        },
+        envelope: { attack: 0.05, decay: 0.2, sustain: 0.6, release: 0.3 },
+        lfo: { enabled: true, rate: 0.5, depth: 15, target: 'filter', waveform: 'sine' },
+        sequence: [
+          true, false, false, false, true, false, false, false,
+          true, false, false, false, true, false, false, false,
+          true, false, false, false, true, false, false, false,
+          true, false, false, false, true, false, false, false
+        ],
+        color: 'hsl(240, 70%, 60%)'
+      },
+      {
+        name: 'Lead',
+        frequency: 440,
+        note: 'A4',
+        category: 'melody',
+        instrument: 'sawtooth',
+        volume: 70,
+        pan: 0,
+        muted: false,
+        solo: false,
+        effects: {
+          delay: { enabled: true, time: 0.3, feedback: 0.2, mix: 0.3 },
+          chorus: { enabled: true, rate: 1.5, depth: 0.003, mix: 0.4 },
+          distortion: { enabled: true, amount: 0.3, type: 'hard' },
+          filter: { enabled: true, type: 'lowpass', frequency: 2000, resonance: 2 },
+          compression: { enabled: false, threshold: -24, ratio: 4, attack: 0.003, release: 0.25 }
+        },
+        envelope: { attack: 0.1, decay: 0.3, sustain: 0.5, release: 0.5 },
+        lfo: { enabled: true, rate: 2, depth: 10, target: 'pitch', waveform: 'sine' },
+        sequence: [
+          true, false, true, false, true, false, true, false,
+          false, true, false, true, false, true, false, true,
+          true, false, true, false, true, false, true, false,
+          false, true, false, true, false, true, false, true
+        ],
+        color: 'hsl(120, 70%, 60%)'
+      },
+      {
+        name: 'Arpeggio',
+        frequency: 330,
+        note: 'E4',
+        category: 'melody',
+        instrument: 'square',
+        volume: 60,
+        pan: -30,
+        muted: false,
+        solo: false,
+        effects: {
+          delay: { enabled: true, time: 0.2, feedback: 0.1, mix: 0.2 },
+          chorus: { enabled: true, rate: 2.0, depth: 0.002, mix: 0.3 },
+          distortion: { enabled: false, amount: 0.3, type: 'soft' },
+          filter: { enabled: true, type: 'lowpass', frequency: 1500, resonance: 1.5 },
+          compression: { enabled: false, threshold: -24, ratio: 4, attack: 0.003, release: 0.25 }
+        },
+        envelope: { attack: 0.01, decay: 0.1, sustain: 0.3, release: 0.2 },
+        lfo: { enabled: true, rate: 4, depth: 8, target: 'pitch', waveform: 'square' },
+        sequence: [
+          true, false, false, true, false, false, true, false,
+          false, true, false, false, true, false, false, true,
+          true, false, false, true, false, false, true, false,
+          false, true, false, false, true, false, false, true
+        ],
+        color: 'hsl(180, 70%, 60%)'
+      },
+      {
+        name: 'Pad',
+        frequency: 220,
+        note: 'A3',
+        category: 'ambient',
+        instrument: 'sine',
+        volume: 45,
+        pan: 30,
+        muted: false,
+        solo: false,
+        effects: {
+          delay: { enabled: true, time: 1.5, feedback: 0.4, mix: 0.6 },
+          chorus: { enabled: true, rate: 0.5, depth: 0.004, mix: 0.7 },
+          distortion: { enabled: false, amount: 0.3, type: 'soft' },
+          filter: { enabled: true, type: 'lowpass', frequency: 1500, resonance: 0.8 },
+          compression: { enabled: false, threshold: -24, ratio: 4, attack: 0.003, release: 0.25 }
+        },
+        envelope: { attack: 2.0, decay: 1.0, sustain: 0.8, release: 3.0 },
+        lfo: { enabled: true, rate: 0.3, depth: 0.3, target: 'volume', waveform: 'sine' },
+        sequence: [
+          true, true, true, true, true, true, true, true,
+          true, true, true, true, true, true, true, true,
+          true, true, true, true, true, true, true, true,
+          true, true, true, true, true, true, true, true
+        ],
+        color: 'hsl(200, 70%, 60%)'
+      },
+      {
+        name: 'FX Sweep',
+        frequency: 880,
+        note: 'A5',
+        category: 'fx',
+        instrument: 'sawtooth',
+        volume: 40,
+        pan: 0,
+        muted: false,
+        solo: false,
+        effects: {
+          delay: { enabled: true, time: 0.8, feedback: 0.6, mix: 0.8 },
+          chorus: { enabled: true, rate: 0.8, depth: 0.005, mix: 0.9 },
+          distortion: { enabled: false, amount: 0.3, type: 'soft' },
+          filter: { enabled: true, type: 'lowpass', frequency: 800, resonance: 0.4 },
+          compression: { enabled: false, threshold: -24, ratio: 4, attack: 0.003, release: 0.25 }
+        },
+        envelope: { attack: 3.0, decay: 2.0, sustain: 0.9, release: 4.0 },
+        lfo: { enabled: true, rate: 0.1, depth: 20, target: 'filter', waveform: 'sine' },
+        sequence: [
+          true, true, true, true, true, true, true, true,
+          true, true, true, true, true, true, true, true,
+          true, true, true, true, true, true, true, true,
+          true, true, true, true, true, true, true, true
+        ],
+        color: 'hsl(280, 70%, 60%)'
+      },
+      {
+        name: 'Hi-Hats',
+        frequency: 3000,
+        note: 'C7',
+        category: 'rhythm',
+        instrument: 'noise',
+        volume: 55,
+        pan: 0,
+        muted: false,
+        solo: false,
+        effects: {
+          delay: { enabled: false, time: 0.3, feedback: 0.3, mix: 0.5 },
+          chorus: { enabled: false, rate: 1.5, depth: 0.002, mix: 0.5 },
+          distortion: { enabled: false, amount: 0.3, type: 'soft' },
+          filter: { enabled: true, type: 'highpass', frequency: 5000, resonance: 0.5 },
+          compression: { enabled: true, threshold: -20, ratio: 3, attack: 0.001, release: 0.05 }
+        },
+        envelope: { attack: 0.01, decay: 0.05, sustain: 0.1, release: 0.1 },
+        lfo: { enabled: false, rate: 0, depth: 5, target: 'pitch', waveform: 'sine' },
+        sequence: [
+          true, true, true, true, true, true, true, true,
+          true, true, true, true, true, true, true, true,
+          true, true, true, true, true, true, true, true,
+          true, true, true, true, true, true, true, true
+        ],
+        color: 'hsl(300, 70%, 60%)'
+             }
+     ]
+   },
+   
+   'lofi-chill': {
+     id: 'lofi-chill',
+     name: 'Lo-Fi Chill',
+     description: 'A relaxing 8-track lo-fi hip-hop arrangement with vinyl crackle and jazzy samples',
+     bpm: 85,
+     tracks: [
+       {
+         name: 'Kick',
+         frequency: 60,
+         note: 'C2',
+         category: 'rhythm',
+         instrument: 'sine',
+         volume: 90,
+         pan: 0,
+         muted: false,
+         solo: false,
+         effects: {
+           delay: { enabled: false, time: 0.3, feedback: 0.3, mix: 0.5 },
+           chorus: { enabled: false, rate: 1.5, depth: 0.002, mix: 0.5 },
+           distortion: { enabled: false, amount: 0.3, type: 'soft' },
+           filter: { enabled: true, type: 'lowpass', frequency: 200, resonance: 2 },
+           compression: { enabled: true, threshold: -20, ratio: 4, attack: 0.001, release: 0.1 }
+         },
+         envelope: { attack: 0.01, decay: 0.1, sustain: 0.3, release: 0.2 },
+         lfo: { enabled: false, rate: 0, depth: 5, target: 'pitch', waveform: 'sine' },
+         sequence: [
+           true, false, false, false, true, false, false, false,
+           true, false, false, false, true, false, false, false,
+           true, false, false, false, true, false, false, false,
+           true, false, false, false, true, false, false, false
+         ],
+         color: 'hsl(0, 70%, 60%)'
+       },
+       {
+         name: 'Snare',
+         frequency: 200,
+         note: 'G3',
+         category: 'rhythm',
+         instrument: 'noise',
+         volume: 70,
+         pan: 0,
+         muted: false,
+         solo: false,
+         effects: {
+           delay: { enabled: false, time: 0.3, feedback: 0.3, mix: 0.5 },
+           chorus: { enabled: false, rate: 1.5, depth: 0.002, mix: 0.5 },
+           distortion: { enabled: false, amount: 0.3, type: 'soft' },
+           filter: { enabled: true, type: 'highpass', frequency: 800, resonance: 1 },
+           compression: { enabled: true, threshold: -15, ratio: 3, attack: 0.001, release: 0.05 }
+         },
+         envelope: { attack: 0.01, decay: 0.05, sustain: 0.1, release: 0.1 },
+         lfo: { enabled: false, rate: 0, depth: 5, target: 'pitch', waveform: 'sine' },
+         sequence: [
+           false, false, true, false, false, false, true, false,
+           false, false, true, false, false, false, true, false,
+           false, false, true, false, false, false, true, false,
+           false, false, true, false, false, false, true, false
+         ],
+         color: 'hsl(60, 70%, 60%)'
+       },
+       {
+         name: 'Jazz Piano',
+         frequency: 440,
+         note: 'A4',
+         category: 'melody',
+         instrument: 'sine',
+         volume: 65,
+         pan: -20,
+         muted: false,
+         solo: false,
+         effects: {
+           delay: { enabled: true, time: 0.4, feedback: 0.2, mix: 0.3 },
+           chorus: { enabled: true, rate: 0.8, depth: 0.002, mix: 0.4 },
+           distortion: { enabled: false, amount: 0.3, type: 'soft' },
+           filter: { enabled: true, type: 'lowpass', frequency: 4000, resonance: 0.5 },
+           compression: { enabled: true, threshold: -20, ratio: 3, attack: 0.01, release: 0.1 }
+         },
+         envelope: { attack: 0.1, decay: 0.3, sustain: 0.6, release: 0.8 },
+         lfo: { enabled: false, rate: 0, depth: 5, target: 'pitch', waveform: 'sine' },
+         sequence: [
+           true, false, true, false, true, false, true, false,
+           true, false, true, false, true, false, true, false,
+           true, false, true, false, true, false, true, false,
+           true, false, true, false, true, false, true, false
+         ],
+         color: 'hsl(30, 70%, 60%)'
+       },
+       {
+         name: 'Bass',
+         frequency: 110,
+         note: 'A2',
+         category: 'bass',
+         instrument: 'square',
+         volume: 80,
+         pan: 0,
+         muted: false,
+         solo: false,
+         effects: {
+           delay: { enabled: false, time: 0.3, feedback: 0.3, mix: 0.5 },
+           chorus: { enabled: false, rate: 1.5, depth: 0.002, mix: 0.5 },
+           distortion: { enabled: false, amount: 0.3, type: 'soft' },
+           filter: { enabled: true, type: 'lowpass', frequency: 300, resonance: 1 },
+           compression: { enabled: true, threshold: -15, ratio: 4, attack: 0.005, release: 0.2 }
+         },
+         envelope: { attack: 0.05, decay: 0.2, sustain: 0.7, release: 0.4 },
+         lfo: { enabled: false, rate: 0, depth: 5, target: 'pitch', waveform: 'sine' },
+         sequence: [
+           true, false, false, false, true, false, false, false,
+           true, false, false, false, true, false, false, false,
+           true, false, false, false, true, false, false, false,
+           true, false, false, false, true, false, false, false
+         ],
+         color: 'hsl(200, 70%, 60%)'
+       },
+       {
+         name: 'Vinyl Crackle',
+         frequency: 100,
+         note: 'E2',
+         category: 'fx',
+         instrument: 'noise',
+         volume: 25,
+         pan: 0,
+         muted: false,
+         solo: false,
+         effects: {
+           delay: { enabled: false, time: 0.3, feedback: 0.3, mix: 0.5 },
+           chorus: { enabled: false, rate: 1.5, depth: 0.002, mix: 0.5 },
+           distortion: { enabled: true, amount: 0.1, type: 'soft' },
+           filter: { enabled: true, type: 'lowpass', frequency: 500, resonance: 0.3 },
+           compression: { enabled: false, threshold: -24, ratio: 4, attack: 0.003, release: 0.25 }
+         },
+         envelope: { attack: 0.01, decay: 0.1, sustain: 0.2, release: 0.3 },
+         lfo: { enabled: true, rate: 0.2, depth: 0.2, target: 'volume', waveform: 'sine' },
+         sequence: [
+           true, true, true, true, true, true, true, true,
+           true, true, true, true, true, true, true, true,
+           true, true, true, true, true, true, true, true,
+           true, true, true, true, true, true, true, true
+         ],
+         color: 'hsl(20, 70%, 60%)'
+       },
+       {
+         name: 'Sax Sample',
+         frequency: 330,
+         note: 'E4',
+         category: 'melody',
+         instrument: 'sawtooth',
+         volume: 55,
+         pan: 20,
+         muted: false,
+         solo: false,
+         effects: {
+           delay: { enabled: true, time: 0.4, feedback: 0.2, mix: 0.3 },
+           chorus: { enabled: true, rate: 1.8, depth: 0.003, mix: 0.4 },
+           distortion: { enabled: false, amount: 0.3, type: 'soft' },
+           filter: { enabled: true, type: 'lowpass', frequency: 2500, resonance: 1.2 },
+           compression: { enabled: false, threshold: -24, ratio: 4, attack: 0.003, release: 0.25 }
+         },
+         envelope: { attack: 0.2, decay: 0.4, sustain: 0.5, release: 1.0 },
+         lfo: { enabled: true, rate: 1.5, depth: 8, target: 'pitch', waveform: 'sine' },
+         sequence: [
+           false, false, false, true, false, false, false, true,
+           false, false, false, true, false, false, false, true,
+           false, false, false, true, false, false, false, true,
+           false, false, false, true, false, false, false, true
+         ],
+         color: 'hsl(15, 70%, 60%)'
+       },
+       {
+         name: 'Ambient Pad',
+         frequency: 220,
+         note: 'A3',
+         category: 'ambient',
+         instrument: 'sine',
+         volume: 35,
+         pan: 0,
+         muted: false,
+         solo: false,
+         effects: {
+           delay: { enabled: true, time: 1.5, feedback: 0.4, mix: 0.6 },
+           chorus: { enabled: true, rate: 0.5, depth: 0.004, mix: 0.7 },
+           distortion: { enabled: false, amount: 0.3, type: 'soft' },
+           filter: { enabled: true, type: 'lowpass', frequency: 1500, resonance: 0.8 },
+           compression: { enabled: false, threshold: -24, ratio: 4, attack: 0.003, release: 0.25 }
+         },
+         envelope: { attack: 2.0, decay: 1.0, sustain: 0.8, release: 3.0 },
+         lfo: { enabled: true, rate: 0.3, depth: 0.3, target: 'volume', waveform: 'sine' },
+         sequence: [
+           true, true, true, true, true, true, true, true,
+           true, true, true, true, true, true, true, true,
+           true, true, true, true, true, true, true, true,
+           true, true, true, true, true, true, true, true
+         ],
+         color: 'hsl(200, 70%, 60%)'
+       },
+       {
+         name: 'Hi-Hats',
+         frequency: 3000,
+         note: 'C7',
+         category: 'rhythm',
+         instrument: 'noise',
+         volume: 45,
+         pan: 0,
+         muted: false,
+         solo: false,
+         effects: {
+           delay: { enabled: false, time: 0.3, feedback: 0.3, mix: 0.5 },
+           chorus: { enabled: false, rate: 1.5, depth: 0.002, mix: 0.5 },
+           distortion: { enabled: false, amount: 0.3, type: 'soft' },
+           filter: { enabled: true, type: 'highpass', frequency: 5000, resonance: 0.5 },
+           compression: { enabled: true, threshold: -20, ratio: 3, attack: 0.001, release: 0.05 }
+         },
+         envelope: { attack: 0.01, decay: 0.05, sustain: 0.1, release: 0.1 },
+         lfo: { enabled: false, rate: 0, depth: 5, target: 'pitch', waveform: 'sine' },
+         sequence: [
+           true, true, true, true, true, true, true, true,
+           true, true, true, true, true, true, true, true,
+           true, true, true, true, true, true, true, true,
+           true, true, true, true, true, true, true, true
+         ],
+         color: 'hsl(300, 70%, 60%)'
+       }
+     ]
+   },
+   
+   'dubstep-bass': {
+     id: 'dubstep-bass',
+     name: 'Dubstep Bass',
+     description: 'A heavy 8-track dubstep arrangement with wobble bass and aggressive drums',
+     bpm: 140,
+     tracks: [
+       {
+         name: 'Kick',
+         frequency: 60,
+         note: 'C2',
+         category: 'rhythm',
+         instrument: 'sine',
+         volume: 100,
+         pan: 0,
+         muted: false,
+         solo: false,
+         effects: {
+           delay: { enabled: false, time: 0.3, feedback: 0.3, mix: 0.5 },
+           chorus: { enabled: false, rate: 1.5, depth: 0.002, mix: 0.5 },
+           distortion: { enabled: false, amount: 0.3, type: 'soft' },
+           filter: { enabled: true, type: 'lowpass', frequency: 200, resonance: 2 },
+           compression: { enabled: true, threshold: -20, ratio: 4, attack: 0.001, release: 0.1 }
+         },
+         envelope: { attack: 0.01, decay: 0.1, sustain: 0.3, release: 0.2 },
+         lfo: { enabled: false, rate: 0, depth: 5, target: 'pitch', waveform: 'sine' },
+         sequence: [
+           true, false, false, false, true, false, false, false,
+           true, false, false, false, true, false, false, false,
+           true, false, false, false, true, false, false, false,
+           true, false, false, false, true, false, false, false
+         ],
+         color: 'hsl(0, 70%, 60%)'
+       },
+       {
+         name: 'Snare',
+         frequency: 200,
+         note: 'G3',
+         category: 'rhythm',
+         instrument: 'noise',
+         volume: 90,
+         pan: 0,
+         muted: false,
+         solo: false,
+         effects: {
+           delay: { enabled: false, time: 0.3, feedback: 0.3, mix: 0.5 },
+           chorus: { enabled: false, rate: 1.5, depth: 0.002, mix: 0.5 },
+           distortion: { enabled: false, amount: 0.3, type: 'soft' },
+           filter: { enabled: true, type: 'highpass', frequency: 800, resonance: 1 },
+           compression: { enabled: true, threshold: -15, ratio: 3, attack: 0.001, release: 0.05 }
+         },
+         envelope: { attack: 0.01, decay: 0.05, sustain: 0.1, release: 0.1 },
+         lfo: { enabled: false, rate: 0, depth: 5, target: 'pitch', waveform: 'sine' },
+         sequence: [
+           false, false, true, false, false, false, true, false,
+           false, false, true, false, false, false, true, false,
+           false, false, true, false, false, false, true, false,
+           false, false, true, false, false, false, true, false
+         ],
+         color: 'hsl(60, 70%, 60%)'
+       },
+       {
+         name: 'Wobble Bass',
+         frequency: 110,
+         note: 'A2',
+         category: 'bass',
+         instrument: 'sawtooth',
+         volume: 95,
+         pan: 0,
+         muted: false,
+         solo: false,
+         effects: {
+           delay: { enabled: false, time: 0.3, feedback: 0.3, mix: 0.5 },
+           chorus: { enabled: false, rate: 1.5, depth: 0.002, mix: 0.5 },
+           distortion: { enabled: true, amount: 0.5, type: 'hard' },
+           filter: { enabled: true, type: 'lowpass', frequency: 400, resonance: 1.5 },
+           compression: { enabled: true, threshold: -18, ratio: 4, attack: 0.01, release: 0.2 }
+         },
+         envelope: { attack: 0.05, decay: 0.2, sustain: 0.6, release: 0.3 },
+         lfo: { enabled: true, rate: 0.3, depth: 25, target: 'filter', waveform: 'sine' },
+         sequence: [
+           true, false, false, false, true, false, false, false,
+           true, false, false, false, true, false, false, false,
+           true, false, false, false, true, false, false, false,
+           true, false, false, false, true, false, false, false
+         ],
+         color: 'hsl(240, 70%, 60%)'
+       },
+       {
+         name: 'Lead',
+         frequency: 440,
+         note: 'A4',
+         category: 'melody',
+         instrument: 'sawtooth',
+         volume: 75,
+         pan: 0,
+         muted: false,
+         solo: false,
+         effects: {
+           delay: { enabled: true, time: 0.3, feedback: 0.2, mix: 0.3 },
+           chorus: { enabled: true, rate: 1.5, depth: 0.003, mix: 0.4 },
+           distortion: { enabled: true, amount: 0.4, type: 'hard' },
+           filter: { enabled: true, type: 'lowpass', frequency: 2000, resonance: 2 },
+           compression: { enabled: false, threshold: -24, ratio: 4, attack: 0.003, release: 0.25 }
+         },
+         envelope: { attack: 0.1, decay: 0.3, sustain: 0.5, release: 0.5 },
+         lfo: { enabled: true, rate: 2, depth: 10, target: 'pitch', waveform: 'sine' },
+         sequence: [
+           true, false, true, false, true, false, true, false,
+           false, true, false, true, false, true, false, true,
+           true, false, true, false, true, false, true, false,
+           false, true, false, true, false, true, false, true
+         ],
+         color: 'hsl(120, 70%, 60%)'
+       },
+       {
+         name: 'FX Sweep',
+         frequency: 880,
+         note: 'A5',
+         category: 'fx',
+         instrument: 'sawtooth',
+         volume: 50,
+         pan: 0,
+         muted: false,
+         solo: false,
+         effects: {
+           delay: { enabled: true, time: 0.8, feedback: 0.6, mix: 0.8 },
+           chorus: { enabled: true, rate: 0.8, depth: 0.005, mix: 0.9 },
+           distortion: { enabled: false, amount: 0.3, type: 'soft' },
+           filter: { enabled: true, type: 'lowpass', frequency: 800, resonance: 0.4 },
+           compression: { enabled: false, threshold: -24, ratio: 4, attack: 0.003, release: 0.25 }
+         },
+         envelope: { attack: 3.0, decay: 2.0, sustain: 0.9, release: 4.0 },
+         lfo: { enabled: true, rate: 0.1, depth: 20, target: 'filter', waveform: 'sine' },
+         sequence: [
+           true, true, true, true, true, true, true, true,
+           true, true, true, true, true, true, true, true,
+           true, true, true, true, true, true, true, true,
+           true, true, true, true, true, true, true, true
+         ],
+         color: 'hsl(280, 70%, 60%)'
+       },
+       {
+         name: 'Hi-Hats',
+         frequency: 3000,
+         note: 'C7',
+         category: 'rhythm',
+         instrument: 'noise',
+         volume: 65,
+         pan: 0,
+         muted: false,
+         solo: false,
+         effects: {
+           delay: { enabled: false, time: 0.3, feedback: 0.3, mix: 0.5 },
+           chorus: { enabled: false, rate: 1.5, depth: 0.002, mix: 0.5 },
+           distortion: { enabled: false, amount: 0.3, type: 'soft' },
+           filter: { enabled: true, type: 'highpass', frequency: 5000, resonance: 0.5 },
+           compression: { enabled: true, threshold: -20, ratio: 3, attack: 0.001, release: 0.05 }
+         },
+         envelope: { attack: 0.01, decay: 0.05, sustain: 0.1, release: 0.1 },
+         lfo: { enabled: false, rate: 0, depth: 5, target: 'pitch', waveform: 'sine' },
+         sequence: [
+           true, true, true, true, true, true, true, true,
+           true, true, true, true, true, true, true, true,
+           true, true, true, true, true, true, true, true,
+           true, true, true, true, true, true, true, true
+         ],
+         color: 'hsl(300, 70%, 60%)'
+       },
+       {
+         name: 'Sub Bass',
+         frequency: 55,
+         note: 'A1',
+         category: 'bass',
+         instrument: 'sine',
+         volume: 90,
+         pan: 0,
+         muted: false,
+         solo: false,
+         effects: {
+           delay: { enabled: false, time: 0.3, feedback: 0.3, mix: 0.5 },
+           chorus: { enabled: false, rate: 1.5, depth: 0.002, mix: 0.5 },
+           distortion: { enabled: false, amount: 0.3, type: 'soft' },
+           filter: { enabled: true, type: 'lowpass', frequency: 150, resonance: 2 },
+           compression: { enabled: true, threshold: -15, ratio: 4, attack: 0.001, release: 0.2 }
+         },
+         envelope: { attack: 0.01, decay: 0.3, sustain: 0.7, release: 0.5 },
+         lfo: { enabled: false, rate: 0, depth: 5, target: 'pitch', waveform: 'sine' },
+         sequence: [
+           true, false, false, false, true, false, false, false,
+           true, false, false, false, true, false, false, false,
+           true, false, false, false, true, false, false, false,
+           true, false, false, false, true, false, false, false
+         ],
+         color: 'hsl(180, 70%, 60%)'
+       },
+       {
+         name: 'Crash',
+         frequency: 2000,
+         note: 'C6',
+         category: 'rhythm',
+         instrument: 'noise',
+         volume: 70,
+         pan: 0,
+         muted: false,
+         solo: false,
+         effects: {
+           delay: { enabled: true, time: 0.3, feedback: 0.5, mix: 0.7 },
+           chorus: { enabled: false, rate: 1.5, depth: 0.002, mix: 0.5 },
+           distortion: { enabled: false, amount: 0.3, type: 'soft' },
+           filter: { enabled: true, type: 'highpass', frequency: 3000, resonance: 0.5 },
+           compression: { enabled: true, threshold: -20, ratio: 3, attack: 0.001, release: 0.1 }
+         },
+         envelope: { attack: 0.01, decay: 0.1, sustain: 0.2, release: 0.8 },
+         lfo: { enabled: false, rate: 0, depth: 5, target: 'pitch', waveform: 'sine' },
+         sequence: [
+           false, false, false, false, true, false, false, false,
+           false, false, false, false, true, false, false, false,
+           false, false, false, false, true, false, false, false,
+           false, false, false, false, true, false, false, false
+         ],
+         color: 'hsl(135, 70%, 60%)'
+       }
+     ]
+   }
 };

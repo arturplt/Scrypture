@@ -10,7 +10,7 @@ import {
   TrackEnvelope,
   TrackLFO
 } from '../types/synthesizer';
-import { CHORDS, CHORD_PROGRESSIONS, PRESETS, NUMBER_KEY_PATTERNS, RHYTHM_PATTERNS, SCRYPTURE_RHYTHM_PATTERNS, SEQUENCER_TRACKS, NOTES, TRACK_PRESETS } from '../data/synthesizerData';
+import { CHORDS, CHORD_PROGRESSIONS, PRESETS, NUMBER_KEY_PATTERNS, RHYTHM_PATTERNS, SCRYPTURE_RHYTHM_PATTERNS, NOTES, TRACK_PRESETS } from '../data/synthesizerData';
 
 // Default track effects
 const defaultTrackEffects: TrackEffects = {
@@ -136,7 +136,6 @@ const initialState: SynthesizerState = {
     masterVolume: 100,
     masterPan: 0,
     trackOrder: [],
-    showTrackList: false,
     showTrackEditor: false
   }
 };
@@ -1549,122 +1548,7 @@ export const useSynthesizer = (): SynthesizerContextType => {
   }, []);
 
   // Simple test function to verify basic audio is working
-  const testAudio = useCallback(() => {
-    console.log('testAudio called');
-    console.log('audioContextRef.current:', audioContextRef.current);
-    
-    if (!audioContextRef.current) {
-      console.warn('No audio context available');
-      return;
-    }
-    
-    console.log('Audio context state:', audioContextRef.current.state);
-    
-    // Ensure audio context is running
-    if (audioContextRef.current.state === 'suspended') {
-      console.log('Resuming audio context for test');
-      audioContextRef.current.resume();
-      
-      // Recreate all track nodes after resuming to ensure they're from the same context
-      setTimeout(() => {
-        const trackIds = Array.from(trackNodesRef.current.keys());
-        trackIds.forEach(trackId => {
-          removeTrackNodes(trackId);
-          createTrackNodes(trackId);
-        });
-      }, 100);
-    }
-    
-    // Test 1: Direct connection to destination
-    console.log('Test 1: Direct connection to destination');
-    const osc1 = audioContextRef.current.createOscillator();
-    const gain1 = audioContextRef.current.createGain();
-    
-    osc1.frequency.value = 440;
-    gain1.gain.value = 0.3; // Higher gain for testing
-    
-    osc1.connect(gain1);
-    gain1.connect(audioContextRef.current.destination);
-    
-    osc1.start();
-    setTimeout(() => {
-      osc1.stop();
-      console.log('Test 1 complete');
-    }, 1000);
-    
-    // Test 2: Through master gain (like the synthesizer does)
-    setTimeout(() => {
-      console.log('Test 2: Through master gain');
-      if (masterGainRef.current && audioContextRef.current) {
-        const osc2 = audioContextRef.current.createOscillator();
-        const gain2 = audioContextRef.current.createGain();
-        
-        osc2.frequency.value = 660; // Different frequency
-        gain2.gain.value = 0.3;
-        
-        osc2.connect(gain2);
-        gain2.connect(masterGainRef.current);
-        
-        osc2.start();
-        setTimeout(() => {
-          osc2.stop();
-          console.log('Test 2 complete');
-        }, 1000);
-      } else {
-        console.warn('Master gain not available for test 2');
-      }
-    }, 1200);
-    
-    // Test 3: Through dry gain (like the synthesizer does)
-    setTimeout(() => {
-      console.log('Test 3: Through dry gain');
-      if (dryGainRef.current && audioContextRef.current) {
-        const osc3 = audioContextRef.current.createOscillator();
-        const gain3 = audioContextRef.current.createGain();
-        
-        osc3.frequency.value = 880; // Different frequency
-        gain3.gain.value = 0.3;
-        
-        osc3.connect(gain3);
-        gain3.connect(dryGainRef.current);
-        
-        osc3.start();
-        setTimeout(() => {
-          osc3.stop();
-          console.log('Test 3 complete');
-        }, 1000);
-      } else {
-        console.warn('Dry gain not available for test 3');
-      }
-    }, 2400);
-    
-    // Test 4: Through track nodes (test multi-track sequencer)
-    setTimeout(() => {
-      console.log('Test 4: Through track nodes');
-      if (state.trackState.tracks.length > 0) {
-        const firstTrack = state.trackState.tracks[0];
-        console.log(`Testing track: ${firstTrack.name} (${firstTrack.id})`);
-        
-        // Ensure track nodes exist
-        if (!trackNodesRef.current.has(firstTrack.id)) {
-          console.log(`Creating track nodes for ${firstTrack.id}`);
-          createTrackNodes(firstTrack.id);
-        }
-        
-        // Test note through track
-        startNote(firstTrack.frequency, null, firstTrack.id);
-        
-        setTimeout(() => {
-          stopNote(firstTrack.frequency, null);
-          console.log('Test 4 complete');
-        }, 1000);
-      } else {
-        console.warn('No tracks available for test 4');
-      }
-    }, 3600);
-    
-    console.log('All test audio setup complete');
-  }, [state.trackState.tracks, createTrackNodes, startNote, stopNote]);
+
 
   // Update sequencer interval when BPM or steps change
   useEffect(() => {
@@ -2032,14 +1916,7 @@ export const useSynthesizer = (): SynthesizerContextType => {
     updateTrackAudio(duplicatedTrack.id, duplicatedTrack);
   }, [state.trackState.tracks, updateState, createTrackNodes, updateTrackAudio]);
 
-  const toggleTrackList = useCallback(() => {
-    updateState(prev => ({
-      trackState: {
-        ...prev.trackState,
-        showTrackList: !prev.trackState.showTrackList
-      }
-    }));
-  }, [updateState]);
+
 
   const toggleTrackEditor = useCallback(() => {
     updateState(prev => ({
@@ -2080,28 +1957,7 @@ export const useSynthesizer = (): SynthesizerContextType => {
     return state.trackState.tracks.filter(track => track.solo);
   }, [state.trackState.tracks]);
 
-  // Debug function to check track node status
-  const debugTrackNodes = useCallback(() => {
-    console.log('=== Track Nodes Debug ===');
-    console.log('Audio context state:', audioContextRef.current?.state);
-    console.log('Master gain available:', !!masterGainRef.current);
-    console.log('Number of tracks:', state.trackState.tracks.length);
-    console.log('Number of track nodes:', trackNodesRef.current.size);
-    
-    state.trackState.tracks.forEach(track => {
-      const trackNodes = trackNodesRef.current.get(track.id);
-      console.log(`Track ${track.id} (${track.name}):`, {
-        hasNodes: !!trackNodes,
-        muted: track.muted,
-        solo: track.solo,
-        volume: track.volume,
-        frequency: track.frequency,
-        contextMatch: trackNodes ? trackNodes.gain.context === audioContextRef.current : 'N/A'
-      });
-    });
-    
-    console.log('=== End Debug ===');
-  }, [state.trackState.tracks]);
+
 
   return {
     state,
@@ -2168,15 +2024,12 @@ export const useSynthesizer = (): SynthesizerContextType => {
     clearTrackSequence,
     clearAllTracks,
     duplicateTrack,
-    toggleTrackList,
     toggleTrackEditor,
     updateMasterVolume,
     updateMasterPan,
     getSelectedTrack,
     getActiveTracks,
     getSoloTracks,
-    testAudio,
-    debugTrackNodes,
     loadTrackPreset
   };
 }; 
