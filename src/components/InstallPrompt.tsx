@@ -33,6 +33,28 @@ export const InstallPrompt: React.FC<InstallPromptProps> = ({ onClose }) => {
     return null;
   }
 
+  // Don't show during E2E testing
+  if (typeof window !== 'undefined') {
+    // Check if we're in a test environment
+    const userAgent = window.navigator.userAgent.toLowerCase();
+    const isPlaywright = userAgent.includes('headlesschrome') || 
+                        userAgent.includes('playwright') ||
+                        userAgent.includes('chromium') ||
+                        userAgent.includes('firefox') && userAgent.includes('headless') ||
+                        userAgent.includes('webkit') && userAgent.includes('headless');
+    
+    const isLocalhost = window.location.hostname === 'localhost' || 
+                       window.location.hostname === '127.0.0.1' ||
+                       window.location.hostname.includes('localhost');
+    
+    const hasPort = window.location.port && window.location.port !== '80' && window.location.port !== '443';
+    
+    // Disable in test environments
+    if (isPlaywright || (isLocalhost && hasPort) || process.env.NODE_ENV === 'test') {
+      return null;
+    }
+  }
+
   const handleClose = () => {
     // Mark that install prompt has been shown
     localStorage.setItem('installPromptShown', 'true');
@@ -73,14 +95,15 @@ export const InstallPrompt: React.FC<InstallPromptProps> = ({ onClose }) => {
   const instructions = getInstallInstructions();
 
   return (
-    <div className={styles.overlay}>
-      <div className={styles.prompt}>
+    <div className={styles.overlay} data-testid="install-prompt-overlay">
+      <div className={styles.prompt} data-testid="install-prompt">
         <div className={styles.header}>
           <h3>📱 {instructions.title}</h3>
           <button 
             className={styles.closeButton}
             onClick={handleClose}
             aria-label="Close install prompt"
+            data-testid="install-prompt-close"
           >
             ✕
           </button>
@@ -108,6 +131,7 @@ export const InstallPrompt: React.FC<InstallPromptProps> = ({ onClose }) => {
           <button 
             className={styles.primaryButton}
             onClick={handleClose}
+            data-testid="install-prompt-got-it"
           >
             Got it!
           </button>

@@ -81,7 +81,36 @@ test.describe('Critical User Journeys', () => {
 
   // Helper function to handle overlays that block interactions
   async function handleOverlays(page: any) {
-    // Try to dismiss "Add to Home Screen" prompts
+    // Try to dismiss InstallPrompt specifically
+    const installPrompt = page.locator('[data-testid="install-prompt-overlay"], [data-testid="install-prompt"]');
+    if (await installPrompt.isVisible()) {
+      console.log('Dismissing InstallPrompt');
+      try {
+        // Try to click the close button first
+        const closeButton = page.locator('[data-testid="install-prompt-close"]');
+        if (await closeButton.isVisible()) {
+          await closeButton.click();
+          await page.waitForTimeout(500);
+          return;
+        }
+        
+        // Try to click the "Got it!" button
+        const gotItButton = page.locator('[data-testid="install-prompt-got-it"]');
+        if (await gotItButton.isVisible()) {
+          await gotItButton.click();
+          await page.waitForTimeout(500);
+          return;
+        }
+        
+        // Fallback: try to click outside the prompt
+        await page.click('body', { position: { x: 10, y: 10 } });
+        await page.waitForTimeout(500);
+      } catch (e) {
+        console.log('Could not dismiss InstallPrompt:', e);
+      }
+    }
+
+    // Try to dismiss "Add to Home Screen" prompts (legacy detection)
     const addToHomeScreen = page.locator('text="Add to Home Screen", text="Install App"');
     if (await addToHomeScreen.isVisible()) {
       console.log('Dismissing Add to Home Screen prompt');

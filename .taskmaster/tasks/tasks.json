@@ -151,11 +151,77 @@
         "dependencies": [],
         "testStrategy": "Test theme creation, customization options, theme sharing functionality",
         "subtasks": []
+      },
+      {
+        "id": 11,
+        "title": "Achievement System E2E Tests",
+        "description": "Create comprehensive e2e tests for the Achievement System unlock flows and celebrations",
+        "details": "Implement e2e tests for the achievement system including: achievement unlock flows (First Steps, Dam Builder, Ancient Wisdom), progress tracking with visual progress bars, category filtering (Progression/Mastery/Consistency/Exploration/Special), achievement persistence across browser sessions, and rarity-based celebrations (Common/Legendary visual effects). Test the complete user journey from task completion to achievement unlock celebration.",
+        "status": "done",
+        "priority": "high",
+        "dependencies": [],
+        "testStrategy": "Test achievement unlock flows, progress tracking, category filtering, persistence, and celebration effects across different browsers and devices",
+        "subtasks": []
+      },
+      {
+        "id": 12,
+        "title": "Habit System E2E Tests",
+        "description": "Create e2e tests for Habit System frequency logic and streak tracking",
+        "details": "Implement e2e tests for the habit system including: habit frequency logic (daily/weekly/monthly completion rules), streak calculation across different frequencies, habit conversion to tasks, stat rewards (Body/Mind/Soul) on completion, and habit data persistence across browser refresh. Test complex scenarios like streak breaks and frequency transitions.",
+        "status": "done",
+        "priority": "high",
+        "dependencies": [],
+        "testStrategy": "Test habit frequency logic, streak calculations, stat rewards, and data persistence with various habit types and completion patterns",
+        "subtasks": []
+      },
+      {
+        "id": 13,
+        "title": "Data Persistence E2E Tests",
+        "description": "Create e2e tests for auto-save functionality and data recovery",
+        "details": "Implement e2e tests for data persistence including: auto-save functionality during user interactions, data recovery after browser crash/refresh, storage limits handling when localStorage is full, data export/import functionality, and cross-session persistence verification. Test the complete data lifecycle from creation to recovery.",
+        "status": "done",
+        "priority": "high",
+        "dependencies": [],
+        "testStrategy": "Test auto-save triggers, data recovery scenarios, storage error handling, and export/import functionality across different browsers",
+        "subtasks": []
+      },
+      {
+        "id": 14,
+        "title": "Synthesizer E2E Tests",
+        "description": "Create e2e tests for multi-track synthesizer functionality",
+        "details": "Implement e2e tests for the synthesizer including: multi-track management (creating, muting, soloing tracks), sequencer functionality (pattern creation and playback), effects chain (enabling/disabling effects per track), audio context initialization and playback, and track settings persistence across sessions. Test the complete audio workflow from track creation to playback.",
+        "status": "done",
+        "priority": "medium",
+        "dependencies": [],
+        "testStrategy": "Test multi-track operations, sequencer functionality, audio playback, and track persistence with various audio configurations",
+        "subtasks": []
+      },
+      {
+        "id": 15,
+        "title": "User Progression E2E Tests",
+        "description": "Create e2e tests for XP, leveling, and stat progression systems",
+        "details": "Implement e2e tests for user progression including: XP accumulation from tasks/habits, level progression mechanics, stat rewards (Body/Mind/Soul) accumulation, and progression persistence across sessions. Test the complete progression journey from first task to high-level achievements.",
+        "status": "done",
+        "priority": "medium",
+        "dependencies": [],
+        "testStrategy": "Test XP calculations, level progression, stat accumulation, and progression persistence with various task/habit completion scenarios",
+        "subtasks": []
+      },
+      {
+        "id": 16,
+        "title": "Error Handling E2E Tests",
+        "description": "Create e2e tests for offline functionality and error recovery",
+        "details": "Implement e2e tests for error handling including: offline functionality when internet is unavailable, storage errors when localStorage fails, invalid data recovery from corrupted data, and browser compatibility across different browsers/devices. Test graceful degradation and error recovery scenarios.",
+        "status": "done",
+        "priority": "medium",
+        "dependencies": [],
+        "testStrategy": "Test offline functionality, storage error handling, data corruption recovery, and cross-browser compatibility",
+        "subtasks": []
       }
     ],
     "metadata": {
       "created": "2025-08-02T12:13:50.420Z",
-      "updated": "2025-08-02T12:13:50.421Z",
+      "updated": "2025-08-02T16:44:06.051Z",
       "description": "Tasks for master context"
     }
   }

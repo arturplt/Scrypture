@@ -1,0 +1,87 @@
+# Page snapshot
+
+```yaml
+- text: 🎉 Level Up! Level 2
+- button "Close"
+- banner:
+  - heading "Scrypture" [level=1]
+  - paragraph: Grimorium Vivendi
+  - text: Achievement Test Use Level 2
+  - button "📊"
+  - button "🏆 1/15"
+- main:
+  - text: 🏡
+  - heading "Dam & Sanctuary" [level=2]
+  - button "▼"
+  - button "Start Here"
+  - text: Tasks Completed 1 / 9
+  - heading "Core Attributes" [level=3]
+  - text: 💪 Body 0 🧠 Mind 0 ✨ Soul 0 Level 2 100 / 200
+  - textbox "Intention": Task 10 for Dam Builder
+  - heading "Active Tasks" [level=2]
+  - textbox "Search tasks..."
+  - combobox:
+    - option "All Categories" [selected]
+    - option "💪 Body"
+  - combobox:
+    - option "⚡ Priority" [selected]
+    - option "📅 Date"
+    - option "⭐ XP"
+  - button "Sort descending": ↑
+  - button "Collapse Uncategorized category":
+    - text: 📝
+    - heading "Uncategorized" [level=3]
+    - text: 1 task ▲
+  - heading "Task 1 for Dam Builder" [level=3]
+  - text: "Medium Priority just now XP: +10"
+  - checkbox
+  - button "Edit task": 🖍
+  - button "Collapse body category":
+    - text: 💪
+    - heading "Body" [level=3]
+    - text: 7 tasks ▲
+  - heading "Task 2 for Dam Builder" [level=3]
+  - text: "Medium Priority just now XP: +10"
+  - checkbox
+  - button "Edit task": 🖍
+  - heading "Task 3 for Dam Builder" [level=3]
+  - text: "Medium Priority just now XP: +10"
+  - checkbox
+  - button "Edit task": 🖍
+  - heading "Task 4 for Dam Builder" [level=3]
+  - text: "Medium Priority just now XP: +10"
+  - checkbox
+  - button "Edit task": 🖍
+  - heading "Task 5 for Dam Builder" [level=3]
+  - text: "Medium Priority just now XP: +10"
+  - checkbox
+  - button "Edit task": 🖍
+  - heading "Task 6 for Dam Builder" [level=3]
+  - text: "Medium Priority just now XP: +10"
+  - checkbox
+  - button "Edit task": 🖍
+  - heading "Task 7 for Dam Builder" [level=3]
+  - text: "Medium Priority just now XP: +10"
+  - checkbox
+  - button "Edit task": 🖍
+  - heading "Task 8 for Dam Builder" [level=3]
+  - text: "Medium Priority just now XP: +10"
+  - checkbox
+  - button "Edit task": 🖍
+  - heading "Completed Tasks (1)" [level=2]
+  - text: ▲
+  - heading "Task 9 for Dam Builder" [level=3]
+  - text: "Medium Priority just now XP: +10"
+  - checkbox [checked]
+  - button "Edit task": 🖍
+  - heading "Habits" [level=2]
+  - button "Data Manager ▲"
+  - heading "🔐 Secret Menu" [level=3]
+  - button "🔒 LOCKED"
+- text: ✓ Saved
+- button "×"
+- text: 🌱 Achievement Unlocked!
+- heading "First Steps" [level=3]
+- paragraph: Bóbr nods approvingly. Your dam-building journey has begun!
+- text: common +50 XP 0
+```
