@@ -1,0 +1,11 @@
+# Task ID: 4
+# Title: Enhanced Habit Analytics
+# Status: pending
+# Dependencies: None
+# Priority: medium
+# Description: Improve habit tracking with detailed analytics and insights
+# Details:
+Add comprehensive habit analytics including streak patterns, completion rates, habit correlation analysis, and personalized insights. Implement habit performance tracking and improvement recommendations.
+
+# Test Strategy:
+Test analytics accuracy, performance with long-term habit data, insight generation

@@ -1,0 +1,162 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Enhance Mobile Responsiveness",
+        "description": "Improve mobile optimization and PWA features for better mobile experience",
+        "details": "Implement responsive design improvements, touch interactions, and Progressive Web App features including offline functionality and app-like experience. Focus on mobile-first design principles and ensure all features work seamlessly on mobile devices.",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [],
+        "testStrategy": "Test on various mobile devices and screen sizes, verify PWA installation, test offline functionality",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Responsive Design Improvements",
+            "description": "Update CSS and component layouts to work seamlessly across all screen sizes",
+            "details": "Review current mobile responsiveness and implement improvements to ensure all components work well on mobile devices. Focus on touch-friendly interactions, proper spacing, and readable text sizes.",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 1
+          },
+          {
+            "id": 2,
+            "title": "Add PWA Features and Offline Functionality",
+            "description": "Implement Progressive Web App features including service worker and offline capabilities",
+            "details": "Add service worker for offline functionality, implement app manifest for PWA installation, and ensure the app works without internet connection for basic features.",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 1
+          },
+          {
+            "id": 3,
+            "title": "Optimize Touch Interactions",
+            "description": "Improve touch gestures and interactions for mobile devices",
+            "details": "Enhance touch interactions including swipe gestures, touch-friendly buttons, and mobile-optimized navigation. Ensure all interactive elements are properly sized for touch input.",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 1
+          },
+          {
+            "id": 4,
+            "title": "Test and Validate Mobile Experience",
+            "description": "Comprehensive testing across different mobile devices and screen sizes",
+            "details": "Test the app on various mobile devices, screen sizes, and browsers. Validate PWA installation, offline functionality, and overall mobile user experience. Document any issues found and create fixes.",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 1
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Advanced Task Filtering and Search",
+        "description": "Implement comprehensive task filtering and search functionality",
+        "details": "Add advanced filtering options by category, priority, difficulty, due date, and tags. Implement search functionality with real-time results. Include saved filter presets and quick filter buttons for common use cases.",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [],
+        "testStrategy": "Test all filter combinations, search accuracy, performance with large task lists",
+        "subtasks": []
+      },
+      {
+        "id": 3,
+        "title": "Task Templates and Quick Actions",
+        "description": "Create task templates and quick action system for faster task creation",
+        "details": "Implement task templates for common activities, quick action buttons for frequently used tasks, and template management system. Allow users to create, save, and share custom templates.",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [],
+        "testStrategy": "Test template creation, quick actions, template sharing functionality",
+        "subtasks": []
+      },
+      {
+        "id": 4,
+        "title": "Enhanced Habit Analytics",
+        "description": "Improve habit tracking with detailed analytics and insights",
+        "details": "Add comprehensive habit analytics including streak patterns, completion rates, habit correlation analysis, and personalized insights. Implement habit performance tracking and improvement recommendations.",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [],
+        "testStrategy": "Test analytics accuracy, performance with long-term habit data, insight generation",
+        "subtasks": []
+      },
+      {
+        "id": 5,
+        "title": "Performance Optimizations",
+        "description": "Optimize app performance and implement caching strategies",
+        "details": "Implement performance optimizations including code splitting, lazy loading, efficient state management, and caching strategies. Focus on reducing load times and improving overall app responsiveness.",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": [],
+        "testStrategy": "Measure performance improvements, test caching effectiveness, monitor memory usage",
+        "subtasks": []
+      },
+      {
+        "id": 6,
+        "title": "User Profiles and Sharing",
+        "description": "Implement user profiles and social sharing features",
+        "details": "Create user profile system with customizable profiles, achievement showcases, and social sharing capabilities. Allow users to share achievements, progress, and custom content with the community.",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [],
+        "testStrategy": "Test profile creation, sharing functionality, privacy settings",
+        "subtasks": []
+      },
+      {
+        "id": 7,
+        "title": "Community Challenges",
+        "description": "Add community challenges and leaderboards",
+        "details": "Implement community challenges system with leaderboards, collaborative goals, and social competition features. Create challenge creation tools and participation tracking.",
+        "status": "pending",
+        "priority": "low",
+        "dependencies": [
+          6
+        ],
+        "testStrategy": "Test challenge creation, leaderboard functionality, community participation",
+        "subtasks": []
+      },
+      {
+        "id": 8,
+        "title": "Comprehensive Analytics Dashboard",
+        "description": "Create advanced analytics dashboard with detailed insights",
+        "details": "Build comprehensive analytics dashboard with productivity patterns, progress tracking, performance insights, and personalized recommendations. Include data visualization and export functionality.",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [
+          4
+        ],
+        "testStrategy": "Test analytics accuracy, dashboard performance, data visualization quality",
+        "subtasks": []
+      },
+      {
+        "id": 9,
+        "title": "Export and Backup System",
+        "description": "Implement data export and backup functionality",
+        "details": "Create comprehensive data export and backup system allowing users to export their data in various formats, backup to cloud storage, and restore from backups. Include data migration tools.",
+        "status": "pending",
+        "priority": "medium",
+        "dependencies": [],
+        "testStrategy": "Test export functionality, backup reliability, data integrity verification",
+        "subtasks": []
+      },
+      {
+        "id": 10,
+        "title": "Custom Themes and Personalization",
+        "description": "Add custom themes and advanced personalization options",
+        "details": "Implement custom theme system with color schemes, typography options, and layout customization. Allow users to create and share custom themes with the community.",
+        "status": "pending",
+        "priority": "low",
+        "dependencies": [],
+        "testStrategy": "Test theme creation, customization options, theme sharing functionality",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-08-02T12:13:50.420Z",
+      "updated": "2025-08-02T12:13:50.421Z",
+      "description": "Tasks for master context"
+    }
+  }
+}
