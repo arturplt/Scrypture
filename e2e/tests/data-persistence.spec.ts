@@ -307,7 +307,7 @@ test.describe('Data Persistence E2E Tests', () => {
     await setupUser(page);
     
     // Look for auto-save indicator
-    const autoSaveIndicator = page.locator('[data-testid="auto-save-indicator"], text=Saved, text=Saving, text=Auto-save');
+    const autoSaveIndicator = page.locator('[data-testid="auto-save-indicator"], text="Saved", text="Saving", text="Auto-save"');
     
     if (await autoSaveIndicator.isVisible()) {
       // Verify initial state

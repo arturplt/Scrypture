@@ -1,83 +1,57 @@
 import { test, expect } from '@playwright/test';
+import { createUserIfNeeded, setupTestEnvironment, handleOverlays, waitForOverlaysToDisappear } from '../utils/test-helpers';
 
 test.describe('Synthesizer E2E Tests', () => {
   test.beforeEach(async ({ page }) => {
-    // Clear localStorage before each test
-    await page.goto('/');
-    await page.evaluate(() => {
-      localStorage.clear();
-    });
+    await setupTestEnvironment(page);
   });
 
-  // Helper function to create a user and navigate to main app
-  async function setupUser(page: any) {
-    const userCreationInput = page.locator('input[placeholder="Enter your character\'s name"]');
-    if (await userCreationInput.isVisible()) {
-      await userCreationInput.fill('Synthesizer Test User');
-      
-      const beginJourneyButton = page.locator('button:has-text("Begin Your Journey")');
-      await beginJourneyButton.click();
-      
-      // Handle intro screens
-      await page.waitForSelector('button:has-text("Skip Intro"), button:has-text("Begin Journey"), button:has-text("Begin My Journey!")', { timeout: 10000 });
-      
-      const skipIntroButton = page.locator('button:has-text("Skip Intro")');
-      const beginJourneyButton2 = page.locator('button:has-text("Begin Journey")');
-      const beginMyJourneyButton = page.locator('button:has-text("Begin My Journey!")');
-      
-      if (await beginJourneyButton2.isVisible()) {
-        await beginJourneyButton2.click();
-      } else if (await beginMyJourneyButton.isVisible()) {
-        await beginMyJourneyButton.click();
-      } else if (await skipIntroButton.isVisible()) {
-        await skipIntroButton.click();
-      }
-      
-      // Skip tutorial if it appears
-      const tutorialWizard = page.locator('text="Create Your First Task or Habit"');
-      if (await tutorialWizard.isVisible()) {
-        const skipTutorialButton = page.locator('button:has-text("Skip Tutorial")');
-        await skipTutorialButton.click();
-        await page.waitForTimeout(1000);
-      }
-      
-      // Handle congratulations screen
-      const congratulationsScreen = page.locator('text="Congratulations"');
-      if (await congratulationsScreen.isVisible()) {
-        const beginMyJourneyButton = page.locator('button:has-text("Begin My Journey!")');
-        await beginMyJourneyButton.click();
-        await page.waitForTimeout(1000);
-      }
-      
-      // Wait for main app to load
-      await page.waitForSelector('input[placeholder="Intention"]', { timeout: 20000 });
-      await page.waitForTimeout(500);
-    }
-  }
-
-  // Helper function to access synthesizer
+  // Helper function to access synthesizer through secret menu
   async function openSynthesizer(page: any) {
-    // Look for synthesizer access (could be through secret menu, keyboard shortcut, or button)
-    const synthesizerButton = page.locator('button:has-text("Synthesizer"), button:has-text("8-Bit"), [data-testid="synthesizer-button"]');
+    // Scroll to bottom to find secret menu
+    await page.evaluate(() => {
+      window.scrollTo(0, document.body.scrollHeight);
+    });
+    await page.waitForTimeout(500);
     
-    if (await synthesizerButton.isVisible()) {
-      await synthesizerButton.click();
-    } else {
-      // Try keyboard shortcut or other access methods
-      await page.keyboard.press('Control+s');
-      await page.waitForTimeout(1000);
-    }
+    // Look for the secret menu section
+    const secretMenuSection = page.locator('text="🔐 Secret Menu"');
+    await expect(secretMenuSection).toBeVisible();
+    
+    // Click the LOCKED button to open combination lock
+    const lockedButton = page.locator('button:has-text("🔒 LOCKED")');
+    await expect(lockedButton).toBeVisible();
+    await lockedButton.click();
+    
+    // Wait for combination lock modal to appear - look for any modal with dials
+    await page.waitForSelector('div[class*="dials"], div[class*="dialContainer"]', { timeout: 5000 });
+    
+    // The combination lock starts at 2136, we need to change the last digit to 7
+    // Look for dial numbers (digits 0-9)
+    const dialNumbers = page.locator('div[class*="dialNumber"], div[role="button"]:has-text(/[0-9]/)');
+    await expect(dialNumbers).toHaveCount(4);
+    
+    // Click the last dial (4th position) to set it to 7
+    await dialNumbers.nth(3).click();
+    
+    // Wait for unlock animation and modal to close
+    await page.waitForTimeout(1000);
+    
+    // Now the secret menu should be unlocked, click the synthesizer button
+    const synthesizerButton = page.locator('button:has-text("🎵 Synthesizer")');
+    await expect(synthesizerButton).toBeVisible();
+    await synthesizerButton.click();
     
     // Wait for synthesizer to load
-    await page.waitForSelector('[data-testid="synthesizer"], text=Synthesizer, text=8-Bit', { timeout: 10000 });
+    await page.waitForSelector('[data-testid="synthesizer"]', { timeout: 10000 });
   }
 
   test('should open synthesizer interface', async ({ page }) => {
-    await setupUser(page);
+    await createUserIfNeeded(page);
     await openSynthesizer(page);
     
     // Verify synthesizer interface is visible
-    await expect(page.locator('[data-testid="synthesizer"], text=Synthesizer, text=8-Bit')).toBeVisible();
+    await expect(page.locator('[data-testid="synthesizer"]')).toBeVisible();
     
     // Check for basic synthesizer controls
     const controls = page.locator('[data-testid="synthesizer-controls"], button:has-text("Play"), button:has-text("Stop")');
@@ -87,7 +61,7 @@ test.describe('Synthesizer E2E Tests', () => {
   });
 
   test('should create and manage multiple tracks', async ({ page }) => {
-    await setupUser(page);
+    await createUserIfNeeded(page);
     await openSynthesizer(page);
     
     // Look for track management interface
@@ -113,7 +87,7 @@ test.describe('Synthesizer E2E Tests', () => {
   });
 
   test('should mute and solo tracks', async ({ page }) => {
-    await setupUser(page);
+    await createUserIfNeeded(page);
     await openSynthesizer(page);
     
     // Create tracks if needed
@@ -144,7 +118,7 @@ test.describe('Synthesizer E2E Tests', () => {
   });
 
   test('should adjust track volume', async ({ page }) => {
-    await setupUser(page);
+    await createUserIfNeeded(page);
     await openSynthesizer(page);
     
     // Look for volume controls
@@ -160,7 +134,7 @@ test.describe('Synthesizer E2E Tests', () => {
   });
 
   test('should create and play sequences', async ({ page }) => {
-    await setupUser(page);
+    await createUserIfNeeded(page);
     await openSynthesizer(page);
     
     // Look for sequencer interface
@@ -195,7 +169,7 @@ test.describe('Synthesizer E2E Tests', () => {
   });
 
   test('should enable and configure effects', async ({ page }) => {
-    await setupUser(page);
+    await createUserIfNeeded(page);
     await openSynthesizer(page);
     
     // Look for effects controls
@@ -228,7 +202,7 @@ test.describe('Synthesizer E2E Tests', () => {
   });
 
   test('should change waveforms and instruments', async ({ page }) => {
-    await setupUser(page);
+    await createUserIfNeeded(page);
     await openSynthesizer(page);
     
     // Look for waveform/instrument selection
@@ -251,7 +225,7 @@ test.describe('Synthesizer E2E Tests', () => {
   });
 
   test('should adjust synthesizer parameters', async ({ page }) => {
-    await setupUser(page);
+    await createUserIfNeeded(page);
     await openSynthesizer(page);
     
     // Test attack parameter
@@ -277,7 +251,7 @@ test.describe('Synthesizer E2E Tests', () => {
   });
 
   test('should play individual notes', async ({ page }) => {
-    await setupUser(page);
+    await createUserIfNeeded(page);
     await openSynthesizer(page);
     
     // Look for keyboard or note buttons
@@ -301,7 +275,7 @@ test.describe('Synthesizer E2E Tests', () => {
   });
 
   test('should save and load synthesizer presets', async ({ page }) => {
-    await setupUser(page);
+    await createUserIfNeeded(page);
     await openSynthesizer(page);
     
     // Configure some settings
@@ -335,7 +309,7 @@ test.describe('Synthesizer E2E Tests', () => {
   });
 
   test('should handle BPM changes', async ({ page }) => {
-    await setupUser(page);
+    await createUserIfNeeded(page);
     await openSynthesizer(page);
     
     // Look for BPM control
@@ -364,7 +338,7 @@ test.describe('Synthesizer E2E Tests', () => {
   });
 
   test('should persist synthesizer settings across sessions', async ({ page }) => {
-    await setupUser(page);
+    await createUserIfNeeded(page);
     await openSynthesizer(page);
     
     // Configure some settings
@@ -387,7 +361,7 @@ test.describe('Synthesizer E2E Tests', () => {
   });
 
   test('should handle audio context initialization', async ({ page }) => {
-    await setupUser(page);
+    await createUserIfNeeded(page);
     await openSynthesizer(page);
     
     // Try to play a note to trigger audio context
@@ -405,7 +379,7 @@ test.describe('Synthesizer E2E Tests', () => {
   });
 
   test('should handle synthesizer performance with multiple tracks', async ({ page }) => {
-    await setupUser(page);
+    await createUserIfNeeded(page);
     await openSynthesizer(page);
     
     // Create multiple tracks

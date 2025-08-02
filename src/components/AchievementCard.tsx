@@ -93,7 +93,7 @@ export const AchievementCard: React.FC<AchievementCardProps> = ({
   ].filter(Boolean).join(' ');
 
   return (
-    <div className={cardClasses} onClick={onClick}>
+    <div className={cardClasses} onClick={onClick} data-testid={`achievement-card-${achievement.id}`}>
       <div className={styles.header}>
         <div className={iconClasses}>
           {isUnlocked ? achievement.icon : '🔒'}
@@ -111,7 +111,7 @@ export const AchievementCard: React.FC<AchievementCardProps> = ({
 
           {/* Progress bar for locked achievements */}
           {!isUnlocked && showProgress && progress && (
-            <div className={styles.progressContainer}>
+            <div className={styles.progressContainer} data-testid="achievement-progress">
               <div className={styles.progressLabel}>
                 Progress: {progress.currentValue} / {progress.targetValue}
               </div>
@@ -155,7 +155,7 @@ export const AchievementCard: React.FC<AchievementCardProps> = ({
 
           {/* Unlock date for unlocked achievements */}
           {isUnlocked && achievement.unlockedAt && (
-            <div className={styles.unlockedAt}>
+            <div className={styles.unlockedAt} data-testid="achievement-unlocked">
               Unlocked: {formatDate(achievement.unlockedAt)}
             </div>
           )}

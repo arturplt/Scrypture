@@ -6,7 +6,7 @@ This directory contains end-to-end tests for the Scrypture application using Pla
 
 E2E tests validate complete user workflows and ensure the application works correctly across different browsers and devices.
 
-## 📁 Structure
+## 📁 Structurenpm run test:e2e:report
 
 ```
 e2e/
@@ -40,7 +40,7 @@ npm run test:e2e:debug
 npm run test:e2e:mobile
 
 # Show test report
-npm run test:e2e:report
+
 ```
 
 ### Running Specific Tests

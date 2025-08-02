@@ -86,7 +86,7 @@ export const AchievementNotification: React.FC<AchievementNotificationProps> = (
   ].filter(Boolean).join(' ');
 
   return (
-    <div className={notificationClasses}>
+    <div className={notificationClasses} data-testid="achievement-notification">
       <button className={styles.closeButton} onClick={handleClose}>
         ×
       </button>
@@ -97,7 +97,7 @@ export const AchievementNotification: React.FC<AchievementNotificationProps> = (
         </div>
         <div className={styles.content}>
           <div className={styles.title}>Achievement Unlocked!</div>
-          <h3 className={styles.achievementName}>{achievement.name}</h3>
+          <h3 className={styles.achievementName} data-testid="achievement-name">{achievement.name}</h3>
           <p className={styles.achievementMessage}>{achievement.unlockedMessage}</p>
           
           <div className={`${styles.rarity} ${getRarityClass(achievement.rarity)}`}>

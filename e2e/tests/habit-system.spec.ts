@@ -1,178 +1,162 @@
 import { test, expect } from '@playwright/test';
+import { createUserIfNeeded, setupTestEnvironment, safeClick, waitForOverlaysToDisappear, handleOverlays } from '../utils/test-helpers';
 
 test.describe('Habit System E2E Tests', () => {
   test.beforeEach(async ({ page }) => {
-    // Clear localStorage before each test
-    await page.goto('/');
-    await page.evaluate(() => {
-      localStorage.clear();
-    });
+    await setupTestEnvironment(page);
   });
-
-  // Helper function to create a user and navigate to main app
-  async function setupUser(page: any) {
-    const userCreationInput = page.locator('input[placeholder="Enter your character\'s name"]');
-    if (await userCreationInput.isVisible()) {
-      await userCreationInput.fill('Habit Test User');
-      
-      const beginJourneyButton = page.locator('button:has-text("Begin Your Journey")');
-      await beginJourneyButton.click();
-      
-      // Handle intro screens
-      await page.waitForSelector('button:has-text("Skip Intro"), button:has-text("Begin Journey"), button:has-text("Begin My Journey!")', { timeout: 10000 });
-      
-      const skipIntroButton = page.locator('button:has-text("Skip Intro")');
-      const beginJourneyButton2 = page.locator('button:has-text("Begin Journey")');
-      const beginMyJourneyButton = page.locator('button:has-text("Begin My Journey!")');
-      
-      if (await beginJourneyButton2.isVisible()) {
-        await beginJourneyButton2.click();
-      } else if (await beginMyJourneyButton.isVisible()) {
-        await beginMyJourneyButton.click();
-      } else if (await skipIntroButton.isVisible()) {
-        await skipIntroButton.click();
-      }
-      
-      // Skip tutorial if it appears
-      const tutorialWizard = page.locator('text="Create Your First Task or Habit"');
-      if (await tutorialWizard.isVisible()) {
-        const skipTutorialButton = page.locator('button:has-text("Skip Tutorial")');
-        await skipTutorialButton.click();
-        await page.waitForTimeout(1000);
-      }
-      
-      // Handle congratulations screen
-      const congratulationsScreen = page.locator('text="Congratulations"');
-      if (await congratulationsScreen.isVisible()) {
-        const beginMyJourneyButton = page.locator('button:has-text("Begin My Journey!")');
-        await beginMyJourneyButton.click();
-        await page.waitForTimeout(1000);
-      }
-      
-      // Wait for main app to load
-      await page.waitForSelector('input[placeholder="Intention"]', { timeout: 20000 });
-      await page.waitForTimeout(500);
-    }
-  }
 
   // Helper function to create a habit
   async function createHabit(page: any, habitName: string, frequency: 'daily' | 'weekly' | 'monthly' = 'daily') {
-    // Look for habit creation button or form
-    const addHabitButton = page.locator('button:has-text("Add Habit"), button:has-text("Create Habit"), [data-testid="add-habit-button"]');
-    if (await addHabitButton.isVisible()) {
-      await addHabitButton.click();
-    }
+    // Wait for the TaskForm to be visible (the main input with "Intention" placeholder)
+    const taskFormInput = page.locator('input[placeholder="Intention"]');
+    await expect(taskFormInput).toBeVisible({ timeout: 10000 });
     
-    // Fill habit form
-    const habitNameInput = page.locator('input[placeholder*="habit"], input[placeholder*="Habit"], [data-testid="habit-name-input"]');
-    if (await habitNameInput.isVisible()) {
-      await habitNameInput.fill(habitName);
-    }
+    // Handle any overlays that might be blocking interactions
+    await handleOverlays(page);
     
-    // Select frequency if available
-    const frequencyButtons = page.locator(`button:has-text("${frequency.charAt(0).toUpperCase() + frequency.slice(1)}"), [data-testid="frequency-${frequency}"]`);
-    if (await frequencyButtons.isVisible()) {
-      await frequencyButtons.click();
-    }
+    // Use JavaScript click to bypass any remaining overlays
+    await page.evaluate(() => {
+      const input = document.querySelector('input[placeholder="Intention"]') as HTMLElement;
+      if (input) {
+        input.click();
+      }
+    });
+    await page.waitForTimeout(500);
     
-    // Submit habit form
-    const submitButton = page.locator('button:has-text("Create"), button:has-text("Add"), button[type="submit"]');
-    if (await submitButton.isVisible()) {
-      await submitButton.click();
-    }
+    // Fill in the task name using JavaScript
+    await page.evaluate((name) => {
+      const input = document.querySelector('input[placeholder="Intention"]') as HTMLInputElement;
+      if (input) {
+        input.value = name;
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    }, habitName);
+    await page.waitForTimeout(500);
     
-    // Wait for habit to appear
-    await expect(page.locator(`text=${habitName}`)).toBeVisible({ timeout: 5000 });
+    // Look for and click the "Make it a Habit" button using JavaScript
+    await page.evaluate(() => {
+      const buttons = Array.from(document.querySelectorAll('button'));
+      const makeItHabitButton = buttons.find(btn => btn.textContent?.includes('🔄 Make it a Habit'));
+      if (makeItHabitButton) {
+        (makeItHabitButton as HTMLElement).click();
+      }
+    });
+    await page.waitForTimeout(500);
+    
+    // Select frequency using JavaScript
+    await page.evaluate((freq) => {
+      const buttons = Array.from(document.querySelectorAll('button'));
+      const frequencyButton = buttons.find(btn => btn.textContent?.includes(freq.charAt(0).toUpperCase() + freq.slice(1)));
+      if (frequencyButton) {
+        (frequencyButton as HTMLElement).click();
+      }
+    }, frequency);
+    await page.waitForTimeout(500);
+    
+    // Submit the form using JavaScript
+    await page.evaluate(() => {
+      const buttons = Array.from(document.querySelectorAll('button'));
+      const submitButton = buttons.find(btn => btn.textContent?.includes('Create Habit'));
+      if (submitButton) {
+        (submitButton as HTMLElement).click();
+      }
+    });
+    
+    // Wait for habit to appear in the habit list
+    await expect(page.locator(`text="${habitName}"`)).toBeVisible({ timeout: 10000 });
   }
 
   test('should create and complete a daily habit', async ({ page }) => {
-    await setupUser(page);
+    await createUserIfNeeded(page);
     
     // Create a daily habit
     await createHabit(page, 'Daily Exercise Habit', 'daily');
     
-    // Complete the habit
-    const completeButton = page.locator('button:has-text("Complete"), [data-testid="complete-habit-button"]').first();
-    await completeButton.click();
+    // Complete the habit by clicking the checkbox
+    const habitCheckbox = page.locator('input[type="checkbox"]').first();
+    await expect(habitCheckbox).toBeVisible({ timeout: 5000 });
+    await habitCheckbox.click();
     
-    // Verify habit shows as completed
-    await expect(page.locator('text=Daily Exercise Habit')).toBeVisible();
-    await expect(page.locator('[data-testid="habit-completed"]')).toBeVisible();
+    // Verify habit shows as completed (checkbox should be checked)
+    await expect(habitCheckbox).toBeChecked();
     
-    // Verify streak starts at 1
-    await expect(page.locator('text=1')).toBeVisible();
+    // Verify streak starts at 1 (look for streak display)
+    await expect(page.locator('text="1 day"')).toBeVisible({ timeout: 5000 });
   });
 
   test('should track daily habit streak correctly', async ({ page }) => {
-    await setupUser(page);
+    await createUserIfNeeded(page);
     
     // Create a daily habit
     await createHabit(page, 'Daily Reading Habit', 'daily');
     
     // Complete the habit multiple times
     for (let i = 1; i <= 3; i++) {
-      const completeButton = page.locator('button:has-text("Complete"), [data-testid="complete-habit-button"]').first();
-      await completeButton.click();
+      const habitCheckbox = page.locator('input[type="checkbox"]').first();
+      await expect(habitCheckbox).toBeVisible({ timeout: 5000 });
+      await habitCheckbox.click();
       
       // Wait for completion animation
       await page.waitForTimeout(500);
       
-      // Verify streak increases
-      await expect(page.locator(`text=${i}`)).toBeVisible({ timeout: 2000 });
+      // Verify streak increases (look for streak display)
+      await expect(page.locator(`text="${i} day${i !== 1 ? 's' : ''}"`)).toBeVisible({ timeout: 2000 });
     }
     
     // Verify final streak is 3
-    await expect(page.locator('text=3')).toBeVisible();
+    await expect(page.locator('text="3 days"')).toBeVisible();
   });
 
   test('should handle weekly habit frequency logic', async ({ page }) => {
-    await setupUser(page);
+    await createUserIfNeeded(page);
     
     // Create a weekly habit
     await createHabit(page, 'Weekly Review Habit', 'weekly');
     
     // Complete the habit
-    const completeButton = page.locator('button:has-text("Complete"), [data-testid="complete-habit-button"]').first();
-    await completeButton.click();
+    const habitCheckbox = page.locator('input[type="checkbox"]').first();
+    await expect(habitCheckbox).toBeVisible({ timeout: 5000 });
+    await habitCheckbox.click();
     
     // Verify habit shows as completed
-    await expect(page.locator('text=Weekly Review Habit')).toBeVisible();
-    await expect(page.locator('[data-testid="habit-completed"]')).toBeVisible();
+    await expect(habitCheckbox).toBeChecked();
     
     // Try to complete again immediately (should be blocked for weekly)
-    await completeButton.click();
+    await habitCheckbox.click();
     
-    // Verify it shows cooldown or completion status
-    await expect(page.locator('text=Weekly Review Habit')).toBeVisible();
+    // Verify it shows cooldown or completion status (checkbox should remain checked)
+    await expect(habitCheckbox).toBeChecked();
   });
 
   test('should handle monthly habit frequency logic', async ({ page }) => {
-    await setupUser(page);
+    await createUserIfNeeded(page);
     
     // Create a monthly habit
     await createHabit(page, 'Monthly Planning Habit', 'monthly');
     
     // Complete the habit
-    const completeButton = page.locator('button:has-text("Complete"), [data-testid="complete-habit-button"]').first();
-    await completeButton.click();
+    const habitCheckbox = page.locator('input[type="checkbox"]').first();
+    await expect(habitCheckbox).toBeVisible({ timeout: 5000 });
+    await habitCheckbox.click();
     
     // Verify habit shows as completed
-    await expect(page.locator('text=Monthly Planning Habit')).toBeVisible();
-    await expect(page.locator('[data-testid="habit-completed"]')).toBeVisible();
+    await expect(habitCheckbox).toBeChecked();
     
-    // Verify monthly frequency is respected
-    await expect(page.locator('[data-testid="habit-frequency-monthly"]')).toBeVisible();
+    // Verify monthly frequency is respected (look for monthly frequency indicator)
+    await expect(page.locator('text="Monthly"')).toBeVisible();
   });
 
   test('should award stat rewards on habit completion', async ({ page }) => {
-    await setupUser(page);
+    await createUserIfNeeded(page);
     
     // Create a habit with stat rewards
     await createHabit(page, 'Mind Training Habit', 'daily');
     
     // Complete the habit
-    const completeButton = page.locator('button:has-text("Complete"), [data-testid="complete-habit-button"]').first();
-    await completeButton.click();
+    const habitCheckbox = page.locator('input[type="checkbox"]').first();
+    await expect(habitCheckbox).toBeVisible({ timeout: 5000 });
+    await habitCheckbox.click();
     
     // Verify stat rewards are awarded
     // Look for stat indicators or notifications
@@ -189,13 +173,18 @@ test.describe('Habit System E2E Tests', () => {
   });
 
   test('should convert habit to task', async ({ page }) => {
-    await setupUser(page);
+    await createUserIfNeeded(page);
     
     // Create a habit
     await createHabit(page, 'Convertible Habit', 'daily');
     
-    // Find and click convert to task button
-    const convertButton = page.locator('button:has-text("Convert to Task"), [data-testid="convert-to-task-button"]');
+    // Find and click the edit button (🖍) to open edit form
+    const editButton = page.locator('button:has-text("🖍")').first();
+    await expect(editButton).toBeVisible({ timeout: 5000 });
+    await editButton.click();
+    
+    // Look for convert to task button in the edit form
+    const convertButton = page.locator('button:has-text("Convert to Task")');
     if (await convertButton.isVisible()) {
       await convertButton.click();
       
@@ -209,18 +198,18 @@ test.describe('Habit System E2E Tests', () => {
   });
 
   test('should persist habit data across browser sessions', async ({ page }) => {
-    await setupUser(page);
+    await createUserIfNeeded(page);
     
     // Create a habit
     await createHabit(page, 'Persistent Habit', 'daily');
     
     // Complete the habit
-    const completeButton = page.locator('button:has-text("Complete"), [data-testid="complete-habit-button"]').first();
-    await completeButton.click();
+    const habitCheckbox = page.locator('input[type="checkbox"]').first();
+    await expect(habitCheckbox).toBeVisible({ timeout: 5000 });
+    await habitCheckbox.click();
     
     // Verify habit is completed
-    await expect(page.locator('text=Persistent Habit')).toBeVisible();
-    await expect(page.locator('[data-testid="habit-completed"]')).toBeVisible();
+    await expect(habitCheckbox).toBeChecked();
     
     // Refresh the page
     await page.reload();
@@ -228,27 +217,28 @@ test.describe('Habit System E2E Tests', () => {
     
     // Verify habit still exists and shows completion status
     await expect(page.locator('text=Persistent Habit')).toBeVisible();
-    await expect(page.locator('[data-testid="habit-completed"]')).toBeVisible();
+    await expect(page.locator('input[type="checkbox"]').first()).toBeChecked();
   });
 
   test('should handle habit streak breaks correctly', async ({ page }) => {
-    await setupUser(page);
+    await createUserIfNeeded(page);
     
     // Create a daily habit
     await createHabit(page, 'Streak Test Habit', 'daily');
     
     // Complete the habit to start streak
-    const completeButton = page.locator('button:has-text("Complete"), [data-testid="complete-habit-button"]').first();
-    await completeButton.click();
+    const habitCheckbox = page.locator('input[type="checkbox"]').first();
+    await expect(habitCheckbox).toBeVisible({ timeout: 5000 });
+    await habitCheckbox.click();
     
     // Verify streak starts at 1
-    await expect(page.locator('text=1')).toBeVisible();
+    await expect(page.locator('text="1 day"')).toBeVisible();
     
     // Wait for cooldown period (simulate missing a day)
     await page.waitForTimeout(1000);
     
     // Try to complete again (should reset streak or show different behavior)
-    await completeButton.click();
+    await habitCheckbox.click();
     
     // Verify streak behavior (either continues or resets based on app logic)
     const streakDisplay = page.locator('[data-testid="streak-display"], text=1, text=2');
@@ -256,7 +246,7 @@ test.describe('Habit System E2E Tests', () => {
   });
 
   test('should display habit categories correctly', async ({ page }) => {
-    await setupUser(page);
+    await createUserIfNeeded(page);
     
     // Create habits with different categories
     await createHabit(page, 'Work Habit', 'daily');
@@ -273,12 +263,13 @@ test.describe('Habit System E2E Tests', () => {
       
       // Verify only filtered habits are shown
       const filteredHabits = page.locator('[data-testid="habit-card"]');
-      await expect(filteredHabits).toHaveCount.greaterThan(0);
+      const filteredCount = await filteredHabits.count();
+      expect(filteredCount).toBeGreaterThan(0);
     }
   });
 
   test('should handle multiple habit completions rapidly', async ({ page }) => {
-    await setupUser(page);
+    await createUserIfNeeded(page);
     
     // Create multiple habits
     const habits = ['Habit 1', 'Habit 2', 'Habit 3'];
@@ -287,41 +278,42 @@ test.describe('Habit System E2E Tests', () => {
       await createHabit(page, habitName, 'daily');
     }
     
-    // Complete all habits rapidly
-    const completeButtons = page.locator('button:has-text("Complete"), [data-testid="complete-habit-button"]');
-    const count = await completeButtons.count();
+    // Complete all habits rapidly using checkboxes
+    const habitCheckboxes = page.locator('input[type="checkbox"]');
+    const count = await habitCheckboxes.count();
     
     for (let i = 0; i < count; i++) {
-      await completeButtons.nth(i).click();
+      await habitCheckboxes.nth(i).click();
       await page.waitForTimeout(100);
     }
     
     // Verify all habits show as completed
     for (const habitName of habits) {
-      await expect(page.locator(`text=${habitName}`)).toBeVisible();
+      await expect(page.locator(`text="${habitName}"`)).toBeVisible();
     }
     
-    // Verify completion indicators are present
-    const completionIndicators = page.locator('[data-testid="habit-completed"]');
-    await expect(completionIndicators).toHaveCount.greaterThan(0);
+    // Verify completion indicators are present (checkboxes should be checked)
+    const checkedCheckboxes = page.locator('input[type="checkbox"]:checked');
+    const completionCount = await checkedCheckboxes.count();
+    expect(completionCount).toBeGreaterThan(0);
   });
 
   test('should show habit statistics and analytics', async ({ page }) => {
-    await setupUser(page);
+    await createUserIfNeeded(page);
     
     // Create and complete some habits
     await createHabit(page, 'Analytics Habit 1', 'daily');
     await createHabit(page, 'Analytics Habit 2', 'weekly');
     
     // Complete habits
-    const completeButtons = page.locator('button:has-text("Complete"), [data-testid="complete-habit-button"]');
+    const habitCheckboxes = page.locator('input[type="checkbox"]');
     for (let i = 0; i < 2; i++) {
-      await completeButtons.nth(i).click();
+      await habitCheckboxes.nth(i).click();
       await page.waitForTimeout(200);
     }
     
     // Navigate to analytics or statistics section
-    const analyticsButton = page.locator('button:has-text("Analytics"), button:has-text("Stats"), [data-testid="analytics-button"]');
+    const analyticsButton = page.locator('button:has-text("📊")');
     if (await analyticsButton.isVisible()) {
       await analyticsButton.click();
       
