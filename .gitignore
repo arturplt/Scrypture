@@ -107,3 +107,32 @@ dev-debug.log
 # Task files
 # tasks.json
 # tasks/ 
+
+# Playwright test files and reports
+e2e/
+playwright-report/
+test-results/
+playwright.config.ts
+playwright.config.js
+
+# Task Master AI files
+.taskmaster/
+tasks.json
+tasks/
+*.taskmaster
+task-master-ai/
+
+# Test files and debugging
+__tests__/
+*.test.ts
+*.test.tsx
+*.test.js
+*.test.jsx
+*.spec.ts
+*.spec.tsx
+*.spec.js
+*.spec.jsx
+test-*.html
+test-*.js
+debug-*.html
+debug-*.js
