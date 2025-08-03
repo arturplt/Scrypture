@@ -172,11 +172,6 @@ export const HabitForm: React.FC<HabitFormProps> = ({ onClose, habit }) => {
             className={`${styles.input} ${errors.name ? styles.inputError : ''}`}
             placeholder="e.g., Daily Exercise, Read for 30 minutes"
             maxLength={100}
-            autoComplete="off"
-            autoCorrect="off"
-            autoCapitalize="words"
-            spellCheck="false"
-            data-form-type="other"
           />
           {errors.name && <span className={styles.error}>{errors.name}</span>}
         </div>

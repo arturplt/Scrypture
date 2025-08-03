@@ -241,11 +241,6 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({
               required
               minLength={1}
               maxLength={100}
-              autoComplete="off"
-              autoCorrect="off"
-              autoCapitalize="words"
-              spellCheck="false"
-              data-form-type="other"
             />
           </div>
         </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { useUser } from '../hooks/useUser';
 import { AutoSaveIndicator } from './AutoSaveIndicator';
 import styles from './UserCreation.module.css';
@@ -14,56 +14,6 @@ export const UserCreation: React.FC<UserCreationProps> = ({
   const [name, setName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  // Aggressively disable autofill
-  useEffect(() => {
-    if (inputRef.current) {
-      // Set multiple non-standard autocomplete values
-      const preventAutofill = () => {
-        if (inputRef.current) {
-          inputRef.current.setAttribute('autocomplete', 'nope');
-          inputRef.current.setAttribute('data-lpignore', 'true');
-          inputRef.current.setAttribute('data-1p-ignore', 'true');
-          inputRef.current.setAttribute('data-autocomplete', 'off');
-          
-          // Set readonly temporarily to prevent autofill
-          inputRef.current.setAttribute('readonly', 'true');
-          setTimeout(() => {
-            if (inputRef.current) {
-              inputRef.current.removeAttribute('readonly');
-            }
-          }, 100);
-        }
-      };
-      
-      // Apply prevention immediately
-      preventAutofill();
-      
-      // Disable autofill via JavaScript on multiple events
-      const events = ['focus', 'input', 'blur', 'change', 'keydown', 'keyup'];
-      
-      events.forEach(event => {
-        inputRef.current?.addEventListener(event, preventAutofill);
-      });
-      
-      // Also prevent on form submission
-      const form = inputRef.current.closest('form');
-      if (form) {
-        form.addEventListener('submit', preventAutofill);
-      }
-      
-      // Cleanup function
-      return () => {
-        events.forEach(event => {
-          inputRef.current?.removeEventListener(event, preventAutofill);
-        });
-        if (form) {
-          form.removeEventListener('submit', preventAutofill);
-        }
-      };
-    }
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -120,32 +70,11 @@ export const UserCreation: React.FC<UserCreationProps> = ({
         </p>
 
         <form className={styles.form} onSubmit={handleSubmit}>
-          {/* Multiple hidden fake inputs to completely confuse browser autofill */}
-          <input
-            type="text"
-            style={{ position: 'absolute', left: '-9999px', opacity: 0 }}
-            autoComplete="username"
-            tabIndex={-1}
-          />
-          <input
-            type="email"
-            style={{ position: 'absolute', left: '-9999px', opacity: 0 }}
-            autoComplete="email"
-            tabIndex={-1}
-          />
-          <input
-            type="password"
-            style={{ position: 'absolute', left: '-9999px', opacity: 0 }}
-            autoComplete="current-password"
-            tabIndex={-1}
-          />
-          
           <div className={styles.inputGroup}>
             <label htmlFor="characterName" className={styles.label}>
               Character Name
             </label>
             <input
-              ref={inputRef}
               id="characterName"
               type="text"
               value={name}
@@ -155,15 +84,6 @@ export const UserCreation: React.FC<UserCreationProps> = ({
               maxLength={20}
               disabled={isSubmitting}
               autoFocus
-              autoComplete="nope"
-              autoCorrect="off"
-              autoCapitalize="words"
-              spellCheck="false"
-              data-form-type="other"
-              data-lpignore="true"
-              data-1p-ignore="true"
-              data-autocomplete="off"
-              data-cy="character-name-input"
             />
             {error && <p className={styles.error}>{error}</p>}
           </div>
