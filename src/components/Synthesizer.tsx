@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useSynthesizer } from '../hooks/useSynthesizer';
-import { NOTES, CHORDS, CHORD_PROGRESSIONS, CIRCLE_OF_FIFTHS, PRESETS, INSTRUMENT_CATEGORIES, InstrumentPreset } from '../data/synthesizerData';
+import { NOTES, CHORDS, CHORD_PROGRESSIONS, CIRCLE_OF_FIFTHS, PRESETS } from '../data/synthesizerData';
 import { WaveformType } from '../types/synthesizer';
 import { INSTRUMENT_PRESETS } from '../../music-theory-presets';
 
@@ -112,73 +112,7 @@ const SliderControl: React.FC<SliderControlProps> = ({
   );
 };
 
-interface InstrumentSelectorProps {
-  selectedInstrument: string;
-  onSelectInstrument: (instrument: InstrumentPreset) => void;
-}
 
-const InstrumentSelector: React.FC<InstrumentSelectorProps> = ({ 
-  selectedInstrument, 
-  onSelectInstrument 
-}) => {
-  const [selectedCategory, setSelectedCategory] = useState<string>('electronic');
-  const [searchTerm, setSearchTerm] = useState<string>('');
-
-  const filteredInstruments = INSTRUMENT_CATEGORIES
-    .find(cat => cat.id === selectedCategory)
-    ?.instruments.filter(instrument => 
-      instrument.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      instrument.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
-    ) || [];
-
-  return (
-    <div className={styles.instrumentSelector}>
-      <div className={styles.instrumentSearch}>
-        <input
-          type="text"
-          placeholder="Search instruments..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className={styles.instrumentSearchInput}
-        />
-      </div>
-      
-      <div className={styles.categoryTabs}>
-        {INSTRUMENT_CATEGORIES.map(category => (
-          <button
-            key={category.id}
-            onClick={() => setSelectedCategory(category.id)}
-            className={`${styles.categoryTab} ${selectedCategory === category.id ? styles.active : ''}`}
-          >
-            <span className={styles.categoryIcon}>{category.icon}</span>
-            <span className={styles.categoryName}>{category.name}</span>
-          </button>
-        ))}
-      </div>
-      
-      <div className={styles.instrumentsGrid}>
-        {filteredInstruments.map(instrument => (
-          <div
-            key={instrument.id}
-            onClick={() => onSelectInstrument(instrument)}
-            className={`${styles.instrumentCard} ${selectedInstrument === instrument.id ? styles.selected : ''}`}
-          >
-            <div className={styles.instrumentCardHeader}>
-              <h4>{instrument.name}</h4>
-              <span className={styles.instrumentWaveform}>{instrument.waveform}</span>
-            </div>
-            <p className={styles.instrumentDescription}>{instrument.description}</p>
-            <div className={styles.instrumentTags}>
-              {instrument.tags.map(tag => (
-                <span key={tag} className={styles.instrumentTag}>{tag}</span>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
 
 interface EffectsRoutingProps {
   tracks: any[];
@@ -619,8 +553,6 @@ const MultiTrackSequencer: React.FC<MultiTrackSequencerProps> = ({
 };
 
 export const Synthesizer: React.FC<SynthesizerProps> = ({ isOpen, onClose }) => {
-  // State for instrument preset filtering
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const synth = useSynthesizer();
   const [isDragging, setIsDragging] = useState(false);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -1502,109 +1434,72 @@ export const Synthesizer: React.FC<SynthesizerProps> = ({ isOpen, onClose }) => 
             {/* 🎹 INSTRUMENT PRESET LIBRARY SECTION */}
             <CollapsibleSection title="🎹 Instrument Preset Library" defaultCollapsed={false}>
               <div className={styles.presetLibrarySection}>
-                {/* Category Filter */}
-                <div className={styles.presetCategories}>
-                  {['All', 'Pianos', 'Guitars', 'Drums', 'Brass', 'Woodwinds', 'Synths', 'Tools'].map(category => (
-                    <button
-                      key={category}
-                      className={`${styles.presetCategoryBtn} ${selectedCategory === category ? styles.active : ''}`}
-                      onClick={() => setSelectedCategory(category)}
-                    >
-                      {category}
-                    </button>
-                  ))}
-                </div>
-
                 {/* Compact Preset Grid */}
                 <div className={styles.presetGrid}>
-                  {Object.entries(INSTRUMENT_PRESETS)
-                    .filter(([presetKey]) => {
-                      if (selectedCategory === 'All') return true;
-                      
-                      // Determine category based on preset key
-                      let category = 'Other';
-                      if (presetKey.includes('piano') || presetKey.includes('clavinet')) {
-                        category = 'Pianos';
-                      } else if (presetKey.includes('guitar') || presetKey.includes('bass')) {
-                        category = 'Guitars';
-                      } else if (presetKey.includes('drum') || presetKey.includes('cymbal') || presetKey.includes('tom')) {
-                        category = 'Drums';
-                      } else if (presetKey.includes('trumpet') || presetKey.includes('saxophone') || presetKey.includes('trombone')) {
-                        category = 'Brass';
-                      } else if (presetKey.includes('flute') || presetKey.includes('clarinet')) {
-                        category = 'Woodwinds';
-                      } else if (presetKey.includes('synth') || presetKey.includes('moog') || presetKey.includes('prophet') || presetKey.includes('dx7') || presetKey.includes('juno')) {
-                        category = 'Synths';
-                      } else if (presetKey.includes('metronome') || presetKey.includes('tuning') || presetKey.includes('drone')) {
-                        category = 'Tools';
-                      }
-                      
-                      return category === selectedCategory;
-                    })
-                    .map(([presetKey, preset]) => {
-                      // Determine category and icon
-                      let category = 'Other';
-                      let categoryIcon = '🎵';
-                      
-                      if (presetKey.includes('piano') || presetKey.includes('clavinet')) {
-                        category = 'Pianos';
-                        categoryIcon = '🎹';
-                      } else if (presetKey.includes('guitar') || presetKey.includes('bass')) {
-                        category = 'Guitars';
-                        categoryIcon = '🎸';
-                      } else if (presetKey.includes('drum') || presetKey.includes('cymbal') || presetKey.includes('tom')) {
-                        category = 'Drums';
-                        categoryIcon = '🥁';
-                      } else if (presetKey.includes('trumpet') || presetKey.includes('saxophone') || presetKey.includes('trombone')) {
-                        category = 'Brass';
-                        categoryIcon = '🎺';
-                      } else if (presetKey.includes('flute') || presetKey.includes('clarinet')) {
-                        category = 'Woodwinds';
-                        categoryIcon = '🎷';
-                      } else if (presetKey.includes('synth') || presetKey.includes('moog') || presetKey.includes('prophet') || presetKey.includes('dx7') || presetKey.includes('juno')) {
-                        category = 'Synths';
-                        categoryIcon = '🎛️';
-                      } else if (presetKey.includes('metronome') || presetKey.includes('tuning') || presetKey.includes('drone')) {
-                        category = 'Tools';
-                        categoryIcon = '🔧';
-                      }
+                  {Object.entries(INSTRUMENT_PRESETS).map(([presetKey, preset]) => {
+                    // Determine category and icon
+                    let category = 'Other';
+                    let categoryIcon = '🎵';
+                    
+                    if (presetKey.includes('piano') || presetKey.includes('clavinet')) {
+                      category = 'Pianos';
+                      categoryIcon = '🎹';
+                    } else if (presetKey.includes('guitar') || presetKey.includes('bass')) {
+                      category = 'Guitars';
+                      categoryIcon = '🎸';
+                    } else if (presetKey.includes('drum') || presetKey.includes('cymbal') || presetKey.includes('tom')) {
+                      category = 'Drums';
+                      categoryIcon = '🥁';
+                    } else if (presetKey.includes('trumpet') || presetKey.includes('saxophone') || presetKey.includes('trombone')) {
+                      category = 'Brass';
+                      categoryIcon = '🎺';
+                    } else if (presetKey.includes('flute') || presetKey.includes('clarinet')) {
+                      category = 'Woodwinds';
+                      categoryIcon = '🎷';
+                    } else if (presetKey.includes('synth') || presetKey.includes('moog') || presetKey.includes('prophet') || presetKey.includes('dx7') || presetKey.includes('juno')) {
+                      category = 'Synths';
+                      categoryIcon = '🎛️';
+                    } else if (presetKey.includes('metronome') || presetKey.includes('tuning') || presetKey.includes('drone')) {
+                      category = 'Tools';
+                      categoryIcon = '🔧';
+                    }
 
-                      return (
-                        <div key={presetKey} className={styles.presetCard}>
-                          <div className={styles.presetCardHeader}>
-                            <div className={styles.presetIcon}>{categoryIcon}</div>
-                            <div className={styles.presetInfo}>
-                              <div className={styles.presetName}>{preset.name.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</div>
-                            </div>
-                          </div>
-                          <div className={styles.presetCardActions}>
-                            <button
-                              onClick={() => {
-                                synth.updateState({
-                                  waveform: preset.waveform as any,
-                                  volume: preset.volume,
-                                  attack: preset.attack,
-                                  release: preset.release,
-                                  detune: preset.detune,
-                                  reverbEnabled: preset.reverb === 'on',
-                                  lfoRate: preset.lfoRate,
-                                  lfoDepth: preset.lfoDepth,
-                                  lfoTarget: preset.lfoTarget as any,
-                                  filterEnabled: preset.filterEnabled ?? false,
-                                  filterType: preset.filterType as any ?? 'lowpass',
-                                  filterFrequency: preset.filterFrequency ?? 2000,
-                                  filterResonance: preset.filterResonance ?? 1
-                                });
-                              }}
-                              className={styles.presetLoadBtn}
-                              title={`Load ${preset.name}`}
-                            >
-                              Load
-                            </button>
+                    return (
+                      <div key={presetKey} className={styles.presetCard}>
+                        <div className={styles.presetCardHeader}>
+                          <div className={styles.presetIcon}>{categoryIcon}</div>
+                          <div className={styles.presetInfo}>
+                            <div className={styles.presetName}>{preset.name.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</div>
                           </div>
                         </div>
-                      );
-                    })}
+                        <div className={styles.presetCardActions}>
+                          <button
+                            onClick={() => {
+                              synth.updateState({
+                                waveform: preset.waveform as any,
+                                volume: preset.volume,
+                                attack: preset.attack,
+                                release: preset.release,
+                                detune: preset.detune,
+                                reverbEnabled: preset.reverb === 'on',
+                                lfoRate: preset.lfoRate,
+                                lfoDepth: preset.lfoDepth,
+                                lfoTarget: preset.lfoTarget as any,
+                                filterEnabled: preset.filterEnabled ?? false,
+                                filterType: preset.filterType as any ?? 'lowpass',
+                                filterFrequency: preset.filterFrequency ?? 2000,
+                                filterResonance: preset.filterResonance ?? 1
+                              });
+                            }}
+                            className={styles.presetLoadBtn}
+                            title={`Load ${preset.name}`}
+                          >
+                            Load
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </CollapsibleSection>
@@ -1790,37 +1685,7 @@ export const Synthesizer: React.FC<SynthesizerProps> = ({ isOpen, onClose }) => 
               </div>
             </CollapsibleSection>
 
-            {/* 🎛️ INSTRUMENT SELECTOR SECTION */}
-            <CollapsibleSection title="🎛️ Instrument Selector" defaultCollapsed={true}>
-              <InstrumentSelector
-                selectedInstrument={(() => {
-                  // Find the instrument ID that matches the current track's waveform
-                  const currentWaveform = synth.getSelectedTrack()?.instrument || 'sine';
-                  for (const category of INSTRUMENT_CATEGORIES) {
-                    const matchingInstrument = category.instruments.find(instr => instr.waveform === currentWaveform);
-                    if (matchingInstrument) {
-                      return matchingInstrument.id;
-                    }
-                  }
-                  // Fallback to first instrument with matching waveform, or 'sine' instruments
-                  for (const category of INSTRUMENT_CATEGORIES) {
-                    const sineInstrument = category.instruments.find(instr => instr.waveform === 'sine');
-                    if (sineInstrument) {
-                      return sineInstrument.id;
-                    }
-                  }
-                  return 'violin'; // Ultimate fallback
-                })()}
-                onSelectInstrument={(instrument) => {
-                  synth.updateTrack(synth.getSelectedTrack()!.id, {
-                    instrument: instrument.waveform,
-                    envelope: instrument.envelope,
-                    lfo: instrument.lfo,
-                    effects: instrument.effects
-                  });
-                }}
-              />
-            </CollapsibleSection>
+
 
             {/* 🎛️ EFFECTS ROUTING SECTION */}
             <CollapsibleSection title="🎛️ Effects Routing" defaultCollapsed={true}>

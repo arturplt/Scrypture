@@ -65,6 +65,14 @@
   align-items: flex-start;
 }
 
+.activeSection {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  gap: var(--spacing-xs);
+  align-items: flex-start;
+}
+
 .viewToggle {
   display: flex;
   gap: var(--spacing-xs);
@@ -83,7 +91,7 @@
   cursor: pointer;
   transition: all var(--transition-normal);
   flex: 1;
-  max-width: 120px;
+  max-width: 100px;
 }
 
 .toggleButton:hover {
@@ -105,11 +113,6 @@
 
 .damSection {
   flex: 2;
-  min-width: 0;
-}
-
-.companionSection {
-  flex: 1;
   min-width: 0;
 }
 
@@ -164,6 +167,11 @@
     gap: var(--spacing-xs);
   }
   
+  .activeSection {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+  
   .viewToggle {
     margin-bottom: var(--spacing-sm);
   }
@@ -172,17 +180,14 @@
     font-size: var(--font-size-xs);
     padding: var(--spacing-xs) var(--spacing-sm);
     max-width: none;
+    min-width: 80px;
   }
   
   .damSection {
     flex: 1;
   }
   
-  .companionSection {
-    flex: 1;
-    margin-left: 0;
-    margin-top: var(--spacing-xs);
-  }
+
   
   .penTitle {
     font-size: var(--font-size-xs);

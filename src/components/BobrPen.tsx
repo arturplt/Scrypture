@@ -3,6 +3,7 @@ import { User } from '../types';
 import BobrCompanion from './BobrCompanion';
 import DamVisualization from './DamVisualization';
 import { BobrInteraction } from './BobrInteraction';
+import Sanctuary from './Sanctuary';
 import styles from './BobrPen.module.css';
 
 interface BobrPenProps {
@@ -19,9 +20,10 @@ const BobrPen: React.FC<BobrPenProps> = ({
   onTaskCreated
 }) => {
   const [showEvolutionNotification, setShowEvolutionNotification] = useState(false);
-  const [activeView, setActiveView] = useState<'dam' | 'bobr'>('bobr');
+  const [activeView, setActiveView] = useState<'dam' | 'bobr' | 'sanctuary'>('bobr');
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [showBobrInteraction, setShowBobrInteraction] = useState(false);
+
 
   // Get stage progress for visual indicators
   const getStageProgress = (level: number): { current: number; stages: string[] } => {
@@ -97,6 +99,12 @@ const BobrPen: React.FC<BobrPenProps> = ({
             >
               🦫 Bóbr
             </button>
+            <button
+              className={`${styles.toggleButton} ${activeView === 'sanctuary' ? styles.active : ''}`}
+              onClick={() => setActiveView('sanctuary')}
+            >
+              🏛️ Sanctuary
+            </button>
           </div>
 
           {/* Main Content */}
@@ -110,7 +118,7 @@ const BobrPen: React.FC<BobrPenProps> = ({
                   showCelebration={false}
                 />
               </div>
-            ) : (
+            ) : activeView === 'bobr' ? (
               /* Bóbr Companion Section */
               <div className={styles.activeSection}>
                 <BobrCompanion 
@@ -121,7 +129,12 @@ const BobrPen: React.FC<BobrPenProps> = ({
                   onBobrClick={() => setShowBobrInteraction(true)}
                 />
               </div>
-            )}
+                                      ) : (
+                /* Sanctuary Section */
+                <div className={styles.activeSection}>
+                          <Sanctuary />
+                </div>
+              )}
           </div>
         </>
       )}
