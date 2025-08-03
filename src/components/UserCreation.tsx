@@ -84,6 +84,11 @@ export const UserCreation: React.FC<UserCreationProps> = ({
               maxLength={20}
               disabled={isSubmitting}
               autoFocus
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="words"
+              spellCheck="false"
+              data-form-type="other"
             />
             {error && <p className={styles.error}>{error}</p>}
           </div>

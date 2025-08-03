@@ -498,6 +498,11 @@ export const FirstTaskWizard: React.FC<FirstTaskWizardProps> = ({
             onKeyPress={handleKeyPress}
             placeholder="e.g., Read for 10 minutes"
             maxLength={100}
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="words"
+            spellCheck="false"
+            data-form-type="other"
           />
           <button 
             className={`${styles.nextButton} ${!canProceed ? styles.disabled : ''}`}

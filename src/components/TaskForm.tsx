@@ -616,6 +616,11 @@ export const TaskForm: React.FC<TaskFormProps> = ({
             onInvalid={handleInvalid}
             onBlur={handleTitleBlur}
             onClick={handleTitleBarTap}
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="words"
+            spellCheck="false"
+            data-form-type="other"
           />
           {showValidation && (
             <div className={styles.validationMessage}>
