@@ -210,6 +210,50 @@
   color: var(--color-text-primary) !important;
 }
 
+/* Additional aggressive autofill prevention */
+.input {
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+}
+
+/* Hide any autocomplete dropdowns */
+.input::-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 30px var(--color-bg-primary) inset !important;
+  -webkit-text-fill-color: var(--color-text-primary) !important;
+}
+
+/* Prevent Chrome autofill styling */
+.input:-webkit-autofill {
+  -webkit-animation-name: autofill;
+  -webkit-animation-fill-mode: both;
+}
+
+@-webkit-keyframes autofill {
+  to {
+    color: var(--color-text-primary);
+    background: var(--color-bg-primary);
+  }
+}
+
+/* Hide any browser-generated autocomplete */
+input::-webkit-contacts-auto-fill-button {
+  visibility: hidden;
+  display: none !important;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+}
+
+/* Disable any browser autocomplete */
+input::-webkit-credentials-auto-fill-button {
+  visibility: hidden;
+  display: none !important;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .container {
@@ -244,3 +288,4 @@
     padding: var(--spacing-xs) var(--spacing-sm);
   }
 }
+

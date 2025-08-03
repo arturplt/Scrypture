@@ -416,4 +416,45 @@ input[type="text"] {
   appearance: none;
 }
 
+/* Aggressive autofill prevention for all inputs */
+input {
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+}
+
+/* Hide any browser-generated autocomplete buttons */
+input::-webkit-contacts-auto-fill-button,
+input::-webkit-credentials-auto-fill-button {
+  visibility: hidden !important;
+  display: none !important;
+  pointer-events: none !important;
+  position: absolute !important;
+  right: 0 !important;
+}
+
+/* Disable Chrome autofill completely */
+input:-webkit-autofill {
+  -webkit-animation-name: autofill;
+  -webkit-animation-fill-mode: both;
+}
+
+@-webkit-keyframes autofill {
+  to {
+    color: var(--color-text-primary) !important;
+    background: var(--color-bg-primary) !important;
+  }
+}
+
+/* Additional global autofill prevention */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Prevent any form autocomplete */
+form {
+  -webkit-autocomplete: off;
+  autocomplete: off;
+}
+
 
