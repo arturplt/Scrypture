@@ -19,6 +19,19 @@ interface HoverCell {
   y: number;
 }
 
+interface CameraPosition {
+  x: number;
+  y: number;
+}
+
+interface DragState {
+  isDragging: boolean;
+  startX: number;
+  startY: number;
+  startCameraX: number;
+  startCameraY: number;
+}
+
 const Sanctuary: React.FC<SanctuaryProps> = ({
   className = ''
 }) => {
@@ -27,6 +40,15 @@ const Sanctuary: React.FC<SanctuaryProps> = ({
   const [tiles, setTiles] = useState<IsometricTile[]>([]);
   const [hoverCell, setHoverCell] = useState<HoverCell | null>(null);
   const [nextTileId, setNextTileId] = useState(37);
+  const [camera, setCamera] = useState<CameraPosition>({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [dragState, setDragState] = useState<DragState>({
+    isDragging: false,
+    startX: 0,
+    startY: 0,
+    startCameraX: 0,
+    startCameraY: 0
+  });
 
   // Initialize isometric tiles based on the sandbox sheet
   useEffect(() => {
@@ -117,6 +139,11 @@ const Sanctuary: React.FC<SanctuaryProps> = ({
         // Clear canvas
         ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
         
+        // Apply camera transform
+        ctx.save();
+        ctx.translate(camera.x, camera.y);
+        ctx.scale(zoom, zoom);
+        
         // Draw isometric grid
         drawIsometricGrid(ctx, rect.width);
         
@@ -129,13 +156,15 @@ const Sanctuary: React.FC<SanctuaryProps> = ({
         if (hoverCell) {
           drawHoverHighlight(ctx, hoverCell, rect.width);
         }
+        
+        ctx.restore();
       };
       
       render();
     };
     
     tileSheet.src = TILE_SHEET_CONFIG.imagePath;
-  }, [tiles, hoverCell, isLoaded]);
+  }, [tiles, hoverCell, isLoaded, camera, zoom]);
 
   const drawIsometricGrid = (ctx: CanvasRenderingContext2D, width: number) => {
     // Proper isometric tilemap grid system
@@ -156,7 +185,7 @@ const Sanctuary: React.FC<SanctuaryProps> = ({
     
     // Center point - match tile positioning
     const centerX = width / 2;
-    const centerY = 40;
+    const centerY = 56; // Offset down to align with tile bases
     
     // Draw grid cells that match tile base footprints
     // Each cell is a diamond shape that represents where a tile's base would be
@@ -197,7 +226,7 @@ const Sanctuary: React.FC<SanctuaryProps> = ({
     // Calculate isometric position - this is the center of the tile's base
     // Use half the tile width for spacing to make tiles touch edge-to-edge
     const isoX = (tile.x - tile.y) * (tileWidth / 2) + canvasWidth / 2;
-    const isoY = (tile.x + tile.y) * (tileHeight / 2) + 40;
+    const isoY = (tile.x + tile.y) * (tileHeight / 2) + 64; // Grid base position
     
     // Draw tile with pixel-perfect positioning
     ctx.save();
@@ -208,11 +237,12 @@ const Sanctuary: React.FC<SanctuaryProps> = ({
     ctx.imageSmoothingEnabled = false;
     
     // Draw the tile at its original size from the tile sheet
-    // The tile is centered on its base position
+    // Position the tile so its base aligns with the grid
+    // The tile's base should be at the center point, so offset by half the tile height
     ctx.drawImage(
       tileSheet,
       tileData.sourceX, tileData.sourceY, tileData.width, tileData.height,
-      -tileData.width / 2, -tileData.height / 2, tileData.width, tileData.height
+      -tileData.width / 2, -tileData.height, tileData.width, tileData.height
     );
     
     ctx.restore();
@@ -225,13 +255,15 @@ const Sanctuary: React.FC<SanctuaryProps> = ({
     
     // Use half the tile width for spacing to match tile positioning
     const isoX = (cell.x - cell.y) * (tileWidth / 2) + canvasWidth / 2;
-    const isoY = (cell.x + cell.y) * (tileHeight / 2) + 40;
+    const isoY = (cell.x + cell.y) * (tileHeight / 2) + 56; // Updated to match grid position
     
-    // Draw hover highlight
+    // Draw hover highlight with much better visibility
     ctx.save();
-    ctx.strokeStyle = 'rgba(255, 255, 0, 0.8)';
-    ctx.lineWidth = 2;
-    ctx.setLineDash([5, 5]);
+    
+    // Draw filled background for better visibility
+    ctx.fillStyle = 'rgba(0, 255, 0, 0.3)'; // Bright green with transparency
+    ctx.strokeStyle = 'rgba(0, 255, 0, 0.9)'; // Bright green border
+    ctx.lineWidth = 3; // Thicker line for better visibility
     
     // Draw isometric diamond shape for hover cell
     // This should match the grid cell shape exactly
@@ -242,12 +274,22 @@ const Sanctuary: React.FC<SanctuaryProps> = ({
       { x: isoX - tileWidth / 2, y: isoY }, // left
     ];
     
+    // Fill the diamond
     ctx.beginPath();
     ctx.moveTo(points[0].x, points[0].y);
     points.forEach(point => {
       ctx.lineTo(point.x, point.y);
     });
     ctx.closePath();
+    ctx.fill();
+    
+    // Stroke the border
+    ctx.stroke();
+    
+    // Add a pulsing effect with dashed line overlay
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([8, 4]);
     ctx.stroke();
     
     ctx.restore();
@@ -261,26 +303,137 @@ const Sanctuary: React.FC<SanctuaryProps> = ({
     return randomTile.id;
   };
 
+  // Zoom handlers
+  const handleZoomIn = (zoomLevel: number) => {
+    setZoom(zoomLevel);
+  };
+
+  const handleResetView = () => {
+    setCamera({ x: 0, y: 0 });
+    setZoom(1);
+  };
+
+  // Mouse and touch event handlers
+  const handleMouseDown = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    event.preventDefault();
+    const rect = canvasRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    
+    setDragState({
+      isDragging: true,
+      startX: event.clientX,
+      startY: event.clientY,
+      startCameraX: camera.x,
+      startCameraY: camera.y
+    });
+  };
+
+  const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    const rect = canvasRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    
+    if (dragState.isDragging) {
+      const deltaX = event.clientX - dragState.startX;
+      const deltaY = event.clientY - dragState.startY;
+      
+      setCamera({
+        x: dragState.startCameraX + deltaX,
+        y: dragState.startCameraY + deltaY
+      });
+      return; // Don't update hover when dragging
+    }
+    
+    // Update hover cell for tile placement
+    const x = (event.clientX - rect.left - camera.x) / zoom;
+    const y = (event.clientY - rect.top - camera.y) / zoom;
+    
+    // Convert screen coordinates to isometric grid coordinates
+    const tileWidth = 32;
+    const tileHeight = 16;
+    
+    const centerX = rect.width / 2;
+    const centerY = 56; // Updated to match grid position
+    
+    const isoX = (x - centerX) / (tileWidth / 2);
+    const isoY = (y - centerY) / (tileHeight / 2);
+    
+    const gridX = Math.round((isoX + isoY) / 2);
+    const gridY = Math.round((isoY - isoX) / 2);
+    
+    const existingTile = tiles.find(tile => tile.x === gridX && tile.y === gridY);
+    if (existingTile) {
+      setHoverCell(null);
+      return;
+    }
+    
+    setHoverCell({ x: gridX, y: gridY });
+  };
+
+  const handleMouseUp = () => {
+    setDragState(prev => ({ ...prev, isDragging: false }));
+  };
+
+  const handleMouseLeave = () => {
+    setDragState(prev => ({ ...prev, isDragging: false }));
+    setHoverCell(null);
+  };
+
+  // Touch event handlers
+  const handleTouchStart = (event: React.TouchEvent<HTMLCanvasElement>) => {
+    event.preventDefault();
+    const touch = event.touches[0];
+    const rect = canvasRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    
+    setDragState({
+      isDragging: true,
+      startX: touch.clientX,
+      startY: touch.clientY,
+      startCameraX: camera.x,
+      startCameraY: camera.y
+    });
+  };
+
+  const handleTouchMove = (event: React.TouchEvent<HTMLCanvasElement>) => {
+    event.preventDefault();
+    const touch = event.touches[0];
+    const rect = canvasRef.current?.getBoundingClientRect();
+    if (!rect || !dragState.isDragging) return;
+    
+    const deltaX = touch.clientX - dragState.startX;
+    const deltaY = touch.clientY - dragState.startY;
+    
+    setCamera({
+      x: dragState.startCameraX + deltaX,
+      y: dragState.startCameraY + deltaY
+    });
+  };
+
+  const handleTouchEnd = () => {
+    setDragState(prev => ({ ...prev, isDragging: false }));
+  };
+
   const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    // Only place tiles if not dragging
+    if (dragState.isDragging) return;
+    
     const canvas = canvasRef.current;
     if (!canvas) return;
     
     const rect = canvas.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
+    const x = (event.clientX - rect.left - camera.x) / zoom;
+    const y = (event.clientY - rect.top - camera.y) / zoom;
     
     // Convert screen coordinates to isometric grid coordinates
     const tileWidth = 32;
-    const tileHeight = 16; // Half the tile width for isometric projection
+    const tileHeight = 16;
     
     const centerX = rect.width / 2;
-    const centerY = 40;
+    const centerY = 56; // Updated to match grid position
     
-    // Convert to isometric coordinates using half tile width for spacing
     const isoX = (x - centerX) / (tileWidth / 2);
     const isoY = (y - centerY) / (tileHeight / 2);
     
-    // Convert to grid coordinates
     const gridX = Math.round((isoX + isoY) / 2);
     const gridY = Math.round((isoY - isoX) / 2);
     
@@ -301,43 +454,6 @@ const Sanctuary: React.FC<SanctuaryProps> = ({
     setNextTileId(prev => prev + 1);
   };
 
-  const handleCanvasMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    
-    const rect = canvas.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-    
-    // Convert screen coordinates to isometric grid coordinates
-    const tileWidth = 32;
-    const tileHeight = 16; // Half the tile width for isometric projection
-    
-    const centerX = rect.width / 2;
-    const centerY = 40;
-    
-    // Convert to isometric coordinates using half tile width for spacing
-    const isoX = (x - centerX) / (tileWidth / 2);
-    const isoY = (y - centerY) / (tileHeight / 2);
-    
-    // Convert to grid coordinates
-    const gridX = Math.round((isoX + isoY) / 2);
-    const gridY = Math.round((isoY - isoX) / 2);
-    
-    // Check if cell is empty
-    const existingTile = tiles.find(tile => tile.x === gridX && tile.y === gridY);
-    if (existingTile) {
-      setHoverCell(null);
-      return;
-    }
-    
-    setHoverCell({ x: gridX, y: gridY });
-  };
-
-  const handleCanvasMouseLeave = () => {
-    setHoverCell(null);
-  };
-
   return (
     <div className={`${styles.sanctuary} ${className}`}>
       <div className={styles.sanctuaryHeader}>
@@ -345,13 +461,52 @@ const Sanctuary: React.FC<SanctuaryProps> = ({
         <h3 className={styles.sanctuaryTitle}>Sanctuary</h3>
       </div>
       
+      <div className={styles.zoomControls}>
+        <button 
+          className={`${styles.zoomButton} ${zoom === 1 ? styles.active : ''}`}
+          onClick={() => handleZoomIn(1)}
+        >
+          1x
+        </button>
+        <button 
+          className={`${styles.zoomButton} ${zoom === 2 ? styles.active : ''}`}
+          onClick={() => handleZoomIn(2)}
+        >
+          2x
+        </button>
+        <button 
+          className={`${styles.zoomButton} ${zoom === 4 ? styles.active : ''}`}
+          onClick={() => handleZoomIn(4)}
+        >
+          4x
+        </button>
+        <button 
+          className={styles.resetButton}
+          onClick={handleResetView}
+        >
+          Reset
+        </button>
+      </div>
+      
       <canvas
         ref={canvasRef}
         className={styles.isometricCanvas}
         onClick={handleCanvasClick}
-        onMouseMove={handleCanvasMouseMove}
-        onMouseLeave={handleCanvasMouseLeave}
-        style={{ cursor: 'pointer' }}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        style={{ 
+          cursor: dragState.isDragging 
+            ? 'grabbing' 
+            : hoverCell 
+              ? 'pointer' 
+              : 'grab',
+          touchAction: 'none' // Prevent default touch behaviors
+        }}
       />
       {!isLoaded && (
         <div className={styles.loadingOverlay}>

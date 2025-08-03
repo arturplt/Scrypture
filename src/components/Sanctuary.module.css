@@ -7,6 +7,10 @@
   border-radius: 0px;
   overflow: hidden;
   box-shadow: var(--shadow-button);
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 .sanctuaryHeader {
@@ -16,6 +20,7 @@
   right: var(--spacing-xs);
   text-align: center;
   z-index: 10;
+  pointer-events: none;
 }
 
 .sanctuaryTitle {
@@ -33,7 +38,64 @@
   margin-right: var(--spacing-xs);
 }
 
+.zoomControls {
+  position: absolute;
+  top: var(--spacing-xs);
+  right: var(--spacing-xs);
+  display: flex;
+  gap: var(--spacing-xs);
+  z-index: 20;
+}
 
+.zoomButton {
+  font-family: 'Press Start 2P', monospace;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-primary);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: 0px;
+  padding: var(--spacing-xs);
+  cursor: pointer;
+  text-transform: uppercase;
+  min-width: 40px;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-button);
+}
+
+.zoomButton:hover {
+  background: var(--color-accent-gold);
+  color: var(--color-bg-primary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-button-hover);
+}
+
+.zoomButton.active {
+  background: var(--color-accent-gold);
+  color: var(--color-bg-primary);
+  border-color: var(--color-accent-gold);
+}
+
+.resetButton {
+  font-family: 'Press Start 2P', monospace;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-primary);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: 0px;
+  padding: var(--spacing-xs);
+  cursor: pointer;
+  text-transform: uppercase;
+  min-width: 50px;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-button);
+}
+
+.resetButton:hover {
+  background: var(--color-accent-red);
+  color: var(--color-bg-primary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-button-hover);
+}
 
 .canvasContainer {
   position: absolute;
@@ -59,6 +121,13 @@
   image-rendering: -ms-crisp-edges;
   image-rendering: crisp-edges;
   -ms-interpolation-mode: nearest-neighbor;
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 .loadingOverlay {
@@ -75,6 +144,7 @@
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
   text-transform: uppercase;
+  pointer-events: none;
 }
 
 .sanctuaryInfo {
@@ -84,6 +154,7 @@
   right: var(--spacing-xs);
   text-align: center;
   z-index: 10;
+  pointer-events: none;
 }
 
 .sanctuaryDescription {
@@ -108,5 +179,22 @@
   
   .sanctuaryTitle {
     font-size: var(--font-size-xs);
+  }
+  
+  .zoomControls {
+    top: var(--spacing-xs);
+    right: var(--spacing-xs);
+    gap: 2px;
+  }
+  
+  .zoomButton,
+  .resetButton {
+    font-size: 10px;
+    padding: 4px 6px;
+    min-width: 30px;
+  }
+  
+  .resetButton {
+    min-width: 40px;
   }
 } 
