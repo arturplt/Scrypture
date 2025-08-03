@@ -81,6 +81,7 @@ This index serves as the master navigation guide for the Scrypture MVP documenta
 |----------|---------|-----------------|--------------|
 | **[10-color-system.md](10-color-system.md)** | Color palette, accessibility, theming | Designers, frontend developers | 02-mvp-features.md |
 | **[11-ui-enhancements.md](11-ui-enhancements.md)** | Recent UI enhancements and UX improvements | Designers, frontend developers, users | 02-mvp-features.md, 10-color-system.md |
+| **[autofill-prevention-guide.md](autofill-prevention-guide.md)** | Browser autofill prevention system for payment method suggestions | Frontend developers, UX designers | 02-mvp-features.md, 11-ui-enhancements.md |
 
 **Key Concepts**: User experience, accessibility compliance, design system, responsive design, UI enhancements
 
@@ -150,6 +151,7 @@ graph TD
 - **Database**: [05-database-schema.md](05-database-schema.md)
 - **API**: [04-api-reference.md](04-api-reference.md), [03-technical-specs.md](03-technical-specs.md)
 - **Audio & Sound**: [13-synthesizer-sound-engine.md](13-synthesizer-sound-engine.md), [14-multi-track-synthesizer-roadmap.md](14-multi-track-synthesizer-roadmap.md)
+- **UX & Security**: [autofill-prevention-guide.md](autofill-prevention-guide.md), [11-ui-enhancements.md](11-ui-enhancements.md)
 
 ### **By Technology**
 - **Frontend**: [02-mvp-features.md](02-mvp-features.md), [10-color-system.md](10-color-system.md)
@@ -207,6 +209,8 @@ Each document should include:
 - **[04-api-reference.md](04-api-reference.md)** - Simplified API documentation
 - **[05-database-schema.md](05-database-schema.md)** - Simplified database design
 - **[06-development-guide.md](06-development-guide.md)** - New implementation guide with practical examples
+- **[autofill-prevention-guide.md](autofill-prevention-guide.md)** - New autofill prevention guide
+- **[11-ui-enhancements.md](11-ui-enhancements.md)** - New UI enhancements guide
 
 ## 📞 **Documentation Support**
 
