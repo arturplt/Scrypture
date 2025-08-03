@@ -8,6 +8,7 @@ import styles from './StartHereSection.module.css';
 interface StartHereSectionProps {
   isVisible: boolean;
   onClose: () => void;
+  onDataChange?: () => void;
 }
 
 interface TaskTemplate {
@@ -27,7 +28,7 @@ interface HabitTemplate {
   statRewards: { mind?: number; body?: number; soul?: number; xp: number };
 }
 
-export const StartHereSection: React.FC<StartHereSectionProps> = ({ isVisible, onClose }) => {
+export const StartHereSection: React.FC<StartHereSectionProps> = ({ isVisible, onClose, onDataChange }) => {
   const { addTask, tasks, isSaving: tasksSaving } = useTasks();
   const { addHabit, isSaving: habitsSaving } = useHabits();
   const { user } = useUser();
@@ -37,6 +38,15 @@ export const StartHereSection: React.FC<StartHereSectionProps> = ({ isVisible, o
   const [collapsedCompletedSections, setCollapsedCompletedSections] = useState<Set<string>>(new Set());
   const [isSavingProgress, setIsSavingProgress] = useState(false);
   const [isSavingUI, setIsSavingUI] = useState(false);
+
+  // Function to reset all state
+  const resetState = () => {
+    setGivenTasks(new Set());
+    setGivenHabits(new Set());
+    setExpandedCategories(new Set());
+    setCollapsedCompletedSections(new Set());
+    console.log('🔄 StartHereSection: State reset due to data clear');
+  };
 
   // Load saved given tasks and habits from localStorage on mount
   useEffect(() => {
@@ -60,6 +70,44 @@ export const StartHereSection: React.FC<StartHereSectionProps> = ({ isVisible, o
       console.error('Error loading saved given tasks/habits:', error);
     }
   }, []);
+
+  // Listen for data changes and reset state if needed
+  useEffect(() => {
+    const checkForDataClear = () => {
+      const savedGivenTasks = localStorage.getItem('startHereGivenTasks');
+      const savedGivenHabits = localStorage.getItem('startHereGivenHabits');
+      
+      // If the localStorage items are missing but we have state, reset
+      if ((!savedGivenTasks && givenTasks.size > 0) || (!savedGivenHabits && givenHabits.size > 0)) {
+        resetState();
+        onDataChange?.();
+      }
+    };
+
+    // Check immediately
+    checkForDataClear();
+
+    // Listen for custom data cleared event
+    const handleDataCleared = () => {
+      resetState();
+      onDataChange?.();
+    };
+
+    // Set up a storage event listener for cross-tab synchronization
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'startHereGivenTasks' || e.key === 'startHereGivenHabits') {
+        checkForDataClear();
+      }
+    };
+
+    window.addEventListener('scrypture-data-cleared', handleDataCleared);
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('scrypture-data-cleared', handleDataCleared);
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [givenTasks.size, givenHabits.size, onDataChange]);
 
   // Helper function to calculate XP based on priority and difficulty
   const calculateXp = (priority: 'low' | 'medium' | 'high', difficulty: number): number => {

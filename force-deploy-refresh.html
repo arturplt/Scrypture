@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Force Deploy Refresh - Scrypture</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a2e;
+            color: #eee;
+            padding: 2rem;
+        }
+        .container {
+            background: #16213e;
+            border: 2px solid #667eea;
+            padding: 2rem;
+            border-radius: 8px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 8px;
+            transition: all 0.3s ease;
+        }
+        .button:hover {
+            background: #764ba2;
+        }
+        .button.danger {
+            background: #dc2626;
+        }
+        .button.danger:hover {
+            background: #b91c1c;
+        }
+        .log {
+            background: #0f1419;
+            border: 1px solid #333;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+            font-size: 0.9em;
+            text-align: left;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .status {
+            font-size: 1.2em;
+            margin-bottom: 1rem;
+            color: #4ade80;
+        }
+        .warning {
+            background: #dc2626;
+            color: white;
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Force Deploy Refresh</h1>
+        <div class="warning">
+            <strong>⚠️ Warning:</strong> This will clear all cached data and force a fresh reload. Use this when your deployed changes aren't appearing.
+        </div>
+        <div class="status" id="status">Ready to force refresh</div>
+        <div class="log" id="log"></div>
+        
+        <button class="button" onclick="checkCurrentVersion()">Check Current Version</button>
+        <button class="button" onclick="forceServiceWorkerUpdate()">Force Service Worker Update</button>
+        <button class="button danger" onclick="nuclearOption()">Nuclear Option (Clear Everything)</button>
+        <button class="button" onclick="goToApp()">Go to App</button>
+    </div>
+
+    <script>
+        const statusEl = document.getElementById('status');
+        const logEl = document.getElementById('log');
+        
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            logEl.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+        
+        async function checkCurrentVersion() {
+            log('🔍 Checking current service worker version...');
+            
+            if ('serviceWorker' in navigator) {
+                const registration = await navigator.serviceWorker.getRegistration();
+                if (registration) {
+                    log(`📋 Service Worker: ${registration.active ? 'Active' : 'Inactive'}`);
+                    log(`🔄 Update found: ${registration.waiting ? 'Yes' : 'No'}`);
+                    
+                    if (registration.waiting) {
+                        log('⚠️ New service worker is waiting to activate');
+                        statusEl.textContent = 'New version available - use Force Update';
+                    } else {
+                        log('✅ Service worker is up to date');
+                        statusEl.textContent = 'Service worker is current';
+                    }
+                } else {
+                    log('❌ No service worker found');
+                    statusEl.textContent = 'No service worker registered';
+                }
+            } else {
+                log('❌ Service workers not supported');
+                statusEl.textContent = 'Service workers not supported';
+            }
+        }
+        
+        async function forceServiceWorkerUpdate() {
+            log('🔄 Forcing service worker update...');
+            
+            if ('serviceWorker' in navigator) {
+                const registration = await navigator.serviceWorker.getRegistration();
+                if (registration && registration.waiting) {
+                    // Send skip waiting message
+                    registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+                    log('📡 Sent SKIP_WAITING message');
+                    
+                    // Listen for the new service worker to take over
+                    registration.addEventListener('updatefound', () => {
+                        log('🔄 Update found - new service worker installing');
+                    });
+                    
+                    navigator.serviceWorker.addEventListener('controllerchange', () => {
+                        log('✅ New service worker activated');
+                        statusEl.textContent = 'Service worker updated - reloading...';
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    });
+                } else {
+                    log('⚠️ No waiting service worker found');
+                    statusEl.textContent = 'No update available';
+                }
+            }
+        }
+        
+        async function nuclearOption() {
+            log('☢️ Nuclear option - clearing everything...');
+            
+            try {
+                // 1. Unregister all service workers
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    log(`📋 Found ${registrations.length} service worker(s)`);
+                    
+                    for (const registration of registrations) {
+                        await registration.unregister();
+                        log(`🔧 Unregistered service worker: ${registration.scope}`);
+                    }
+                }
+                
+                // 2. Clear all caches
+                if ('caches' in window) {
+                    const cacheNames = await caches.keys();
+                    log(`📦 Found ${cacheNames.length} cache(s): ${cacheNames.join(', ')}`);
+                    
+                    for (const cacheName of cacheNames) {
+                        await caches.delete(cacheName);
+                        log(`🗑️ Deleted cache: ${cacheName}`);
+                    }
+                }
+                
+                // 3. Clear all storage
+                log('💾 Clearing localStorage...');
+                localStorage.clear();
+                log('💾 Clearing sessionStorage...');
+                sessionStorage.clear();
+                
+                // 4. Clear IndexedDB (if any)
+                if ('indexedDB' in window) {
+                    log('🗄️ Clearing IndexedDB...');
+                    // This is a simplified approach
+                    const databases = await indexedDB.databases();
+                    for (const db of databases) {
+                        if (db.name) {
+                            indexedDB.deleteDatabase(db.name);
+                            log(`🗄️ Deleted database: ${db.name}`);
+                        }
+                    }
+                }
+                
+                log('✅ Nuclear option complete!');
+                statusEl.textContent = 'Everything cleared - reloading...';
+                
+                // Force reload with cache bypass
+                setTimeout(() => {
+                    window.location.reload(true);
+                }, 2000);
+                
+            } catch (error) {
+                log(`❌ Error during nuclear option: ${error.message}`);
+                statusEl.textContent = 'Error during nuclear option';
+            }
+        }
+        
+        function goToApp() {
+            window.location.href = '/';
+        }
+        
+        // Auto-check on load
+        checkCurrentVersion();
+    </script>
+</body>
+</html> 

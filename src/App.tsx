@@ -541,6 +541,7 @@ function AppContent() {
           <StartHereSection 
             isVisible={true}
             onClose={() => setShowStartHere(false)}
+            onDataChange={refreshTasks}
           />
         )}
         <TaskCounter className={styles.taskCounter} />

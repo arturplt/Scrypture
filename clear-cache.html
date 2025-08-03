@@ -113,6 +113,9 @@
                 log('💾 Clearing sessionStorage...');
                 sessionStorage.clear();
                 
+                // Dispatch custom event to notify components that data has been cleared
+                window.dispatchEvent(new CustomEvent('scrypture-data-cleared'));
+                
                 log('✅ All caches cleared successfully!');
                 statusEl.textContent = 'Caches cleared! Redirecting...';
                 

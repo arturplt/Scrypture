@@ -1,5 +1,5 @@
 // Service Worker for Scrypture PWA
-const CACHE_NAME = 'scrypture-v4'; // Increment version to force cache update
+const CACHE_NAME = 'scrypture-v5'; // Increment version to force cache update
 const urlsToCache = [
   '/',
   '/index.html',

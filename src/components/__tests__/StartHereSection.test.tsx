@@ -278,4 +278,31 @@ describe('StartHereSection', () => {
       expect(screen.getByText('Next Task (Difficulty 1)')).toBeInTheDocument();
     });
   });
+
+  it('should reset state when data is cleared', async () => {
+    // Set up initial state with some given tasks and habits
+    localStorage.setItem('startHereGivenTasks', JSON.stringify(['task1', 'task2']));
+    localStorage.setItem('startHereGivenHabits', JSON.stringify(['habit1']));
+    
+    const onDataChange = jest.fn();
+    render(<StartHereSection isVisible={true} onClose={jest.fn()} onDataChange={onDataChange} />);
+    
+    // Wait for the component to load the data from localStorage
+    await waitFor(() => {
+      expect(localStorage.getItem('startHereGivenTasks')).toBe(JSON.stringify(['task1', 'task2']));
+      expect(localStorage.getItem('startHereGivenHabits')).toBe(JSON.stringify(['habit1']));
+    });
+    
+    // Clear the data
+    localStorage.removeItem('startHereGivenTasks');
+    localStorage.removeItem('startHereGivenHabits');
+    
+    // Dispatch the custom event
+    window.dispatchEvent(new CustomEvent('scrypture-data-cleared'));
+    
+    // Verify that onDataChange was called
+    await waitFor(() => {
+      expect(onDataChange).toHaveBeenCalled();
+    });
+  });
 }); 

@@ -141,6 +141,10 @@ declare global {
       initialize: () => void;
     };
   }
+
+  interface WindowEventMap {
+    'scrypture-data-cleared': CustomEvent;
+  }
 }
 
 export {}; 

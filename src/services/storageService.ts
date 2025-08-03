@@ -350,6 +350,11 @@ export class StorageService {
       }
     });
 
+    // Dispatch custom event to notify components that data has been cleared
+    if (success) {
+      window.dispatchEvent(new CustomEvent('scrypture-data-cleared'));
+    }
+
     return success;
   }
 
