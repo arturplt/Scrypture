@@ -32,14 +32,94 @@ interface DragState {
   startCameraY: number;
 }
 
+interface BlockGroup {
+  type: IsometricTileData['type'];
+  name: string;
+  icon: string;
+  colors: {
+    palette: IsometricTileData['palette'];
+    tiles: IsometricTileData[];
+  }[];
+}
+
+// Tile Preview Component
+interface TilePreviewProps {
+  tile: IsometricTileData;
+  size?: number;
+  className?: string;
+}
+
+
+
+const TilePreview: React.FC<TilePreviewProps> = ({ tile, size = 32, className = '' }) => {
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
+
+  const spriteStyle = {
+    width: `${size}px`,
+    height: `${size}px`,
+    backgroundImage: `url(${TILE_SHEET_CONFIG.imagePath})`,
+    backgroundPosition: `-${tile.sourceX}px -${tile.sourceY}px`,
+    backgroundSize: `${TILE_SHEET_CONFIG.sheetWidth}px ${TILE_SHEET_CONFIG.sheetHeight}px`,
+    imageRendering: 'pixelated' as const,
+    display: 'inline-block',
+    border: '1px solid var(--color-border-primary)',
+    backgroundColor: 'transparent'
+  };
+
+  // Debug logging
+  useEffect(() => {
+    console.log('TilePreview:', {
+      tileId: tile.id,
+      tileName: tile.name,
+      imagePath: TILE_SHEET_CONFIG.imagePath,
+      sourceX: tile.sourceX,
+      sourceY: tile.sourceY,
+      spriteStyle
+    });
+  }, [tile]);
+
+  if (imageError) {
+    return (
+      <div 
+        className={`${styles.tilePreviewSprite} ${className}`}
+        style={{
+          width: `${size}px`,
+          height: `${size}px`,
+          backgroundColor: 'var(--color-bg-primary)',
+          border: '1px solid var(--color-border-primary)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '8px',
+          color: 'var(--color-text-secondary)'
+        }}
+        title={`${tile.name} (Image failed to load)`}
+      >
+        {tile.id}
+      </div>
+    );
+  }
+
+  return (
+    <div 
+      className={`${styles.tilePreviewSprite} ${className}`}
+      style={spriteStyle}
+      title={tile.name}
+      onError={() => setImageError(true)}
+    />
+  );
+};
+
 const Sanctuary: React.FC<SanctuaryProps> = ({
   className = ''
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const hoverCanvasRef = useRef<HTMLCanvasElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [tiles, setTiles] = useState<IsometricTile[]>([]);
   const [hoverCell, setHoverCell] = useState<HoverCell | null>(null);
-  const [nextTileId, setNextTileId] = useState(37);
+  const [nextTileId, setNextTileId] = useState(53);
   const [camera, setCamera] = useState<CameraPosition>({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [dragState, setDragState] = useState<DragState>({
@@ -49,6 +129,145 @@ const Sanctuary: React.FC<SanctuaryProps> = ({
     startCameraX: 0,
     startCameraY: 0
   });
+  
+  // Block selector state
+  const [isBlockMenuOpen, setIsBlockMenuOpen] = useState(false);
+  const [selectedBlockType, setSelectedBlockType] = useState<IsometricTileData['type'] | null>(null);
+  const [selectedPalette, setSelectedPalette] = useState<IsometricTileData['palette'] | null>(null);
+  const [selectedTileId, setSelectedTileId] = useState<number | null>(null);
+  
+  // Throttle hover updates to reduce redraws
+  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Group tiles by type and color
+  const blockGroups: BlockGroup[] = [
+    {
+      type: 'cube',
+      name: 'Cubes',
+      icon: '⬜',
+      colors: [
+        {
+          palette: 'green',
+          tiles: ISOMETRIC_TILES.filter(tile => tile.type === 'cube' && tile.palette === 'green')
+        },
+        {
+          palette: 'blue',
+          tiles: ISOMETRIC_TILES.filter(tile => tile.type === 'cube' && tile.palette === 'blue')
+        },
+        {
+          palette: 'gray',
+          tiles: ISOMETRIC_TILES.filter(tile => tile.type === 'cube' && tile.palette === 'gray')
+        },
+        {
+          palette: 'orange',
+          tiles: ISOMETRIC_TILES.filter(tile => tile.type === 'cube' && tile.palette === 'orange')
+        }
+      ]
+    },
+         {
+       type: 'flat',
+       name: 'Flats',
+       icon: '⬜',
+       colors: [
+         {
+           palette: 'green',
+           tiles: ISOMETRIC_TILES.filter(tile => tile.type === 'flat' && tile.palette === 'green')
+         },
+         {
+           palette: 'blue',
+           tiles: ISOMETRIC_TILES.filter(tile => tile.type === 'flat' && tile.palette === 'blue')
+         },
+         {
+           palette: 'gray',
+           tiles: ISOMETRIC_TILES.filter(tile => tile.type === 'flat' && tile.palette === 'gray')
+         },
+         {
+           palette: 'orange',
+           tiles: ISOMETRIC_TILES.filter(tile => tile.type === 'flat' && tile.palette === 'orange')
+         }
+       ]
+     },
+     {
+       type: 'ramp',
+       name: 'Ramps',
+       icon: '⬜',
+       colors: [
+         {
+           palette: 'green',
+           tiles: ISOMETRIC_TILES.filter(tile => tile.type === 'ramp' && tile.palette === 'green')
+         },
+         {
+           palette: 'blue',
+           tiles: ISOMETRIC_TILES.filter(tile => tile.type === 'ramp' && tile.palette === 'blue')
+         },
+         {
+           palette: 'gray',
+           tiles: ISOMETRIC_TILES.filter(tile => tile.type === 'ramp' && tile.palette === 'gray')
+         },
+         {
+           palette: 'orange',
+           tiles: ISOMETRIC_TILES.filter(tile => tile.type === 'ramp' && tile.palette === 'orange')
+         }
+       ]
+     },
+     {
+       type: 'corner',
+       name: 'Corners',
+       icon: '⬜',
+       colors: [
+         {
+           palette: 'green',
+           tiles: ISOMETRIC_TILES.filter(tile => tile.type === 'corner' && tile.palette === 'green')
+         },
+         {
+           palette: 'blue',
+           tiles: ISOMETRIC_TILES.filter(tile => tile.type === 'corner' && tile.palette === 'blue')
+         },
+         {
+           palette: 'gray',
+           tiles: ISOMETRIC_TILES.filter(tile => tile.type === 'corner' && tile.palette === 'gray')
+         },
+         {
+           palette: 'orange',
+           tiles: ISOMETRIC_TILES.filter(tile => tile.type === 'corner' && tile.palette === 'orange')
+         }
+       ]
+     },
+     {
+       type: 'staircase',
+       name: 'Stairs',
+       icon: '⬜',
+       colors: [
+         {
+           palette: 'green',
+           tiles: ISOMETRIC_TILES.filter(tile => tile.type === 'staircase' && tile.palette === 'green')
+         },
+         {
+           palette: 'blue',
+           tiles: ISOMETRIC_TILES.filter(tile => tile.type === 'staircase' && tile.palette === 'blue')
+         },
+         {
+           palette: 'gray',
+           tiles: ISOMETRIC_TILES.filter(tile => tile.type === 'staircase' && tile.palette === 'gray')
+         },
+         {
+           palette: 'orange',
+           tiles: ISOMETRIC_TILES.filter(tile => tile.type === 'staircase' && tile.palette === 'orange')
+         }
+       ]
+     },
+    {
+      type: 'pillar',
+      name: 'Pillars',
+      icon: '⬜',
+      colors: [
+        {
+          palette: 'orange',
+          tiles: ISOMETRIC_TILES.filter(tile => tile.type === 'pillar' && tile.palette === 'orange')
+        }
+      ]
+    }
+  ];
 
   // Initialize isometric tiles based on the sandbox sheet
   useEffect(() => {
@@ -79,34 +298,34 @@ const Sanctuary: React.FC<SanctuaryProps> = ({
       { id: 18, x: 5, y: 2, tileId: 19, rotation: 0 }, // Blue Staircase
       
       // Row 4 - Blue tiles
-      { id: 19, x: 0, y: 3, tileId: 14, rotation: 0 },
-      { id: 20, x: 1, y: 3, tileId: 15, rotation: 0 },
-      { id: 21, x: 2, y: 3, tileId: 16, rotation: 0 },
-      { id: 22, x: 3, y: 3, tileId: 17, rotation: 0 },
-      { id: 23, x: 4, y: 3, tileId: 18, rotation: 0 },
-      { id: 24, x: 5, y: 3, tileId: 19, rotation: 0 },
+      { id: 19, x: 0, y: 3, tileId: 20, rotation: 0 }, // Blue Flat 1
+      { id: 20, x: 1, y: 3, tileId: 21, rotation: 0 }, // Blue Flat 2
+      { id: 21, x: 2, y: 3, tileId: 22, rotation: 0 }, // Blue Flat 3
+      { id: 22, x: 3, y: 3, tileId: 23, rotation: 0 }, // Blue Corner Left
+      { id: 23, x: 4, y: 3, tileId: 24, rotation: 0 }, // Blue Corner Right
+      { id: 24, x: 5, y: 3, tileId: 25, rotation: 0 }, // Blue Cube 4
       
       // Row 5 - Gray tiles
-      { id: 25, x: 0, y: 4, tileId: 20, rotation: 0 }, // Gray Cube 1
-      { id: 26, x: 1, y: 4, tileId: 21, rotation: 0 }, // Gray Cube 2
-      { id: 27, x: 2, y: 4, tileId: 22, rotation: 0 }, // Gray Cube 3
-      { id: 28, x: 3, y: 4, tileId: 23, rotation: 0 }, // Gray Ramp Left
-      { id: 29, x: 4, y: 4, tileId: 24, rotation: 0 }, // Gray Ramp Right
-      { id: 30, x: 5, y: 4, tileId: 25, rotation: 0 }, // Gray Staircase
+      { id: 25, x: 0, y: 4, tileId: 27, rotation: 0 }, // Gray Cube 1
+      { id: 26, x: 1, y: 4, tileId: 28, rotation: 0 }, // Gray Cube 2
+      { id: 27, x: 2, y: 4, tileId: 29, rotation: 0 }, // Gray Cube 3
+      { id: 28, x: 3, y: 4, tileId: 30, rotation: 0 }, // Gray Ramp Left
+      { id: 29, x: 4, y: 4, tileId: 31, rotation: 0 }, // Gray Ramp Right
+      { id: 30, x: 5, y: 4, tileId: 32, rotation: 0 }, // Gray Staircase
       
       // Row 6 - Gray tiles
-      { id: 31, x: 0, y: 5, tileId: 20, rotation: 0 },
-      { id: 32, x: 1, y: 5, tileId: 21, rotation: 0 },
-      { id: 33, x: 2, y: 5, tileId: 22, rotation: 0 },
-      { id: 34, x: 3, y: 5, tileId: 23, rotation: 0 },
-      { id: 35, x: 4, y: 5, tileId: 24, rotation: 0 },
-      { id: 36, x: 5, y: 5, tileId: 25, rotation: 0 },
+      { id: 31, x: 0, y: 5, tileId: 33, rotation: 0 }, // Gray Flat 1
+      { id: 32, x: 1, y: 5, tileId: 34, rotation: 0 }, // Gray Flat 2
+      { id: 33, x: 2, y: 5, tileId: 35, rotation: 0 }, // Gray Flat 3
+      { id: 34, x: 3, y: 5, tileId: 36, rotation: 0 }, // Gray Corner Left
+      { id: 35, x: 4, y: 5, tileId: 37, rotation: 0 }, // Gray Corner Right
+      { id: 36, x: 5, y: 5, tileId: 38, rotation: 0 }, // Gray Cube 4
     ];
     
     setTiles(initialTiles);
   }, []);
 
-  // Draw isometric grid and tiles
+  // Draw isometric grid and tiles (static content)
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -134,7 +353,7 @@ const Sanctuary: React.FC<SanctuaryProps> = ({
     tileSheet.onload = () => {
       setIsLoaded(true);
       
-      // Use requestAnimationFrame for smooth rendering
+      // Render static content (grid and tiles)
       const render = () => {
         // Clear canvas
         ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
@@ -152,7 +371,7 @@ const Sanctuary: React.FC<SanctuaryProps> = ({
           drawTile(ctx, tileSheet, tile, rect.width);
         });
         
-        // Draw hover highlight
+        // Draw hover highlight on main canvas for now
         if (hoverCell) {
           drawHoverHighlight(ctx, hoverCell, rect.width);
         }
@@ -164,7 +383,47 @@ const Sanctuary: React.FC<SanctuaryProps> = ({
     };
     
     tileSheet.src = TILE_SHEET_CONFIG.imagePath;
-  }, [tiles, hoverCell, isLoaded, camera, zoom]);
+  }, [tiles, hoverCell, isLoaded, camera, zoom]); // Added hoverCell back temporarily
+
+  // Draw hover highlight on separate canvas layer (temporarily disabled)
+  // useEffect(() => {
+  //   const hoverCanvas = hoverCanvasRef.current;
+  //   const mainCanvas = canvasRef.current;
+  //   if (!hoverCanvas || !mainCanvas || !isLoaded) return;
+
+  //   const ctx = hoverCanvas.getContext('2d');
+  //   if (!ctx) return;
+
+  //   // Get device pixel ratio for crisp rendering
+  //   const dpr = window.devicePixelRatio || 1;
+  //   const mainRect = mainCanvas.getBoundingClientRect();
+    
+  //   // Set canvas size accounting for device pixel ratio - use main canvas dimensions
+  //   hoverCanvas.width = mainRect.width * dpr;
+  //   hoverCanvas.height = 300 * dpr;
+    
+  //   // Scale context to account for device pixel ratio
+  //   ctx.scale(dpr, dpr);
+    
+  //   // Set canvas CSS size - match main canvas exactly
+  //   hoverCanvas.style.width = mainRect.width + 'px';
+  //   hoverCanvas.style.height = 300 + 'px';
+
+  //   // Clear hover canvas
+  //   ctx.clearRect(0, 0, hoverCanvas.width / dpr, hoverCanvas.height / dpr);
+    
+  //   // Draw hover highlight if exists
+  //   if (hoverCell) {
+  //     // Apply camera transform - same as main canvas
+  //     ctx.save();
+  //     ctx.translate(camera.x, camera.y);
+  //     ctx.scale(zoom, zoom);
+      
+  //     drawHoverHighlight(ctx, hoverCell, mainRect.width);
+      
+  //     ctx.restore();
+  //   }
+  // }, [hoverCell, isLoaded, camera, zoom]);
 
   const drawIsometricGrid = (ctx: CanvasRenderingContext2D, width: number) => {
     // Proper isometric tilemap grid system
@@ -180,34 +439,35 @@ const Sanctuary: React.FC<SanctuaryProps> = ({
     const cellWidth = tileWidth; // Full width for diamond points
     const cellHeight = tileHeight; // Full height for diamond points
     
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-    ctx.lineWidth = 1;
-    
-    // Center point - match tile positioning
-    const centerX = width / 2;
-    const centerY = 56; // Offset down to align with tile bases
-    
-    // Draw grid cells that match tile base footprints
-    // Each cell is a diamond shape that represents where a tile's base would be
-    // Use smaller range to reduce flickering and bring cells closer together
-    for (let x = -4; x <= 4; x++) {
-      for (let y = -4; y <= 4; y++) {
-        // Use half the tile width for spacing to match tile positioning
-        const isoX = (x - y) * (tileWidth / 2) + centerX;
-        const isoY = (x + y) * (tileHeight / 2) + centerY;
-        
-        // Draw diamond shape for this grid cell
-        // The diamond represents the tile's base footprint
-        // Use full diamond size to eliminate gaps between cells
-        ctx.beginPath();
-        ctx.moveTo(isoX, isoY - cellHeight / 2); // top
-        ctx.lineTo(isoX + cellWidth / 2, isoY); // right
-        ctx.lineTo(isoX, isoY + cellHeight / 2); // bottom
-        ctx.lineTo(isoX - cellWidth / 2, isoY); // left
-        ctx.closePath();
-        ctx.stroke();
-      }
-    }
+    // Grid is now invisible - removed grid drawing code
+    // ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+    // ctx.lineWidth = 1;
+    // 
+    // // Center point - match tile positioning
+    // const centerX = width / 2;
+    // const centerY = 56; // Offset down to align with tile bases
+    // 
+    // // Draw grid cells that match tile base footprints
+    // // Each cell is a diamond shape that represents where a tile's base would be
+    // // Use smaller range to reduce flickering and bring cells closer together
+    // for (let x = -4; x <= 4; x++) {
+    //   for (let y = -4; y <= 4; y++) {
+    //     // Use half the tile width for spacing to match tile positioning
+    //     const isoX = (x - y) * (tileWidth / 2) + centerX;
+    //     const isoY = (x + y) * (tileHeight / 2) + centerY;
+    //     
+    //     // Draw diamond shape for this grid cell
+    //     // The diamond represents the tile's base footprint
+    //     // Use full diamond size to eliminate gaps between cells
+    //     ctx.beginPath();
+    //     ctx.moveTo(isoX, isoY - cellHeight / 2); // top
+    //     ctx.lineTo(isoX + cellWidth / 2, isoY); // right
+    //     ctx.lineTo(isoX, isoY + cellHeight / 2); // bottom
+    //     ctx.lineTo(isoX - cellWidth / 2, isoY); // left
+    //     ctx.closePath();
+    //     ctx.stroke();
+    //   }
+    // }
   };
 
   const drawTile = (ctx: CanvasRenderingContext2D, tileSheet: HTMLImageElement, tile: IsometricTile, canvasWidth: number) => {
@@ -257,39 +517,21 @@ const Sanctuary: React.FC<SanctuaryProps> = ({
     const isoX = (cell.x - cell.y) * (tileWidth / 2) + canvasWidth / 2;
     const isoY = (cell.x + cell.y) * (tileHeight / 2) + 56; // Updated to match grid position
     
-    // Draw hover highlight with much better visibility
+    // Draw simple cell border highlight
     ctx.save();
     
-    // Draw filled background for better visibility
-    ctx.fillStyle = 'rgba(0, 255, 0, 0.3)'; // Bright green with transparency
-    ctx.strokeStyle = 'rgba(0, 255, 0, 0.9)'; // Bright green border
-    ctx.lineWidth = 3; // Thicker line for better visibility
+    // Simple border styling
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)'; // White border
+    ctx.lineWidth = 2; // Simple line width
     
     // Draw isometric diamond shape for hover cell
     // This should match the grid cell shape exactly
-    const points = [
-      { x: isoX, y: isoY - tileHeight / 2 }, // top
-      { x: isoX + tileWidth / 2, y: isoY }, // right
-      { x: isoX, y: isoY + tileHeight / 2 }, // bottom
-      { x: isoX - tileWidth / 2, y: isoY }, // left
-    ];
-    
-    // Fill the diamond
     ctx.beginPath();
-    ctx.moveTo(points[0].x, points[0].y);
-    points.forEach(point => {
-      ctx.lineTo(point.x, point.y);
-    });
+    ctx.moveTo(isoX, isoY - tileHeight / 2); // top
+    ctx.lineTo(isoX + tileWidth / 2, isoY); // right
+    ctx.lineTo(isoX, isoY + tileHeight / 2); // bottom
+    ctx.lineTo(isoX - tileWidth / 2, isoY); // left
     ctx.closePath();
-    ctx.fill();
-    
-    // Stroke the border
-    ctx.stroke();
-    
-    // Add a pulsing effect with dashed line overlay
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
-    ctx.lineWidth = 2;
-    ctx.setLineDash([8, 4]);
     ctx.stroke();
     
     ctx.restore();
@@ -301,6 +543,36 @@ const Sanctuary: React.FC<SanctuaryProps> = ({
     );
     const randomTile = availableTiles[Math.floor(Math.random() * availableTiles.length)];
     return randomTile.id;
+  };
+
+  // Block selection handlers
+  const handleBlockTypeSelect = (type: IsometricTileData['type']) => {
+    setSelectedBlockType(type);
+    setSelectedPalette(null);
+    setSelectedTileId(null);
+  };
+
+  const handlePaletteSelect = (palette: IsometricTileData['palette']) => {
+    setSelectedPalette(palette);
+    // Auto-select first tile of this palette and type
+    const group = blockGroups.find(g => g.type === selectedBlockType);
+    if (group) {
+      const colorGroup = group.colors.find(c => c.palette === palette);
+      if (colorGroup && colorGroup.tiles.length > 0) {
+        setSelectedTileId(colorGroup.tiles[0].id);
+      }
+    }
+  };
+
+  const handleTileSelect = (tileId: number) => {
+    setSelectedTileId(tileId);
+  };
+
+  const getSelectedTileId = (): number => {
+    if (selectedTileId) return selectedTileId;
+    
+    // Fallback to random tile if nothing selected
+    return getRandomTileId();
   };
 
   // Zoom handlers
@@ -343,30 +615,42 @@ const Sanctuary: React.FC<SanctuaryProps> = ({
       return; // Don't update hover when dragging
     }
     
-    // Update hover cell for tile placement
-    const x = (event.clientX - rect.left - camera.x) / zoom;
-    const y = (event.clientY - rect.top - camera.y) / zoom;
-    
-    // Convert screen coordinates to isometric grid coordinates
-    const tileWidth = 32;
-    const tileHeight = 16;
-    
-    const centerX = rect.width / 2;
-    const centerY = 56; // Updated to match grid position
-    
-    const isoX = (x - centerX) / (tileWidth / 2);
-    const isoY = (y - centerY) / (tileHeight / 2);
-    
-    const gridX = Math.round((isoX + isoY) / 2);
-    const gridY = Math.round((isoY - isoX) / 2);
-    
-    const existingTile = tiles.find(tile => tile.x === gridX && tile.y === gridY);
-    if (existingTile) {
-      setHoverCell(null);
-      return;
+    // Throttle hover updates to reduce redraws
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
     }
     
-    setHoverCell({ x: gridX, y: gridY });
+    hoverTimeoutRef.current = setTimeout(() => {
+      // Update hover cell for tile placement
+      const x = (event.clientX - rect.left - camera.x) / zoom;
+      const y = (event.clientY - rect.top - camera.y) / zoom;
+      
+      // Convert screen coordinates to isometric grid coordinates
+      const tileWidth = 32;
+      const tileHeight = 16;
+      
+      const centerX = rect.width / 2;
+      const centerY = 56; // Updated to match grid position
+      
+      const isoX = (x - centerX) / (tileWidth / 2);
+      const isoY = (y - centerY) / (tileHeight / 2);
+      
+      const gridX = Math.round((isoX + isoY) / 2);
+      const gridY = Math.round((isoY - isoX) / 2);
+      
+      // Debug: log coordinates to see what's happening
+      console.log('Mouse coords:', { x: event.clientX, y: event.clientY });
+      console.log('Canvas rect:', { left: rect.left, top: rect.top, width: rect.width });
+      console.log('Calculated grid:', { gridX, gridY });
+      
+      const existingTile = tiles.find(tile => tile.x === gridX && tile.y === gridY);
+      if (existingTile) {
+        setHoverCell(null);
+        return;
+      }
+      
+      setHoverCell({ x: gridX, y: gridY });
+    }, 16); // ~60fps throttling
   };
 
   const handleMouseUp = () => {
@@ -376,6 +660,10 @@ const Sanctuary: React.FC<SanctuaryProps> = ({
   const handleMouseLeave = () => {
     setDragState(prev => ({ ...prev, isDragging: false }));
     setHoverCell(null);
+    // Clear any pending hover updates
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+    }
   };
 
   // Touch event handlers
@@ -441,12 +729,12 @@ const Sanctuary: React.FC<SanctuaryProps> = ({
     const existingTile = tiles.find(tile => tile.x === gridX && tile.y === gridY);
     if (existingTile) return; // Don't place on existing tile
     
-    // Place random tile
+    // Place selected tile or random tile if none selected
     const newTile: IsometricTile = {
       id: nextTileId,
       x: gridX,
       y: gridY,
-      tileId: getRandomTileId(),
+      tileId: getSelectedTileId(),
       rotation: 0
     };
     
@@ -459,7 +747,81 @@ const Sanctuary: React.FC<SanctuaryProps> = ({
       <div className={styles.sanctuaryHeader}>
         <span className={styles.sanctuaryIcon}>🏛️</span>
         <h3 className={styles.sanctuaryTitle}>Sanctuary</h3>
+        <button 
+          className={styles.blockMenuToggle}
+          onClick={() => setIsBlockMenuOpen(!isBlockMenuOpen)}
+        >
+          {isBlockMenuOpen ? '✕' : '🧱'}
+        </button>
       </div>
+      
+      {/* Block Selector Menu */}
+      {isBlockMenuOpen && (
+        <div className={styles.blockSelector}>
+          <div className={styles.blockGroups}>
+            {blockGroups.map((group) => (
+              <div key={group.type} className={styles.blockGroup}>
+                <button
+                  className={`${styles.blockTypeButton} ${selectedBlockType === group.type ? styles.active : ''}`}
+                  onClick={() => handleBlockTypeSelect(group.type)}
+                >
+                  <span className={styles.blockIcon}>{group.icon}</span>
+                  <span className={styles.blockName}>{group.name}</span>
+                </button>
+                
+                {selectedBlockType === group.type && (
+                  <div className={styles.colorPalettes}>
+                    {group.colors.map((colorGroup) => (
+                      <div key={colorGroup.palette} className={styles.colorPalette}>
+                        <button
+                          className={`${styles.paletteButton} ${selectedPalette === colorGroup.palette ? styles.active : ''}`}
+                          onClick={() => handlePaletteSelect(colorGroup.palette)}
+                          style={{
+                            backgroundColor: colorGroup.palette === 'green' ? '#4CAF50' :
+                                           colorGroup.palette === 'blue' ? '#2196F3' :
+                                           colorGroup.palette === 'gray' ? '#9E9E9E' :
+                                           colorGroup.palette === 'orange' ? '#FF9800' : '#ccc'
+                          }}
+                        >
+                          {colorGroup.palette}
+                        </button>
+                        
+                        {selectedPalette === colorGroup.palette && (
+                          <div className={styles.tileGrid}>
+                            {colorGroup.tiles.map((tile) => (
+                              <button
+                                key={tile.id}
+                                className={`${styles.tileButton} ${selectedTileId === tile.id ? styles.active : ''}`}
+                                onClick={() => handleTileSelect(tile.id)}
+                                title={tile.name}
+                              >
+                                <TilePreview tile={tile} />
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+          
+          {/* Selected tile info */}
+          {selectedTileId && (
+            <div className={styles.selectedTileInfo}>
+              <div className={styles.selectedTilePreview}>
+                <TilePreview 
+                  tile={ISOMETRIC_TILES.find(t => t.id === selectedTileId)!} 
+                  size={24}
+                />
+                <span>{ISOMETRIC_TILES.find(t => t.id === selectedTileId)?.name}</span>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
       
       <div className={styles.zoomControls}>
         <button 
@@ -488,26 +850,41 @@ const Sanctuary: React.FC<SanctuaryProps> = ({
         </button>
       </div>
       
-      <canvas
-        ref={canvasRef}
-        className={styles.isometricCanvas}
-        onClick={handleCanvasClick}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseLeave}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        style={{ 
-          cursor: dragState.isDragging 
-            ? 'grabbing' 
-            : hoverCell 
-              ? 'pointer' 
-              : 'grab',
-          touchAction: 'none' // Prevent default touch behaviors
-        }}
-      />
+      <div className={styles.canvasContainer}>
+        <canvas
+          ref={canvasRef}
+          className={styles.isometricCanvas}
+          onClick={handleCanvasClick}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseLeave}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          style={{ 
+            cursor: dragState.isDragging 
+              ? 'grabbing' 
+              : hoverCell 
+                ? 'pointer' 
+                : 'grab',
+            touchAction: 'none' // Prevent default touch behaviors
+          }}
+        />
+        {/* Temporarily disabled hover canvas for debugging
+        <canvas
+          ref={hoverCanvasRef}
+          className={styles.hoverCanvas}
+          style={{ 
+            pointerEvents: 'none',
+            touchAction: 'none',
+            position: 'absolute',
+            top: 0,
+            left: 0
+          }}
+        />
+        */}
+      </div>
       {!isLoaded && (
         <div className={styles.loadingOverlay}>
           Loading Sanctuary...

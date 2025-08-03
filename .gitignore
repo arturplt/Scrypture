@@ -149,3 +149,4 @@ app/
 twa-manifest.json
 android-project/
 capacitor.config.ts
+Docs/isometric-tilemap-reference.md

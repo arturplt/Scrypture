@@ -21,6 +21,10 @@
   text-align: center;
   z-index: 10;
   pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
 }
 
 .sanctuaryTitle {
@@ -38,10 +42,226 @@
   margin-right: var(--spacing-xs);
 }
 
+.blockMenuToggle {
+  position: absolute;
+  right: var(--spacing-xs);
+  font-family: 'Press Start 2P', monospace;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-primary);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: 0px;
+  padding: var(--spacing-xs);
+  cursor: pointer;
+  text-transform: uppercase;
+  min-width: 40px;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-button);
+  pointer-events: auto;
+}
+
+.blockMenuToggle:hover {
+  background: var(--color-accent-gold);
+  color: var(--color-bg-primary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-button-hover);
+}
+
+.blockSelector {
+  position: absolute;
+  top: 50px;
+  right: var(--spacing-xs);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: 0px;
+  padding: var(--spacing-sm);
+  z-index: 30;
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: var(--shadow-button);
+  width: auto;
+  min-width: 200px;
+  max-width: 300px;
+}
+
+.blockGroups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.blockGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.blockTypeButton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-family: 'Press Start 2P', monospace;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-primary);
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: 0px;
+  padding: var(--spacing-xs);
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-button);
+}
+
+.blockTypeButton:hover {
+  background: var(--color-accent-gold);
+  color: var(--color-bg-primary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-button-hover);
+}
+
+.blockTypeButton.active {
+  background: var(--color-accent-gold);
+  color: var(--color-bg-primary);
+  border-color: var(--color-accent-gold);
+}
+
+.blockIcon {
+  font-size: var(--font-size-sm);
+}
+
+.blockName {
+  font-size: var(--font-size-xs);
+}
+
+.colorPalettes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  margin-left: var(--spacing-sm);
+}
+
+.colorPalette {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.paletteButton {
+  font-family: 'Press Start 2P', monospace;
+  font-size: var(--font-size-xs);
+  color: white;
+  border: 1px solid var(--color-border-primary);
+  border-radius: 0px;
+  padding: var(--spacing-xs);
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-button);
+  min-width: 60px;
+}
+
+.paletteButton:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-button-hover);
+}
+
+.paletteButton.active {
+  border-color: var(--color-accent-gold);
+  box-shadow: 0 0 0 2px var(--color-accent-gold);
+}
+
+.tileGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
+  gap: var(--spacing-xs);
+  margin-left: var(--spacing-sm);
+}
+
+.tileButton {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  color: var(--color-text-primary);
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: 0px;
+  padding: var(--spacing-xs);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-button);
+  min-width: 40px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tileButton:hover {
+  background: var(--color-accent-gold);
+  color: var(--color-bg-primary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-button-hover);
+}
+
+.tileButton.active {
+  background: var(--color-accent-gold);
+  color: var(--color-bg-primary);
+  border-color: var(--color-accent-gold);
+}
+
+.tilePreview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 6px;
+  text-align: center;
+  line-height: 1;
+}
+
+.tilePreviewSprite {
+  width: 32px;
+  height: 32px;
+  background-repeat: no-repeat;
+  background-size: contain;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  border: 1px solid var(--color-border-primary);
+  background-color: transparent;
+}
+
+.selectedTileInfo {
+  margin-top: var(--spacing-sm);
+  padding: var(--spacing-xs);
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: 0px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-primary);
+  text-align: center;
+}
+
+.selectedTilePreview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  flex-direction: column;
+}
+
+.selectedTilePreview span {
+  font-size: 8px;
+  line-height: 1.2;
+  text-align: center;
+}
+
 .zoomControls {
   position: absolute;
   top: var(--spacing-xs);
-  right: var(--spacing-xs);
+  right: 50px; /* Moved left to make room for block menu toggle */
   display: flex;
   gap: var(--spacing-xs);
   z-index: 20;
@@ -105,6 +325,19 @@
   bottom: 0;
   width: 100%;
   height: 100%;
+}
+
+.hoverCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
 }
 
 .isometricCanvas {
@@ -183,7 +416,7 @@
   
   .zoomControls {
     top: var(--spacing-xs);
-    right: var(--spacing-xs);
+    right: 50px;
     gap: 2px;
   }
   
@@ -196,5 +429,39 @@
   
   .resetButton {
     min-width: 40px;
+  }
+  
+  .blockSelector {
+    max-height: 150px;
+    padding: var(--spacing-xs);
+    min-width: 150px;
+    max-width: 250px;
+  }
+  
+  .blockTypeButton {
+    font-size: 10px;
+    padding: 4px 6px;
+  }
+  
+  .paletteButton {
+    font-size: 10px;
+    padding: 4px 6px;
+    min-width: 50px;
+  }
+  
+  .tileButton {
+    font-size: 6px;
+    padding: 2px;
+    min-width: 30px;
+    min-height: 30px;
+  }
+  
+  .tilePreview {
+    font-size: 4px;
+  }
+  
+  .selectedTileInfo {
+    font-size: 10px;
+    padding: 4px 6px;
   }
 } 
