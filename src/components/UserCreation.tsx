@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useUser } from '../hooks/useUser';
 import { AutoSaveIndicator } from './AutoSaveIndicator';
 import styles from './UserCreation.module.css';
@@ -14,6 +14,27 @@ export const UserCreation: React.FC<UserCreationProps> = ({
   const [name, setName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Aggressively disable autofill
+  useEffect(() => {
+    if (inputRef.current) {
+      // Set autocomplete to a non-standard value
+      inputRef.current.setAttribute('autocomplete', 'new-password');
+      inputRef.current.setAttribute('data-lpignore', 'true');
+      inputRef.current.setAttribute('data-1p-ignore', 'true');
+      
+      // Disable autofill via JavaScript
+      inputRef.current.addEventListener('focus', () => {
+        inputRef.current?.setAttribute('autocomplete', 'new-password');
+      });
+      
+      // Prevent autofill on input
+      inputRef.current.addEventListener('input', () => {
+        inputRef.current?.setAttribute('autocomplete', 'new-password');
+      });
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,11 +91,20 @@ export const UserCreation: React.FC<UserCreationProps> = ({
         </p>
 
         <form className={styles.form} onSubmit={handleSubmit}>
+          {/* Hidden fake input to trick browser autofill */}
+          <input
+            type="text"
+            style={{ position: 'absolute', left: '-9999px', opacity: 0 }}
+            autoComplete="username"
+            tabIndex={-1}
+          />
+          
           <div className={styles.inputGroup}>
             <label htmlFor="characterName" className={styles.label}>
               Character Name
             </label>
             <input
+              ref={inputRef}
               id="characterName"
               type="text"
               value={name}
@@ -84,11 +114,13 @@ export const UserCreation: React.FC<UserCreationProps> = ({
               maxLength={20}
               disabled={isSubmitting}
               autoFocus
-              autoComplete="off"
+              autoComplete="new-password"
               autoCorrect="off"
               autoCapitalize="words"
               spellCheck="false"
               data-form-type="other"
+              data-lpignore="true"
+              data-1p-ignore="true"
             />
             {error && <p className={styles.error}>{error}</p>}
           </div>

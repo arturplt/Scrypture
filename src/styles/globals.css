@@ -388,4 +388,32 @@ select:focus,
   }
 }
 
+/* Prevent autofill suggestions globally */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px var(--color-bg-primary) inset !important;
+  -webkit-text-fill-color: var(--color-text-primary) !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Hide autocomplete dropdowns */
+input::-webkit-calendar-picker-indicator {
+  display: none !important;
+}
+
+/* Prevent browser autofill styling */
+input:autofill {
+  background-color: var(--color-bg-primary) !important;
+  color: var(--color-text-primary) !important;
+}
+
+/* Disable autofill for all text inputs */
+input[type="text"] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
 
