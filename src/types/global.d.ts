@@ -1,5 +1,13 @@
 // Global type declarations for Scrypture application
 declare global {
+  interface ImportMeta {
+    env: {
+      MODE: string;
+      DEV: boolean;
+      PROD: boolean;
+      BASE_URL: string;
+    };
+  }
   interface Window {
     ScryptureTypes: {
       Task: {

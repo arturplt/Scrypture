@@ -62,6 +62,8 @@
 8. **05-database-schema.md** - Database design (copied)
 9. **06-development-guide.md** - Implementation guide (copied)
 10. **12-achievement-system.md** - Achievement system documentation (new, comprehensive)
+11. **data-clearing-guide.md** - Enhanced data clearing with cache management (new, comprehensive)
+12. **cache-management-technical.md** - Technical implementation guide for cache management (new, comprehensive)
 
 ### **Implementation Tracking (1 file)**
 10. **07-mvp-checklist.md** - Implementation tracking (new, streamlined)

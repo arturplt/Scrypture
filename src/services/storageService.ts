@@ -328,10 +328,11 @@ export class StorageService {
   }
 
   // Clear all data
-  clearAllData(): boolean {
+  async clearAllData(): Promise<boolean> {
     const keys = Object.values(STORAGE_KEYS);
     let success = true;
 
+    // Clear localStorage items
     keys.forEach((key) => {
       if (!this.removeItem(key)) {
         success = false;
@@ -350,9 +351,57 @@ export class StorageService {
       }
     });
 
+    // Clear sessionStorage
+    try {
+      sessionStorage.clear();
+      console.log('✅ sessionStorage cleared');
+    } catch (error) {
+      console.warn('⚠️ Failed to clear sessionStorage:', error);
+      success = false;
+    }
+
+    // Clear service worker caches
+    try {
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        console.log(`🗑️ Clearing ${cacheNames.length} cache(s): ${cacheNames.join(', ')}`);
+        
+        await Promise.all(
+          cacheNames.map(async (cacheName) => {
+            const deleted = await caches.delete(cacheName);
+            console.log(`✅ Cache ${cacheName}: ${deleted ? 'deleted' : 'not found'}`);
+            return deleted;
+          })
+        );
+      }
+    } catch (error) {
+      console.warn('⚠️ Failed to clear caches:', error);
+      success = false;
+    }
+
+    // Unregister service workers
+    try {
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        console.log(`🔧 Unregistering ${registrations.length} service worker(s)`);
+        
+        await Promise.all(
+          registrations.map(async (registration) => {
+            const unregistered = await registration.unregister();
+            console.log(`✅ Service worker ${registration.scope}: ${unregistered ? 'unregistered' : 'failed'}`);
+            return unregistered;
+          })
+        );
+      }
+    } catch (error) {
+      console.warn('⚠️ Failed to unregister service workers:', error);
+      success = false;
+    }
+
     // Dispatch custom event to notify components that data has been cleared
     if (success) {
       window.dispatchEvent(new CustomEvent('scrypture-data-cleared'));
+      console.log('✅ All data cleared successfully');
     }
 
     return success;

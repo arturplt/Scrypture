@@ -136,3 +136,16 @@ test-*.html
 test-*.js
 debug-*.html
 debug-*.js
+
+# Bubblewrap and Android files
+android/
+android.keystore
+*.keystore
+*.jks
+*.apk
+*.aab
+bubblewrap.json
+app/
+twa-manifest.json
+android-project/
+capacitor.config.ts

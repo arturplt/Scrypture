@@ -388,7 +388,7 @@ export const userService = {
     return storageService.restoreFromBackup(backup);
   },
 
-  clearAllData(): boolean {
+  clearAllData(): Promise<boolean> {
     return storageService.clearAllData();
   },
 

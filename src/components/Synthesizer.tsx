@@ -1518,7 +1518,7 @@ export const Synthesizer: React.FC<SynthesizerProps> = ({ isOpen, onClose }) => 
                 {/* Compact Preset Grid */}
                 <div className={styles.presetGrid}>
                   {Object.entries(INSTRUMENT_PRESETS)
-                    .filter(([presetKey, preset]) => {
+                    .filter(([presetKey]) => {
                       if (selectedCategory === 'All') return true;
                       
                       // Determine category based on preset key

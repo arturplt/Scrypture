@@ -7,7 +7,7 @@ import { initializeGlobalData, logGlobalDataState } from './utils/htmlDataBridge
 // Add build timestamp for cache busting
 console.log('🚀 Scrypture App Starting...');
 console.log('📅 Build timestamp:', new Date().toISOString());
-console.log('🔧 Environment:', import.meta.env.MODE);
+console.log('🔧 Environment:', import.meta.env?.MODE || 'unknown');
 
 // Initialize global data from HTML
 initializeGlobalData();

@@ -122,18 +122,30 @@ export const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
     setShowClearConfirm(true);
   };
 
-  const handleConfirmClearData = () => {
+  const handleConfirmClearData = async () => {
     setIsSaving(true);
     try {
-      userService.clearAllData();
-      tutorialService.resetTutorial();
-      showMessage('Data cleared! Refreshing...', 'success');
-      onDataChange?.();
-      // Refresh the page after clearing data
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
+      console.log('🧹 Starting complete data clear...');
+      
+      // Clear all data including caches
+      const success = await userService.clearAllData();
+      
+      if (success) {
+        // Reset tutorial state
+        tutorialService.resetTutorial();
+        
+        showMessage('All data and cache cleared! Refreshing...', 'success');
+        onDataChange?.();
+        
+        // Refresh the page after clearing data
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000); // Give more time for cache clearing to complete
+      } else {
+        showMessage('Clear failed - some data may remain', 'error');
+      }
     } catch (error) {
+      console.error('Error clearing data:', error);
       showMessage('Clear failed', 'error');
     } finally {
       setIsSaving(false);
@@ -225,7 +237,7 @@ export const DataManager: React.FC<DataManagerProps> = ({ onDataChange }) => {
             ) : (
               <div className={styles.confirmationContainer}>
                 <p className={styles.confirmationMessage}>
-                  Are you sure you want to clear all data? This action cannot be undone and will permanently delete all your tasks, habits, user data, and custom categories.
+                  Are you sure you want to clear all data? This action cannot be undone and will permanently delete all your tasks, habits, user data, custom categories, and cached files. The app will refresh to ensure a completely fresh start.
                 </p>
                 <div className={styles.confirmationActions}>
                   <button
