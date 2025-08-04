@@ -61,6 +61,7 @@ const TilePreview: React.FC<TilePreviewProps> = ({ tile, size = 32, className = 
     backgroundImage: `url(${TILE_SHEET_CONFIG.imagePath})`,
     backgroundPosition: `-${tile.sourceX}px -${tile.sourceY}px`,
     backgroundSize: `${TILE_SHEET_CONFIG.sheetWidth}px ${TILE_SHEET_CONFIG.sheetHeight}px`,
+    backgroundRepeat: 'no-repeat',
     imageRendering: 'pixelated' as const,
     display: 'inline-block',
     border: '1px solid var(--color-border-primary)',
