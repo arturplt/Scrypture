@@ -80,15 +80,13 @@ export const ISOMETRIC_TILES: IsometricTileData[] = [
   { id: 49, name: 'Orange Flat 2', type: 'flat', palette: 'orange', sourceX: 96, sourceY: 224, width: 32, height: 32, isometric: true },
   { id: 50, name: 'Orange Corner Left', type: 'corner', palette: 'orange', sourceX: 128, sourceY: 224, width: 32, height: 32, isometric: true },
   { id: 51, name: 'Orange Corner Right', type: 'corner', palette: 'orange', sourceX: 160, sourceY: 224, width: 32, height: 32, isometric: true },
-  { id: 52, name: 'Orange Cube 4', type: 'cube', palette: 'orange', sourceX: 192, sourceY: 224, width: 32, height: 32, isometric: true },
-  { id: 53, name: 'Orange Cube 5', type: 'cube', palette: 'orange', sourceX: 224, sourceY: 224, width: 32, height: 32, isometric: true },
 ];
 
 export const TILE_SHEET_CONFIG = {
   imagePath: '/assets/Tile Maps/isometric-sandbox-sheet.png',
   tileWidth: 32,
   tileHeight: 32,
-  sheetWidth: 256, // 8 columns * 32px = 256px (to accommodate the last tile at x=224)
+  sheetWidth: 192, // 6 columns * 32px = 192px (actual sheet width)
   sheetHeight: 256, // 8 rows * 32px = 256px
   isometric: true,
 };

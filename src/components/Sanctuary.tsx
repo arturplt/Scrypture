@@ -65,7 +65,9 @@ const TilePreview: React.FC<TilePreviewProps> = ({ tile, size = 32, className = 
     imageRendering: 'pixelated' as const,
     display: 'inline-block',
     border: '1px solid var(--color-border-primary)',
-    backgroundColor: 'transparent'
+    backgroundColor: 'transparent',
+    flexShrink: 0,
+    transform: 'translateZ(0)' // Force hardware acceleration for crisp pixels
   };
 
   // Debug logging
@@ -76,9 +78,25 @@ const TilePreview: React.FC<TilePreviewProps> = ({ tile, size = 32, className = 
       imagePath: TILE_SHEET_CONFIG.imagePath,
       sourceX: tile.sourceX,
       sourceY: tile.sourceY,
-      spriteStyle
+      sheetWidth: TILE_SHEET_CONFIG.sheetWidth,
+      sheetHeight: TILE_SHEET_CONFIG.sheetHeight
     });
   }, [tile]);
+
+  // Test if image loads
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => {
+      console.log('Tile sheet image loaded successfully:', TILE_SHEET_CONFIG.imagePath);
+      console.log('Image dimensions:', img.width, 'x', img.height);
+      setImageLoaded(true);
+    };
+    img.onerror = () => {
+      console.error('Failed to load tile sheet image:', TILE_SHEET_CONFIG.imagePath);
+      setImageError(true);
+    };
+    img.src = TILE_SHEET_CONFIG.imagePath;
+  }, []);
 
   if (imageError) {
     return (
@@ -107,8 +125,25 @@ const TilePreview: React.FC<TilePreviewProps> = ({ tile, size = 32, className = 
       className={`${styles.tilePreviewSprite} ${className}`}
       style={spriteStyle}
       title={tile.name}
-      onError={() => setImageError(true)}
-    />
+    >
+      {!imageLoaded && !imageError && (
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '8px',
+          color: 'var(--color-text-secondary)',
+          backgroundColor: 'rgba(0,0,0,0.1)'
+        }}>
+          {tile.id}
+        </div>
+      )}
+    </div>
   );
 };
 
@@ -756,7 +791,7 @@ const Sanctuary: React.FC<SanctuaryProps> = ({
                                 onClick={() => handleTileSelect(tile.id)}
                                 title={tile.name}
                               >
-                                <TilePreview tile={tile} />
+                                <TilePreview tile={tile} size={32} />
                               </button>
                             ))}
                           </div>
