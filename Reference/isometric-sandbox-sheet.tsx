@@ -86,7 +86,7 @@ export const TILE_SHEET_CONFIG = {
   imagePath: '/assets/Tile Maps/isometric-sandbox-sheet.png',
   tileWidth: 32,
   tileHeight: 32,
-  sheetWidth: 192, // 6 columns * 32px = 192px (actual sheet width)
+  sheetWidth: 224, // 7 columns * 32px = 224px (to accommodate tiles at x=192)
   sheetHeight: 256, // 8 rows * 32px = 256px
   isometric: true,
 };
