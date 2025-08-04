@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styles from './Sanctuary.module.css';
-import { ISOMETRIC_TILES, TILE_SHEET_CONFIG, IsometricTileData } from '../../Reference/isometric-sandbox-sheet';
+import { ISOMETRIC_TILES, TILE_SHEET_CONFIG, IsometricTileData } from '../data/isometric-tiles';
 
 interface SanctuaryProps {
   className?: string;
