@@ -1,893 +1,1842 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import styles from './Sanctuary.module.css';
 import { ISOMETRIC_TILES, TILE_SHEET_CONFIG, IsometricTileData } from '../data/isometric-tiles';
+
+// ============================================================================
+// PERFORMANCE-FIRST ARCHITECTURE
+// ============================================================================
 
 interface SanctuaryProps {
   className?: string;
 }
 
-interface IsometricTile {
-  id: number;
-  x: number;
-  y: number;
-  tileId: number; // References the tile data from the sheet
-  rotation: 0 | 90 | 180 | 270;
-}
-
-interface HoverCell {
-  x: number;
-  y: number;
-}
-
-interface CameraPosition {
-  x: number;
-  y: number;
-}
-
-interface DragState {
-  isDragging: boolean;
-  startX: number;
-  startY: number;
-  startCameraX: number;
-  startCameraY: number;
-}
-
-interface BlockGroup {
+// Core data structures optimized for performance
+interface Block {
+  id: string;
   type: IsometricTileData['type'];
-  name: string;
-  icon: string;
-  colors: {
-    palette: IsometricTileData['palette'];
-    tiles: IsometricTileData[];
-  }[];
+  palette: IsometricTileData['palette'];
+  position: { x: number; y: number; z: number };
+  rotation: 0 | 90 | 180 | 270;
+  properties: {
+    walkable: boolean;
+    climbable: boolean;
+    interactable: boolean;
+    destructible: boolean;
+  };
+  sprite: {
+    sourceX: number;
+    sourceY: number;
+    width: number;
+    height: number;
+    sheetPath: string;
+  };
 }
 
-// Tile Preview Component
+interface Camera {
+  position: { x: number; y: number; z: number };
+  zoom: number;
+  rotation: number;
+}
+
+interface ViewFrustum {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+  near: number;
+  far: number;
+}
+
+interface PerformanceMetrics {
+  fps: number;
+  renderTime: number;
+  blockCount: number;
+  visibleBlocks: number;
+  memoryUsage: number;
+  drawCalls: number;
+  timestamp: number;
+}
+
+interface Level {
+  id: string;
+  name: string;
+  description: string;
+  author: string;
+  createdAt: Date;
+  modifiedAt: Date;
+  blocks: Block[];
+  camera: Camera;
+  settings: {
+    gravity: boolean;
+    timeLimit?: number;
+  };
+}
+
+// ============================================================================
+// PERFORMANCE MONITORING SYSTEM
+// ============================================================================
+
+class PerformanceMonitor {
+  private metrics: PerformanceMetrics[] = [];
+  private maxSamples = 60; // 1 second at 60fps
+  private lastFrameTime = 0;
+
+  collectMetrics(): PerformanceMetrics {
+    const now = performance.now();
+    const deltaTime = now - this.lastFrameTime;
+    const fps = deltaTime > 0 ? 1000 / deltaTime : 60;
+    this.lastFrameTime = now;
+
+    const metrics: PerformanceMetrics = {
+      fps: Math.min(fps, 60),
+      renderTime: deltaTime,
+      blockCount: 0, // Will be set by renderer
+      visibleBlocks: 0, // Will be set by culling system
+      memoryUsage: this.getMemoryUsage(),
+      drawCalls: 0, // Will be set by renderer
+      timestamp: now
+    };
+
+    this.metrics.push(metrics);
+    if (this.metrics.length > this.maxSamples) {
+      this.metrics.shift();
+    }
+
+    return metrics;
+  }
+
+  private getMemoryUsage(): number {
+    if ('memory' in performance) {
+      const memory = (performance as any).memory;
+      return (memory.usedJSHeapSize / memory.jsHeapSizeLimit) * 100;
+    }
+    return 0;
+  }
+
+  getAverageFPS(): number {
+    if (this.metrics.length === 0) return 60;
+    return this.metrics.reduce((sum, m) => sum + m.fps, 0) / this.metrics.length;
+  }
+
+  getPerformanceGrade(): 'A' | 'B' | 'C' | 'D' | 'F' {
+    const avgFPS = this.getAverageFPS();
+    if (avgFPS >= 58) return 'A';
+    if (avgFPS >= 50) return 'B';
+    if (avgFPS >= 40) return 'C';
+    if (avgFPS >= 30) return 'D';
+    return 'F';
+  }
+
+  getRecentMetrics(): PerformanceMetrics[] {
+    return this.metrics.slice(-10);
+  }
+}
+
+// ============================================================================
+// SPATIAL INDEXING SYSTEM
+// ============================================================================
+
+class SpatialIndex {
+  private grid = new Map<string, Block[]>();
+  private cellSize = 32;
+
+  private getCellKey(x: number, y: number, z: number): string {
+    const cellX = Math.floor(x / this.cellSize);
+    const cellY = Math.floor(y / this.cellSize);
+    const cellZ = Math.floor(z / this.cellSize);
+    return `${cellX},${cellY},${cellZ}`;
+  }
+
+  addBlock(block: Block): void {
+    const key = this.getCellKey(block.position.x, block.position.y, block.position.z);
+    if (!this.grid.has(key)) {
+      this.grid.set(key, []);
+    }
+    this.grid.get(key)!.push(block);
+  }
+
+  removeBlock(block: Block): void {
+    const key = this.getCellKey(block.position.x, block.position.y, block.position.z);
+    const cell = this.grid.get(key);
+    if (cell) {
+      const index = cell.findIndex(b => b.id === block.id);
+      if (index !== -1) {
+        cell.splice(index, 1);
+        if (cell.length === 0) {
+          this.grid.delete(key);
+        }
+      }
+    }
+  }
+
+  getBlocksInArea(x: number, y: number, z: number, radius: number): Block[] {
+    const blocks: Block[] = [];
+    const centerCell = this.getCellKey(x, y, z);
+    const [centerX, centerY, centerZ] = centerCell.split(',').map(Number);
+    
+    // Check surrounding cells
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dz = -1; dz <= 1; dz++) {
+          const cellKey = `${centerX + dx},${centerY + dy},${centerZ + dz}`;
+          const cellBlocks = this.grid.get(cellKey) || [];
+          blocks.push(...cellBlocks);
+        }
+      }
+    }
+    
+    return blocks;
+  }
+
+  getBlockAt(x: number, y: number, z: number): Block | null {
+    const key = this.getCellKey(x, y, z);
+    const cell = this.grid.get(key);
+    if (cell && cell.length > 0) {
+      return cell.find(block => 
+        block.position.x === x && 
+        block.position.y === y && 
+        block.position.z === z
+      ) || null;
+    }
+    return null;
+  }
+
+  clear(): void {
+    this.grid.clear();
+  }
+  
+  getAllBlocks(): Block[] {
+    const allBlocks: Block[] = [];
+    this.grid.forEach(cellBlocks => {
+      allBlocks.push(...cellBlocks);
+    });
+    return allBlocks;
+  }
+}
+
+// ============================================================================
+// CULLING SYSTEM
+// ============================================================================
+
+class CullingSystem {
+  private spatialIndex: SpatialIndex;
+  private frustum: ViewFrustum;
+
+  constructor(spatialIndex: SpatialIndex) {
+    this.spatialIndex = spatialIndex;
+    this.frustum = {
+      left: -1000,
+      right: 1000,
+      top: -1000,
+      bottom: 1000,
+      near: 0,
+      far: 1000
+    };
+  }
+
+  updateFrustum(camera: Camera, canvasWidth: number, canvasHeight: number): void {
+    const halfWidth = canvasWidth / (2 * camera.zoom);
+    const halfHeight = canvasHeight / (2 * camera.zoom);
+    
+    this.frustum = {
+      left: camera.position.x - halfWidth,
+      right: camera.position.x + halfWidth,
+      top: camera.position.y - halfHeight,
+      bottom: camera.position.y + halfHeight,
+      near: 0,
+      far: 1000
+    };
+  }
+
+  getVisibleBlocks(camera: Camera, maxDistance: number = 200): Block[] {
+    // Temporarily bypass spatial index and return all blocks for debugging
+    const allBlocks = this.spatialIndex.getAllBlocks();
+    
+    // Temporarily disable culling to see all blocks
+    const filteredBlocks = allBlocks; // .filter(block => {
+    //   // Frustum culling
+    //   if (!this.isInFrustum(block)) return false;
+    //   
+    //   // Distance culling
+    //   const distance = this.getDistance(block, camera);
+    //   if (distance > maxDistance) return false;
+    //   
+    //   return true;
+    // });
+    
+    // Debug info removed for clean output
+    
+    return filteredBlocks;
+  }
+
+  private isInFrustum(block: Block): boolean {
+    const { x, y, z } = block.position;
+    
+    // Convert grid coordinates to world coordinates (before camera transform)
+    const tileWidth = 32;
+    const tileHeight = 16;
+    
+    // Isometric projection to world coordinates
+    const isoX = (x - y) * (tileWidth / 2);
+    const isoY = (x + y) * (tileHeight / 2) - z * tileHeight;
+    
+    // Check if the block's world position is within the frustum
+    // The frustum is already in world coordinates (accounting for camera)
+    return isoX >= this.frustum.left && isoX <= this.frustum.right &&
+           isoY >= this.frustum.bottom && isoY <= this.frustum.top &&
+           z >= this.frustum.near && z <= this.frustum.far;
+  }
+
+  private getDistance(block: Block, camera: Camera): number {
+    const { x, y, z } = block.position;
+    
+    // Convert grid coordinates to world coordinates for distance calculation
+    const tileWidth = 32;
+    const tileHeight = 16;
+    
+    // Isometric projection to world coordinates
+    const isoX = (x - y) * (tileWidth / 2);
+    const isoY = (x + y) * (tileHeight / 2) - z * tileHeight;
+    
+    // Calculate distance in world space
+    const dx = isoX - camera.position.x;
+    const dy = isoY - camera.position.y;
+    const dz = z - camera.position.z;
+    return Math.sqrt(dx * dx + dy * dy + dz * dz);
+  }
+}
+
+// ============================================================================
+// BATCH RENDERING SYSTEM
+// ============================================================================
+
+interface RenderBatch {
+  texture: string;
+  blocks: Block[];
+  vertices: number[];
+  indices: number[];
+  count: number;
+}
+
+class BatchRenderer {
+  private batches = new Map<string, RenderBatch>();
+
+  addToBatch(block: Block): void {
+    const textureKey = block.sprite.sheetPath;
+    
+    if (!this.batches.has(textureKey)) {
+      this.batches.set(textureKey, {
+        texture: textureKey,
+        blocks: [],
+        vertices: [],
+        indices: [],
+        count: 0
+      });
+    }
+    
+    const batch = this.batches.get(textureKey)!;
+    batch.blocks.push(block);
+    batch.count++;
+  }
+
+  getBatches(): RenderBatch[] {
+    return Array.from(this.batches.values());
+  }
+
+  clear(): void {
+    this.batches.clear();
+  }
+
+  getDrawCallCount(): number {
+    return this.batches.size;
+  }
+}
+
+// ============================================================================
+// MEMORY POOL SYSTEM
+// ============================================================================
+
+class ObjectPool<T> {
+  private pool: T[] = [];
+  private factory: () => T;
+  private reset: (obj: T) => void;
+
+  constructor(factory: () => T, reset: (obj: T) => void) {
+    this.factory = factory;
+    this.reset = reset;
+  }
+
+  get(): T {
+    return this.pool.pop() || this.factory();
+  }
+
+  release(obj: T): void {
+    this.reset(obj);
+    this.pool.push(obj);
+  }
+}
+
+// ============================================================================
+// LEVEL MANAGEMENT SYSTEM
+// ============================================================================
+
+class LevelManager {
+  private static STORAGE_KEY = 'sanctuary_levels';
+
+  static saveLevel(level: Level): void {
+    try {
+      const levels = this.getAllLevels();
+      const existingIndex = levels.findIndex(l => l.id === level.id);
+      
+      if (existingIndex >= 0) {
+        levels[existingIndex] = { ...level, modifiedAt: new Date() };
+      } else {
+        levels.push({ ...level, createdAt: new Date(), modifiedAt: new Date() });
+      }
+      
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(levels));
+    } catch (error) {
+      console.error('Failed to save level:', error);
+    }
+  }
+
+  static loadLevel(levelId: string): Level | null {
+    try {
+      const levels = this.getAllLevels();
+      return levels.find(l => l.id === levelId) || null;
+    } catch (error) {
+      console.error('Failed to load level:', error);
+      return null;
+    }
+  }
+
+  static getAllLevels(): Level[] {
+    try {
+      const stored = localStorage.getItem(this.STORAGE_KEY);
+      return stored ? JSON.parse(stored) : [];
+    } catch (error) {
+      console.error('Failed to get levels:', error);
+      return [];
+    }
+  }
+
+  static deleteLevel(levelId: string): boolean {
+    try {
+      const levels = this.getAllLevels();
+      const filtered = levels.filter(l => l.id !== levelId);
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(filtered));
+      return true;
+    } catch (error) {
+      console.error('Failed to delete level:', error);
+      return false;
+    }
+  }
+
+  static createNewLevel(name: string = 'New Level'): Level {
+    return {
+      id: `level_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      name,
+      description: 'A new sanctuary level',
+      author: 'Player',
+      createdAt: new Date(),
+      modifiedAt: new Date(),
+      blocks: [],
+      camera: { position: { x: 400, y: 200, z: 0 }, zoom: 1, rotation: 0 },
+      settings: { gravity: true }
+    };
+  }
+}
+
+// ============================================================================
+// TILE PREVIEW COMPONENT (OPTIMIZED)
+// ============================================================================
+
 interface TilePreviewProps {
   tile: IsometricTileData;
   size?: number;
   className?: string;
 }
 
-
-
-const TilePreview: React.FC<TilePreviewProps> = ({ tile, size = 32, className = '' }) => {
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [imageError, setImageError] = useState(false);
-
-  const spriteStyle = {
+const TilePreview: React.FC<TilePreviewProps> = React.memo(({ tile, size = 32, className = '' }) => {
+  const spriteStyle = useMemo(() => ({
     width: `${size}px`,
     height: `${size}px`,
-    backgroundImage: `url(${TILE_SHEET_CONFIG.imagePath})`,
+    backgroundImage: `url('${TILE_SHEET_CONFIG.imagePath}')`,
     backgroundPosition: `-${tile.sourceX}px -${tile.sourceY}px`,
     backgroundSize: `${TILE_SHEET_CONFIG.sheetWidth}px ${TILE_SHEET_CONFIG.sheetHeight}px`,
     backgroundRepeat: 'no-repeat',
     imageRendering: 'pixelated' as const,
-    display: 'inline-block',
-    border: '1px solid var(--color-border-primary)',
-    backgroundColor: 'transparent',
+    display: 'block',
     flexShrink: 0,
-    transform: 'translateZ(0)' // Force hardware acceleration for crisp pixels
-  };
-
-  // Debug logging
-  useEffect(() => {
-    console.log('TilePreview:', {
-      tileId: tile.id,
-      tileName: tile.name,
-      imagePath: TILE_SHEET_CONFIG.imagePath,
-      sourceX: tile.sourceX,
-      sourceY: tile.sourceY,
-      sheetWidth: TILE_SHEET_CONFIG.sheetWidth,
-      sheetHeight: TILE_SHEET_CONFIG.sheetHeight
-    });
-  }, [tile]);
-
-  // Test if image loads
-  useEffect(() => {
-    const img = new Image();
-    img.onload = () => {
-      console.log('Tile sheet image loaded successfully:', TILE_SHEET_CONFIG.imagePath);
-      console.log('Image dimensions:', img.width, 'x', img.height);
-      setImageLoaded(true);
-    };
-    img.onerror = () => {
-      console.error('Failed to load tile sheet image:', TILE_SHEET_CONFIG.imagePath);
-      setImageError(true);
-    };
-    img.src = TILE_SHEET_CONFIG.imagePath;
-  }, []);
-
-  if (imageError) {
-    return (
-      <div 
-        className={`${styles.tilePreviewSprite} ${className}`}
-        style={{
-          width: `${size}px`,
-          height: `${size}px`,
-          backgroundColor: 'var(--color-bg-primary)',
-          border: '1px solid var(--color-border-primary)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '8px',
-          color: 'var(--color-text-secondary)'
-        }}
-        title={`${tile.name} (Image failed to load)`}
-      >
-        {tile.id}
-      </div>
-    );
-  }
+    position: 'absolute' as const,
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%) translateZ(0)',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    borderRadius: '2px'
+  }), [tile.sourceX, tile.sourceY, size]);
 
   return (
     <div 
       className={`${styles.tilePreviewSprite} ${className}`}
       style={spriteStyle}
-      title={tile.name}
-    >
-      {!imageLoaded && !imageError && (
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '8px',
-          color: 'var(--color-text-secondary)',
-          backgroundColor: 'rgba(0,0,0,0.1)'
-        }}>
-          {tile.id}
-        </div>
-      )}
-    </div>
+      title={`${tile.name} (${tile.palette}) - ${tile.sourceX},${tile.sourceY}`}
+    />
   );
-};
+});
 
-const Sanctuary: React.FC<SanctuaryProps> = ({
-  className = ''
-}) => {
+TilePreview.displayName = 'TilePreview';
+
+// ============================================================================
+// MAIN SANCTUARY COMPONENT
+// ============================================================================
+
+const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className = '' }) => {
+  // Debug logging removed for performance
+
+  // ============================================================================
+  // PERFORMANCE SYSTEMS
+  // ============================================================================
+  
+  const performanceMonitor = useMemo(() => new PerformanceMonitor(), []);
+  const spatialIndex = useMemo(() => new SpatialIndex(), []);
+  const cullingSystem = useMemo(() => new CullingSystem(spatialIndex), [spatialIndex]);
+  const batchRenderer = useMemo(() => new BatchRenderer(), []);
+  
+  // Memory pools for frequently created objects
+  const blockPool = useMemo(() => new ObjectPool<Block>(
+    () => ({
+      id: '',
+      type: 'cube',
+      palette: 'green',
+      position: { x: 0, y: 0, z: 0 },
+      rotation: 0,
+      properties: { walkable: true, climbable: false, interactable: false, destructible: false },
+      sprite: { sourceX: 0, sourceY: 0, width: 32, height: 32, sheetPath: '' }
+    }),
+    (block) => {
+      block.id = '';
+      block.position = { x: 0, y: 0, z: 0 };
+      block.rotation = 0;
+    }
+  ), []);
+
+  // ============================================================================
+  // STATE MANAGEMENT
+  // ============================================================================
+  
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const hoverCanvasRef = useRef<HTMLCanvasElement>(null);
+  const animationFrameRef = useRef<number | null>(null);
+  const lastRenderTimeRef = useRef<number>(0);
+  
+  // Camera drag state
+  const isDraggingRef = useRef(false);
+  const isPaintingRef = useRef(false);
+  const isErasingRef = useRef(false);
+  const lastMousePosRef = useRef({ x: 0, y: 0 });
+  
   const [isLoaded, setIsLoaded] = useState(false);
-  const [tiles, setTiles] = useState<IsometricTile[]>([]);
-  const [hoverCell, setHoverCell] = useState<HoverCell | null>(null);
-  const [nextTileId, setNextTileId] = useState(53);
-  const [camera, setCamera] = useState<CameraPosition>({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1);
-  const [dragState, setDragState] = useState<DragState>({
-    isDragging: false,
-    startX: 0,
-    startY: 0,
-    startCameraX: 0,
-    startCameraY: 0
+  const [blocks, setBlocks] = useState<Block[]>([]);
+  const [camera, setCamera] = useState<Camera>({
+    position: { x: 400, y: 300, z: 0 }, // Center the camera on the canvas
+    zoom: 2, // Zoom in a bit to see blocks better
+    rotation: 0
   });
-  
-  // Block selector state
+  const [hoverCell, setHoverCell] = useState<{ x: number; y: number; z: number } | null>(null);
+  const [selectedTile, setSelectedTile] = useState<IsometricTileData | null>(ISOMETRIC_TILES[0]); // Default to first tile
+  const [selectedBlock, setSelectedBlock] = useState<Block | null>(null);
   const [isBlockMenuOpen, setIsBlockMenuOpen] = useState(false);
-  const [selectedBlockType, setSelectedBlockType] = useState<IsometricTileData['type'] | null>(null);
-  const [selectedPalette, setSelectedPalette] = useState<IsometricTileData['palette'] | null>(null);
-  const [selectedTileId, setSelectedTileId] = useState<number | null>(null);
+  const [performanceMetrics, setPerformanceMetrics] = useState<PerformanceMetrics | null>(null);
+  const [showPerformance, setShowPerformance] = useState(false);
+  // Click indicator removed
+  // Debug grid position removed
+  const [showInstructions, setShowInstructions] = useState(false);
+  const [showGrid, setShowGrid] = useState(false);
   
-  // Throttle hover updates to reduce redraws
-  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  // Tile sheet loading state
+  const [tileSheet, setTileSheet] = useState<HTMLImageElement | null>(null);
+  const [tileSheetLoaded, setTileSheetLoaded] = useState(false);
+  
+  // Level management state
+  const [currentLevel, setCurrentLevel] = useState<Level>(LevelManager.createNewLevel());
+  const [showLevelMenu, setShowLevelMenu] = useState(false);
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [levelName, setLevelName] = useState('New Level');
+  
+  // Fill mode state
+  const [fillMode, setFillMode] = useState(false);
 
-  // Group tiles by type and color
-  const blockGroups: BlockGroup[] = [
-    {
-      type: 'cube',
-      name: 'Cubes',
-      icon: '⬜',
-      colors: [
-        {
-          palette: 'green',
-          tiles: ISOMETRIC_TILES.filter(tile => tile.type === 'cube' && tile.palette === 'green')
-        },
-        {
-          palette: 'blue',
-          tiles: ISOMETRIC_TILES.filter(tile => tile.type === 'cube' && tile.palette === 'blue')
-        },
-        {
-          palette: 'gray',
-          tiles: ISOMETRIC_TILES.filter(tile => tile.type === 'cube' && tile.palette === 'gray')
-        },
-        {
-          palette: 'orange',
-          tiles: ISOMETRIC_TILES.filter(tile => tile.type === 'cube' && tile.palette === 'orange')
-        }
-      ]
-    },
-         {
-       type: 'flat',
-       name: 'Flats',
-       icon: '⬜',
-       colors: [
-         {
-           palette: 'green',
-           tiles: ISOMETRIC_TILES.filter(tile => tile.type === 'flat' && tile.palette === 'green')
-         },
-         {
-           palette: 'blue',
-           tiles: ISOMETRIC_TILES.filter(tile => tile.type === 'flat' && tile.palette === 'blue')
-         },
-         {
-           palette: 'gray',
-           tiles: ISOMETRIC_TILES.filter(tile => tile.type === 'flat' && tile.palette === 'gray')
-         },
-         {
-           palette: 'orange',
-           tiles: ISOMETRIC_TILES.filter(tile => tile.type === 'flat' && tile.palette === 'orange')
-         }
-       ]
-     },
-     {
-       type: 'ramp',
-       name: 'Ramps',
-       icon: '⬜',
-       colors: [
-         {
-           palette: 'green',
-           tiles: ISOMETRIC_TILES.filter(tile => tile.type === 'ramp' && tile.palette === 'green')
-         },
-         {
-           palette: 'blue',
-           tiles: ISOMETRIC_TILES.filter(tile => tile.type === 'ramp' && tile.palette === 'blue')
-         },
-         {
-           palette: 'gray',
-           tiles: ISOMETRIC_TILES.filter(tile => tile.type === 'ramp' && tile.palette === 'gray')
-         },
-         {
-           palette: 'orange',
-           tiles: ISOMETRIC_TILES.filter(tile => tile.type === 'ramp' && tile.palette === 'orange')
-         }
-       ]
-     },
-     {
-       type: 'corner',
-       name: 'Corners',
-       icon: '⬜',
-       colors: [
-         {
-           palette: 'green',
-           tiles: ISOMETRIC_TILES.filter(tile => tile.type === 'corner' && tile.palette === 'green')
-         },
-         {
-           palette: 'blue',
-           tiles: ISOMETRIC_TILES.filter(tile => tile.type === 'corner' && tile.palette === 'blue')
-         },
-         {
-           palette: 'gray',
-           tiles: ISOMETRIC_TILES.filter(tile => tile.type === 'corner' && tile.palette === 'gray')
-         },
-         {
-           palette: 'orange',
-           tiles: ISOMETRIC_TILES.filter(tile => tile.type === 'corner' && tile.palette === 'orange')
-         }
-       ]
-     },
-     {
-       type: 'staircase',
-       name: 'Stairs',
-       icon: '⬜',
-       colors: [
-         {
-           palette: 'green',
-           tiles: ISOMETRIC_TILES.filter(tile => tile.type === 'staircase' && tile.palette === 'green')
-         },
-         {
-           palette: 'blue',
-           tiles: ISOMETRIC_TILES.filter(tile => tile.type === 'staircase' && tile.palette === 'blue')
-         },
-         {
-           palette: 'gray',
-           tiles: ISOMETRIC_TILES.filter(tile => tile.type === 'staircase' && tile.palette === 'gray')
-         },
-         {
-           palette: 'orange',
-           tiles: ISOMETRIC_TILES.filter(tile => tile.type === 'staircase' && tile.palette === 'orange')
-         }
-       ]
-     },
-    {
-      type: 'pillar',
-      name: 'Pillars',
-      icon: '⬜',
-      colors: [
-        {
-          palette: 'orange',
-          tiles: ISOMETRIC_TILES.filter(tile => tile.type === 'pillar' && tile.palette === 'orange')
-        }
-      ]
+  // ============================================================================
+  // BLOCK MANAGEMENT
+  // ============================================================================
+  
+  const fillWithFlatBlocks = useCallback(() => {
+    console.log('🏗️ Filling grid with flat blocks...');
+    
+    const newBlocks: Block[] = [];
+    const gridSize = 8; // 8x8 grid
+    
+    // Find flat tiles from different palettes
+    const flatTiles = ISOMETRIC_TILES.filter(tile => tile.type === 'flat');
+    if (flatTiles.length === 0) {
+      console.error('❌ No flat tiles found in ISOMETRIC_TILES');
+      return;
     }
-  ];
-
-  // Initialize isometric tiles based on the sandbox sheet
-  useEffect(() => {
-    const initialTiles: IsometricTile[] = [
-      // Fill the area with tiles to check alignment
-      // Row 1 - Green tiles
-      { id: 1, x: 0, y: 0, tileId: 1, rotation: 0 }, // Green Cube 1
-      { id: 2, x: 1, y: 0, tileId: 2, rotation: 0 }, // Green Cube 2
-      { id: 3, x: 2, y: 0, tileId: 3, rotation: 0 }, // Green Cube 3
-      { id: 4, x: 3, y: 0, tileId: 4, rotation: 0 }, // Green Ramp Left
-      { id: 5, x: 4, y: 0, tileId: 5, rotation: 0 }, // Green Ramp Right
-      { id: 6, x: 5, y: 0, tileId: 6, rotation: 0 }, // Green Staircase
-      
-      // Row 2 - Green tiles
-      { id: 7, x: 0, y: 1, tileId: 1, rotation: 0 },
-      { id: 8, x: 1, y: 1, tileId: 2, rotation: 0 },
-      { id: 9, x: 2, y: 1, tileId: 3, rotation: 0 },
-      { id: 10, x: 3, y: 1, tileId: 4, rotation: 0 },
-      { id: 11, x: 4, y: 1, tileId: 5, rotation: 0 },
-      { id: 12, x: 5, y: 1, tileId: 6, rotation: 0 },
-      
-      // Row 3 - Blue tiles
-      { id: 13, x: 0, y: 2, tileId: 14, rotation: 0 }, // Blue Cube 1
-      { id: 14, x: 1, y: 2, tileId: 15, rotation: 0 }, // Blue Cube 2
-      { id: 15, x: 2, y: 2, tileId: 16, rotation: 0 }, // Blue Cube 3
-      { id: 16, x: 3, y: 2, tileId: 17, rotation: 0 }, // Blue Ramp Left
-      { id: 17, x: 4, y: 2, tileId: 18, rotation: 0 }, // Blue Ramp Right
-      { id: 18, x: 5, y: 2, tileId: 19, rotation: 0 }, // Blue Staircase
-      
-      // Row 4 - Blue tiles
-      { id: 19, x: 0, y: 3, tileId: 20, rotation: 0 }, // Blue Flat 1
-      { id: 20, x: 1, y: 3, tileId: 21, rotation: 0 }, // Blue Flat 2
-      { id: 21, x: 2, y: 3, tileId: 22, rotation: 0 }, // Blue Flat 3
-      { id: 22, x: 3, y: 3, tileId: 23, rotation: 0 }, // Blue Corner Left
-      { id: 23, x: 4, y: 3, tileId: 24, rotation: 0 }, // Blue Corner Right
-      { id: 24, x: 5, y: 3, tileId: 25, rotation: 0 }, // Blue Cube 4
-      
-      // Row 5 - Gray tiles
-      { id: 25, x: 0, y: 4, tileId: 27, rotation: 0 }, // Gray Cube 1
-      { id: 26, x: 1, y: 4, tileId: 28, rotation: 0 }, // Gray Cube 2
-      { id: 27, x: 2, y: 4, tileId: 29, rotation: 0 }, // Gray Cube 3
-      { id: 28, x: 3, y: 4, tileId: 30, rotation: 0 }, // Gray Ramp Left
-      { id: 29, x: 4, y: 4, tileId: 31, rotation: 0 }, // Gray Ramp Right
-      { id: 30, x: 5, y: 4, tileId: 32, rotation: 0 }, // Gray Staircase
-      
-      // Row 6 - Gray tiles
-      { id: 31, x: 0, y: 5, tileId: 33, rotation: 0 }, // Gray Flat 1
-      { id: 32, x: 1, y: 5, tileId: 34, rotation: 0 }, // Gray Flat 2
-      { id: 33, x: 2, y: 5, tileId: 35, rotation: 0 }, // Gray Flat 3
-      { id: 34, x: 3, y: 5, tileId: 36, rotation: 0 }, // Gray Corner Left
-      { id: 35, x: 4, y: 5, tileId: 37, rotation: 0 }, // Gray Corner Right
-      { id: 36, x: 5, y: 5, tileId: 38, rotation: 0 }, // Gray Cube 4
-    ];
     
-    setTiles(initialTiles);
-  }, []);
-
-  // Draw isometric grid and tiles (static content)
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    // Get device pixel ratio for crisp rendering
-    const dpr = window.devicePixelRatio || 1;
-    const rect = canvas.getBoundingClientRect();
+    // Create a grid pattern with alternating palettes
+    for (let x = -gridSize/2; x < gridSize/2; x++) {
+      for (let y = -gridSize/2; y < gridSize/2; y++) {
+        // Alternate between different flat tile palettes
+        const tileIndex = (Math.abs(x) + Math.abs(y)) % flatTiles.length;
+        const selectedTile = flatTiles[tileIndex];
+        
+        const block: Block = {
+          id: `fill_${x}_${y}_0`,
+          type: 'flat',
+          palette: selectedTile.palette,
+          position: { x, y, z: 0 },
+          rotation: 0,
+          properties: {
+            walkable: true,
+            climbable: false,
+            interactable: false,
+            destructible: false
+          },
+          sprite: {
+            sourceX: selectedTile.sourceX,
+            sourceY: selectedTile.sourceY,
+            width: selectedTile.width,
+            height: selectedTile.height,
+            sheetPath: TILE_SHEET_CONFIG.imagePath
+          }
+        };
+        
+        newBlocks.push(block);
+      }
+    }
     
-    // Set canvas size accounting for device pixel ratio
-    canvas.width = rect.width * dpr;
-    canvas.height = 300 * dpr;
+    console.log(`🏗️ Created ${newBlocks.length} flat blocks`);
+    console.log('🏗️ Sample block:', newBlocks[0]);
     
-    // Scale context to account for device pixel ratio
-    ctx.scale(dpr, dpr);
-    
-    // Set canvas CSS size
-    canvas.style.width = rect.width + 'px';
-    canvas.style.height = 300 + 'px';
-
-    // Load tile sheet
-    const tileSheet = new Image();
-    tileSheet.onload = () => {
-      setIsLoaded(true);
+    // Add new blocks to state and spatial index
+    setBlocks(prevBlocks => {
+      const updatedBlocks = [...prevBlocks, ...newBlocks];
+      console.log('🏗️ Total blocks after fill:', updatedBlocks.length);
       
-      // Render static content (grid and tiles)
-      const render = () => {
-        // Clear canvas
-        ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
-        
-        // Apply camera transform
-        ctx.save();
-        ctx.translate(camera.x, camera.y);
-        ctx.scale(zoom, zoom);
-        
-        // Draw isometric grid
-        drawIsometricGrid();
-        
-        // Draw tiles
-        tiles.forEach(tile => {
-          drawTile(ctx, tileSheet, tile, rect.width);
-        });
-        
-        // Draw hover highlight on main canvas for now
-        if (hoverCell) {
-          drawHoverHighlight(ctx, hoverCell, rect.width);
-        }
-        
-        ctx.restore();
-      };
+      // Update spatial index
+      newBlocks.forEach(block => {
+        spatialIndex.addBlock(block);
+      });
       
-      render();
+      return updatedBlocks;
+    });
+    
+    // Update level
+    setCurrentLevel(prevLevel => ({
+      ...prevLevel,
+      blocks: [...prevLevel.blocks, ...newBlocks],
+      modifiedAt: new Date()
+    }));
+    
+    console.log('✅ Fill complete!');
+  }, [spatialIndex]);
+
+  const createBlock = useCallback((tile: IsometricTileData, position: { x: number; y: number; z: number }): Block => {
+    
+    const block: Block = {
+      id: `block_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      type: tile.type,
+      palette: tile.palette,
+      position,
+      rotation: 0,
+      properties: {
+        walkable: tile.type === 'flat' || tile.type === 'cube',
+        climbable: tile.type === 'ramp' || tile.type === 'staircase',
+        interactable: false,
+        destructible: true,
+      },
+      sprite: {
+        sourceX: tile.sourceX,
+        sourceY: tile.sourceY,
+        width: tile.width,
+        height: tile.height,
+        sheetPath: TILE_SHEET_CONFIG.imagePath,
+      },
     };
     
-    tileSheet.src = TILE_SHEET_CONFIG.imagePath;
-  }, [tiles, hoverCell, isLoaded, camera, zoom]); // Added hoverCell back temporarily
+    console.log('🏛️ Block created:', block);
+    return block;
+  }, []);
 
-  // Draw hover highlight on separate canvas layer (temporarily disabled)
-  // useEffect(() => {
-  //   const hoverCanvas = hoverCanvasRef.current;
-  //   const mainCanvas = canvasRef.current;
-  //   if (!hoverCanvas || !mainCanvas || !isLoaded) return;
+  const addBlock = useCallback((block: Block) => {
+    setBlocks(prev => {
+      const newBlocks = [...prev, block];
+      return newBlocks;
+    });
+    spatialIndex.addBlock(block);
+  }, [spatialIndex]);
 
-  //   const ctx = hoverCanvas.getContext('2d');
-  //   if (!ctx) return;
-
-  //   // Get device pixel ratio for crisp rendering
-  //   const dpr = window.devicePixelRatio || 1;
-  //   const mainRect = mainCanvas.getBoundingClientRect();
-    
-  //   // Set canvas size accounting for device pixel ratio - use main canvas dimensions
-  //   hoverCanvas.width = mainRect.width * dpr;
-  //   hoverCanvas.height = 300 * dpr;
-    
-  //   // Scale context to account for device pixel ratio
-  //   ctx.scale(dpr, dpr);
-    
-  //   // Set canvas CSS size - match main canvas exactly
-  //   hoverCanvas.style.width = mainRect.width + 'px';
-  //   hoverCanvas.style.height = 300 + 'px';
-
-  //   // Clear hover canvas
-  //   ctx.clearRect(0, 0, hoverCanvas.width / dpr, hoverCanvas.height / dpr);
-    
-  //   // Draw hover highlight if exists
-  //   if (hoverCell) {
-  //     // Apply camera transform - same as main canvas
-  //     ctx.save();
-  //     ctx.translate(camera.x, camera.y);
-  //     ctx.scale(zoom, zoom);
-      
-  //     drawHoverHighlight(ctx, hoverCell, mainRect.width);
-      
-  //     ctx.restore();
-  //   }
-  // }, [hoverCell, isLoaded, camera, zoom]);
-
-  const drawIsometricGrid = () => {
-    // Grid drawing is currently disabled for cleaner visual appearance
-    // This function is kept for future grid visualization features
-  };
-
-  const drawTile = (ctx: CanvasRenderingContext2D, tileSheet: HTMLImageElement, tile: IsometricTile, canvasWidth: number) => {
-    // Get tile data from the sheet
-    const tileData = ISOMETRIC_TILES.find((t: IsometricTileData) => t.id === tile.tileId);
-    if (!tileData) return;
-    
-    // Proper isometric tile positioning
-    // Each tile is 32x32 pixels, but in isometric projection:
-    // - The tile's base footprint is 32 pixels wide
-    // - The tile's base footprint is 16 pixels tall (32/2 for isometric)
-    // - For edge-to-edge placement, use half the tile width for spacing
-    const tileWidth = 32;
-    const tileHeight = 16; // Half the tile width for isometric projection
-    
-    // Calculate isometric position - this is the center of the tile's base
-    // Use half the tile width for spacing to make tiles touch edge-to-edge
-    const isoX = (tile.x - tile.y) * (tileWidth / 2) + canvasWidth / 2;
-    const isoY = (tile.x + tile.y) * (tileHeight / 2) + 64; // Grid base position
-    
-    // Draw tile with pixel-perfect positioning
-    ctx.save();
-    ctx.translate(Math.round(isoX), Math.round(isoY));
-    ctx.rotate((tile.rotation * Math.PI) / 180);
-    
-    // Ensure pixel-perfect rendering
-    ctx.imageSmoothingEnabled = false;
-    
-    // Draw the tile at its original size from the tile sheet
-    // Position the tile so its base aligns with the grid
-    // The tile's base should be at the center point, so offset by half the tile height
-    ctx.drawImage(
-      tileSheet,
-      tileData.sourceX, tileData.sourceY, tileData.width, tileData.height,
-      -tileData.width / 2, -tileData.height, tileData.width, tileData.height
-    );
-    
-    ctx.restore();
-  };
-
-  const drawHoverHighlight = (ctx: CanvasRenderingContext2D, cell: HoverCell, canvasWidth: number) => {
-    // Use consistent tile dimensions for hover highlight
-    const tileWidth = 32;
-    const tileHeight = 16; // Half the tile width for isometric projection
-    
-    // Use half the tile width for spacing to match tile positioning
-    const isoX = (cell.x - cell.y) * (tileWidth / 2) + canvasWidth / 2;
-    const isoY = (cell.x + cell.y) * (tileHeight / 2) + 56; // Updated to match grid position
-    
-    // Draw simple cell border highlight
-    ctx.save();
-    
-    // Simple border styling
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)'; // White border
-    ctx.lineWidth = 2; // Simple line width
-    
-    // Draw isometric diamond shape for hover cell
-    // This should match the grid cell shape exactly
-    ctx.beginPath();
-    ctx.moveTo(isoX, isoY - tileHeight / 2); // top
-    ctx.lineTo(isoX + tileWidth / 2, isoY); // right
-    ctx.lineTo(isoX, isoY + tileHeight / 2); // bottom
-    ctx.lineTo(isoX - tileWidth / 2, isoY); // left
-    ctx.closePath();
-    ctx.stroke();
-    
-    ctx.restore();
-  };
-
-  const getRandomTileId = (): number => {
-    const availableTiles = ISOMETRIC_TILES.filter(tile => 
-      tile.type === 'cube' || tile.type === 'flat'
-    );
-    const randomTile = availableTiles[Math.floor(Math.random() * availableTiles.length)];
-    return randomTile.id;
-  };
-
-  // Block selection handlers
-  const handleBlockTypeSelect = (type: IsometricTileData['type']) => {
-    setSelectedBlockType(type);
-    setSelectedPalette(null);
-    setSelectedTileId(null);
-  };
-
-  const handlePaletteSelect = (palette: IsometricTileData['palette']) => {
-    setSelectedPalette(palette);
-    // Auto-select first tile of this palette and type
-    const group = blockGroups.find(g => g.type === selectedBlockType);
-    if (group) {
-      const colorGroup = group.colors.find(c => c.palette === palette);
-      if (colorGroup && colorGroup.tiles.length > 0) {
-        setSelectedTileId(colorGroup.tiles[0].id);
+  const removeBlock = useCallback((blockId: string) => {
+    setBlocks(prev => {
+      const block = prev.find(b => b.id === blockId);
+      if (block) {
+        spatialIndex.removeBlock(block);
+        blockPool.release(block);
       }
-    }
-  };
-
-  const handleTileSelect = (tileId: number) => {
-    setSelectedTileId(tileId);
-  };
-
-  const getSelectedTileId = (): number => {
-    if (selectedTileId) return selectedTileId;
-    
-    // Fallback to random tile if nothing selected
-    return getRandomTileId();
-  };
-
-  // Zoom handlers
-  const handleZoomIn = (zoomLevel: number) => {
-    setZoom(zoomLevel);
-  };
-
-  const handleResetView = () => {
-    setCamera({ x: 0, y: 0 });
-    setZoom(1);
-  };
-
-  // Mouse and touch event handlers
-  const handleMouseDown = (event: React.MouseEvent<HTMLCanvasElement>) => {
-    event.preventDefault();
-    const rect = canvasRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    
-    setDragState({
-      isDragging: true,
-      startX: event.clientX,
-      startY: event.clientY,
-      startCameraX: camera.x,
-      startCameraY: camera.y
+      return prev.filter(b => b.id !== blockId);
     });
-  };
+  }, [spatialIndex, blockPool]);
 
-  const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
-    const rect = canvasRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    
-    if (dragState.isDragging) {
-      const deltaX = event.clientX - dragState.startX;
-      const deltaY = event.clientY - dragState.startY;
-      
-      setCamera({
-        x: dragState.startCameraX + deltaX,
-        y: dragState.startCameraY + deltaY
-      });
-      return; // Don't update hover when dragging
-    }
-    
-    // Throttle hover updates to reduce redraws
-    if (hoverTimeoutRef.current) {
-      clearTimeout(hoverTimeoutRef.current);
-    }
-    
-    hoverTimeoutRef.current = setTimeout(() => {
-      // Update hover cell for tile placement
-      const x = (event.clientX - rect.left - camera.x) / zoom;
-      const y = (event.clientY - rect.top - camera.y) / zoom;
-      
-      // Convert screen coordinates to isometric grid coordinates
-      const tileWidth = 32;
-      const tileHeight = 16;
-      
-      const centerX = rect.width / 2;
-      const centerY = 56; // Updated to match grid position
-      
-      const isoX = (x - centerX) / (tileWidth / 2);
-      const isoY = (y - centerY) / (tileHeight / 2);
-      
-      const gridX = Math.round((isoX + isoY) / 2);
-      const gridY = Math.round((isoY - isoX) / 2);
-      
-      // Debug: log coordinates to see what's happening
-      console.log('Mouse coords:', { x: event.clientX, y: event.clientY });
-      console.log('Canvas rect:', { left: rect.left, top: rect.top, width: rect.width });
-      console.log('Calculated grid:', { gridX, gridY });
-      
-      const existingTile = tiles.find(tile => tile.x === gridX && tile.y === gridY);
-      if (existingTile) {
-        setHoverCell(null);
-        return;
+  const rotateBlock = useCallback((blockId: string) => {
+    setBlocks(prev => prev.map(block => {
+      if (block.id === blockId) {
+        return { ...block, rotation: ((block.rotation + 90) % 360) as 0 | 90 | 180 | 270 };
       }
-      
-      setHoverCell({ x: gridX, y: gridY });
-    }, 16); // ~60fps throttling
-  };
+      return block;
+    }));
+  }, []);
 
-  const handleMouseUp = () => {
-    setDragState(prev => ({ ...prev, isDragging: false }));
-  };
+  // ============================================================================
+  // COORDINATE CONVERSION UTILITIES
+  // ============================================================================
 
-  const handleMouseLeave = () => {
-    setDragState(prev => ({ ...prev, isDragging: false }));
-    setHoverCell(null);
-    // Clear any pending hover updates
-    if (hoverTimeoutRef.current) {
-      clearTimeout(hoverTimeoutRef.current);
-    }
-  };
-
-  // Touch event handlers
-  const handleTouchStart = (event: React.TouchEvent<HTMLCanvasElement>) => {
-    event.preventDefault();
-    const touch = event.touches[0];
-    const rect = canvasRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    
-    setDragState({
-      isDragging: true,
-      startX: touch.clientX,
-      startY: touch.clientY,
-      startCameraX: camera.x,
-      startCameraY: camera.y
-    });
-  };
-
-  const handleTouchMove = (event: React.TouchEvent<HTMLCanvasElement>) => {
-    event.preventDefault();
-    const touch = event.touches[0];
-    const rect = canvasRef.current?.getBoundingClientRect();
-    if (!rect || !dragState.isDragging) return;
-    
-    const deltaX = touch.clientX - dragState.startX;
-    const deltaY = touch.clientY - dragState.startY;
-    
-    setCamera({
-      x: dragState.startCameraX + deltaX,
-      y: dragState.startCameraY + deltaY
-    });
-  };
-
-  const handleTouchEnd = () => {
-    setDragState(prev => ({ ...prev, isDragging: false }));
-  };
-
-  const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
-    // Only place tiles if not dragging
-    if (dragState.isDragging) return;
-    
+  const screenToGrid = useCallback((screenX: number, screenY: number): { x: number; y: number; z: number } => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas) return { x: 0, y: 0, z: 0 };
     
     const rect = canvas.getBoundingClientRect();
-    const x = (event.clientX - rect.left - camera.x) / zoom;
-    const y = (event.clientY - rect.top - camera.y) / zoom;
+    const canvasX = screenX - rect.left;
+    const canvasY = screenY - rect.top;
     
-    // Convert screen coordinates to isometric grid coordinates
+    // Convert to world coordinates (accounting for camera)
+    const worldX = (canvasX - camera.position.x) / camera.zoom;
+    const worldY = (canvasY - camera.position.y) / camera.zoom;
+    
+    // Convert to isometric grid coordinates
     const tileWidth = 32;
     const tileHeight = 16;
     
-    const centerX = rect.width / 2;
-    const centerY = 56; // Updated to match grid position
-    
-    const isoX = (x - centerX) / (tileWidth / 2);
-    const isoY = (y - centerY) / (tileHeight / 2);
+    // Isometric to grid conversion (corrected for half-height grid)
+    // For 2:1 isometric projection, we need to account for the projection ratio
+    const isoX = worldX / (tileWidth / 2);
+    const isoY = worldY / (tileHeight / 2);
     
     const gridX = Math.round((isoX + isoY) / 2);
     const gridY = Math.round((isoY - isoX) / 2);
+    const gridZ = 0;
     
-    // Check if cell is empty
-    const existingTile = tiles.find(tile => tile.x === gridX && tile.y === gridY);
-    if (existingTile) return; // Don't place on existing tile
+    // Debug logging removed for performance
     
-    // Place selected tile or random tile if none selected
-    const newTile: IsometricTile = {
-      id: nextTileId,
-      x: gridX,
-      y: gridY,
-      tileId: getSelectedTileId(),
-      rotation: 0
+    return { x: gridX, y: gridY, z: gridZ };
+  }, [camera]);
+
+  const gridToScreen = useCallback((gridX: number, gridY: number, gridZ: number): { x: number; y: number } => {
+    const tileWidth = 32;
+    const tileHeight = 16;
+    
+    // Isometric projection (corrected to match screenToGrid and half-height grid)
+    const isoX = (gridX - gridY) * (tileWidth / 2);
+    const isoY = (gridX + gridY) * (tileHeight / 2) - gridZ * tileHeight;
+    
+    // Convert to screen coordinates (accounting for camera)
+    const screenX = isoX * camera.zoom + camera.position.x;
+    const screenY = isoY * camera.zoom + camera.position.y;
+    
+    return { x: screenX, y: screenY };
+  }, [camera]);
+
+  // ============================================================================
+  // UNIFIED BUTTON STYLES
+  // ============================================================================
+  
+  const unifiedButtonStyle = {
+    background: 'var(--color-accent-primary)',
+    border: '1px solid var(--color-border-primary)',
+    borderRadius: '4px',
+    padding: '6px 10px',
+    cursor: 'pointer',
+    fontSize: '14px',
+    transition: 'all 0.2s ease',
+    color: 'var(--color-text-primary)',
+    pointerEvents: 'auto' as const,
+    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
+    minWidth: '40px',
+    height: '32px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  };
+
+  // ============================================================================
+  // RENDERING SYSTEM
+  // ============================================================================
+
+  const renderBlock = useCallback((ctx: CanvasRenderingContext2D, block: Block, tileSheet: HTMLImageElement) => {
+    const { x, y, z } = block.position;
+    const tileWidth = 32;
+    const tileHeight = 16;
+    
+    // Isometric projection (corrected to match grid coordinate system)
+    const isoX = (x - y) * (tileWidth / 2);
+    const isoY = (x + y) * (tileHeight / 2) - z * tileHeight;
+    
+    // Debug logging removed for performance
+    
+    ctx.save();
+    ctx.translate(isoX, isoY);
+    ctx.rotate((block.rotation * Math.PI) / 180);
+    
+    // Pixel-perfect rendering
+    ctx.imageSmoothingEnabled = false;
+    
+    ctx.drawImage(
+      tileSheet,
+      block.sprite.sourceX, block.sprite.sourceY,
+      block.sprite.width, block.sprite.height,
+      -block.sprite.width / 2, -block.sprite.height + tileHeight/2,
+      block.sprite.width, block.sprite.height
+    );
+    
+    ctx.restore();
+  }, []);
+
+  const renderHoverPreview = useCallback((ctx: CanvasRenderingContext2D, tileSheet: HTMLImageElement) => {
+    if (!hoverCell || !selectedTile) return;
+    
+    const { x, y, z } = hoverCell;
+    const tileWidth = 32;
+    const tileHeight = 16;
+    
+    // Isometric projection (corrected to match grid coordinate system)
+    const isoX = (x - y) * (tileWidth / 2);
+    const isoY = (x + y) * (tileHeight / 2) - z * tileHeight;
+    
+    ctx.save();
+    ctx.translate(isoX, isoY);
+    
+    // Semi-transparent preview
+    ctx.globalAlpha = 0.6;
+    
+    // Draw tile preview (aligned to grid base)
+    ctx.drawImage(
+      tileSheet,
+      selectedTile.sourceX, selectedTile.sourceY,
+      selectedTile.width, selectedTile.height,
+      -selectedTile.width / 2, -selectedTile.height + tileHeight/2,
+      selectedTile.width, selectedTile.height
+    );
+    
+    ctx.restore();
+  }, [hoverCell, selectedTile, spatialIndex]);
+
+  const renderSelectionHighlight = useCallback((ctx: CanvasRenderingContext2D) => {
+    if (!selectedBlock) return;
+    
+    const { x, y, z } = selectedBlock.position;
+    const tileWidth = 32;
+    const tileHeight = 16;
+    
+    // Calculate isometric position (matching the grid coordinate system)
+    const isoX = (x - y) * (tileWidth / 2);
+    const isoY = (x + y) * (tileHeight / 2) - z * tileHeight;
+    
+    ctx.save();
+    ctx.strokeStyle = '#FFD700';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([5, 5]);
+    ctx.strokeRect(isoX - tileWidth/2, isoY - tileHeight + tileHeight/2, tileWidth, tileHeight);
+    ctx.restore();
+  }, [selectedBlock]);
+
+  const renderGrid = useCallback((ctx: CanvasRenderingContext2D) => {
+    if (!showGrid) return;
+    
+    const tileWidth = 32;
+    const tileHeight = 16;
+    const gridSize = 20; // Number of grid cells to render
+    
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+    ctx.lineWidth = 1;
+    
+    // Draw highlighted cell if hovering
+    if (hoverCell) {
+      const { x, y } = hoverCell;
+      const isoX = (x - y) * (tileWidth / 2);
+      const isoY = (x + y) * (tileHeight / 2);
+      
+      const centerX = isoX;
+      const centerY = isoY;
+      
+      // Highlight diamond
+      const top = { x: centerX, y: centerY - tileHeight/2 };
+      const right = { x: centerX + tileWidth/2, y: centerY };
+      const bottom = { x: centerX, y: centerY + tileHeight/2 };
+      const left = { x: centerX - tileWidth/2, y: centerY };
+      
+      ctx.save();
+      ctx.fillStyle = 'rgba(255, 255, 0, 0.2)';
+      ctx.strokeStyle = 'rgba(255, 255, 0, 0.8)';
+      ctx.lineWidth = 2;
+      
+      ctx.beginPath();
+      ctx.moveTo(top.x, top.y);
+      ctx.lineTo(right.x, right.y);
+      ctx.lineTo(bottom.x, bottom.y);
+      ctx.lineTo(left.x, left.y);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+    }
+    
+    // Draw diamond-shaped grid cells for isometric projection
+    for (let x = -gridSize; x <= gridSize; x++) {
+      for (let y = -gridSize; y <= gridSize; y++) {
+        // Calculate isometric position (adjusted for seamless tiling)
+        const isoX = (x - y) * (tileWidth / 2);
+        const isoY = (x + y) * (tileHeight / 2);
+        
+        // Draw diamond shape for each grid cell
+        const centerX = isoX;
+        const centerY = isoY;
+        
+        // Isometric diamond grid cells (half height for traditional isometric pixel art)
+        // Each diamond represents one grid cell in isometric space
+        const top = { x: centerX, y: centerY - tileHeight/2 };
+        const right = { x: centerX + tileWidth/2, y: centerY };
+        const bottom = { x: centerX, y: centerY + tileHeight/2 };
+        const left = { x: centerX - tileWidth/2, y: centerY };
+        
+        ctx.beginPath();
+        ctx.moveTo(top.x, top.y);
+        ctx.lineTo(right.x, right.y);
+        ctx.lineTo(bottom.x, bottom.y);
+        ctx.lineTo(left.x, left.y);
+        ctx.closePath();
+        ctx.stroke();
+        
+        // Add a subtle center point for each diamond
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, 1, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    
+    ctx.restore();
+  }, [showGrid, hoverCell]);
+
+  const renderScene = useCallback((ctx: CanvasRenderingContext2D, tileSheet: HTMLImageElement) => {
+    const startTime = performance.now();
+    
+    // Clear canvas
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    
+    // Apply camera transform
+    ctx.save();
+    ctx.translate(camera.position.x, camera.position.y);
+    ctx.scale(camera.zoom, camera.zoom);
+    
+    // Get visible blocks using culling system
+    const visibleBlocks = cullingSystem.getVisibleBlocks(camera);
+    
+    // Sort blocks by depth (z DESC, then y ASC, then x ASC)
+    const sortedBlocks = visibleBlocks.sort((a, b) => {
+      if (a.position.z !== b.position.z) return b.position.z - a.position.z;
+      if (a.position.y !== b.position.y) return a.position.y - b.position.y;
+      return a.position.x - b.position.x;
+    });
+    
+    // Render blocks
+    let drawCalls = 0;
+    sortedBlocks.forEach(block => {
+      renderBlock(ctx, block, tileSheet);
+      drawCalls++;
+    });
+    
+    // Render hover preview
+    renderHoverPreview(ctx, tileSheet);
+    
+    // Render selection highlight
+    renderSelectionHighlight(ctx);
+
+    // Render grid
+    renderGrid(ctx);
+    
+    // Click indicator removed
+    
+    // Debug grid position indicator removed
+    
+    ctx.restore();
+    
+    // Update performance metrics
+    const renderTime = performance.now() - startTime;
+    const metrics = performanceMonitor.collectMetrics();
+    metrics.renderTime = renderTime;
+    metrics.blockCount = blocks.length;
+    metrics.visibleBlocks = visibleBlocks.length;
+    metrics.drawCalls = drawCalls;
+    
+    // Debug culling info
+    if (blocks.length > 0 && visibleBlocks.length === 0) {
+      console.log('🏛️ Culling Debug: All blocks are being culled!');
+      console.log('🏛️ Total blocks:', blocks.length);
+      console.log('🏛️ Camera position:', camera.position);
+      console.log('🏛️ Camera zoom:', camera.zoom);
+    }
+    
+    setPerformanceMetrics(metrics);
+  }, [camera, blocks, cullingSystem, renderBlock, renderHoverPreview, renderSelectionHighlight, performanceMonitor, renderGrid, showGrid]);
+
+  const renderFallbackScene = useCallback((ctx: CanvasRenderingContext2D) => {
+    // Clear canvas
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    
+    // Apply camera transform
+    ctx.save();
+    ctx.translate(camera.position.x, camera.position.y);
+    ctx.scale(camera.zoom, camera.zoom);
+    
+    // Render grid first (so blocks appear on top)
+    if (showGrid) {
+      const tileWidth = 32;
+      const tileHeight = 16;
+      const gridSize = 20; // Number of grid cells to render
+      
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+      ctx.lineWidth = 1;
+      
+      // Draw diamond-shaped grid cells for isometric projection
+      for (let x = -gridSize; x <= gridSize; x++) {
+        for (let y = -gridSize; y <= gridSize; y++) {
+          // Calculate isometric position (adjusted for seamless tiling)
+          const isoX = (x - y) * (tileWidth / 2);
+          const isoY = (x + y) * (tileHeight / 2);
+          
+          // Isometric diamond grid cells
+          const centerX = isoX;
+          const centerY = isoY;
+          
+          // Isometric diamond grid cells (half height)
+          // Each diamond represents one grid cell in isometric space
+          const top = { x: centerX, y: centerY - tileHeight/2 };
+          const right = { x: centerX + tileWidth/2, y: centerY };
+          const bottom = { x: centerX, y: centerY + tileHeight/2 };
+          const left = { x: centerX - tileWidth/2, y: centerY };
+          
+          ctx.beginPath();
+          ctx.moveTo(top.x, top.y);
+          ctx.lineTo(right.x, right.y);
+          ctx.lineTo(bottom.x, bottom.y);
+          ctx.lineTo(left.x, left.y);
+          ctx.closePath();
+          ctx.stroke();
+          
+          // Add a subtle center point for each diamond
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, 1, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    }
+    
+    // Render blocks as colored rectangles using corrected coordinate system
+    blocks.forEach((block, index) => {
+      console.log('🏛️ Rendering fallback block:', block.id, 'at position:', block.position);
+      
+      const { x, y, z } = block.position;
+      const tileWidth = 32;
+      const tileHeight = 16;
+      
+      // Calculate isometric position (matching the coordinate system)
+      const isoX = (x - y) * (tileWidth / 2);
+      const isoY = (x + y) * tileHeight - z * tileHeight;
+      
+      // Color based on palette
+      const colors = {
+        green: '#00FF00',
+        blue: '#0080FF',
+        gray: '#808080',
+        orange: '#FF8000'
+      };
+      
+      ctx.fillStyle = colors[block.palette] || '#FF0000';
+      ctx.fillRect(isoX - tileWidth/2, isoY - tileHeight, tileWidth, tileHeight);
+      
+      // Draw border
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(isoX - tileWidth/2, isoY - tileHeight, tileWidth, tileHeight);
+    });
+    
+    // Click indicator removed
+    
+    // Debug grid position indicator removed
+    
+    ctx.restore();
+  }, [blocks, camera, showGrid]);
+
+  // ============================================================================
+  // GAME LOOP
+  // ============================================================================
+
+  const gameLoop = useCallback((currentTime: number) => {
+    if (currentTime - lastRenderTimeRef.current >= 16.67) { // ~60fps
+      const canvas = canvasRef.current;
+      if (canvas && isLoaded) {
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          // Update culling system frustum
+          cullingSystem.updateFrustum(camera, canvas.width, canvas.height);
+          
+          // Use proper tile sheet rendering if loaded, otherwise fallback
+          if (tileSheetLoaded && tileSheet) {
+            renderScene(ctx, tileSheet);
+          } else {
+            renderFallbackScene(ctx);
+          }
+        }
+      }
+      lastRenderTimeRef.current = currentTime;
+    }
+    
+    animationFrameRef.current = requestAnimationFrame(gameLoop);
+  }, [isLoaded, camera, cullingSystem, renderScene, renderFallbackScene, tileSheetLoaded, tileSheet]);
+
+  // Start game loop
+  useEffect(() => {
+    animationFrameRef.current = requestAnimationFrame(gameLoop);
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, [gameLoop]);
+
+  // ============================================================================
+  // INPUT HANDLING
+  // ============================================================================
+
+  const handleCanvasClick = useCallback((event: React.MouseEvent<HTMLCanvasElement>) => {
+    const gridPos = screenToGrid(event.clientX, event.clientY);
+    
+    if (event.button === 0) { // Left click
+      if (selectedTile) {
+        // Place block
+        const existingBlock = spatialIndex.getBlockAt(gridPos.x, gridPos.y, gridPos.z);
+        if (!existingBlock) {
+          const newBlock = createBlock(selectedTile, gridPos);
+          addBlock(newBlock);
+        }
+      } else {
+        // Select block
+        const block = spatialIndex.getBlockAt(gridPos.x, gridPos.y, gridPos.z);
+        setSelectedBlock(block);
+      }
+    } else if (event.button === 2) { // Right click
+      // Remove block
+      const block = spatialIndex.getBlockAt(gridPos.x, gridPos.y, gridPos.z);
+      if (block) {
+        removeBlock(block.id);
+        if (selectedBlock?.id === block.id) {
+          setSelectedBlock(null);
+        }
+      }
+    }
+  }, [selectedTile, spatialIndex, createBlock, addBlock, removeBlock, selectedBlock, screenToGrid]);
+
+  const handleMouseMove = useCallback((event: React.MouseEvent<HTMLCanvasElement>) => {
+    const gridPos = screenToGrid(event.clientX, event.clientY);
+    setHoverCell(gridPos);
+    
+    // Handle continuous painting
+    if (isPaintingRef.current && selectedTile) {
+      const existingBlock = spatialIndex.getBlockAt(gridPos.x, gridPos.y, gridPos.z);
+      if (!existingBlock) {
+        const newBlock = createBlock(selectedTile, gridPos);
+        addBlock(newBlock);
+      }
+    }
+    
+    // Handle continuous erasing
+    if (isErasingRef.current) {
+      const block = spatialIndex.getBlockAt(gridPos.x, gridPos.y, gridPos.z);
+      if (block) {
+        removeBlock(block.id);
+        if (selectedBlock?.id === block.id) {
+          setSelectedBlock(null);
+        }
+      }
+    }
+  }, [screenToGrid, selectedTile, spatialIndex, createBlock, addBlock, removeBlock, selectedBlock]);
+
+  const handleMouseDown = useCallback((event: React.MouseEvent<HTMLCanvasElement>) => {
+    if (event.button === 0) { // Left mouse button - start painting
+      isPaintingRef.current = true;
+      const gridPos = screenToGrid(event.clientX, event.clientY);
+      if (selectedTile) {
+        const existingBlock = spatialIndex.getBlockAt(gridPos.x, gridPos.y, gridPos.z);
+        if (!existingBlock) {
+          const newBlock = createBlock(selectedTile, gridPos);
+          addBlock(newBlock);
+        }
+      }
+    } else if (event.button === 1) { // Middle mouse button - camera pan
+      isDraggingRef.current = true;
+      lastMousePosRef.current = { x: event.clientX, y: event.clientY };
+      event.preventDefault();
+    } else if (event.button === 2) { // Right mouse button - start erasing
+      isErasingRef.current = true;
+      const gridPos = screenToGrid(event.clientX, event.clientY);
+      const block = spatialIndex.getBlockAt(gridPos.x, gridPos.y, gridPos.z);
+      if (block) {
+        removeBlock(block.id);
+        if (selectedBlock?.id === block.id) {
+          setSelectedBlock(null);
+        }
+      }
+    }
+  }, [selectedTile, spatialIndex, createBlock, addBlock, removeBlock, selectedBlock, screenToGrid]);
+
+  const handleMouseUp = useCallback((event: React.MouseEvent<HTMLCanvasElement>) => {
+    if (event.button === 0) { // Left mouse button - stop painting
+      isPaintingRef.current = false;
+    } else if (event.button === 1) { // Middle mouse button - stop camera pan
+      isDraggingRef.current = false;
+    } else if (event.button === 2) { // Right mouse button - stop erasing
+      isErasingRef.current = false;
+    }
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    isDraggingRef.current = false;
+    setHoverCell(null);
+  }, []);
+
+  const handleWheel = useCallback((event: React.WheelEvent<HTMLCanvasElement>) => {
+    event.preventDefault();
+    
+    const currentZoom = camera.zoom;
+    const zoomLevels = [1, 2, 4]; // Only allow 1x, 2x, 4x zoom levels
+    
+    // Determine zoom direction
+    const zoomIn = event.deltaY < 0;
+    
+    // Find current zoom level index
+    const currentIndex = zoomLevels.indexOf(currentZoom);
+    
+    // Calculate new zoom level
+    let newZoom: number;
+    if (zoomIn) {
+      // Zoom in - go to next higher level
+      newZoom = zoomLevels[Math.min(currentIndex + 1, zoomLevels.length - 1)];
+    } else {
+      // Zoom out - go to next lower level
+      newZoom = zoomLevels[Math.max(currentIndex - 1, 0)];
+    }
+    
+    // Only update if zoom level actually changed
+    if (newZoom !== currentZoom) {
+      setCamera(prev => ({
+        ...prev,
+        zoom: newZoom
+      }));
+    }
+  }, [camera.zoom]);
+
+  // Handle camera dragging
+  useEffect(() => {
+    const handleGlobalMouseMove = (event: MouseEvent) => {
+      if (isDraggingRef.current) {
+        const deltaX = event.clientX - lastMousePosRef.current.x;
+        const deltaY = event.clientY - lastMousePosRef.current.y;
+        
+        setCamera(prev => ({
+          ...prev,
+          position: {
+            ...prev.position,
+            x: prev.position.x + deltaX,
+            y: prev.position.y + deltaY
+          }
+        }));
+        
+        lastMousePosRef.current = { x: event.clientX, y: event.clientY };
+      }
+    };
+
+    const handleGlobalMouseUp = () => {
+      isDraggingRef.current = false;
+    };
+
+    document.addEventListener('mousemove', handleGlobalMouseMove);
+    document.addEventListener('mouseup', handleGlobalMouseUp);
+
+    return () => {
+      document.removeEventListener('mousemove', handleGlobalMouseMove);
+      document.removeEventListener('mouseup', handleGlobalMouseUp);
+    };
+  }, []);
+
+  // Handle keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      switch (event.key) {
+        case 'Delete':
+        case 'Backspace':
+          if (selectedBlock) {
+            removeBlock(selectedBlock.id);
+            setSelectedBlock(null);
+          }
+          break;
+        case 'r':
+        case 'R':
+          if (selectedBlock) {
+            rotateBlock(selectedBlock.id);
+          }
+          break;
+        case 'Escape':
+          setSelectedTile(null);
+          setSelectedBlock(null);
+          break;
+        case 's':
+        case 'S':
+          if (event.ctrlKey || event.metaKey) {
+            event.preventDefault();
+            setShowSaveDialog(true);
+          }
+          break;
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [selectedBlock, removeBlock, rotateBlock]);
+
+  // ============================================================================
+  // LEVEL MANAGEMENT
+  // ============================================================================
+
+  const saveLevel = useCallback(() => {
+    const levelToSave: Level = {
+      ...currentLevel,
+      blocks: [...blocks],
+      camera: { ...camera },
+      modifiedAt: new Date()
     };
     
-    setTiles(prev => [...prev, newTile]);
-    setNextTileId(prev => prev + 1);
-  };
+    LevelManager.saveLevel(levelToSave);
+    setCurrentLevel(levelToSave);
+    setShowSaveDialog(false);
+  }, [currentLevel, blocks, camera]);
+
+  const loadLevel = useCallback((level: Level) => {
+    setBlocks([...level.blocks]);
+    setCamera({ ...level.camera });
+    setCurrentLevel(level);
+    setSelectedBlock(null);
+    setSelectedTile(null);
+    
+    // Clear spatial index and rebuild
+    spatialIndex.clear();
+    level.blocks.forEach(block => spatialIndex.addBlock(block));
+  }, [spatialIndex]);
+
+  const createNewLevel = useCallback(() => {
+    const newLevel = LevelManager.createNewLevel();
+    setBlocks([]);
+    setCamera({ position: { x: 400, y: 200, z: 0 }, zoom: 1, rotation: 0 });
+    setCurrentLevel(newLevel);
+    setSelectedBlock(null);
+    setSelectedTile(null);
+    spatialIndex.clear();
+  }, [spatialIndex]);
+
+  const resetCamera = useCallback(() => {
+    setCamera({ position: { x: 400, y: 200, z: 0 }, zoom: 1, rotation: 0 });
+  }, []);
+
+  const resetTerrain = useCallback(() => {
+    console.log('🏛️ Resetting terrain...');
+    setBlocks([]);
+    setSelectedBlock(null);
+    spatialIndex.clear();
+    // The terrain generation useEffect will trigger automatically
+  }, [spatialIndex]);
+
+  // ============================================================================
+  // DEBUG TESTING
+  // ============================================================================
+  
+  // Expose debug functions to window for testing
+  useEffect(() => {
+    (window as any).testSanctuary = {
+      screenToGrid: (x: number, y: number) => screenToGrid(x, y),
+      gridToScreen: (x: number, y: number, z: number) => gridToScreen(x, y, z),
+      addTestBlock: () => {
+        const testBlock = createBlock(ISOMETRIC_TILES[0], { x: 0, y: 0, z: 0 });
+        addBlock(testBlock);
+        console.log('🏛️ Test block added:', testBlock);
+      },
+      getCamera: () => camera,
+      getBlocks: () => blocks,
+      setCamera: (pos: { x: number; y: number; z: number }) => setCamera(prev => ({ ...prev, position: pos })),
+      getTileSheetStatus: () => ({ loaded: tileSheetLoaded, image: tileSheet }),
+      forceFallback: () => {
+        console.log('🏛️ Forcing fallback rendering');
+        setTileSheetLoaded(false);
+      },
+      forceTileSheet: () => {
+        console.log('🏛️ Forcing tile sheet rendering');
+        setTileSheetLoaded(true);
+      }
+    };
+    console.log('🏛️ Debug functions available on window.testSanctuary');
+  }, [screenToGrid, gridToScreen, createBlock, addBlock, camera, blocks, tileSheetLoaded, tileSheet]);
+
+  // ============================================================================
+  // TILE SHEET LOADING
+  // ============================================================================
+
+  useEffect(() => {
+    console.log('🏛️ Loading tile sheet from:', TILE_SHEET_CONFIG.imagePath);
+    const img = new Image();
+    img.onload = () => {
+      console.log('🏛️ Tile sheet loaded successfully:', img.width, 'x', img.height);
+      setTileSheet(img);
+      setTileSheetLoaded(true);
+    };
+    img.onerror = (error) => {
+      console.error('🏛️ Failed to load tile sheet:', error);
+      setTileSheetLoaded(false);
+    };
+    img.src = TILE_SHEET_CONFIG.imagePath;
+  }, []);
+
+  // ============================================================================
+  // INITIALIZATION
+  // ============================================================================
+
+  useEffect(() => {
+    // Initialize canvas dimensions
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+      
+      // Test render to verify canvas is working
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.fillStyle = '#FF0000';
+        ctx.fillRect(0, 0, 100, 100);
+        ctx.fillStyle = '#00FF00';
+        ctx.fillRect(100, 100, 100, 100);
+      }
+    }
+
+    // Initialize with a simple test pattern
+    console.log('🏛️ Creating test blocks with tiles:', ISOMETRIC_TILES.slice(0, 5).map(t => t.name));
+    
+    const testBlocks: Block[] = [
+      createBlock(ISOMETRIC_TILES[0], { x: 0, y: 0, z: 0 }), // Center
+      createBlock(ISOMETRIC_TILES[1], { x: 1, y: 0, z: 0 }), // Right
+      createBlock(ISOMETRIC_TILES[2], { x: -1, y: 0, z: 0 }), // Left
+      createBlock(ISOMETRIC_TILES[3], { x: 0, y: 1, z: 0 }), // Down
+      createBlock(ISOMETRIC_TILES[4], { x: 0, y: -1, z: 0 }), // Up
+    ];
+    
+    console.log('🏛️ Created test blocks:', testBlocks.map(b => ({ id: b.id, pos: b.position, type: b.type })));
+    
+    testBlocks.forEach(block => {
+      addBlock(block);
+    });
+    
+    setIsLoaded(true);
+  }, [createBlock, addBlock]);
+
+  // Initialize with some terrain (disabled for testing)
+  useEffect(() => {
+    // Temporarily disabled for coordinate testing
+    // if (blocks.length === 0) {
+    //   console.log('🏛️ Generating initial terrain...');
+    //   // ... terrain generation code ...
+    // }
+  }, [blocks.length, createBlock, addBlock]);
+
+  // Handle canvas resize
+  useEffect(() => {
+    const handleResize = () => {
+      const canvas = canvasRef.current;
+      if (canvas) {
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Click indicator effect removed
+
+  // Debug grid position effect removed
+
+  // Debug instructions state
+  useEffect(() => {
+    console.log('🏛️ Instructions panel should show:', showInstructions);
+  }, [showInstructions]);
+
+  // ============================================================================
+  // BLOCK SELECTOR UI
+  // ============================================================================
+
+  const blockCategories = useMemo(() => [
+    { type: 'cube', name: 'Cubes' },
+    { type: 'flat', name: 'Flats' },
+    { type: 'ramp', name: 'Ramps' },
+    { type: 'corner', name: 'Corners' },
+    { type: 'staircase', name: 'Stairs' },
+    { type: 'pillar', name: 'Pillars' },
+    { type: 'water', name: 'Water' },
+  ], []);
+
+  const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
+
+  const palettes = useMemo(() => [
+    { name: 'green', color: '#4CAF50' },
+    { name: 'gray', color: '#9E9E9E' },
+    { name: 'orange', color: '#FF9800' },
+  ], []);
+
+  const getTilesByTypeAndPalette = useCallback((type: string, palette: string) => {
+    return ISOMETRIC_TILES.filter(tile => tile.type === type && tile.palette === palette);
+  }, []);
+
+  // ============================================================================
+  // RENDER
+  // ============================================================================
 
   return (
     <div className={`${styles.sanctuary} ${className}`}>
+      {/* Debug indicator */}
+      {/* Tile Sheet Loading Indicator - Hidden */}
+
+      {/* Header */}
       <div className={styles.sanctuaryHeader}>
         <span className={styles.sanctuaryIcon}>🏛️</span>
-        <h3 className={styles.sanctuaryTitle}>Sanctuary</h3>
+        <h3 className={styles.sanctuaryTitle}>Sanctuary - {currentLevel.name}</h3>
+        
+        {/* Selected Tile Indicator */}
+        {selectedTile && (
+          <div className={styles.selectedTileIndicator}>
+            <span>Selected: {selectedTile.name}</span>
+            <div 
+              className={styles.selectedTilePreview}
+              style={{
+                backgroundImage: `url('${TILE_SHEET_CONFIG.imagePath}')`,
+                backgroundPosition: `-${selectedTile.sourceX}px -${selectedTile.sourceY}px`,
+                backgroundSize: `${TILE_SHEET_CONFIG.sheetWidth}px ${TILE_SHEET_CONFIG.sheetHeight}px`,
+                backgroundRepeat: 'no-repeat',
+                imageRendering: 'pixelated',
+                width: '24px',
+                height: '24px',
+                display: 'inline-block',
+                marginLeft: '8px'
+              }}
+            />
+          </div>
+        )}
+        
+        {/* Zoom Level Indicator */}
+        <div className={styles.zoomIndicator}>
+          <span>{camera.zoom}x</span>
+        </div>
+        
+        {/* Level Management */}
         <button 
-          className={styles.blockMenuToggle}
+          style={unifiedButtonStyle}
+          onClick={() => setShowLevelMenu(!showLevelMenu)}
+          title="Level Management"
+        >
+          SAVE
+        </button>
+        
+        {/* Camera Reset */}
+        <button 
+          style={unifiedButtonStyle}
+          onClick={resetCamera}
+          title="Reset Camera"
+        >
+          🎯
+        </button>
+        
+        {/* Reset Terrain */}
+        <button 
+          style={unifiedButtonStyle}
+          onClick={resetTerrain}
+          title="Reset Terrain"
+        >
+          🌱
+        </button>
+        
+        {/* Instructions Toggle */}
+        <button 
+          style={unifiedButtonStyle}
+          onClick={() => {
+            console.log('🏛️ Instructions toggle clicked, current state:', showInstructions);
+            setShowInstructions(!showInstructions);
+            console.log('🏛️ Instructions state will be:', !showInstructions);
+          }}
+          title="Show/Hide Instructions"
+        >
+          [?]
+        </button>
+        
+        {/* Grid Toggle */}
+        <button 
+          style={unifiedButtonStyle}
+          onClick={() => setShowGrid(!showGrid)}
+          title="Show/Hide Grid"
+        >
+          {showGrid ? 'GRID ON' : 'GRID OFF'}
+        </button>
+        
+        <button 
+          style={unifiedButtonStyle}
           onClick={() => setIsBlockMenuOpen(!isBlockMenuOpen)}
+          title="Block Selector"
         >
           {isBlockMenuOpen ? '✕' : '🧱'}
         </button>
+        
+        <button 
+          style={unifiedButtonStyle}
+          onClick={() => setShowPerformance(!showPerformance)}
+          title="Performance Monitor"
+        >
+          📊
+        </button>
+        
+        <button 
+          style={{
+            ...unifiedButtonStyle,
+            background: 'var(--color-accent-secondary)'
+          }}
+          onClick={fillWithFlatBlocks}
+          title="Fill Grid with Flat Blocks"
+        >
+          🏗️ FILL
+        </button>
       </div>
-      
-      {/* Block Selector Menu */}
-      {isBlockMenuOpen && (
-        <div className={styles.blockSelector}>
-          <div className={styles.blockGroups}>
-            {blockGroups.map((group) => (
-              <div key={group.type} className={styles.blockGroup}>
-                <button
-                  className={`${styles.blockTypeButton} ${selectedBlockType === group.type ? styles.active : ''}`}
-                  onClick={() => handleBlockTypeSelect(group.type)}
-                >
-                  <span className={styles.blockIcon}>{group.icon}</span>
-                  <span className={styles.blockName}>{group.name}</span>
-                </button>
-                
-                {selectedBlockType === group.type && (
-                  <div className={styles.colorPalettes}>
-                    {group.colors.map((colorGroup) => (
-                      <div key={colorGroup.palette} className={styles.colorPalette}>
-                        <button
-                          className={`${styles.paletteButton} ${selectedPalette === colorGroup.palette ? styles.active : ''}`}
-                          onClick={() => handlePaletteSelect(colorGroup.palette)}
-                          style={{
-                            backgroundColor: colorGroup.palette === 'green' ? '#4CAF50' :
-                                           colorGroup.palette === 'blue' ? '#2196F3' :
-                                           colorGroup.palette === 'gray' ? '#9E9E9E' :
-                                           colorGroup.palette === 'orange' ? '#FF9800' : '#ccc'
-                          }}
-                        >
-                          {colorGroup.palette}
-                        </button>
-                        
-                        {selectedPalette === colorGroup.palette && (
-                          <div className={styles.tileGrid}>
-                            {colorGroup.tiles.map((tile) => (
-                              <button
-                                key={tile.id}
-                                className={`${styles.tileButton} ${selectedTileId === tile.id ? styles.active : ''}`}
-                                onClick={() => handleTileSelect(tile.id)}
-                                title={tile.name}
-                              >
-                                <TilePreview tile={tile} size={32} />
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
+
+      {/* Performance Display */}
+      {showPerformance && performanceMetrics && (
+        <div className={styles.performanceDisplay}>
+          <div>FPS: {performanceMetrics.fps.toFixed(1)}</div>
+          <div>Render: {performanceMetrics.renderTime.toFixed(1)}ms</div>
+          <div>Blocks: {performanceMetrics.blockCount}</div>
+          <div>Visible: {performanceMetrics.visibleBlocks}</div>
+          <div>Draw Calls: {performanceMetrics.drawCalls}</div>
+          <div>Grade: {performanceMonitor.getPerformanceGrade()}</div>
+        </div>
+      )}
+
+      {/* Level Management Menu */}
+      {showLevelMenu && (
+        <div className={styles.levelMenu}>
+          <div className={styles.levelMenuHeader}>
+            <h4>Level Management</h4>
+            <button onClick={() => setShowLevelMenu(false)}>✕</button>
+          </div>
+          
+          <div className={styles.levelActions}>
+            <button onClick={createNewLevel}>New Level</button>
+            <button onClick={() => setShowSaveDialog(true)}>Save Level</button>
+          </div>
+          
+          <div className={styles.levelList}>
+            <h5>Saved Levels</h5>
+            {LevelManager.getAllLevels().map(level => (
+              <div key={level.id} className={styles.levelItem}>
+                <span>{level.name}</span>
+                <div className={styles.levelItemActions}>
+                  <button onClick={() => loadLevel(level)}>Load</button>
+                  <button onClick={() => LevelManager.deleteLevel(level.id)}>Delete</button>
+                </div>
               </div>
             ))}
           </div>
-          
-          {/* Selected tile info */}
-          {selectedTileId && (
-            <div className={styles.selectedTileInfo}>
-              <div className={styles.selectedTilePreview}>
-                <TilePreview 
-                  tile={ISOMETRIC_TILES.find(t => t.id === selectedTileId)!} 
-                  size={24}
-                />
-                <span>{ISOMETRIC_TILES.find(t => t.id === selectedTileId)?.name}</span>
-              </div>
-            </div>
-          )}
         </div>
       )}
-      
-      <div className={styles.zoomControls}>
-        <button 
-          className={`${styles.zoomButton} ${zoom === 1 ? styles.active : ''}`}
-          onClick={() => handleZoomIn(1)}
-        >
-          1x
-        </button>
-        <button 
-          className={`${styles.zoomButton} ${zoom === 2 ? styles.active : ''}`}
-          onClick={() => handleZoomIn(2)}
-        >
-          2x
-        </button>
-        <button 
-          className={`${styles.zoomButton} ${zoom === 4 ? styles.active : ''}`}
-          onClick={() => handleZoomIn(4)}
-        >
-          4x
-        </button>
-        <button 
-          className={styles.resetButton}
-          onClick={handleResetView}
-        >
-          Reset
-        </button>
-      </div>
-      
+
+      {/* Save Dialog */}
+      {showSaveDialog && (
+        <div className={styles.saveDialog}>
+          <div className={styles.saveDialogContent}>
+            <h4>Save Level</h4>
+            <input
+              type="text"
+              value={levelName}
+              onChange={(e) => setLevelName(e.target.value)}
+              placeholder="Level name"
+            />
+            <div className={styles.saveDialogActions}>
+              <button onClick={saveLevel}>Save</button>
+              <button onClick={() => setShowSaveDialog(false)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+            {/* Block Selector */}
+      {isBlockMenuOpen && (
+        <div className={styles.blockSelector}>
+          <div className={styles.blockSelectorHeader}>
+            <button 
+              className={styles.closeButton}
+              onClick={() => setIsBlockMenuOpen(false)}
+              title="Close Block Selector"
+            >
+              ✕
+            </button>
+          </div>
+          
+          <div className={styles.blockCategories}>
+            {blockCategories.map(category => {
+              const isExpanded = expandedCategory === category.type;
+              
+              return (
+                <div key={category.type} className={styles.blockCategory}>
+                  <div 
+                    className={styles.categoryHeader}
+                    onClick={() => setExpandedCategory(isExpanded ? null : category.type)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <h4>{category.name}</h4>
+                    <span className={styles.expandIcon}>{isExpanded ? '▼' : '▶'}</span>
+                  </div>
+                  
+                  {isExpanded && (
+                    <div className={styles.expandedContent}>
+                      {category.type === 'water' ? (
+                        // Special rendering for water category - show all water tiles directly
+                        <div className={styles.tileGrid}>
+                          {ISOMETRIC_TILES.filter(tile => tile.type === 'water').map(tile => (
+                            <button
+                              key={tile.id}
+                              className={`${styles.tileButton} ${selectedTile?.id === tile.id ? styles.active : ''}`}
+                              onClick={() => setSelectedTile(tile)}
+                              title={`${tile.name} (water) - ${tile.sourceX},${tile.sourceY}`}
+                            >
+                              <TilePreview tile={tile} size={32} />
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        // Regular rendering for other categories - show palettes
+                        <div className={styles.paletteGrid}>
+                          {palettes.map(palette => {
+                            const tiles = ISOMETRIC_TILES.filter(tile => 
+                              tile.type === category.type && tile.palette === palette.name
+                            );
+                            
+                            if (tiles.length === 0) return null;
+                            
+                            return (
+                              <div key={palette.name} className={styles.paletteSection}>
+                                                              <div className={styles.paletteHeader}>
+                                <div 
+                                  className={styles.paletteButton}
+                                  style={{ backgroundColor: palette.color }}
+                                />
+                              </div>
+                                
+                                <div className={styles.tileGrid}>
+                                  {tiles.map(tile => (
+                                                                      <button
+                                    key={tile.id}
+                                    className={`${styles.tileButton} ${selectedTile?.id === tile.id ? styles.active : ''}`}
+                                    onClick={() => setSelectedTile(tile)}
+                                    title={`${tile.name} (${tile.palette}) - ${tile.sourceX},${tile.sourceY}`}
+                                  >
+                                    <TilePreview tile={tile} size={32} />
+                                  </button>
+                                  ))}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          
+
+        </div>
+      )}
+
+      {/* Canvas Container */}
       <div className={styles.canvasContainer}>
         <canvas
           ref={canvasRef}
           className={styles.isometricCanvas}
           onClick={handleCanvasClick}
-          onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
+          onMouseDown={handleMouseDown}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseLeave}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-          style={{ 
-            cursor: dragState.isDragging 
-              ? 'grabbing' 
-              : hoverCell 
-                ? 'pointer' 
-                : 'grab',
-            touchAction: 'none' // Prevent default touch behaviors
+          onWheel={handleWheel}
+          onContextMenu={(e) => e.preventDefault()}
+          style={{
+            cursor: selectedTile ? 'crosshair' : 'default',
+            touchAction: 'none'
           }}
         />
-        {/* Temporarily disabled hover canvas for debugging
-        <canvas
-          ref={hoverCanvasRef}
-          className={styles.hoverCanvas}
-          style={{ 
-            pointerEvents: 'none',
-            touchAction: 'none',
-            position: 'absolute',
-            top: 0,
-            left: 0
-          }}
-        />
-        */}
       </div>
-      {!isLoaded && (
+
+      {/* Instructions */}
+      {showInstructions && (
+        <div className={styles.instructions}>
+          <h4>Instructions</h4>
+          <div className={styles.instructionItem}>
+            <strong>Left Click:</strong> {selectedTile ? 'Place Block' : 'Select Block'}
+          </div>
+          <div className={styles.instructionItem}>
+            <strong>Right Click:</strong> Remove Block
+          </div>
+          <div className={styles.instructionItem}>
+            <strong>Middle Drag:</strong> Pan Camera
+          </div>
+          <div className={styles.instructionItem}>
+            <strong>Mouse Wheel:</strong> Zoom
+          </div>
+          <div className={styles.instructionItem}>
+            <strong>R Key:</strong> Rotate Selected Block
+          </div>
+          <div className={styles.instructionItem}>
+            <strong>Delete:</strong> Remove Selected Block
+          </div>
+        </div>
+      )}
+
+      {/* Loading Overlay */}
+      {(!isLoaded || !tileSheetLoaded) && (
         <div className={styles.loadingOverlay}>
-          Loading Sanctuary...
+          {!isLoaded ? 'Loading Optimized Sanctuary...' : 'Loading Tile Sheet...'}
         </div>
       )}
     </div>
   );
-};
+});
+
+Sanctuary.displayName = 'Sanctuary';
 
 export default Sanctuary; 
