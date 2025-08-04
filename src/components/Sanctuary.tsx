@@ -169,7 +169,7 @@ class SpatialIndex {
     }
   }
 
-  getBlocksInArea(x: number, y: number, z: number, radius: number): Block[] {
+  getBlocksInArea(x: number, y: number, z: number, _radius: number): Block[] {
     const blocks: Block[] = [];
     const centerCell = this.getCellKey(x, y, z);
     const [centerX, centerY, centerZ] = centerCell.split(',').map(Number);
@@ -248,7 +248,7 @@ class CullingSystem {
     };
   }
 
-  getVisibleBlocks(camera: Camera, maxDistance: number = 200): Block[] {
+  getVisibleBlocks(_camera: Camera, _maxDistance: number = 200): Block[] {
     // Temporarily bypass spatial index and return all blocks for debugging
     const allBlocks = this.spatialIndex.getAllBlocks();
     
@@ -1363,7 +1363,7 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className = '' }) => {
     }
     
     // Render blocks as colored rectangles using corrected coordinate system
-    blocks.forEach((block, index) => {
+    blocks.forEach((block, _index) => {
       console.log('🏛️ Rendering fallback block:', block.id, 'at position:', block.position);
       
       const { x, y, z } = block.position;
