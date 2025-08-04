@@ -364,7 +364,7 @@ const Sanctuary: React.FC<SanctuaryProps> = ({
         ctx.scale(zoom, zoom);
         
         // Draw isometric grid
-        drawIsometricGrid(ctx, rect.width);
+        drawIsometricGrid();
         
         // Draw tiles
         tiles.forEach(tile => {
@@ -425,49 +425,9 @@ const Sanctuary: React.FC<SanctuaryProps> = ({
   //   }
   // }, [hoverCell, isLoaded, camera, zoom]);
 
-  const drawIsometricGrid = (ctx: CanvasRenderingContext2D, width: number) => {
-    // Proper isometric tilemap grid system
-    // Each tile is 32x32 pixels, but in isometric projection:
-    // - The tile's base footprint is 32 pixels wide
-    // - The tile's base footprint is 16 pixels tall (32/2 for isometric)
-    // - Grid cells should match the tile's base footprint exactly
-    const tileWidth = 32;
-    const tileHeight = 16; // Half the tile width for isometric projection
-    
-    // Grid cell dimensions - make diamonds larger to fill gaps
-    // For edge-to-edge diamonds, use the full tile width/height for diamond points
-    const cellWidth = tileWidth; // Full width for diamond points
-    const cellHeight = tileHeight; // Full height for diamond points
-    
-    // Grid is now invisible - removed grid drawing code
-    // ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-    // ctx.lineWidth = 1;
-    // 
-    // // Center point - match tile positioning
-    // const centerX = width / 2;
-    // const centerY = 56; // Offset down to align with tile bases
-    // 
-    // // Draw grid cells that match tile base footprints
-    // // Each cell is a diamond shape that represents where a tile's base would be
-    // // Use smaller range to reduce flickering and bring cells closer together
-    // for (let x = -4; x <= 4; x++) {
-    //   for (let y = -4; y <= 4; y++) {
-    //     // Use half the tile width for spacing to match tile positioning
-    //     const isoX = (x - y) * (tileWidth / 2) + centerX;
-    //     const isoY = (x + y) * (tileHeight / 2) + centerY;
-    //     
-    //     // Draw diamond shape for this grid cell
-    //     // The diamond represents the tile's base footprint
-    //     // Use full diamond size to eliminate gaps between cells
-    //     ctx.beginPath();
-    //     ctx.moveTo(isoX, isoY - cellHeight / 2); // top
-    //     ctx.lineTo(isoX + cellWidth / 2, isoY); // right
-    //     ctx.lineTo(isoX, isoY + cellHeight / 2); // bottom
-    //     ctx.lineTo(isoX - cellWidth / 2, isoY); // left
-    //     ctx.closePath();
-    //     ctx.stroke();
-    //   }
-    // }
+  const drawIsometricGrid = () => {
+    // Grid drawing is currently disabled for cleaner visual appearance
+    // This function is kept for future grid visualization features
   };
 
   const drawTile = (ctx: CanvasRenderingContext2D, tileSheet: HTMLImageElement, tile: IsometricTile, canvasWidth: number) => {
