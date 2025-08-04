@@ -441,7 +441,7 @@ class LevelManager {
       createdAt: new Date(),
       modifiedAt: new Date(),
       blocks: [],
-      camera: { position: { x: 400, y: 200, z: 0 }, zoom: 1, rotation: 0 },
+      camera: { position: { x: 400, y: 300, z: 0 }, zoom: 1.5, rotation: 0 },
       settings: { gravity: true }
     };
   }
@@ -486,6 +486,262 @@ const TilePreview: React.FC<TilePreviewProps> = React.memo(({ tile, size = 32, c
 });
 
 TilePreview.displayName = 'TilePreview';
+
+// ============================================================================
+// PROCEDURAL MAP GENERATION SYSTEM
+// ============================================================================
+
+interface MapGeneratorConfig {
+  width: number;
+  height: number;
+  seed?: number;
+  terrainTypes: {
+    grass: number;
+    stone: number;
+    water: number;
+    sand: number;
+  };
+  features: {
+    structures: boolean;
+    trees: boolean;
+    waterBodies: boolean;
+    elevation: boolean;
+  };
+}
+
+class ProceduralMapGenerator {
+  private seed: number;
+  private noise: (x: number, y: number) => number;
+
+  constructor(seed?: number) {
+    this.seed = seed || Math.floor(Math.random() * 1000000);
+    this.noise = this.createNoiseFunction();
+  }
+
+  private createNoiseFunction(): (x: number, y: number) => number {
+    // Simple hash-based noise function
+    const hash = (x: number, y: number): number => {
+      const n = x + y * 57 + this.seed;
+      return Math.sin(n) * 43758.5453 - Math.floor(Math.sin(n) * 43758.5453);
+    };
+
+    return (x: number, y: number): number => {
+      const xi = Math.floor(x);
+      const yi = Math.floor(y);
+      const xf = x - xi;
+      const yf = y - yi;
+
+      const h00 = hash(xi, yi);
+      const h10 = hash(xi + 1, yi);
+      const h01 = hash(xi, yi + 1);
+      const h11 = hash(xi + 1, yi + 1);
+
+      // Bilinear interpolation
+      const top = h00 + (h10 - h00) * xf;
+      const bottom = h01 + (h11 - h01) * xf;
+      return top + (bottom - top) * yf;
+    };
+  }
+
+  private getTerrainType(x: number, y: number): { type: string; palette: string; elevation: number } {
+    const noise1 = this.noise(x * 0.1, y * 0.1);
+    const noise2 = this.noise(x * 0.05, y * 0.05);
+    const combinedNoise = (noise1 + noise2) / 2;
+
+    // Elevation based on noise
+    const elevation = Math.floor(combinedNoise * 3);
+
+    // Terrain type based on noise and elevation
+    if (combinedNoise < 0.2) {
+      return { type: 'water', palette: 'blue', elevation };
+    } else if (combinedNoise < 0.4) {
+      return { type: 'flat', palette: 'green', elevation };
+    } else if (combinedNoise < 0.7) {
+      return { type: 'flat', palette: 'gray', elevation };
+    } else {
+      return { type: 'cube', palette: 'orange', elevation };
+    }
+  }
+
+  private shouldPlaceStructure(x: number, y: number): boolean {
+    const structureNoise = this.noise(x * 0.3, y * 0.3);
+    return structureNoise > 0.8 && Math.abs(x) > 3 && Math.abs(y) > 3; // Avoid center
+  }
+
+  private shouldPlaceTree(x: number, y: number): boolean {
+    const treeNoise = this.noise(x * 0.4, y * 0.4);
+    return treeNoise > 0.85 && Math.abs(x) > 2 && Math.abs(y) > 2;
+  }
+
+  generateMap(config: MapGeneratorConfig): Block[] {
+    const blocks: Block[] = [];
+    const centerX = 0;
+    const centerY = 0;
+
+    // Generate base terrain
+    for (let x = -config.width / 2; x < config.width / 2; x++) {
+      for (let y = -config.height / 2; y < config.height / 2; y++) {
+        const terrain = this.getTerrainType(x, y);
+        
+        // Skip water tiles for now (we'll add them separately)
+        if (terrain.type === 'water') continue;
+
+        // Find appropriate tile for this terrain type and palette
+        const availableTiles = ISOMETRIC_TILES.filter(tile => 
+          tile.type === terrain.type && tile.palette === terrain.palette
+        );
+
+        if (availableTiles.length > 0) {
+          const selectedTile = availableTiles[Math.floor(Math.random() * availableTiles.length)];
+          
+          const block: Block = {
+            id: `terrain_${x}_${y}_${terrain.elevation}`,
+            type: terrain.type as IsometricTileData['type'],
+            palette: terrain.palette as IsometricTileData['palette'],
+            position: { x, y, z: terrain.elevation },
+            rotation: 0,
+            properties: {
+              walkable: terrain.type === 'flat',
+              climbable: terrain.type === 'ramp' || terrain.type === 'staircase',
+              interactable: false,
+              destructible: true,
+            },
+            sprite: {
+              sourceX: selectedTile.sourceX,
+              sourceY: selectedTile.sourceY,
+              width: selectedTile.width,
+              height: selectedTile.height,
+              sheetPath: TILE_SHEET_CONFIG.imagePath,
+            },
+          };
+          
+          blocks.push(block);
+        }
+      }
+    }
+
+    // Add water bodies
+    if (config.features.waterBodies) {
+      for (let x = -config.width / 2; x < config.width / 2; x++) {
+        for (let y = -config.height / 2; y < config.height / 2; y++) {
+          const terrain = this.getTerrainType(x, y);
+          
+          if (terrain.type === 'water') {
+            const waterTiles = ISOMETRIC_TILES.filter(tile => tile.type === 'water');
+            if (waterTiles.length > 0) {
+              const selectedTile = waterTiles[Math.floor(Math.random() * waterTiles.length)];
+              
+              const block: Block = {
+                id: `water_${x}_${y}_0`,
+                type: 'water',
+                palette: 'blue',
+                position: { x, y, z: 0 },
+                rotation: 0,
+                properties: {
+                  walkable: false,
+                  climbable: false,
+                  interactable: false,
+                  destructible: false,
+                },
+                sprite: {
+                  sourceX: selectedTile.sourceX,
+                  sourceY: selectedTile.sourceY,
+                  width: selectedTile.width,
+                  height: selectedTile.height,
+                  sheetPath: TILE_SHEET_CONFIG.imagePath,
+                },
+              };
+              
+              blocks.push(block);
+            }
+          }
+        }
+      }
+    }
+
+    // Add structures
+    if (config.features.structures) {
+      for (let x = -config.width / 2; x < config.width / 2; x++) {
+        for (let y = -config.height / 2; y < config.height / 2; y++) {
+          if (this.shouldPlaceStructure(x, y)) {
+            const structureTiles = ISOMETRIC_TILES.filter(tile => 
+              tile.type === 'cube' && tile.palette === 'gray'
+            );
+            
+            if (structureTiles.length > 0) {
+              const selectedTile = structureTiles[Math.floor(Math.random() * structureTiles.length)];
+              
+              const block: Block = {
+                id: `structure_${x}_${y}_1`,
+                type: 'cube',
+                palette: 'gray',
+                position: { x, y, z: 1 },
+                rotation: 0,
+                properties: {
+                  walkable: false,
+                  climbable: false,
+                  interactable: true,
+                  destructible: true,
+                },
+                sprite: {
+                  sourceX: selectedTile.sourceX,
+                  sourceY: selectedTile.sourceY,
+                  width: selectedTile.width,
+                  height: selectedTile.height,
+                  sheetPath: TILE_SHEET_CONFIG.imagePath,
+                },
+              };
+              
+              blocks.push(block);
+            }
+          }
+        }
+      }
+    }
+
+    // Add trees
+    if (config.features.trees) {
+      for (let x = -config.width / 2; x < config.width / 2; x++) {
+        for (let y = -config.height / 2; y < config.height / 2; y++) {
+          if (this.shouldPlaceTree(x, y)) {
+            const treeTiles = ISOMETRIC_TILES.filter(tile => 
+              tile.type === 'pillar' && tile.palette === 'green'
+            );
+            
+            if (treeTiles.length > 0) {
+              const selectedTile = treeTiles[Math.floor(Math.random() * treeTiles.length)];
+              
+              const block: Block = {
+                id: `tree_${x}_${y}_1`,
+                type: 'pillar',
+                palette: 'green',
+                position: { x, y, z: 1 },
+                rotation: 0,
+                properties: {
+                  walkable: false,
+                  climbable: false,
+                  interactable: false,
+                  destructible: true,
+                },
+                sprite: {
+                  sourceX: selectedTile.sourceX,
+                  sourceY: selectedTile.sourceY,
+                  width: selectedTile.width,
+                  height: selectedTile.height,
+                  sheetPath: TILE_SHEET_CONFIG.imagePath,
+                },
+              };
+              
+              blocks.push(block);
+            }
+          }
+        }
+      }
+    }
+
+    return blocks;
+  }
+}
 
 // ============================================================================
 // MAIN SANCTUARY COMPONENT
@@ -540,7 +796,7 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className = '' }) => {
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [camera, setCamera] = useState<Camera>({
     position: { x: 400, y: 300, z: 0 }, // Center the camera on the canvas
-    zoom: 2, // Zoom in a bit to see blocks better
+    zoom: 1.5, // Slightly zoomed out to see more of the larger map
     rotation: 0
   });
   const [hoverCell, setHoverCell] = useState<{ x: number; y: number; z: number } | null>(null);
@@ -568,9 +824,68 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className = '' }) => {
   const [fillMode, setFillMode] = useState(false);
 
   // ============================================================================
-  // BLOCK MANAGEMENT
+  // PROCEDURAL MAP GENERATION
   // ============================================================================
-  
+
+  const generateProceduralMap = useCallback((size: 'small' | 'medium' | 'large' = 'medium') => {
+    console.log(`🏗️ Generating ${size} procedural map...`);
+    
+    const mapGenerator = new ProceduralMapGenerator();
+    
+    // Map size configurations
+    const sizeConfigs = {
+      small: { width: 16, height: 16, zoom: 2 },
+      medium: { width: 32, height: 32, zoom: 1.5 },
+      large: { width: 48, height: 48, zoom: 1 }
+    };
+    
+    const config: MapGeneratorConfig = {
+      width: sizeConfigs[size].width,
+      height: sizeConfigs[size].height,
+      seed: Math.floor(Math.random() * 1000000),
+      terrainTypes: {
+        grass: 0.4,
+        stone: 0.3,
+        water: 0.2,
+        sand: 0.1
+      },
+      features: {
+        structures: true,
+        trees: true,
+        waterBodies: true,
+        elevation: true
+      }
+    };
+    
+    const generatedBlocks = mapGenerator.generateMap(config);
+    console.log(`🏗️ Generated ${generatedBlocks.length} blocks for ${size} procedural map`);
+    
+    // Clear existing blocks and spatial index
+    setBlocks([]);
+    spatialIndex.clear();
+    
+    // Add generated blocks
+    setBlocks(generatedBlocks);
+    generatedBlocks.forEach(block => {
+      spatialIndex.addBlock(block);
+    });
+    
+    // Update camera zoom for the new map size
+    setCamera(prev => ({
+      ...prev,
+      zoom: sizeConfigs[size].zoom
+    }));
+    
+    // Update level
+    setCurrentLevel(prevLevel => ({
+      ...prevLevel,
+      blocks: generatedBlocks,
+      modifiedAt: new Date()
+    }));
+    
+    console.log(`✅ ${size} procedural map generation complete!`);
+  }, [spatialIndex]);
+
   const fillWithFlatBlocks = useCallback(() => {
     console.log('🏗️ Filling grid with flat blocks...');
     
@@ -642,6 +957,10 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className = '' }) => {
     console.log('✅ Fill complete!');
   }, [spatialIndex]);
 
+  // ============================================================================
+  // BLOCK MANAGEMENT
+  // ============================================================================
+  
   const createBlock = useCallback((tile: IsometricTileData, position: { x: number; y: number; z: number }): Block => {
     
     const block: Block = {
@@ -751,7 +1070,7 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className = '' }) => {
   // ============================================================================
   
   const unifiedButtonStyle = {
-    background: 'var(--color-accent-primary)',
+    background: 'var(--color-accent-gold)',
     border: '1px solid var(--color-border-primary)',
     borderRadius: '4px',
     padding: '6px 10px',
@@ -1347,7 +1666,7 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className = '' }) => {
   const createNewLevel = useCallback(() => {
     const newLevel = LevelManager.createNewLevel();
     setBlocks([]);
-    setCamera({ position: { x: 400, y: 200, z: 0 }, zoom: 1, rotation: 0 });
+    setCamera({ position: { x: 400, y: 300, z: 0 }, zoom: 1.5, rotation: 0 });
     setCurrentLevel(newLevel);
     setSelectedBlock(null);
     setSelectedTile(null);
@@ -1355,7 +1674,7 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className = '' }) => {
   }, [spatialIndex]);
 
   const resetCamera = useCallback(() => {
-    setCamera({ position: { x: 400, y: 200, z: 0 }, zoom: 1, rotation: 0 });
+    setCamera({ position: { x: 400, y: 300, z: 0 }, zoom: 1.5, rotation: 0 });
   }, []);
 
   const resetTerrain = useCallback(() => {
@@ -1391,10 +1710,14 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className = '' }) => {
       forceTileSheet: () => {
         console.log('🏛️ Forcing tile sheet rendering');
         setTileSheetLoaded(true);
+      },
+      generateProceduralMap: (size: 'small' | 'medium' | 'large' = 'medium') => {
+        console.log('🏛️ Generating procedural map via debug function');
+        generateProceduralMap(size);
       }
     };
     console.log('🏛️ Debug functions available on window.testSanctuary');
-  }, [screenToGrid, gridToScreen, createBlock, addBlock, camera, blocks, tileSheetLoaded, tileSheet]);
+  }, [screenToGrid, gridToScreen, createBlock, addBlock, camera, blocks, tileSheetLoaded, tileSheet, generateProceduralMap]);
 
   // ============================================================================
   // TILE SHEET LOADING
@@ -1437,34 +1760,19 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className = '' }) => {
       }
     }
 
-    // Initialize with a simple test pattern
-    console.log('🏛️ Creating test blocks with tiles:', ISOMETRIC_TILES.slice(0, 5).map(t => t.name));
-    
-    const testBlocks: Block[] = [
-      createBlock(ISOMETRIC_TILES[0], { x: 0, y: 0, z: 0 }), // Center
-      createBlock(ISOMETRIC_TILES[1], { x: 1, y: 0, z: 0 }), // Right
-      createBlock(ISOMETRIC_TILES[2], { x: -1, y: 0, z: 0 }), // Left
-      createBlock(ISOMETRIC_TILES[3], { x: 0, y: 1, z: 0 }), // Down
-      createBlock(ISOMETRIC_TILES[4], { x: 0, y: -1, z: 0 }), // Up
-    ];
-    
-    console.log('🏛️ Created test blocks:', testBlocks.map(b => ({ id: b.id, pos: b.position, type: b.type })));
-    
-    testBlocks.forEach(block => {
-      addBlock(block);
-    });
+    // Initialize canvas and systems (test blocks removed - procedural map will be generated instead)
+    console.log('🏛️ Canvas initialized, ready for procedural map generation');
     
     setIsLoaded(true);
   }, [createBlock, addBlock]);
 
-  // Initialize with some terrain (disabled for testing)
+  // Initialize with procedural map
   useEffect(() => {
-    // Temporarily disabled for coordinate testing
-    // if (blocks.length === 0) {
-    //   console.log('🏛️ Generating initial terrain...');
-    //   // ... terrain generation code ...
-    // }
-  }, [blocks.length, createBlock, addBlock]);
+    if (blocks.length === 0 && isLoaded) {
+      console.log('🏛️ Generating initial procedural map...');
+      generateProceduralMap('medium');
+    }
+  }, [blocks.length, isLoaded, generateProceduralMap]);
 
   // Handle canvas resize
   useEffect(() => {
@@ -1624,12 +1932,34 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className = '' }) => {
         <button 
           style={{
             ...unifiedButtonStyle,
-            background: 'var(--color-accent-secondary)'
+            background: 'var(--color-accent-beaver)'
           }}
           onClick={fillWithFlatBlocks}
           title="Fill Grid with Flat Blocks"
         >
           🏗️ FILL
+        </button>
+        
+        <button 
+          style={{
+            ...unifiedButtonStyle,
+            background: 'var(--color-accent-gold)'
+          }}
+          onClick={() => generateProceduralMap('medium')}
+          title="Generate Medium Procedural Map (32x32)"
+        >
+          🌍 MEDIUM
+        </button>
+        
+        <button 
+          style={{
+            ...unifiedButtonStyle,
+            background: 'var(--color-accent-beaver)'
+          }}
+          onClick={() => generateProceduralMap('large')}
+          title="Generate Large Procedural Map (48x48)"
+        >
+          🌍 LARGE
         </button>
       </div>
 

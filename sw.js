@@ -1,5 +1,5 @@
 // Service Worker for Scrypture PWA
-const CACHE_NAME = 'scrypture-v1.3.0';
+const CACHE_NAME = 'scrypture-v1.4.0';
 const urlsToCache = [
   '/',
   '/index.html',
