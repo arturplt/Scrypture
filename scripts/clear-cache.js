@@ -25,9 +25,9 @@ const dirsToClean = [
 
 // Files to clean
 const filesToClean = [
-  'package-lock.json',
   'yarn.lock',
   'pnpm-lock.yaml'
+  // Note: package-lock.json is preserved for GitHub Actions deployment
 ];
 
 // Clean directories
