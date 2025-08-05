@@ -1,5 +1,5 @@
 // Service Worker for Scrypture PWA
-const CACHE_NAME = 'scrypture-v8'; // Increment version to force cache update
+const CACHE_NAME = 'scrypture-v10'; // Increment version to force cache update
 const urlsToCache = [
   '/',
   '/index.html',
@@ -8,11 +8,11 @@ const urlsToCache = [
 
 // Install event - cache resources and force activation
 self.addEventListener('install', (event) => {
-  console.log('SW: Installing service worker v8');
+  console.log('SW: Installing service worker v10');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-                  console.log('SW: Opened cache v8');
+                  console.log('SW: Opened cache v10');
         return cache.addAll(urlsToCache);
       })
       .then(() => {
@@ -88,7 +88,7 @@ self.addEventListener('fetch', (event) => {
 
 // Activate event - clean up old caches and take control immediately
 self.addEventListener('activate', (event) => {
-  console.log('SW: Activating service worker v8');
+  console.log('SW: Activating service worker v10');
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(

@@ -1,20 +1,56 @@
 # Deployment Checklist
 
-## Before Deploying
+## 🚀 Streamlined Deployment (Recommended)
 
-1. **Increment Service Worker Version**
-   - Edit `public/sw.js`
-   - Change `CACHE_NAME` from `'scrypture-vX'` to `'scrypture-vY'` (increment version)
-   - This forces the service worker to update and clear old caches
+### Option 1: Full Automated Deployment
+```bash
+npm run deploy:auto
+```
+This single command will:
+- ✅ Clear all caches
+- ✅ Bump version automatically
+- ✅ Run tests
+- ✅ Build the project
+- ✅ Verify the build
+- ✅ Deploy to GitHub Pages
+- ✅ Open force refresh page
 
-2. **Check Build Output**
-   - Run `npm run build` locally
-   - Verify the build completes without errors
-   - Check that your changes are included in the build
+### Option 2: Quick Deployment
+```bash
+npm run deploy:force
+```
+This will:
+- ✅ Bump version automatically
+- ✅ Build and deploy
+- ✅ Verify deployment
 
-3. **Test Locally**
-   - Run `npm run preview` to test the production build locally
-   - Verify your changes work in the production build
+### Option 3: Manual Deployment
+If you prefer manual control:
+
+1. **Clear Caches**
+   ```bash
+   npm run cache:clear
+   ```
+
+2. **Bump Version**
+   ```bash
+   npm run version:bump
+   ```
+
+3. **Build and Deploy**
+   ```bash
+   npm run build
+   gh-pages -d dist
+   ```
+
+## 📊 Deployment Monitoring
+
+After deployment, check:
+- **Deployment Status**: https://scrypture.app/deployment-status.html
+- **Force Refresh**: https://scrypture.app/force-deploy-refresh.html
+- **Deployment Info**: https://scrypture.app/deploy-info.json
+
+## Before Deploying (Manual Process)
 
 ## After Deploying
 

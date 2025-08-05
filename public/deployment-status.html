@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deployment Status - Scrypture</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a2e;
+            color: #eee;
+            padding: 2rem;
+        }
+        .container {
+            background: #16213e;
+            border: 2px solid #667eea;
+            padding: 2rem;
+            border-radius: 8px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .status-card {
+            background: #0f1419;
+            border: 1px solid #333;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-live { background: #4ade80; }
+        .status-cached { background: #fbbf24; }
+        .status-offline { background: #ef4444; }
+        .button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 4px;
+            transition: all 0.3s ease;
+        }
+        .button:hover {
+            background: #764ba2;
+        }
+        .version-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        .info-item {
+            background: #1e293b;
+            padding: 0.5rem;
+            border-radius: 4px;
+            border-left: 3px solid #667eea;
+        }
+        .log {
+            background: #0f1419;
+            border: 1px solid #333;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+            font-size: 0.9em;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Deployment Status</h1>
+        
+        <div class="status-card">
+            <h3><span class="status-indicator status-live"></span>Current Status</h3>
+            <div id="currentStatus">Loading...</div>
+        </div>
+        
+        <div class="version-info" id="versionInfo">
+            <!-- Version info will be populated here -->
+        </div>
+        
+        <div class="status-card">
+            <h3>🔄 Cache Status</h3>
+            <div id="cacheStatus">Loading...</div>
+            <button class="button" onclick="checkCacheStatus()">Refresh Cache Status</button>
+        </div>
+        
+        <div class="status-card">
+            <h3>📋 Deployment History</h3>
+            <div class="log" id="deploymentLog">Loading...</div>
+        </div>
+        
+        <div class="status-card">
+            <h3>🔧 Quick Actions</h3>
+            <button class="button" onclick="window.location.href='/force-deploy-refresh.html'">Force Refresh</button>
+            <button class="button" onclick="window.location.href='/clear-cache.html'">Clear Cache</button>
+            <button class="button" onclick="window.location.href='/'">Go to App</button>
+            <button class="button" onclick="checkAllStatus()">Check All Status</button>
+        </div>
+    </div>
+
+    <script>
+        async function loadDeploymentInfo() {
+            try {
+                const response = await fetch('/deploy-info.json');
+                if (response.ok) {
+                    const data = await response.json();
+                    return data;
+                }
+            } catch (error) {
+                console.error('Could not load deployment info:', error);
+            }
+            return null;
+        }
+        
+        async function checkServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                const registration = await navigator.serviceWorker.getRegistration();
+                if (registration) {
+                    return {
+                        active: !!registration.active,
+                        waiting: !!registration.waiting,
+                        scope: registration.scope
+                    };
+                }
+            }
+            return null;
+        }
+        
+        async function checkCacheStorage() {
+            if ('caches' in window) {
+                const cacheNames = await caches.keys();
+                const cacheDetails = [];
+                
+                for (const cacheName of cacheNames) {
+                    const cache = await caches.open(cacheName);
+                    const keys = await cache.keys();
+                    cacheDetails.push({
+                        name: cacheName,
+                        size: keys.length
+                    });
+                }
+                
+                return cacheDetails;
+            }
+            return [];
+        }
+        
+        function updateVersionInfo(deployInfo) {
+            const versionInfo = document.getElementById('versionInfo');
+            if (deployInfo) {
+                versionInfo.innerHTML = `
+                    <div class="info-item">
+                        <strong>Version:</strong> ${deployInfo.version}
+                    </div>
+                    <div class="info-item">
+                        <strong>Cache Version:</strong> v${deployInfo.cacheVersion}
+                    </div>
+                    <div class="info-item">
+                        <strong>Deployed:</strong> ${new Date(deployInfo.deployedAt).toLocaleString()}
+                    </div>
+                    <div class="info-item">
+                        <strong>Build ID:</strong> ${deployInfo.buildId}
+                    </div>
+                `;
+            } else {
+                versionInfo.innerHTML = '<div class="info-item">No deployment info available</div>';
+            }
+        }
+        
+        function updateCacheStatus(cacheDetails) {
+            const cacheStatus = document.getElementById('cacheStatus');
+            if (cacheDetails.length > 0) {
+                cacheStatus.innerHTML = cacheDetails.map(cache => 
+                    `<div>📦 ${cache.name}: ${cache.size} items</div>`
+                ).join('');
+            } else {
+                cacheStatus.innerHTML = 'No caches found';
+            }
+        }
+        
+        function updateCurrentStatus(swInfo, deployInfo) {
+            const currentStatus = document.getElementById('currentStatus');
+            let status = '';
+            
+            if (swInfo) {
+                status += `<div>🔧 Service Worker: ${swInfo.active ? 'Active' : 'Inactive'}</div>`;
+                if (swInfo.waiting) {
+                    status += `<div>⚠️ New version waiting to activate</div>`;
+                }
+            }
+            
+            if (deployInfo) {
+                status += `<div>📦 App Version: ${deployInfo.version}</div>`;
+                status += `<div>🔄 Cache Version: v${deployInfo.cacheVersion}</div>`;
+            }
+            
+            currentStatus.innerHTML = status || 'Status unavailable';
+        }
+        
+        async function checkAllStatus() {
+            const deployInfo = await loadDeploymentInfo();
+            const swInfo = await checkServiceWorker();
+            const cacheDetails = await checkCacheStorage();
+            
+            updateVersionInfo(deployInfo);
+            updateCacheStatus(cacheDetails);
+            updateCurrentStatus(swInfo, deployInfo);
+            
+            // Update deployment log
+            const deploymentLog = document.getElementById('deploymentLog');
+            deploymentLog.innerHTML = `
+                <div>✅ Deployment info loaded</div>
+                <div>✅ Service worker status checked</div>
+                <div>✅ Cache storage checked (${cacheDetails.length} caches)</div>
+                <div>⏰ Last check: ${new Date().toLocaleString()}</div>
+            `;
+        }
+        
+        async function checkCacheStatus() {
+            const cacheDetails = await checkCacheStorage();
+            updateCacheStatus(cacheDetails);
+        }
+        
+        // Auto-check on load
+        checkAllStatus();
+        
+        // Auto-refresh every 30 seconds
+        setInterval(checkAllStatus, 30000);
+    </script>
+</body>
+</html> 
