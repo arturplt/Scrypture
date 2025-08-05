@@ -29,7 +29,10 @@ jobs:
           cache: 'npm'
           
       - name: Install dependencies
-        run: npm install --platform=linux --arch=x64
+        run: npm install --platform=linux --arch=x64 --force
+        
+      - name: Install Rollup Linux dependency
+        run: npm install @rollup/rollup-linux-x64-gnu@4.9.5 --no-save
         
       - name: Build
         run: npm run build
