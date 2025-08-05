@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "build:ci": "npm ci --platform=linux --arch=x64 && tsc && vite build",
     "preview": "vite preview",
     "deploy": "npm run build && gh-pages -d dist",
     "deploy:force": "npm run version:bump && npm run build && npm run deploy:verify && gh-pages -d dist",
@@ -88,5 +89,10 @@
   "bugs": {
     "url": "https://github.com/arturplt/Scrypture/issues"
   },
-  "homepage": "https://scrypture.app"
+  "homepage": "https://scrypture.app",
+  "overrides": {
+    "rollup": {
+      "@rollup/rollup-linux-x64-gnu": "4.9.5"
+    }
+  }
 }
