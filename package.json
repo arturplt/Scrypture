@@ -98,7 +98,7 @@
       "rollup": "4.9.5"
     },
     "esbuild": {
-      "@esbuild/linux-x64": "0.20.8"
+      "@esbuild/linux-x64": "0.21.5"
     }
   }
 }

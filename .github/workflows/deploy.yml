@@ -34,7 +34,10 @@ jobs:
       - name: Install platform-specific dependencies
         run: |
           npm install @rollup/rollup-linux-x64-gnu@4.9.5 --no-save
-          npm install @esbuild/linux-x64 --no-save
+          npm install @esbuild/linux-x64@0.21.5 --no-save
+        
+      - name: Clear esbuild cache
+        run: rm -rf ~/.cache/esbuild || true
         
       - name: Build
         run: npm run build
