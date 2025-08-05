@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "build:ci": "npm ci --platform=linux --arch=x64 && npm install @rollup/rollup-linux-x64-gnu && tsc && vite build",
+    "build:ci": "npm install --platform=linux --arch=x64 && tsc && vite build",
     "preview": "vite preview",
     "deploy": "npm run build && gh-pages -d dist",
     "deploy:force": "npm run version:bump && npm run build && npm run deploy:verify && gh-pages -d dist",
@@ -66,8 +66,7 @@
     "prettier": "^3.1.1",
     "ts-jest": "^29.1.1",
     "typescript": "^5.2.2",
-    "vite": "^5.4.19",
-    "@rollup/rollup-linux-x64-gnu": "^4.9.5"
+    "vite": "^5.4.19"
   },
   "engines": {
     "node": ">=18.0.0",
