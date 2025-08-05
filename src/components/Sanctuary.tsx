@@ -584,7 +584,7 @@ class CullingSystem {
     };
   }
 
-  getVisibleBlocks(camera: Camera, maxDistance: number = 200): Block[] {
+  getVisibleBlocks(_camera: Camera, _maxDistance: number = 200): Block[] {
     const allBlocks = this.spatialIndex.getAllBlocks();
     
     // Temporarily disable culling to fix rendering
@@ -593,8 +593,8 @@ class CullingSystem {
     //   if (!this.isInFrustum(block)) return false;
     //   
     //   // Distance culling
-    //   const distance = this.getDistance(block, camera);
-    //   if (distance > maxDistance) return false;
+    //   const distance = this.getDistance(block, _camera);
+    //   if (distance > _maxDistance) return false;
     //   
     //   return true;
     // });
@@ -640,7 +640,7 @@ class CullingSystem {
 
   // Get the visible area bounds in grid coordinates
   // Convert camera position to grid coordinates
-  private cameraToGrid(camera: Camera): { x: number; y: number; z: number } {
+  private cameraToGrid(_camera: Camera): { x: number; y: number; z: number } {
     // The camera position represents where grid (0,0,0) would be rendered on screen
     // We need to find which grid position is currently at the center of the screen
     
