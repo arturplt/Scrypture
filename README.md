@@ -76,9 +76,36 @@ The system ensures achievements are always up-to-date and properly persisted, pr
 
 ---
 
-## 🧪 Testing
+## 🚀 Deployment
 
-### Comprehensive Test Suite
+### Streamlined Deployment System
+The project includes a comprehensive deployment system that ensures changes appear immediately on the live site:
+
+#### Quick Deployment Commands
+```bash
+# Full automated deployment (recommended)
+npm run deploy:auto
+
+# Quick deployment with version bump
+npm run deploy:force
+
+# Manual deployment
+npm run deploy
+```
+
+#### Deployment Monitoring
+- **Deployment Status**: https://scrypture.app/deployment-status.html
+- **Force Refresh**: https://scrypture.app/force-deploy-refresh.html
+- **GitHub Actions**: https://github.com/arturplt/Scrypture/actions
+
+#### Documentation
+- **Deployment Guide**: [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)
+- **Troubleshooting**: [DEPLOYMENT_TROUBLESHOOTING.md](DEPLOYMENT_TROUBLESHOOTING.md)
+- **Checklist**: [DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md)
+
+---
+
+## 🧪 Testing
 The application includes a complete test suite covering all major functionality:
 
 #### Test Coverage
