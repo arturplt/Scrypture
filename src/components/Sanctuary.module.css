@@ -1,10 +1,10 @@
 .sanctuary {
   position: relative;
   width: 100%;
-  height: 400px; /* Fixed height to ensure canvas is visible */
+  height: 100vh; /* Full screen height */
   background: var(--color-bg-primary);
-  border: 1px solid var(--color-border-primary);
-  border-radius: 8px;
+  border: none;
+  border-radius: 0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -17,14 +17,109 @@
   right: 12px;
   z-index: 10;
   display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.headerTopRow {
+  display: flex;
   align-items: center;
   gap: 12px;
   pointer-events: none;
 }
 
+.headerBottomRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+  pointer-events: none;
+}
+
+.buttonGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  pointer-events: auto;
+  min-width: 0;
+  flex: 1;
+}
+
+.buttonGroupLabel {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+  pointer-events: none;
+}
+
+.buttonGroupHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+  pointer-events: auto;
+}
+
+.buttonGroupHeader:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.buttonGroupHeader.collapsed {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.collapseIcon {
+  font-size: 8px;
+  color: var(--color-text-secondary);
+  transition: transform 0.2s ease;
+  pointer-events: none;
+}
+
+.buttonGroupContent {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
 .sanctuaryIcon {
   font-size: 20px;
   pointer-events: none;
+}
+
+.homeButton {
+  background: var(--color-accent-primary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: 4px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  transition: all 0.2s ease;
+  color: white;
+  pointer-events: auto;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  margin-right: 8px;
+}
+
+.homeButton:hover {
+  background: var(--color-accent-secondary);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+.homeButton:active {
+  transform: translateY(0);
 }
 
 .sanctuaryTitle {
@@ -34,6 +129,10 @@
   color: var(--color-text-primary);
   flex: 1;
   pointer-events: none;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .selectedTileIndicator {
@@ -47,11 +146,16 @@
   color: var(--color-text-secondary);
   pointer-events: auto;
   margin-right: 8px;
+  min-width: 0;
+  flex-shrink: 1;
 }
 
 .selectedTileIndicator span {
   font-size: 11px;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .selectedTilePreview {
@@ -59,18 +163,50 @@
   border-radius: 2px;
 }
 
-.zoomIndicator {
+.zoomControls {
   display: flex;
   align-items: center;
-  background: var(--color-bg-primary);
-  border: 1px solid var(--color-border-primary);
-  border-radius: 4px;
-  padding: 4px 8px;
-  font-size: 12px;
-  color: var(--color-text-secondary);
+  gap: 4px;
   pointer-events: auto;
   margin-right: 8px;
-  font-weight: bold;
+}
+
+.zoomButton {
+  background: var(--color-accent-gold);
+  border: 1px solid var(--color-border-primary);
+  border-radius: 0px;
+  padding: 4px;
+  cursor: pointer;
+  font-size: var(--font-size-xs);
+  transition: all 0.2s ease;
+  color: var(--color-text-primary);
+  pointer-events: auto;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  min-width: 32px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.zoomButton:hover {
+  background: var(--color-bg-hover);
+  border-color: var(--color-accent-primary);
+  transform: translateY(-1px);
+}
+
+.zoomButton:active {
+  transform: translateY(0);
+}
+
+.zoomButtonActive {
+  background: var(--color-accent-primary);
+  color: white;
+  border-color: var(--color-accent-primary);
 }
 
 .blockMenuToggle,
@@ -269,8 +405,8 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-/* Save Dialog */
-.saveDialog {
+/* Rename Dialog */
+.renameDialog {
   position: fixed;
   top: 0;
   left: 0;
@@ -283,7 +419,7 @@
   z-index: 1000;
 }
 
-.saveDialogContent {
+.renameDialogContent {
   background: var(--color-bg-secondary);
   border: 1px solid var(--color-border-primary);
   border-radius: 8px;
@@ -292,7 +428,7 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
-.saveDialogContent h4 {
+.renameDialogContent h4 {
   margin: 0 0 16px 0;
   font-size: 16px;
   font-weight: 600;
@@ -300,7 +436,7 @@
   text-align: center;
 }
 
-.saveDialogContent input {
+.renameDialogContent input {
   width: 100%;
   padding: 8px 12px;
   border: 1px solid var(--color-border-primary);
@@ -309,20 +445,21 @@
   background: var(--color-bg-primary);
   color: var(--color-text-primary);
   margin-bottom: 16px;
+  box-sizing: border-box;
 }
 
-.saveDialogContent input:focus {
+.renameDialogContent input:focus {
   outline: none;
   border-color: var(--color-accent-primary);
 }
 
-.saveDialogActions {
+.renameDialogActions {
   display: flex;
   gap: 8px;
   justify-content: flex-end;
 }
 
-.saveDialogActions button {
+.renameDialogActions button {
   padding: 8px 16px;
   border: none;
   border-radius: 4px;
@@ -332,20 +469,64 @@
   transition: all 0.2s ease;
 }
 
-.saveDialogActions button:first-child {
+.renameDialogActions button:first-child {
   background: var(--color-accent-primary);
   color: white;
 }
 
-.saveDialogActions button:last-child {
+.renameDialogActions button:last-child {
   background: var(--color-bg-primary);
   color: var(--color-text-primary);
   border: 1px solid var(--color-border-primary);
 }
 
-.saveDialogActions button:hover {
+.renameDialogActions button:hover {
   transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.confirmationDialog {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  pointer-events: auto;
+}
+
+.confirmationDialogContent {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: 8px;
+  padding: 20px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.confirmationDialogContent h4 {
+  margin: 0 0 12px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.confirmationDialogContent p {
+  margin: 0 0 20px 0;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+.confirmationDialogActions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
 }
 
 /* Block Selector */
@@ -612,6 +793,18 @@
   flex: 1;
 }
 
+/* Mobile-specific canvas adjustments */
+@media (max-width: 768px) {
+  .canvasContainer {
+    /* Ensure canvas takes full screen on mobile */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+  }
+}
+
 .isometricCanvas {
   width: 100%;
   height: 100%;
@@ -619,6 +812,12 @@
   background: var(--color-bg-primary);
   cursor: default;
   touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 /* Instructions Panel */
@@ -738,26 +937,104 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .sanctuary {
-    height: 300px; /* Smaller height on mobile */
+    height: 100vh; /* Full screen on mobile */
   }
 
   .sanctuaryHeader {
     top: 8px;
     left: 8px;
     right: 8px;
-    gap: 8px;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .headerTopRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .headerBottomRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .buttonGroup {
+    width: 100%;
+    align-items: flex-start;
+  }
+
+  .buttonGroupLabel {
+    text-align: left;
+  }
+
+  .buttonGroupHeader {
+    padding: 4px 6px;
+  }
+
+  .collapseIcon {
+    font-size: 10px;
+  }
+
+  .buttonGroupContent {
+    justify-content: flex-start;
+    gap: 4px;
+  }
+
+  .buttonGroupContent button {
+    font-size: var(--font-size-xs);
+    padding: 4px;
+    min-width: 28px;
+    height: 20px;
+  }
+
+  @media (max-width: 480px) {
+    .buttonGroupContent button {
+      font-size: var(--font-size-xs);
+      padding: 4px;
+      min-width: 24px;
+      height: 18px;
+    }
+  }
+
+  .homeButton {
+    padding: 4px 8px;
+    font-size: 12px;
+    margin-right: 6px;
   }
 
   .sanctuaryTitle {
     font-size: 14px;
+    max-width: 150px;
+  }
+
+  .selectedTileIndicator {
+    max-width: 120px;
+  }
+
+  .buttonGroup {
+    min-width: 80px;
   }
 
   .blockMenuToggle,
   .performanceToggle,
   .levelMenuToggle,
   .cameraReset {
-    padding: 4px 8px;
-    font-size: 12px;
+    padding: 8px 12px;
+    font-size: 14px;
+    min-height: 44px; /* Touch-friendly minimum size */
+  }
+
+  .zoomControls {
+    gap: 2px;
+  }
+
+  .zoomButton {
+    padding: 4px;
+    font-size: var(--font-size-xs);
+    min-width: 28px;
+    height: 20px;
   }
 
   .performanceDisplay {
@@ -825,11 +1102,31 @@
     padding: 16px;
     min-width: 250px;
   }
+
+  .renameDialogContent {
+    margin: 16px;
+    padding: 16px;
+    min-width: 250px;
+  }
+
+  .confirmationDialogContent {
+    padding: 16px;
+    max-width: 95%;
+  }
+
+  .confirmationDialogActions {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .confirmationDialogActions button {
+    width: 100%;
+  }
 }
 
 @media (max-width: 480px) {
   .sanctuary {
-    height: 250px; /* Even smaller height on very small screens */
+    height: 100vh; /* Full screen on very small screens */
   }
 
   .performanceDisplay {
@@ -864,5 +1161,279 @@
   .levelItemActions {
     width: 100%;
     justify-content: flex-end;
+  }
+
+  .blockMenuToggle,
+  .performanceToggle,
+  .levelMenuToggle,
+  .cameraReset {
+    padding: 6px 10px;
+    font-size: 13px;
+    min-height: 40px;
+  }
+
+  .zoomControls {
+    gap: 1px;
+  }
+
+  .zoomButton {
+    padding: 4px;
+    font-size: var(--font-size-xs);
+    min-width: 24px;
+    height: 18px;
+  }
+
+  .homeButton {
+    padding: 3px 6px;
+    font-size: 11px;
+    margin-right: 4px;
+  }
+
+  /* Hide less essential buttons on very small screens */
+  .performanceToggle,
+  .instructionsToggle {
+    display: none;
+  }
+
+  .sanctuaryTitle {
+    font-size: 12px;
+  }
+} 
+
+/* Height Map Display */
+.heightMapDisplay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--color-bg-secondary);
+  border: 2px solid var(--color-border-primary);
+  border-radius: 8px;
+  padding: 16px;
+  z-index: 1000;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.heightMapHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--color-border-primary);
+  padding-bottom: 8px;
+}
+
+.heightMapHeader h4 {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.heightMapHeader button {
+  background: var(--color-accent-beaver);
+  border: 1px solid var(--color-border-primary);
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+  color: var(--color-text-primary);
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+
+.heightMapHeader button:hover {
+  background: var(--color-accent-gold);
+}
+
+.heightMapInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.heightMapCanvas {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--color-bg-primary);
+  border-radius: 4px;
+  padding: 8px;
+}
+
+/* Z-Level Manager */
+.zLevelManager {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--color-bg-secondary);
+  border: 2px solid var(--color-border-primary);
+  border-radius: 8px;
+  padding: 16px;
+  z-index: 1000;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  min-width: 400px;
+}
+
+.zLevelManagerHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--color-border-primary);
+  padding-bottom: 8px;
+}
+
+.zLevelManagerHeader h4 {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.zLevelManagerHeader button {
+  background: var(--color-accent-beaver);
+  border: 1px solid var(--color-border-primary);
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+  color: var(--color-text-primary);
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+
+.zLevelManagerHeader button:hover {
+  background: var(--color-accent-gold);
+}
+
+.zLevelManagerContent {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.zLevelList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.zLevelItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.zLevelItem:hover {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-accent-gold);
+}
+
+.zLevelInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.zLevelName {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.zLevelCount {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.zLevelActions {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.zLevelActions button {
+  border: 1px solid var(--color-border-primary);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+}
+
+.zLevelActions button:hover {
+  transform: scale(1.1);
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .heightMapDisplay,
+  .zLevelManager {
+    top: 10%;
+    left: 5%;
+    right: 5%;
+    transform: none;
+    max-width: none;
+    max-height: 80vh;
+  }
+
+  .heightMapCanvas canvas {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .zLevelManager {
+    min-width: auto;
+  }
+
+  .zLevelItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .zLevelActions {
+    align-self: flex-end;
+  }
+}
+
+@media (max-width: 480px) {
+  .heightMapDisplay,
+  .zLevelManager {
+    top: 5%;
+    left: 2%;
+    right: 2%;
+    padding: 12px;
+  }
+
+  .heightMapHeader h4,
+  .zLevelManagerHeader h4 {
+    font-size: 14px;
+  }
+
+  .zLevelActions button {
+    min-width: 20px;
+    height: 20px;
+    font-size: 8px;
   }
 } 
