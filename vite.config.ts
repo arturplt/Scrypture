@@ -7,11 +7,20 @@ export default defineConfig(({ command }) => {
   
   return {
     plugins: [react()],
+    build: {
+      outDir: 'dist',
+      sourcemap: true,
+      rollupOptions: {
+        input: {
+          main: 'index.html'
+        }
+      }
+    },
     server: {
       port: 3000,
       host: true, // Allow external access
-      https: false, // Disable HTTPS in development
-          headers: {
+      // https: false, // Disable HTTPS in development
+      headers: {
         // Content Security Policy Headers - more permissive in development
         'Content-Security-Policy': isDevelopment ? [
           // Development CSP - more permissive
@@ -45,24 +54,20 @@ export default defineConfig(({ command }) => {
           "base-uri 'self'",
           "upgrade-insecure-requests"
         ].join('; '),
-      
-      // Additional Security Headers
-      'X-Content-Type-Options': 'nosniff',
-      'X-Frame-Options': 'DENY',
-      'X-XSS-Protection': '1; mode=block',
-      'Referrer-Policy': 'strict-origin-when-cross-origin',
-      'Permissions-Policy': 'geolocation=(), microphone=(), camera=()',
-    }
-  },
-  build: {
-    outDir: 'dist',
-    sourcemap: true,
-  },
-  base: '/',
-  resolve: {
-    alias: {
-      '@': '/src',
+        
+        // Additional Security Headers
+        'X-Content-Type-Options': 'nosniff',
+        'X-Frame-Options': 'DENY',
+        'X-XSS-Protection': '1; mode=block',
+        'Referrer-Policy': 'strict-origin-when-cross-origin',
+        'Permissions-Policy': 'geolocation=(), microphone=(), camera=()',
+      }
     },
-  },
+    base: '/',
+    resolve: {
+      alias: {
+        '@': '/src',
+      },
+    },
   }
 }) 
