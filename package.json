@@ -1,6 +1,6 @@
 {
   "name": "scrypture",
-  "version": "1.4.3",
+  "version": "1.4.4",
   "description": "A mystical habit-tracking app with AI companion Bóbr",
   "type": "module",
   "scripts": {
