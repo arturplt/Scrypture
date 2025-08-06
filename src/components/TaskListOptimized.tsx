@@ -129,7 +129,7 @@ export const TaskListOptimized = forwardRef<TaskListRef, TaskListProps>((props, 
     return () => {
       window.removeEventListener('customCategoryAdded', handler);
     };
-  }, [refreshTasks]);
+  }, []); // Remove refreshTasks from dependencies to prevent infinite loop
 
   // Memoized search function
   const taskMatchesSearch = useCallback((task: Task, keyword: string): boolean => {

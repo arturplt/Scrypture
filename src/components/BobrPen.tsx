@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { User } from '../types';
 import BobrCompanion from './BobrCompanion';
 import DamVisualization from './DamVisualization';
@@ -24,6 +24,10 @@ const BobrPen: React.FC<BobrPenProps> = ({
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [showBobrInteraction, setShowBobrInteraction] = useState(false);
 
+  // Memoize the exit function to prevent infinite re-renders
+  const handleSanctuaryExit = useCallback(() => {
+    setActiveView('bobr');
+  }, []);
 
   // Get stage progress for visual indicators
   const getStageProgress = (level: number): { current: number; stages: string[] } => {
@@ -130,10 +134,12 @@ const BobrPen: React.FC<BobrPenProps> = ({
                 />
               </div>
                                       ) : (
-                /* Sanctuary Section */
-                <div className={styles.activeSection}>
-                          <Sanctuary />
-                </div>
+                                 /* Sanctuary Section */
+                 <div className={styles.activeSection}>
+                   <Sanctuary 
+                     onExit={handleSanctuaryExit}
+                   />
+                 </div>
               )}
           </div>
         </>

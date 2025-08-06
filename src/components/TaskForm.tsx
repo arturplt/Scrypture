@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { useTasks } from '../hooks/useTasks';
 import { useHabits } from '../hooks/useHabits';
 import { categoryService } from '../services/categoryService';
@@ -508,7 +508,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   ];
 
   // Remove mainCategories, only use customCategories for allCategories
-  const allCategories = categoryService.getAllCategories();
+  const allCategories = useMemo(() => categoryService.getAllCategories(), []);
 
   // For task creation, show all categories so users can create tasks in any category
   // But exclude Body, Mind, Soul since they're automatically added when core attributes are selected
@@ -545,7 +545,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   }, [bodyReward, mindReward, soulReward]);
 
   // Remove getStatRewards and defaultCategoryRewards
-  const handleCategoryAdded = (newCategory: {
+  const handleCategoryAdded = useCallback((newCategory: {
     name: string;
     icon: string;
     color: string;
@@ -556,7 +556,11 @@ export const TaskForm: React.FC<TaskFormProps> = ({
     if (success) {
       window.dispatchEvent(new Event('customCategoryAdded'));
     }
-  };
+  }, []);
+
+  const handleCloseCategoryModal = useCallback(() => {
+    setIsCategoryModalOpen(false);
+  }, []);
 
   const handleCategoryToggle = (categoryName: string) => {
     setCategories(prev => {
@@ -899,7 +903,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
       )}
       <CategoryModal
         isOpen={isCategoryModalOpen}
-        onClose={() => setIsCategoryModalOpen(false)}
+        onClose={handleCloseCategoryModal}
         onCategoryAdded={handleCategoryAdded}
       />
       <AutoSaveIndicator isSaving={isSaving} />

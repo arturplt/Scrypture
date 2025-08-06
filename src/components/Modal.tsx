@@ -10,7 +10,7 @@ interface ModalProps {
   position?: 'center' | 'bottom';
 }
 
-export const Modal: React.FC<ModalProps> = ({
+export const Modal: React.FC<ModalProps> = React.memo(({
   isOpen,
   onClose,
   title,
@@ -18,7 +18,7 @@ export const Modal: React.FC<ModalProps> = ({
   customPadding,
   position = 'center',
 }) => {
-  console.log('Modal render - isOpen:', isOpen, 'title:', title);
+  // Removed console.log to reduce noise
   
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -28,7 +28,6 @@ export const Modal: React.FC<ModalProps> = ({
     };
 
     if (isOpen) {
-      console.log('Modal isOpen - adding event listeners');
       document.addEventListener('keydown', handleEscape);
       document.body.style.overflow = 'hidden';
     }
@@ -40,11 +39,8 @@ export const Modal: React.FC<ModalProps> = ({
   }, [isOpen, onClose]);
 
   if (!isOpen) {
-    console.log('Modal not rendering - isOpen is false');
     return null;
   }
-
-  console.log('Modal rendering with title:', title);
   return (
     <div className={`${styles.overlay} ${position === 'bottom' ? styles.overlayBottom : ''}`} onClick={onClose}>
       <div className={`${styles.modal} ${position === 'bottom' ? styles.modalBottom : ''}`} onClick={(e) => e.stopPropagation()}>
@@ -67,4 +63,4 @@ export const Modal: React.FC<ModalProps> = ({
       </div>
     </div>
   );
-};
+});

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Habit } from '../types';
 import { useHabits } from '../hooks/useHabits';
 import { useTasks } from '../hooks/useTasks';
@@ -178,9 +178,9 @@ export const HabitEditForm: React.FC<HabitEditFormProps> = ({
     { value: 'monthly', label: 'MONTHLY' },
   ];
 
-  const allCategories = categoryService.getAllCategories();
+  const allCategories = useMemo(() => categoryService.getAllCategories(), []);
 
-  const handleCategoryAdded = (newCategory: {
+  const handleCategoryAdded = useCallback((newCategory: {
     name: string;
     icon: string;
     color: string;
@@ -191,7 +191,11 @@ export const HabitEditForm: React.FC<HabitEditFormProps> = ({
     if (success) {
       window.dispatchEvent(new Event('customCategoryAdded'));
     }
-  };
+  }, []);
+
+  const handleCloseCategoryModal = useCallback(() => {
+    setIsCategoryModalOpen(false);
+  }, []);
 
   return (
     <>
@@ -441,7 +445,7 @@ export const HabitEditForm: React.FC<HabitEditFormProps> = ({
       />
       <CategoryModal
         isOpen={isCategoryModalOpen}
-        onClose={() => setIsCategoryModalOpen(false)}
+        onClose={handleCloseCategoryModal}
         onCategoryAdded={handleCategoryAdded}
       />
     </>

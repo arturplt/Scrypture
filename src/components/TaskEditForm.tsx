@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Task } from '../types';
 import { useTasks } from '../hooks/useTasks';
 import { useHabits } from '../hooks/useHabits';
@@ -176,7 +176,7 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({
     { value: 'high', label: 'HIGH PRIORITY', color: 'var(--color-urgent)' },
   ];
 
-  const allCategories = categoryService.getAllCategories();
+  const allCategories = useMemo(() => categoryService.getAllCategories(), []);
 
   // For task editing, show all categories except Body, Mind, Soul since they're automatically managed
   const categoriesForTaskEditing = allCategories.filter(category => 
@@ -211,7 +211,7 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({
     setCategories(newCategories);
   }, [bodyReward, mindReward, soulReward]);
 
-  const handleCategoryAdded = (newCategory: {
+  const handleCategoryAdded = useCallback((newCategory: {
     name: string;
     icon: string;
     color: string;
@@ -222,7 +222,11 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({
     if (success) {
       window.dispatchEvent(new Event('customCategoryAdded'));
     }
-  };
+  }, []);
+
+  const handleCloseCategoryModal = useCallback(() => {
+    setIsCategoryModalOpen(false);
+  }, []);
 
   return (
     <>
@@ -478,7 +482,7 @@ export const TaskEditForm: React.FC<TaskEditFormProps> = ({
       />
       <CategoryModal
         isOpen={isCategoryModalOpen}
-        onClose={() => setIsCategoryModalOpen(false)}
+        onClose={handleCloseCategoryModal}
         onCategoryAdded={handleCategoryAdded}
       />
     </>

@@ -104,10 +104,6 @@ dev-debug.log
 *.sw?
 # OS specific
 
-# Task files
-# tasks.json
-# tasks/ 
-
 # Playwright test files and reports
 e2e/
 playwright-report/
@@ -117,8 +113,6 @@ playwright.config.js
 
 # Task Master AI files
 .taskmaster/
-tasks.json
-tasks/
 *.taskmaster
 task-master-ai/
 
@@ -150,3 +144,7 @@ twa-manifest.json
 android-project/
 capacitor.config.ts
 Docs/isometric-tilemap-reference.md
+
+# Task files
+# tasks.json
+# tasks/ 

@@ -55,7 +55,7 @@ const colorOptions = [
   'var(--color-error)',
 ];
 
-export const CategoryModal: React.FC<CategoryModalProps> = ({
+export const CategoryModal: React.FC<CategoryModalProps> = React.memo(({
   isOpen,
   onClose,
   onCategoryAdded,
@@ -209,4 +209,4 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
       </div>
     </Modal>
   );
-};
+});

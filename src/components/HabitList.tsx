@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useHabits } from '../hooks/useHabits';
 import { HabitCard } from './HabitCard';
 import { Habit } from '../types';
@@ -27,8 +27,8 @@ export const HabitList: React.FC = () => {
     return today.getTime() === completed.getTime();
   };
 
-  // Get all available categories
-  const allCategories = categoryService.getAllCategories();
+  // Get all available categories - memoized to prevent infinite loops
+  const allCategories = useMemo(() => categoryService.getAllCategories(), []);
   
   // Separate completed and incomplete habits
   const completedHabits: Habit[] = [];
