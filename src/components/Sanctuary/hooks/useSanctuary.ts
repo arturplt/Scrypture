@@ -102,6 +102,7 @@ export const useSanctuary = (): [SanctuaryHookState, SanctuaryHookActions] => {
     sanctuaryActions.setInstructionsVisible(false);
     sanctuaryActions.setGridVisible(false);
     sanctuaryActions.setPerformanceVisible(false);
+    sanctuaryActions.setPerformanceModalVisible(false);
     sanctuaryActions.setLevelMenuVisible(false);
     sanctuaryActions.setZLevelManagerVisible(false);
     sanctuaryActions.setHeightMapVisible(false);

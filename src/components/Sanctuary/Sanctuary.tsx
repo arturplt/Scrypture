@@ -5,6 +5,7 @@ import {
   SanctuaryBottomBar,
   BlockSelector,
   PerformanceDisplay,
+  PerformanceModal,
   Instructions,
   LoadingOverlay
 } from './ui';
@@ -104,6 +105,11 @@ const Sanctuary: React.FC<SanctuaryProps> = ({ className, onExit }) => {
         event.preventDefault();
         toggleFullscreen();
       }
+      // Ctrl+P to open performance modal
+      if (event.ctrlKey && event.key === 'p') {
+        event.preventDefault();
+        actions.sanctuary.setPerformanceModalVisible(true);
+      }
       // Escape handled by modal component
     };
 
@@ -111,7 +117,7 @@ const Sanctuary: React.FC<SanctuaryProps> = ({ className, onExit }) => {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isFullscreen]);
+  }, [isFullscreen, actions.sanctuary]);
 
   // Handle canvas resize and center camera
   useEffect(() => {
@@ -189,7 +195,7 @@ const Sanctuary: React.FC<SanctuaryProps> = ({ className, onExit }) => {
         onToggleBlockMenu={() => actions.sanctuary.setBlockMenuOpen(!state.sanctuary.isBlockMenuOpen)}
         onToggleInstructions={() => actions.sanctuary.setInstructionsVisible(!state.sanctuary.showInstructions)}
         onToggleGrid={() => actions.sanctuary.setGridVisible(!state.sanctuary.showGrid)}
-        onTogglePerformance={() => actions.sanctuary.setPerformanceVisible(!state.sanctuary.showPerformance)}
+        onTogglePerformance={() => actions.sanctuary.setPerformanceModalVisible(true)}
         onSwitchToZLevel={(level: number) => actions.sanctuary.setCurrentZLevel(level)}
         isBlockMenuOpen={state.sanctuary.isBlockMenuOpen}
       />
@@ -276,6 +282,29 @@ const Sanctuary: React.FC<SanctuaryProps> = ({ className, onExit }) => {
         visibleBlocks={state.performance.visibleBlocks}
         drawCalls={state.performance.drawCalls}
         isOptimized={state.performance.isOptimized}
+      />
+
+      {/* Performance Modal */}
+      <PerformanceModal
+        isOpen={state.sanctuary.showPerformanceModal}
+        onClose={() => actions.sanctuary.setPerformanceModalVisible(false)}
+        performanceReport={actions.performance.getPerformanceReport()}
+        fps={state.performance.fps}
+        frameTime={state.performance.frameTime}
+        renderTime={state.performance.renderTime}
+        blockCount={state.performance.blockCount}
+        visibleBlocks={state.performance.visibleBlocks}
+        drawCalls={state.performance.drawCalls}
+        memoryUsage={state.performance.memoryUsage}
+        isOptimized={state.performance.isOptimized}
+        targetFPS={state.performance.targetFPS}
+        enableVSync={state.performance.enableVSync}
+        enableCulling={state.performance.enableCulling}
+        enableBatching={state.performance.enableBatching}
+        enableLOD={state.performance.enableLOD}
+        onOptimizeForPerformance={actions.performance.optimizeForPerformance}
+        onOptimizeForQuality={actions.performance.optimizeForQuality}
+        onAutoOptimize={actions.performance.autoOptimize}
       />
 
       {/* Instructions */}

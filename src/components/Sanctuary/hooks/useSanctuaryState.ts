@@ -20,6 +20,7 @@ export interface SanctuaryState {
   showInstructions: boolean;
   showGrid: boolean;
   showPerformance: boolean;
+  showPerformanceModal: boolean;
   showLevelMenu: boolean;
   showZLevelManager: boolean;
   showHeightMap: boolean;
@@ -78,6 +79,8 @@ export interface SanctuaryStateActions {
   setGridVisible: (show: boolean) => void;
   togglePerformance: () => void;
   setPerformanceVisible: (show: boolean) => void;
+  togglePerformanceModal: () => void;
+  setPerformanceModalVisible: (show: boolean) => void;
   toggleLevelMenu: () => void;
   setLevelMenuVisible: (show: boolean) => void;
   toggleZLevelManager: () => void;
@@ -143,6 +146,7 @@ export const useSanctuaryState = (): [SanctuaryState, SanctuaryStateActions] => 
   const [showInstructions, setShowInstructions] = useState(false);
   const [showGrid, setShowGrid] = useState(false);
   const [showPerformance, setShowPerformance] = useState(false);
+  const [showPerformanceModal, setShowPerformanceModal] = useState(false);
   const [showLevelMenu, setShowLevelMenu] = useState(false);
   const [showZLevelManager, setShowZLevelManager] = useState(false);
   const [showHeightMap, setShowHeightMap] = useState(false);
@@ -239,6 +243,14 @@ export const useSanctuaryState = (): [SanctuaryState, SanctuaryStateActions] => 
     setShowPerformance(show);
   }, []);
   
+  const togglePerformanceModal = useCallback(() => {
+    setShowPerformanceModal(prev => !prev);
+  }, []);
+  
+  const setPerformanceModalVisible = useCallback((show: boolean) => {
+    setShowPerformanceModal(show);
+  }, []);
+  
   const toggleLevelMenu = useCallback(() => {
     setShowLevelMenu(prev => !prev);
   }, []);
@@ -301,6 +313,7 @@ export const useSanctuaryState = (): [SanctuaryState, SanctuaryStateActions] => 
     showInstructions,
     showGrid,
     showPerformance,
+    showPerformanceModal,
     showLevelMenu,
     showZLevelManager,
     showHeightMap,
@@ -336,6 +349,8 @@ export const useSanctuaryState = (): [SanctuaryState, SanctuaryStateActions] => 
     setGridVisible,
     togglePerformance,
     setPerformanceVisible,
+    togglePerformanceModal,
+    setPerformanceModalVisible,
     toggleLevelMenu,
     setLevelMenuVisible,
     toggleZLevelManager,

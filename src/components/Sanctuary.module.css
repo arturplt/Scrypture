@@ -512,20 +512,24 @@
   transform: translateY(0);
 }
 
-/* Performance Display */
+/* Combined Performance and Debug Display */
 .performanceDisplay {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  background: rgba(0, 0, 0, 0.8);
-  color: #00ff00;
-  font-family: 'Courier New', monospace;
+  bottom: 12px;
+  left: 12px;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-mono);
   font-size: 11px;
   padding: 8px;
   border-radius: 4px;
   z-index: 20;
   pointer-events: none;
-  min-width: 120px;
+  min-width: 280px;
+  border: 1px solid var(--color-border-primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  display: flex;
+  gap: 16px;
 }
 
 .performanceDisplay > div {
@@ -535,22 +539,21 @@
 
 .debugDisplay {
   position: absolute;
-  top: 12px;
-  right: 140px;
-  background: rgba(0, 0, 0, 0.8);
-  color: #ffff00;
-  font-family: 'Courier New', monospace;
+  bottom: 12px;
+  left: 12px;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-mono);
   font-size: 11px;
   padding: 8px;
   border-radius: 4px;
   z-index: 20;
   pointer-events: none;
-  min-width: 150px;
-}
-
-.debugDisplay > div {
-  margin: 2px 0;
-  white-space: nowrap;
+  min-width: 280px;
+  border: 1px solid var(--color-border-primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  display: flex;
+  gap: 16px;
 }
 
 /* Level Management Menu */
@@ -1530,10 +1533,19 @@
   }
 
   .performanceDisplay {
-    top: 140px;
-    right: 8px;
+    bottom: 140px;
+    left: 8px;
     padding: 8px;
     font-size: 11px;
+    min-width: 260px;
+  }
+
+  .debugDisplay {
+    bottom: 140px;
+    left: 8px;
+    padding: 8px;
+    font-size: 11px;
+    min-width: 260px;
   }
 
   .levelMenu {
@@ -1678,6 +1690,10 @@
     grid-template-columns: 1fr;
   }
 
+  .debugDisplay {
+    grid-template-columns: 1fr;
+  }
+
   .paletteGrid {
     grid-template-columns: 1fr;
   }
@@ -1753,5 +1769,354 @@
     padding: 6px 10px;
     font-size: 13px;
     min-height: 40px;
+  }
+} 
+
+/* Performance Modal Styles */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  z-index: 2000;
+  padding: 20px;
+}
+
+.performanceModal {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  max-width: 600px;
+  width: 100%;
+  max-height: 80vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--color-border-secondary);
+  background: var(--color-bg-primary);
+}
+
+.modalHeader h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.closeButton:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-text-primary);
+}
+
+.modalContent {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.performanceOverview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-secondary);
+  border-radius: 6px;
+}
+
+.performanceMetric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.metricLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.metricValue {
+  font-size: 24px;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+  color: var(--color-text-primary);
+}
+
+.metricValue.excellent {
+  color: #4CAF50;
+}
+
+.metricValue.good {
+  color: #FF9800;
+}
+
+.metricValue.poor {
+  color: #F44336;
+}
+
+.performanceSection {
+  margin-bottom: 24px;
+}
+
+.performanceSection h4 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  border-bottom: 1px solid var(--color-border-secondary);
+  padding-bottom: 8px;
+}
+
+.statGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.statItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-secondary);
+  border-radius: 4px;
+}
+
+.statLabel {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.statValue {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  font-family: 'Courier New', monospace;
+}
+
+.settingsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.settingItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-secondary);
+  border-radius: 4px;
+}
+
+.settingLabel {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.settingValue {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  font-family: 'Courier New', monospace;
+}
+
+.settingValue.enabled {
+  color: #4CAF50;
+}
+
+.settingValue.disabled {
+  color: #F44336;
+}
+
+.optimizationButtons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.optimizeButton {
+  background: var(--color-accent-primary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: 6px;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  min-width: 120px;
+}
+
+.optimizeButton:hover {
+  background: var(--color-accent-secondary);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.optimizeButton:active {
+  transform: translateY(0);
+}
+
+.performanceReport {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-secondary);
+  border-radius: 4px;
+  padding: 16px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--color-text-primary);
+  white-space: pre-wrap;
+  overflow-x: auto;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+/* Mobile Responsive Styles for Performance Modal */
+@media (max-width: 768px) {
+  .modalOverlay {
+    padding: 10px;
+    align-items: flex-end;
+    justify-content: flex-start;
+  }
+
+  .performanceModal {
+    max-width: 100%;
+    max-height: 70vh;
+  }
+
+  .modalHeader {
+    padding: 12px 16px;
+  }
+
+  .modalHeader h3 {
+    font-size: 16px;
+  }
+
+  .modalContent {
+    padding: 16px;
+  }
+
+  .performanceOverview {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .metricValue {
+    font-size: 20px;
+  }
+
+  .statGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .settingsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .optimizationButtons {
+    flex-direction: column;
+  }
+
+  .optimizeButton {
+    width: 100%;
+    min-width: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .modalOverlay {
+    padding: 5px;
+    align-items: flex-end;
+    justify-content: flex-start;
+  }
+
+  .performanceModal {
+    max-height: 60vh;
+  }
+
+  .modalHeader {
+    padding: 8px 12px;
+  }
+
+  .modalHeader h3 {
+    font-size: 14px;
+  }
+
+  .modalContent {
+    padding: 12px;
+  }
+
+  .performanceOverview {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .metricValue {
+    font-size: 18px;
+  }
+
+  .statItem,
+  .settingItem {
+    padding: 6px 8px;
+  }
+
+  .statLabel,
+  .settingLabel {
+    font-size: 12px;
+  }
+
+  .statValue,
+  .settingValue {
+    font-size: 12px;
+  }
+
+  .performanceReport {
+    font-size: 10px;
+    padding: 12px;
+    max-height: 150px;
   }
 } 

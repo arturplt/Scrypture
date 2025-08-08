@@ -166,10 +166,11 @@ export class PerformanceMonitor {
   collectMetrics(): any {
     return {
       ...this.currentMetrics,
-      renderTime: 0,
-      blockCount: 0,
-      visibleBlocks: 0,
-      drawCalls: 0
+      renderTime: this.currentMetrics.frameTime,
+      blockCount: this.currentMetrics.triangles, // Use triangles as block count estimate
+      visibleBlocks: Math.round(this.currentMetrics.triangles * (this.currentMetrics.cullingEfficiency / 100)),
+      drawCalls: this.currentMetrics.drawCalls,
+      isOptimized: this.isPerformanceAcceptable()
     };
   }
 
@@ -184,19 +185,16 @@ export class PerformanceMonitor {
    * Get performance summary
    */
   getPerformanceSummary(): string {
-    const metrics = this.getMetrics();
-    return `
-Performance Summary:
-- FPS: ${metrics.fps}
-- Frame Time: ${metrics.frameTime}ms
-- Draw Calls: ${metrics.drawCalls}
-- Triangles: ${metrics.triangles}
-- Vertices: ${metrics.vertices}
-- Culling Efficiency: ${metrics.cullingEfficiency.toFixed(1)}%
-- GPU Time: ${metrics.gpuTime.toFixed(2)}ms
-- CPU Time: ${metrics.cpuTime.toFixed(2)}ms
-- Memory Usage: ${(metrics.memoryUsage / 1024 / 1024).toFixed(2)}MB
-    `.trim();
+    const m = this.getMetrics();
+    const grade = this.isPerformanceAcceptable() ? 'Optimized' : 'Standard';
+    return [
+      `FPS: ${m.fps.toFixed(1)}`,
+      `Render: ${m.frameTime.toFixed(1)}ms`,
+      `Draw Calls: ${m.drawCalls}`,
+      `Culling: ${m.cullingEfficiency.toFixed(1)}%`,
+      `GPU: ${m.gpuTime.toFixed(2)}ms  CPU: ${m.cpuTime.toFixed(2)}ms`,
+      `Grade: ${grade}`
+    ].join('\n');
   }
 
   /**

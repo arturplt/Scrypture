@@ -905,23 +905,21 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
       {/* Performance Display */}
       {sanctuary.showPerformance && (
         <div className={styles.performanceDisplay}>
-          <div>FPS: {performance.fps.toFixed(1)}</div>
-          <div>Render: {performance.renderTime.toFixed(1)}ms</div>
-          <div>Blocks: {performance.blockCount}</div>
-          <div>Visible: {performance.visibleBlocks}</div>
-          <div>Draw Calls: {performance.drawCalls}</div>
-          <div>Grade: {performance.isOptimized ? 'Optimized' : 'Standard'}</div>
-        </div>
-      )}
-
-      {/* Debug Coordinate Display */}
-      {sanctuary.showPerformance && (
-        <div className={styles.debugDisplay}>
-          <div>Mouse: {input.lastMousePosition ? `${input.lastMousePosition.x.toFixed(1)}, ${input.lastMousePosition.y.toFixed(1)}` : 'N/A'}</div>
-          <div>Grid: {sanctuary.hoverCell ? `${sanctuary.hoverCell.x}, ${sanctuary.hoverCell.y}, ${sanctuary.hoverCell.z}` : 'N/A'}</div>
-          <div>Camera: {`${sanctuary.camera.position.x.toFixed(1)}, ${sanctuary.camera.position.y.toFixed(1)}, ${sanctuary.camera.position.z.toFixed(1)}`}</div>
-          <div>Zoom: {sanctuary.camera.zoom.toFixed(2)}x</div>
-          <div>Z-Level: {sanctuary.currentZLevel}</div>
+          <div>
+            <div>FPS: {performance.fps.toFixed(1)}</div>
+            <div>Render: {performance.renderTime.toFixed(1)}</div>
+            <div>Blocks: {performance.blockCount}</div>
+            <div>Visible: {performance.visibleBlocks}</div>
+            <div>Draw Calls: {performance.drawCalls}</div>
+            <div>Grade: {performance.isOptimized ? 'Optimized' : 'Standard'}</div>
+          </div>
+          <div>
+            <div>Mouse: {input.lastMousePosition ? `${input.lastMousePosition.x.toFixed(1)}, ${input.lastMousePosition.y.toFixed(1)}` : 'N/A'}</div>
+            <div>Grid: {sanctuary.hoverCell ? `${sanctuary.hoverCell.x}, ${sanctuary.hoverCell.y}, ${sanctuary.hoverCell.z}` : 'N/A'}</div>
+            <div>Camera: {`${sanctuary.camera.position.x.toFixed(1)}, ${sanctuary.camera.position.y.toFixed(1)}, ${sanctuary.camera.position.z.toFixed(1)}`}</div>
+            <div>Zoom: {sanctuary.camera.zoom.toFixed(2)}x</div>
+            <div>Z-Level: {sanctuary.currentZLevel}</div>
+          </div>
         </div>
       )}
 

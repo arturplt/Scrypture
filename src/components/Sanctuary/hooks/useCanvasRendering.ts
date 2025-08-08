@@ -500,10 +500,10 @@ export const useCanvasRendering = (
     
     // Update performance metrics with calculated FPS
     if (performanceMonitor) {
-      const metrics = performanceMonitor.collectMetrics();
-      metrics.fps = fps;
-      metrics.frameTime = frameTime;
-      setPerformanceMetrics(metrics);
+      setPerformanceMetrics((prev: any) => {
+        const base = prev ?? performanceMonitor.collectMetrics();
+        return { ...base, fps, frameTime };
+      });
     }
     
     animationFrameRef.current = requestAnimationFrame(gameLoop);
