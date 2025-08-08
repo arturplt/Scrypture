@@ -1,467 +1,115 @@
-# Sanctuary Component Refactoring Documentation
+# Sanctuary Component System
 
-## Overview
-
-The Sanctuary component has been completely refactored from a monolithic 3764-line component into a modular, hook-based architecture. This refactoring improves maintainability, testability, and performance while preserving all existing functionality.
+A comprehensive isometric sandbox environment built with React, TypeScript, and Canvas/WebGL rendering.
 
 ## Architecture Overview
 
-### Before Refactoring
-- **Single monolithic component** (3764 lines)
-- **Mixed concerns**: State management, rendering, input handling, UI logic all in one file
-- **Difficult to test** and maintain
-- **Performance bottlenecks** due to lack of optimization
+### Core Hooks System
+The Sanctuary uses a modular hook-based architecture for clean separation of concerns:
 
-### After Refactoring
-- **Modular hook-based architecture**
-- **Separated concerns**: Each hook handles a specific responsibility
-- **Comprehensive test coverage**
-- **Performance optimizations** with proper memoization
+- **`useSanctuaryState`** - Core state management (blocks, camera, UI state)
+- **`useCanvasRendering`** - Canvas rendering and game loop management
+- **`useInputHandling`** - Mouse, touch, and keyboard input processing
+- **`useLevelManagement`** - Level save/load operations and auto-save
+- **`usePerformance`** - Performance monitoring and metrics
+- **`useWebGLRendering`** - WebGL rendering system (optional)
 
-## New Architecture
+### Main Components
+- **`Sanctuary.tsx`** - Main component orchestrating all hooks
+- **`SanctuaryModal.tsx`** - Modal wrapper for the Sanctuary
+- **`SanctuaryHeader.tsx`** - Top UI bar with controls
+- **`SanctuaryBottomBar.tsx`** - Bottom UI bar with additional tools
+- **`BlockSelector.tsx`** - Tile/block selection interface
 
-```
-src/components/Sanctuary/
-├── hooks/                    # Custom React hooks
-│   ├── useSanctuaryState.ts  # Core state management
-│   ├── useCanvasRendering.ts # Canvas rendering and game loop
-│   ├── useInputHandling.ts   # Mouse, keyboard, touch input
-│   ├── usePerformance.ts     # Performance monitoring
-│   ├── useLevelManagement.ts # Level save/load operations
-│   ├── useSanctuary.ts       # Main hook that combines all others
-│   └── index.ts             # Hook exports
-├── ui/                      # Extracted UI components
-│   ├── SanctuaryHeader.tsx  # Header with all controls
-│   ├── BlockSelector.tsx    # Block selection interface
-│   ├── PerformanceDisplay.tsx # Performance metrics display
-│   ├── Instructions.tsx     # Help/instructions panel
-│   ├── LoadingOverlay.tsx   # Loading states
-│   ├── TilePreview.tsx      # Tile preview component
-│   └── index.ts            # UI component exports
-├── systems/                 # Core systems (already extracted)
-├── utils/                   # Utility functions (already extracted)
-├── types/                   # TypeScript type definitions
-├── Sanctuary.tsx           # Main component (refactored)
-└── README.md               # This documentation
-```
+## Key Features
 
-## Hook API Documentation
+### Rendering Systems
+- **Canvas 2D Rendering** - Primary rendering with pixel-perfect isometric projection
+- **WebGL Rendering** - High-performance alternative with texture atlasing
+- **Culling System** - Frustum culling for performance optimization
+- **Depth Sorting** - Proper isometric depth ordering
 
-### useSanctuaryState
+### Level Management
+- **Auto-save** - Automatic level saving with configurable intervals
+- **Level Operations** - Create, save, load, duplicate, rename, delete
+- **Storage Management** - LocalStorage with quota handling and pruning
+- **Import/Export** - JSON-based level data exchange
 
-**Purpose**: Manages all core Sanctuary state including blocks, camera, UI state, and configuration.
+### Input Handling
+- **Mouse Controls** - Left-click building, right-click panning
+- **Touch Support** - Mobile-friendly touch controls
+- **Keyboard Shortcuts** - Quick access to common functions
+- **Coordinate Conversion** - Screen-to-grid and grid-to-screen mapping
 
-**Returns**: `[SanctuaryState, SanctuaryStateActions]`
+### Performance Features
+- **Performance Monitoring** - Real-time FPS and render metrics
+- **Spatial Indexing** - Efficient block lookup and culling
+- **Batch Rendering** - Optimized draw call batching
+- **Device Pixel Ratio** - High-DPI display support
 
-**Key Features**:
-- Block management (add, remove, update)
-- Camera controls (position, zoom, rotation)
-- UI state management (menus, toggles, selections)
-- Z-level management
-- Level data management
+### UI Components
+- **Collapsible Groups** - Organized control panels
+- **Z-Level Management** - Multi-layer editing support
+- **Height Map System** - Procedural terrain generation
+- **Atlas Editor** - Texture atlas management
+- **Block Categories** - Organized tile selection
 
-**Example Usage**:
-```typescript
-const [state, actions] = useSanctuaryState();
+## Technical Specifications
 
-// Add a block
-actions.addBlock({
-  id: 'block-1',
-  position: { x: 10, y: 20, z: 0 },
-  sprite: { sourceX: 0, sourceY: 0, width: 32, height: 32 },
-  rotation: 0,
-  palette: 'green'
-});
+### Coordinate Systems
+- **Grid Coordinates** - Integer-based block positioning
+- **Isometric Projection** - 2:1 ratio with Z-level depth
+- **Screen Coordinates** - Device pixel ratio aware
+- **World Coordinates** - Camera-transformed positions
 
-// Update camera
-actions.updateCamera({ zoom: 2 });
+### Data Structures
+- **Block** - Core building unit with position, sprite, properties
+- **Camera** - Viewport position, zoom, rotation
+- **Level** - Complete level data with metadata
+- **IsometricTileData** - Tile definition with sprite coordinates
 
-// Toggle UI elements
-actions.toggleBlockMenu();
-```
+### Rendering Pipeline
+1. **Culling** - Frustum culling for visible blocks
+2. **Depth Sorting** - Z-order calculation for proper layering
+3. **Batch Rendering** - Optimized draw call grouping
+4. **Post-processing** - UI overlays and effects
 
-### useCanvasRendering
+## Usage
 
-**Purpose**: Handles all canvas rendering logic, game loop, and coordinate conversion.
+```tsx
+import { Sanctuary } from './components/Sanctuary';
 
-**Returns**: `[CanvasRenderingState, CanvasRenderingActions]`
+// Basic usage
+<Sanctuary onExit={() => console.log('Exited sanctuary')} />
 
-**Key Features**:
-- Canvas refs and rendering state
-- Game loop management
-- Coordinate conversion (screen ↔ grid)
-- Integration with culling and spatial indexing
-- Performance metrics collection
-
-**Example Usage**:
-```typescript
-const [canvasState, canvasActions] = useCanvasRendering(
-  sanctuaryState,
-  spatialIndex,
-  cullingSystem,
-  performanceMonitor
-);
-
-// Convert screen coordinates to grid coordinates
-const gridPos = canvasActions.screenToGrid(mouseX, mouseY);
-
-// Start/stop rendering
-canvasActions.startRendering();
-canvasActions.stopRendering();
+// Modal usage
+<SanctuaryModal isOpen={isOpen} onClose={handleClose} />
 ```
 
-### useInputHandling
+## File Structure
 
-**Purpose**: Manages all input events including mouse, keyboard, and touch interactions.
-
-**Returns**: `[InputHandlingState, InputHandlingActions]`
-
-**Key Features**:
-- Mouse event handling (click, drag, wheel)
-- Keyboard event handling
-- Touch event handling
-- Gesture recognition
-- Input state tracking
-
-**Example Usage**:
-```typescript
-const [inputState, inputActions] = useInputHandling(
-  sanctuaryState,
-  sanctuaryActions,
-  canvasActions
-);
-
-// Attach to canvas
-<canvas
-  onMouseDown={inputActions.handleMouseDown}
-  onMouseMove={inputActions.handleMouseMove}
-  onMouseUp={inputActions.handleMouseUp}
-  onWheel={inputActions.handleWheel}
-  onTouchStart={inputActions.handleTouchStart}
-  onTouchMove={inputActions.handleTouchMove}
-  onTouchEnd={inputActions.handleTouchEnd}
-/>
+```
+Sanctuary/
+├── hooks/           # Core hook implementations
+├── systems/         # Rendering and optimization systems
+├── types/           # TypeScript type definitions
+├── ui/              # UI components
+├── utils/           # Utility classes and functions
+├── Sanctuary.tsx    # Main component
+└── README.md        # This documentation
 ```
 
-### usePerformance
-
-**Purpose**: Monitors and optimizes performance with real-time metrics.
-
-**Returns**: `[PerformanceState, PerformanceActions]`
-
-**Key Features**:
-- FPS monitoring
-- Render time tracking
-- Memory usage monitoring
-- Automatic optimization
-- Performance reporting
-
-**Example Usage**:
-```typescript
-const [performanceState, performanceActions] = usePerformance();
-
-// Get performance report
-const report = performanceActions.getPerformanceReport();
-console.log(report);
-
-// Auto-optimize based on current performance
-performanceActions.autoOptimize();
-```
-
-### useLevelManagement
-
-**Purpose**: Handles level save/load operations and level metadata management.
-
-**Returns**: `[LevelManagementState, LevelManagementActions]`
-
-**Key Features**:
-- Level saving and loading
-- Auto-save functionality
-- Level metadata management
-- Import/export capabilities
-- Error handling
-
-**Example Usage**:
-```typescript
-const [levelState, levelActions] = useLevelManagement(
-  sanctuaryState,
-  sanctuaryActions
-);
-
-// Save current level
-await levelActions.saveLevel();
-
-// Load a specific level
-await levelActions.loadLevel('level-id');
-
-// Create new level
-await levelActions.createNewLevel('My New Level');
-```
-
-### useSanctuary (Main Hook)
-
-**Purpose**: Combines all individual hooks into a single, cohesive interface.
-
-**Returns**: `[SanctuaryHookState, SanctuaryHookActions]`
-
-**Key Features**:
-- Unified state and actions from all hooks
-- System instance management
-- Convenience methods
-- State export/import
-
-**Example Usage**:
-```typescript
-const [state, actions] = useSanctuary();
-
-// Access any state
-console.log(state.sanctuary.blocks);
-console.log(state.performance.fps);
-
-// Use any actions
-actions.sanctuary.addBlock(newBlock);
-actions.performance.autoOptimize();
-actions.levelManagement.saveLevel();
-
-// Use convenience methods
-actions.resetSanctuary();
-const exportedState = actions.exportSanctuaryState();
-```
-
-## UI Components
-
-### SanctuaryHeader
-Displays the main header with all control groups (Camera, Building, Tools, etc.).
-
-**Props**:
-- `currentLevelName`: Current level name
-- `selectedTile`: Currently selected tile
-- `camera`: Camera state
-- `currentZLevel`: Current Z-level
-- `collapsedGroups`: Which groups are collapsed
-- Various action handlers
-
-### BlockSelector
-Displays the block selection interface with categories and palettes.
-
-**Props**:
-- `isOpen`: Whether the selector is open
-- `selectedTile`: Currently selected tile
-- `expandedCategory`: Which category is expanded
-- Action handlers for selection and category toggling
-
-### PerformanceDisplay
-Shows real-time performance metrics.
-
-**Props**:
-- `isVisible`: Whether to show the display
-- Performance metrics (fps, renderTime, blockCount, etc.)
-
-### Instructions
-Displays help and instruction information.
-
-**Props**:
-- `isVisible`: Whether to show instructions
-
-### LoadingOverlay
-Shows loading states during initialization.
-
-**Props**:
-- `isLoaded`: Whether the main component is loaded
-- `tileSheetLoaded`: Whether the tile sheet is loaded
-
-### TilePreview
-Displays a preview of an isometric tile.
-
-**Props**:
-- `tile`: The tile to preview
-- `size`: Preview size
-- `className`: Optional CSS class
-
-## Migration Guide
-
-### From Old Monolithic Component
-
-**Before**:
-```typescript
-// All state and logic in one component
-const Sanctuary = () => {
-  const [blocks, setBlocks] = useState([]);
-  const [camera, setCamera] = useState({...});
-  // ... 3764 lines of mixed concerns
-};
-```
-
-**After**:
-```typescript
-// Clean, modular component
-const Sanctuary = () => {
-  const [state, actions] = useSanctuary();
-  
-  return (
-    <div className={styles.sanctuary}>
-      <SanctuaryHeader {...headerProps} />
-      <BlockSelector {...selectorProps} />
-      <PerformanceDisplay {...performanceProps} />
-      <Instructions {...instructionProps} />
-      <LoadingOverlay {...loadingProps} />
-      <canvas {...canvasProps} />
-    </div>
-  );
-};
-```
-
-### State Management Migration
-
-**Old State**:
-```typescript
-// Scattered throughout the component
-const [blocks, setBlocks] = useState([]);
-const [camera, setCamera] = useState({...});
-const [selectedTile, setSelectedTile] = useState(null);
-// ... many more state variables
-```
-
-**New State**:
-```typescript
-// Centralized in useSanctuaryState
-const [state, actions] = useSanctuaryState();
-
-// Access state
-state.blocks
-state.camera
-state.selectedTile
-
-// Update state
-actions.addBlock(block);
-actions.updateCamera(camera);
-actions.setSelectedTile(tile);
-```
-
-### Event Handling Migration
-
-**Old Event Handling**:
-```typescript
-// Inline event handlers
-const handleMouseDown = (event) => {
-  // Complex logic mixed with state updates
-  const mousePos = getMousePosition(event);
-  const gridPos = screenToGrid(mousePos.x, mousePos.y);
-  // ... more complex logic
-};
-```
-
-**New Event Handling**:
-```typescript
-// Clean, separated event handling
-const [inputState, inputActions] = useInputHandling(
-  sanctuaryState,
-  sanctuaryActions,
-  canvasActions
-);
-
-// Use pre-built handlers
-<canvas onMouseDown={inputActions.handleMouseDown} />
-```
-
-## Performance Improvements
-
-### Before Refactoring
-- **Rendering**: 3764-line component with mixed concerns
-- **State Updates**: Scattered state management
-- **Event Handling**: Inline complex logic
-- **Testing**: Difficult to test individual parts
-
-### After Refactoring
-- **Rendering**: Modular components with React.memo
-- **State Updates**: Centralized, optimized state management
-- **Event Handling**: Separated, reusable input handling
-- **Testing**: Comprehensive unit and integration tests
-
-### Performance Benchmarks
-
-| Metric | Before | After | Improvement |
-|--------|--------|-------|-------------|
-| Initial Render Time | ~150ms | ~80ms | 47% faster |
-| State Update Time | ~25ms | ~8ms | 68% faster |
-| Memory Usage | ~45MB | ~32MB | 29% less |
-| Bundle Size | ~180KB | ~165KB | 8% smaller |
-| Test Coverage | 15% | 85% | 467% increase |
-
-## Testing Strategy
-
-### Unit Tests
-- **Hook Tests**: Individual hook functionality
-- **Component Tests**: UI component behavior
-- **Utility Tests**: Helper function logic
-
-### Integration Tests
-- **Component Integration**: How components work together
-- **Hook Integration**: How hooks interact
-- **System Integration**: How systems work together
-
-### Performance Tests
-- **Render Performance**: Component rendering speed
-- **Memory Usage**: Memory consumption patterns
-- **Interaction Performance**: User interaction responsiveness
-
-## Best Practices
-
-### Using the New Architecture
-
-1. **Always use the main `useSanctuary` hook** for the main component
-2. **Use individual hooks** for specific functionality when needed
-3. **Leverage the UI components** for consistent interface
-4. **Follow the established patterns** for state management
-
-### Extending the System
-
-1. **Add new hooks** for new functionality
-2. **Create new UI components** for new interfaces
-3. **Update the main hook** to include new functionality
-4. **Add comprehensive tests** for new features
-
-### Performance Considerations
-
-1. **Use React.memo** for expensive components
-2. **Optimize re-renders** with proper dependency arrays
-3. **Monitor performance** with the performance hook
-4. **Profile regularly** to identify bottlenecks
-
-## Troubleshooting
-
-### Common Issues
-
-**Hook Dependencies**: Ensure all hooks have proper dependency arrays
-**State Updates**: Use the provided actions instead of direct state updates
-**Event Handling**: Use the input handling hook for all input events
-**Performance**: Monitor with the performance hook and optimize as needed
-
-### Debug Mode
-
-Enable debug mode by setting the environment variable:
-```bash
-REACT_APP_SANCTUARY_DEBUG=true
-```
-
-This will provide additional logging and performance information.
-
-## Future Enhancements
-
-### Planned Improvements
-- **WebGL Rendering**: GPU-accelerated rendering
-- **Multiplayer Support**: Real-time collaboration
-- **Plugin System**: Extensible architecture
-- **Advanced AI**: Procedural generation improvements
-
-### Extension Points
-- **Custom Hooks**: Add new functionality through hooks
-- **Custom Systems**: Extend the system architecture
-- **Custom UI**: Create new interface components
-- **Custom Rendering**: Implement custom rendering pipelines
-
-## Conclusion
-
-The Sanctuary refactoring represents a significant improvement in code quality, maintainability, and performance. The new modular architecture provides a solid foundation for future development while preserving all existing functionality.
-
-The hook-based approach makes the code more testable, the separated concerns make it more maintainable, and the performance optimizations make it more efficient. This refactoring sets the stage for future enhancements and ensures the Sanctuary component can scale with the application's needs. 
+## Performance Considerations
+
+- **Culling** - Only renders visible blocks
+- **Batching** - Groups similar draw calls
+- **Texture Atlasing** - Reduces texture bindings
+- **Spatial Indexing** - Efficient spatial queries
+- **Frame Rate Limiting** - Configurable render loop timing
+
+## Browser Support
+
+- **Modern Browsers** - Chrome, Firefox, Safari, Edge
+- **WebGL Support** - Optional hardware acceleration
+- **Touch Devices** - Mobile and tablet support
+- **High-DPI Displays** - Retina and 4K support 
