@@ -243,7 +243,7 @@ export class TextureManager {
   createTileVertices(
     x: number, 
     y: number, 
-    z: number, 
+    _z: number, 
     tileId: number, 
     size: number = 32
   ): Float32Array | null {
@@ -269,7 +269,7 @@ export class TextureManager {
   createTileVerticesWithRegion(
     x: number, 
     y: number, 
-    z: number, 
+    _z: number, 
     region: TextureRegion, 
     size: number = 32
   ): Float32Array {
@@ -337,5 +337,17 @@ export class TextureManager {
       : 'Not loaded';
 
     return { textureCount, totalRegions, atlasSize };
+  }
+
+  getTileTexture(
+    _x: number,
+    _y: number,
+    _z: number,
+    _type: string,
+    _palette: string
+  ): WebGLTexture | null {
+    // This method is not used in the provided code, so it's kept as is.
+    // If it were to be used, it would need to be implemented.
+    return null;
   }
 } 

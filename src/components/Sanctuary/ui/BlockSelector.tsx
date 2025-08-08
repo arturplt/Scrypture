@@ -9,7 +9,7 @@ interface BlockSelectorProps {
   expandedCategory: string | null;
   onClose: () => void;
   onSelectTile: (tile: IsometricTileData) => void;
-  onToggleCategory: (category: string) => void;
+  onToggleCategory: (category: string | null) => void;
 }
 
 const BlockSelector: React.FC<BlockSelectorProps> = ({

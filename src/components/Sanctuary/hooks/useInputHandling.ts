@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { SanctuaryState, SanctuaryStateActions } from './useSanctuaryState';
 import { CanvasRenderingActions } from './useCanvasRendering';
+import { screenToCanvas, isWithinCanvas, debugCoordinateConversion } from '../utils/CoordinateUtils';
 
 export interface InputHandlingState {
   isDragging: boolean;
@@ -16,6 +17,7 @@ export interface InputHandlingActions {
   handleMouseMove: (event: React.MouseEvent<HTMLCanvasElement>) => void;
   handleMouseUp: (event: React.MouseEvent<HTMLCanvasElement>) => void;
   handleMouseLeave: (event: React.MouseEvent<HTMLCanvasElement>) => void;
+  handleMouseClick: (event: React.MouseEvent<HTMLCanvasElement>) => void;
   handleWheel: (event: React.WheelEvent<HTMLCanvasElement>) => void;
   handleContextMenu: (event: React.MouseEvent<HTMLCanvasElement>) => void;
   
@@ -60,7 +62,8 @@ export const useInputHandling = (
     
     // Left click for building/selection
     if (event.button === 0) {
-      const gridPos = canvasActions.screenToGrid(mousePos.x, mousePos.y);
+      // Pass raw screen coordinates to screenToGrid
+      const gridPos = canvasActions.screenToGrid(event.clientX, event.clientY);
       stateActions.setHoverCell(gridPos);
       
       // Place block if tile is selected
@@ -117,12 +120,24 @@ export const useInputHandling = (
       });
     }
     
-    // Update hover cell
-    const gridPos = canvasActions.screenToGrid(mousePos.x, mousePos.y);
+    // Update hover cell - pass raw screen coordinates to screenToGrid
+    const gridPos = canvasActions.screenToGrid(event.clientX, event.clientY);
     stateActions.setHoverCell(gridPos);
     
+    // Debug coordinate conversion on mouse move (only when debug is enabled)
+    if (state.showPerformance) {
+      const canvas = event.currentTarget;
+      debugCoordinateConversion(
+        event.clientX, 
+        event.clientY, 
+        canvas, 
+        state.camera, 
+        state.currentZLevel
+      );
+    }
+    
     lastMousePosition.current = mousePos;
-  }, [state.camera, stateActions, canvasActions]);
+  }, [state.camera, state.showPerformance, state.currentZLevel, stateActions, canvasActions]);
 
   const handleMouseUp = useCallback((_event: React.MouseEvent<HTMLCanvasElement>) => {
     isDragging.current = false;
@@ -137,10 +152,27 @@ export const useInputHandling = (
     stateActions.setHoverCell(null);
   }, [stateActions]);
 
-  const handleWheel = useCallback((event: React.WheelEvent<HTMLCanvasElement>) => {
-    // Disabled scroll zoom - only use zoom buttons (1x, 2x, 4x)
-    // Note: preventDefault() removed due to passive event listener restrictions
-    // Wheel zoom is disabled in favor of zoom buttons (1x, 2x, 4x)
+  const handleMouseClick = useCallback((event: React.MouseEvent<HTMLCanvasElement>) => {
+    const mousePos = getMousePosition(event);
+    // Pass raw screen coordinates to screenToGrid
+    const gridPos = canvasActions.screenToGrid(event.clientX, event.clientY);
+    
+    // Debug: Log click position and resulting grid coordinates
+    console.log('Mouse Click Debug:', {
+      mouse: mousePos,
+      grid: gridPos,
+      camera: state.camera,
+      canvas: event.currentTarget.getBoundingClientRect()
+    });
+    
+    // Handle block placement (if implemented)
+    if (state.selectedBlock && !isPanning.current) {
+      console.log('Would place block at:', gridPos, 'with block:', state.selectedBlock);
+    }
+  }, [state.selectedBlock, state.camera, stateActions, canvasActions]);
+
+  const handleWheel = useCallback((_event: React.WheelEvent<HTMLCanvasElement>) => {
+    // Wheel handling can be implemented here if needed
   }, []);
 
   const handleContextMenu = useCallback((event: React.MouseEvent<HTMLCanvasElement>) => {
@@ -151,14 +183,20 @@ export const useInputHandling = (
   // Touch event handlers
   const handleTouchStart = useCallback((event: React.TouchEvent<HTMLCanvasElement>) => {
     if (event.touches.length === 1) {
+      const touch = event.touches[0];
       const touchPos = getTouchPosition(event);
       touchStartPosition.current = touchPos;
       lastMousePosition.current = touchPos;
+      
+      // Convert touch to grid coordinates for potential block placement
+      const gridPos = canvasActions.screenToGrid(touch.clientX, touch.clientY);
+      stateActions.setHoverCell(gridPos);
     }
-  }, []);
+  }, [canvasActions, stateActions]);
 
   const handleTouchMove = useCallback((event: React.TouchEvent<HTMLCanvasElement>) => {
     if (event.touches.length === 1 && touchStartPosition.current) {
+      const touch = event.touches[0];
       const touchPos = getTouchPosition(event);
       
       // Pan with single touch
@@ -175,9 +213,13 @@ export const useInputHandling = (
         });
       }
       
+      // Update hover cell for touch
+      const gridPos = canvasActions.screenToGrid(touch.clientX, touch.clientY);
+      stateActions.setHoverCell(gridPos);
+      
       lastMousePosition.current = touchPos;
     }
-  }, [state.camera, stateActions]);
+  }, [state.camera, stateActions, canvasActions]);
 
   const handleTouchEnd = useCallback((_event: React.TouchEvent<HTMLCanvasElement>) => {
     isDragging.current = false;
@@ -213,8 +255,21 @@ export const useInputHandling = (
           stateActions.togglePerformance();
         }
         break;
+      case 'd':
+        if (event.ctrlKey || event.metaKey) {
+          // Toggle debug mode - this will show coordinate conversion info
+          stateActions.togglePerformance(); // Reuse performance toggle for debug info
+        }
+        break;
       case 'f':
         stateActions.setFillMode(!state.fillMode);
+        break;
+      case 't':
+        if (event.ctrlKey || event.metaKey) {
+          // Test coordinate conversion
+          console.log('Testing coordinate conversion...');
+          // This will be handled by the main component
+        }
         break;
     }
   }, [state.selectedBlock, state.fillMode, stateActions]);
@@ -229,20 +284,14 @@ export const useInputHandling = (
   }, []);
 
   const getMousePosition = useCallback((event: React.MouseEvent<HTMLCanvasElement>): { x: number; y: number } => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    return {
-      x: event.clientX - rect.left,
-      y: event.clientY - rect.top
-    };
+    const canvas = event.currentTarget;
+    return screenToCanvas(event.clientX, event.clientY, canvas);
   }, []);
 
   const getTouchPosition = useCallback((event: React.TouchEvent<HTMLCanvasElement>): { x: number; y: number } => {
-    const rect = event.currentTarget.getBoundingClientRect();
+    const canvas = event.currentTarget;
     const touch = event.touches[0];
-    return {
-      x: touch.clientX - rect.left,
-      y: touch.clientY - rect.top
-    };
+    return screenToCanvas(touch.clientX, touch.clientY, canvas);
   }, []);
 
   // Set up global keyboard listeners
@@ -287,6 +336,7 @@ export const useInputHandling = (
     handleMouseMove,
     handleMouseUp,
     handleMouseLeave,
+    handleMouseClick,
     handleWheel,
     handleContextMenu,
     handleTouchStart,

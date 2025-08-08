@@ -114,7 +114,7 @@ export class BlockRenderer {
   /**
    * Set uniforms for block rendering
    */
-  private setBlockUniforms(block: Block, alpha: number, highlight: boolean, hover: boolean, selected: boolean): void {
+  private setBlockUniforms(block: Block, alpha: number, _highlight: boolean, _hover: boolean, _selected: boolean): void {
     const { x, y, z } = block.position;
     
     // Get uniform locations
@@ -154,7 +154,7 @@ export class BlockRenderer {
   /**
    * Bind texture for block rendering
    */
-  private bindBlockTexture(block: Block): void {
+  private bindBlockTexture(_block: Block): void {
     if (!this.textureManager.isAtlasLoaded()) return;
 
     const textureLocation = this.gl.getUniformLocation(this.program, 'u_texture');
@@ -269,7 +269,7 @@ export class BlockRenderer {
   /**
    * Check if block should be rendered (for culling)
    */
-  shouldRenderBlock(block: Block, camera: { position: { x: number; y: number; z: number }; zoom: number }): boolean {
+  shouldRenderBlock(block: Block, _camera: { position: { x: number; y: number; z: number }; zoom: number }): boolean {
     const { x, y, z } = block.position;
     
     // Simple distance-based culling

@@ -1,13 +1,111 @@
 .sanctuary {
   position: relative;
   width: 100%;
-  height: 100vh; /* Full screen height */
+  height: 100%;
   background: var(--color-bg-primary);
   border: none;
   border-radius: 0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+}
+
+/* Regular fullscreen toggle button */
+.fullscreenToggle {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 1000;
+  pointer-events: auto;
+}
+
+.fullscreenToggle:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* Fullscreen instructions */
+.fullscreenInstructions {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  text-align: center;
+  z-index: 1000;
+  pointer-events: none;
+  animation: fadeInOut 3s ease-in-out infinite;
+}
+
+.fullscreenInstructions div {
+  margin: 4px 0;
+}
+
+.fullscreenInstructions kbd {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+  padding: 2px 6px;
+  font-family: monospace;
+  font-size: 12px;
+}
+
+@keyframes fadeInOut {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+/* Welcome message */
+.welcomeMessage {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.9);
+  backdrop-filter: blur(15px);
+  color: white;
+  padding: 20px 30px;
+  border-radius: 12px;
+  font-size: 18px;
+  text-align: center;
+  z-index: 2000;
+  pointer-events: none;
+  animation: welcomeFadeIn 0.5s ease-out;
+}
+
+.welcomeMessage div {
+  margin: 8px 0;
+}
+
+.welcomeMessage div:first-child {
+  font-size: 24px;
+  font-weight: bold;
+  color: #4CAF50;
+}
+
+@keyframes welcomeFadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
 }
 
 .sanctuaryHeader {
@@ -20,6 +118,166 @@
   flex-direction: column;
   gap: 8px;
   pointer-events: none;
+}
+
+/* Top Bar - Positioned above canvas */
+.sanctuaryTopBar {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
+  border-radius: 8px;
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.topBarLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  pointer-events: auto;
+  flex-shrink: 0;
+}
+
+.topBarCenter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  flex: 1;
+}
+
+.topBarRight {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  pointer-events: auto;
+  flex-shrink: 0;
+}
+
+.cameraControls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.quickActions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.zLevelQuickAccess {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.zLevelButtons {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.controlLabel {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  pointer-events: none;
+}
+
+/* Bottom Bar - Positioned below canvas */
+.sanctuaryBottomBar {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  right: 12px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
+  border-radius: 8px;
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.bottomBarLeft {
+  display: flex;
+  align-items: center;
+  pointer-events: auto;
+  flex-shrink: 0;
+}
+
+.bottomBarCenter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  flex: 1;
+}
+
+.bottomBarRight {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  pointer-events: auto;
+  flex-shrink: 0;
+}
+
+/* Update canvas container to account for top and bottom bars */
+.canvasContainer {
+  position: absolute;
+  top: 80px; /* Account for top bar */
+  left: 0;
+  right: 0;
+  bottom: 80px; /* Account for bottom bar */
+  width: 100%;
+  height: calc(100% - 160px); /* Subtract space for both bars */
+  background: var(--color-bg-primary);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Mobile-specific canvas adjustments */
+@media (max-width: 768px) {
+  .canvasContainer {
+    /* Ensure canvas takes full screen on mobile */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+  }
+}
+
+.isometricCanvas {
+  display: block;
+  background: var(--color-bg-primary);
+  cursor: default;
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  object-fit: cover;
 }
 
 .headerTopRow {
@@ -135,6 +393,17 @@
   white-space: nowrap;
 }
 
+.canvasSizeIndicator {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  pointer-events: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
 .selectedTileIndicator {
   display: flex;
   align-items: center;
@@ -246,29 +515,42 @@
 /* Performance Display */
 .performanceDisplay {
   position: absolute;
-  top: 60px;
+  top: 12px;
   right: 12px;
-  z-index: 10;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
-  padding: 12px;
-  background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border-primary);
-  border-radius: 6px;
-  font-size: 12px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #00ff00;
   font-family: 'Courier New', monospace;
-  color: var(--color-text-secondary);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  font-size: 11px;
+  padding: 8px;
+  border-radius: 4px;
+  z-index: 20;
   pointer-events: none;
+  min-width: 120px;
 }
 
 .performanceDisplay > div {
-  padding: 4px 8px;
-  background: var(--color-bg-primary);
+  margin: 2px 0;
+  white-space: nowrap;
+}
+
+.debugDisplay {
+  position: absolute;
+  top: 12px;
+  right: 140px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #ffff00;
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  padding: 8px;
   border-radius: 4px;
-  text-align: center;
-  border: 1px solid var(--color-border-secondary);
+  z-index: 20;
+  pointer-events: none;
+  min-width: 150px;
+}
+
+.debugDisplay > div {
+  margin: 2px 0;
+  white-space: nowrap;
 }
 
 /* Level Management Menu */
@@ -779,47 +1061,6 @@
   font-smooth: never;
 }
 
-/* Canvas Container */
-.canvasContainer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100%;
-  height: 100%;
-  background: var(--color-bg-primary);
-  overflow: hidden;
-  flex: 1;
-}
-
-/* Mobile-specific canvas adjustments */
-@media (max-width: 768px) {
-  .canvasContainer {
-    /* Ensure canvas takes full screen on mobile */
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-  }
-}
-
-.isometricCanvas {
-  width: 100%;
-  height: 100%;
-  display: block;
-  background: var(--color-bg-primary);
-  cursor: default;
-  touch-action: none;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-}
-
 /* Instructions Panel */
 .instructions {
   position: absolute;
@@ -934,271 +1175,7 @@
   color: var(--color-text-primary);
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .sanctuary {
-    height: 100vh; /* Full screen on mobile */
-  }
-
-  .sanctuaryHeader {
-    top: 8px;
-    left: 8px;
-    right: 8px;
-    gap: 6px;
-    flex-wrap: wrap;
-  }
-
-  .headerTopRow {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
-  }
-
-  .headerBottomRow {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
-  }
-
-  .buttonGroup {
-    width: 100%;
-    align-items: flex-start;
-  }
-
-  .buttonGroupLabel {
-    text-align: left;
-  }
-
-  .buttonGroupHeader {
-    padding: 4px 6px;
-  }
-
-  .collapseIcon {
-    font-size: 10px;
-  }
-
-  .buttonGroupContent {
-    justify-content: flex-start;
-    gap: 4px;
-  }
-
-  .buttonGroupContent button {
-    font-size: var(--font-size-xs);
-    padding: 4px;
-    min-width: 28px;
-    height: 20px;
-  }
-
-  @media (max-width: 480px) {
-    .buttonGroupContent button {
-      font-size: var(--font-size-xs);
-      padding: 4px;
-      min-width: 24px;
-      height: 18px;
-    }
-  }
-
-  .homeButton {
-    padding: 4px 8px;
-    font-size: 12px;
-    margin-right: 6px;
-  }
-
-  .sanctuaryTitle {
-    font-size: 14px;
-    max-width: 150px;
-  }
-
-  .selectedTileIndicator {
-    max-width: 120px;
-  }
-
-  .buttonGroup {
-    min-width: 80px;
-  }
-
-  .blockMenuToggle,
-  .performanceToggle,
-  .levelMenuToggle,
-  .cameraReset {
-    padding: 8px 12px;
-    font-size: 14px;
-    min-height: 44px; /* Touch-friendly minimum size */
-  }
-
-  .zoomControls {
-    gap: 2px;
-  }
-
-  .zoomButton {
-    padding: 4px;
-    font-size: var(--font-size-xs);
-    min-width: 28px;
-    height: 20px;
-  }
-
-  .performanceDisplay {
-    top: 50px;
-    right: 8px;
-    padding: 8px;
-    font-size: 11px;
-  }
-
-  .levelMenu {
-    top: 50px;
-    left: 8px;
-    max-height: 300px;
-    min-width: 200px;
-  }
-
-  .blockSelector {
-    top: 50px;
-    right: 8px;
-    max-height: 300px;
-    min-width: 150px;
-  }
-
-  .blockCategories {
-    padding: 12px;
-    gap: 12px;
-  }
-
-  .blockCategory {
-    padding: 8px;
-  }
-
-  .blockCategory h4 {
-    font-size: 13px;
-    margin-bottom: 8px;
-  }
-
-  .paletteGrid {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-
-  .tileGrid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 2px;
-  }
-
-  .tileButton {
-    width: 28px;
-    height: 28px;
-    min-width: 28px;
-    min-height: 28px;
-  }
-
-  .instructions {
-    bottom: 8px;
-    left: 8px;
-    padding: 8px;
-    font-size: 11px;
-    max-width: 250px;
-  }
-
-  .saveDialogContent {
-    margin: 16px;
-    padding: 16px;
-    min-width: 250px;
-  }
-
-  .renameDialogContent {
-    margin: 16px;
-    padding: 16px;
-    min-width: 250px;
-  }
-
-  .confirmationDialogContent {
-    padding: 16px;
-    max-width: 95%;
-  }
-
-  .confirmationDialogActions {
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .confirmationDialogActions button {
-    width: 100%;
-  }
-}
-
-@media (max-width: 480px) {
-  .sanctuary {
-    height: 100vh; /* Full screen on very small screens */
-  }
-
-  .performanceDisplay {
-    grid-template-columns: 1fr;
-  }
-
-  .paletteGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .tileGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .tileButton {
-    width: 24px;
-    height: 24px;
-    min-width: 24px;
-    min-height: 24px;
-  }
-
-  .levelActions {
-    flex-direction: column;
-  }
-
-  .levelItem {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-
-  .levelItemActions {
-    width: 100%;
-    justify-content: flex-end;
-  }
-
-  .blockMenuToggle,
-  .performanceToggle,
-  .levelMenuToggle,
-  .cameraReset {
-    padding: 6px 10px;
-    font-size: 13px;
-    min-height: 40px;
-  }
-
-  .zoomControls {
-    gap: 1px;
-  }
-
-  .zoomButton {
-    padding: 4px;
-    font-size: var(--font-size-xs);
-    min-width: 24px;
-    height: 18px;
-  }
-
-  .homeButton {
-    padding: 3px 6px;
-    font-size: 11px;
-    margin-right: 4px;
-  }
-
-  /* Hide less essential buttons on very small screens */
-  .performanceToggle,
-  .instructionsToggle {
-    display: none;
-  }
-
-  .sanctuaryTitle {
-    font-size: 12px;
-  }
-} 
+/* Legacy responsive styles removed - replaced with new top/bottom bar responsive styles above */ 
 
 /* Height Map Display */
 .heightMapDisplay {
@@ -1435,5 +1412,346 @@
     min-width: 20px;
     height: 20px;
     font-size: 8px;
+  }
+} 
+
+/* Responsive Design for Top and Bottom Bars */
+@media (max-width: 768px) {
+  .sanctuary {
+    height: 100vh; /* Full screen on mobile */
+  }
+
+  .sanctuaryTopBar {
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    padding: 6px 8px;
+    gap: 8px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .topBarLeft {
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .topBarCenter {
+    justify-content: center;
+  }
+
+  .topBarRight {
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .cameraControls {
+    gap: 4px;
+  }
+
+  .quickActions {
+    gap: 4px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .zLevelQuickAccess {
+    gap: 4px;
+  }
+
+  .zLevelButtons {
+    gap: 2px;
+  }
+
+  .sanctuaryBottomBar {
+    bottom: 8px;
+    left: 8px;
+    right: 8px;
+    padding: 6px 8px;
+    gap: 8px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .bottomBarLeft,
+  .bottomBarCenter,
+  .bottomBarRight {
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .bottomBarRight {
+    flex-wrap: wrap;
+  }
+
+  /* Update canvas container for mobile */
+  .canvasContainer {
+    top: 120px; /* Account for taller top bar on mobile */
+    bottom: 120px; /* Account for taller bottom bar on mobile */
+    height: calc(100% - 240px); /* Subtract space for both bars */
+  }
+
+  .homeButton {
+    padding: 4px 8px;
+    font-size: 12px;
+    margin-right: 6px;
+  }
+
+  .sanctuaryTitle {
+    font-size: 14px;
+    max-width: 150px;
+  }
+
+  .selectedTileIndicator {
+    max-width: 120px;
+  }
+
+  .controlLabel {
+    font-size: 9px;
+  }
+
+  .buttonGroupContent button {
+    font-size: var(--font-size-xs);
+    padding: 4px 6px;
+    min-width: 28px;
+    height: 20px;
+  }
+
+  .zoomControls {
+    gap: 2px;
+  }
+
+  .zoomButton {
+    padding: 4px;
+    font-size: var(--font-size-xs);
+    min-width: 28px;
+    height: 20px;
+  }
+
+  .performanceDisplay {
+    top: 140px;
+    right: 8px;
+    padding: 8px;
+    font-size: 11px;
+  }
+
+  .levelMenu {
+    top: 140px;
+    left: 8px;
+    max-height: 300px;
+    min-width: 200px;
+  }
+
+  .blockSelector {
+    top: 140px;
+    right: 8px;
+    max-height: 300px;
+    min-width: 150px;
+  }
+
+  .blockCategories {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .blockCategory {
+    padding: 8px;
+  }
+
+  .blockCategory h4 {
+    font-size: 13px;
+    margin-bottom: 8px;
+  }
+
+  .paletteGrid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .tileGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2px;
+  }
+
+  .tileButton {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    min-height: 28px;
+  }
+
+  .instructions {
+    bottom: 140px;
+    left: 8px;
+    padding: 8px;
+    font-size: 11px;
+    max-width: 250px;
+  }
+
+  .saveDialogContent {
+    margin: 16px;
+    padding: 16px;
+    min-width: 250px;
+  }
+
+  .renameDialogContent {
+    margin: 16px;
+    padding: 16px;
+    min-width: 250px;
+  }
+
+  .confirmationDialogContent {
+    padding: 16px;
+    max-width: 95%;
+  }
+
+  .confirmationDialogActions {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .confirmationDialogActions button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .sanctuary {
+    height: 100vh; /* Full screen on very small screens */
+  }
+
+  .sanctuaryTopBar {
+    top: 4px;
+    left: 4px;
+    right: 4px;
+    padding: 4px 6px;
+    gap: 6px;
+  }
+
+  .topBarLeft {
+    gap: 6px;
+  }
+
+  .topBarRight {
+    gap: 6px;
+  }
+
+  .cameraControls {
+    gap: 2px;
+  }
+
+  .quickActions {
+    gap: 2px;
+  }
+
+  .zLevelQuickAccess {
+    gap: 2px;
+  }
+
+  .zLevelButtons {
+    gap: 1px;
+  }
+
+  .sanctuaryBottomBar {
+    bottom: 4px;
+    left: 4px;
+    right: 4px;
+    padding: 4px 6px;
+    gap: 6px;
+  }
+
+  .bottomBarLeft,
+  .bottomBarCenter,
+  .bottomBarRight {
+    gap: 6px;
+  }
+
+  /* Update canvas container for very small screens */
+  .canvasContainer {
+    top: 100px;
+    bottom: 100px;
+    height: calc(100% - 200px);
+  }
+
+  .performanceDisplay {
+    grid-template-columns: 1fr;
+  }
+
+  .paletteGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .tileGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .tileButton {
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    min-height: 24px;
+  }
+
+  .buttonGroupContent button {
+    font-size: var(--font-size-xs);
+    padding: 3px 4px;
+    min-width: 24px;
+    height: 18px;
+  }
+
+  .zoomControls {
+    gap: 1px;
+  }
+
+  .zoomButton {
+    padding: 3px;
+    font-size: var(--font-size-xs);
+    min-width: 24px;
+    height: 18px;
+  }
+
+  .homeButton {
+    padding: 3px 6px;
+    font-size: 11px;
+    margin-right: 4px;
+  }
+
+  .sanctuaryTitle {
+    font-size: 12px;
+  }
+
+  .controlLabel {
+    font-size: 8px;
+  }
+
+  /* Hide less essential buttons on very small screens */
+  .performanceToggle,
+  .instructionsToggle {
+    display: none;
+  }
+
+  .levelActions {
+    flex-direction: column;
+  }
+
+  .levelItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .levelItemActions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .blockMenuToggle,
+  .performanceToggle,
+  .levelMenuToggle,
+  .cameraReset {
+    padding: 6px 10px;
+    font-size: 13px;
+    min-height: 40px;
   }
 } 

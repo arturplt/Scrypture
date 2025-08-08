@@ -1,5 +1,7 @@
 // Export all Sanctuary UI components
 export { default as SanctuaryHeader } from './SanctuaryHeader';
+export { default as SanctuaryTopBar } from './SanctuaryTopBar';
+export { default as SanctuaryBottomBar } from './SanctuaryBottomBar';
 export { default as BlockSelector } from './BlockSelector';
 export { default as PerformanceDisplay } from './PerformanceDisplay';
 export { default as Instructions } from './Instructions';

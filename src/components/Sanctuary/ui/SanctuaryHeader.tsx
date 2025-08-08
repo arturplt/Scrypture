@@ -68,7 +68,7 @@ const SanctuaryHeader: React.FC<SanctuaryHeaderProps> = ({
   onExportHeightMap,
   onToggleZLevelManager,
   onSwitchToZLevel,
-  onToggleAtlasEditor,
+  onToggleAtlasEditor: _onToggleAtlasEditor,
   isBlockMenuOpen,
   showHeightMap
 }) => {

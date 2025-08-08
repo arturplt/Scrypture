@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from './Sanctuary.module.css';
 import { ISOMETRIC_TILES, TILE_SHEET_CONFIG, IsometricTileData } from '../data/isometric-tiles';
 import AtlasEditor from './AtlasEditor';
@@ -98,46 +98,89 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
     };
 
     loadTileSheet();
-  }, [actions.canvas]);
+  }, []); // Remove actions.canvas dependency to prevent re-renders
 
-  // Initial canvas setup with pixel-perfect scaling
+  // Canvas size state
+  const [canvasSize, setCanvasSize] = useState<'512' | '1024'>('512');
+
+  // Initial canvas setup with fixed sizes
   useEffect(() => {
     const canvasElement = canvas.canvasRef.current;
     if (canvasElement) {
-      const rect = canvasElement.getBoundingClientRect();
+      const size = parseInt(canvasSize);
       const dpr = window.devicePixelRatio || 1;
       
-      // Set canvas size accounting for device pixel ratio for crisp rendering
-      canvasElement.width = rect.width * dpr;
-      canvasElement.height = rect.height * dpr;
+      console.log('Canvas setup - Fixed size:', {
+        size,
+        dpr,
+        actualWidth: size * dpr,
+        actualHeight: size * dpr
+      });
+      
+      // Set canvas size to fixed dimensions with device pixel ratio
+      canvasElement.width = size * dpr;
+      canvasElement.height = size * dpr;
       
       // Set CSS size to maintain visual size
-      canvasElement.style.width = rect.width + 'px';
-      canvasElement.style.height = rect.height + 'px';
+      canvasElement.style.width = `${size}px`;
+      canvasElement.style.height = `${size}px`;
       
       // Scale the context to account for device pixel ratio
       const ctx = canvasElement.getContext('2d');
       if (ctx) {
         ctx.scale(dpr, dpr);
       }
+      
+      // Position camera at center of canvas
+      const centerX = size / 2;
+      const centerY = size / 2;
+      
+      // Update camera position to center of canvas
+      actions.sanctuary.setCamera({
+        position: { x: centerX, y: centerY, z: 0 },
+        zoom: 1,
+        rotation: 0
+      });
+      
+      console.log('Canvas setup - Camera positioned at:', {
+        centerX,
+        centerY,
+        canvasSize: size
+      });
+      
+      console.log('Canvas setup - Canvas dimensions:', {
+        width: canvasElement.width,
+        height: canvasElement.height,
+        styleWidth: canvasElement.style.width,
+        styleHeight: canvasElement.style.height
+      });
     }
-  }, []);
+  }, [canvasSize]); // Only re-run when canvas size changes
 
-  // Handle canvas resize with pixel-perfect scaling
+  // Handle canvas resize with fixed sizes
   useEffect(() => {
+    const { setCamera } = actions.sanctuary;
+    
     const handleResize = () => {
       const canvasElement = canvas.canvasRef.current;
       if (canvasElement) {
-        const rect = canvasElement.getBoundingClientRect();
+        const size = parseInt(canvasSize);
         const dpr = window.devicePixelRatio || 1;
         
-        // Set canvas size accounting for device pixel ratio for crisp rendering
-        canvasElement.width = rect.width * dpr;
-        canvasElement.height = rect.height * dpr;
+        console.log('Canvas resize - Fixed size:', {
+          size,
+          dpr,
+          actualWidth: size * dpr,
+          actualHeight: size * dpr
+        });
+        
+        // Set canvas size to fixed dimensions with device pixel ratio
+        canvasElement.width = size * dpr;
+        canvasElement.height = size * dpr;
         
         // Set CSS size to maintain visual size
-        canvasElement.style.width = rect.width + 'px';
-        canvasElement.style.height = rect.height + 'px';
+        canvasElement.style.width = `${size}px`;
+        canvasElement.style.height = `${size}px`;
         
         // Scale the context to account for device pixel ratio
         const ctx = canvasElement.getContext('2d');
@@ -145,21 +188,55 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
           ctx.scale(dpr, dpr);
         }
         
-        // Keep camera positioned after resize with offset
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
-        const offsetX = centerX - 100; // Offset left to account for UI panels
-        const offsetY = centerY - 50;  // Offset up slightly
+        // Reposition camera to center of new canvas size
+        const centerX = size / 2;
+        const centerY = size / 2;
         
-        actions.sanctuary.updateCamera({
-          position: { x: offsetX, y: offsetY, z: 0 }
+        // Only update if center actually changed to avoid redundant renders
+        if (
+          sanctuary.camera.position.x !== centerX ||
+          sanctuary.camera.position.y !== centerY
+        ) {
+          setCamera({
+            position: { x: centerX, y: centerY, z: 0 },
+            zoom: sanctuary.camera.zoom, // Keep current zoom level
+            rotation: sanctuary.camera.rotation
+          });
+        }
+        
+        console.log('Canvas resize - Camera repositioned to:', {
+          centerX,
+          centerY,
+          canvasSize: size
+        });
+        
+        console.log('Canvas resize - Canvas dimensions:', {
+          width: canvasElement.width,
+          height: canvasElement.height,
+          styleWidth: canvasElement.style.width,
+          styleHeight: canvasElement.style.height
         });
       }
     };
 
+    // Initial setup
+    handleResize();
+    
+    // Add resize listener
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [actions.sanctuary]);
+    
+    // Add orientation change listener for mobile devices
+    const orientationHandler = () => {
+      // Small delay to ensure orientation change is complete
+      setTimeout(handleResize, 100);
+    };
+    window.addEventListener('orientationchange', orientationHandler);
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', orientationHandler);
+    };
+  }, [canvasSize, sanctuary.camera.zoom, sanctuary.camera.rotation, actions.sanctuary.setCamera]); // Re-run when canvas size or camera zoom/rotation changes
 
   // Zoom handlers
   const handleZoomClick = (zoom: number) => {
@@ -167,11 +244,17 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
   };
 
   const resetCamera = () => {
+    const size = parseInt(canvasSize);
+    const centerX = size / 2;
+    const centerY = size / 2;
+    
     actions.sanctuary.setCamera({
-      position: { x: 0, y: 0, z: 0 },
+      position: { x: centerX, y: centerY, z: 0 },
       zoom: 1,
       rotation: 0
     });
+    
+    console.log('Camera reset to:', { centerX, centerY, canvasSize: size });
   };
 
   // Level management handlers
@@ -293,6 +376,36 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
     actions.sanctuary.setCurrentZLevel(level);
   };
 
+  // Multi-Z presets helpers
+  const availableZLevels = React.useMemo(() => {
+    const set = new Set<number>();
+    sanctuary.blocks.forEach(b => set.add(b.position.z));
+    // Always include 0,1,2 as common defaults even if no blocks yet
+    [0, 1, 2].forEach(z => set.add(z));
+    return Array.from(set).sort((a, b) => a - b);
+  }, [sanctuary.blocks]);
+
+  const applyZFilter = (levels: number[] | 'all') => {
+    if (levels === 'all' || levels.length === 0) {
+      actions.sanctuary.setZLevelFilter([]); // empty means show all
+      return;
+    }
+    const uniqueSorted = Array.from(new Set(levels)).sort((a, b) => a - b);
+    actions.sanctuary.setZLevelFilter(uniqueSorted);
+  };
+
+  const applyCurrPlusMinusOne = () => {
+    const cz = sanctuary.currentZLevel;
+    const target = [cz - 1, cz, cz + 1].filter(z => availableZLevels.includes(z));
+    applyZFilter(target);
+  };
+
+  const applyToCurrent = () => {
+    const cz = sanctuary.currentZLevel;
+    const target = availableZLevels.filter(z => z <= cz);
+    applyZFilter(target);
+  };
+
   const addZLevel = (level: number, name: string) => {
     // This would integrate with the ZLevelManager system
     console.log(`Adding Z-level ${level}: ${name}`);
@@ -319,14 +432,82 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
   };
 
   // Height map handlers
-  const generateProceduralMap = (size: string) => {
-    // This would integrate with the HeightMapGenerator system
-    console.log(`Generating ${size} procedural map`);
+  const generateProceduralMap = (size: 'small' | 'medium' | 'large') => {
+    // Basic preset configs
+    const presets = {
+      small: { width: 32, height: 32, octaves: 4, frequency: 0.08, amplitude: 1.0, persistence: 0.5, lacunarity: 2.0, minHeight: 0, maxHeight: 100, smoothing: 1.0 },
+      medium: { width: 64, height: 64, octaves: 5, frequency: 0.06, amplitude: 1.0, persistence: 0.5, lacunarity: 2.0, minHeight: 0, maxHeight: 100, smoothing: 1.5 },
+      large: { width: 128, height: 128, octaves: 6, frequency: 0.045, amplitude: 1.0, persistence: 0.5, lacunarity: 2.1, minHeight: 0, maxHeight: 100, smoothing: 2.0 }
+    } as const;
+
+    const cfg = presets[size];
+    actions.sanctuary.setHeightMapConfig(cfg as any);
+
+    // Generate with in-app system if available via MapGenerator (fallback: simple client-side generator)
+    try {
+      // Lazy import to avoid bundling issues if types move
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { HeightMapGenerator } = require('./Sanctuary/systems/HeightMapSystem');
+      const gen = new HeightMapGenerator();
+      const map = gen.generateHeightMap(cfg as any);
+      actions.sanctuary.setCurrentHeightMap(map);
+      if (!sanctuary.showHeightMap) actions.sanctuary.setHeightMapVisible(true);
+    } catch (e) {
+      console.warn('HeightMapSystem dynamic import failed, using fallback', e);
+      // Minimal fallback height map (flat)
+      const data: number[][] = Array.from({ length: (cfg as any).height }, () => Array((cfg as any).width).fill(0));
+      actions.sanctuary.setCurrentHeightMap({
+        width: (cfg as any).width,
+        height: (cfg as any).height,
+        data,
+        minHeight: (cfg as any).minHeight,
+        maxHeight: (cfg as any).maxHeight,
+        seed: Math.floor(Math.random() * 1e6)
+      });
+      if (!sanctuary.showHeightMap) actions.sanctuary.setHeightMapVisible(true);
+    }
   };
 
   const exportHeightMap = () => {
-    // This would export the current height map
-    console.log('Exporting height map');
+    const hm = sanctuary.currentHeightMap;
+    if (!hm) return;
+    const blob = new Blob([JSON.stringify(hm, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${sanctuary.currentLevel.name.replace(/\s+/g, '_')}_heightmap.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // Test coordinate conversion
+  const testCoordinateConversion = () => {
+    const canvasElement = canvas.canvasRef.current;
+    if (!canvasElement) return;
+    
+    const rect = canvasElement.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    
+    console.log('Testing coordinate conversion at canvas center:', {
+      screenX: centerX,
+      screenY: centerY,
+      canvasRect: rect,
+      canvasSize: canvasSize
+    });
+    
+    // Test the coordinate conversion
+    const gridPos = actions.canvas.screenToGrid(centerX, centerY);
+    console.log('Grid position at center:', gridPos);
+    
+    // Test converting back to screen
+    const screenPos = actions.canvas.gridToScreen(gridPos.x, gridPos.y, gridPos.z);
+    console.log('Back to screen position:', screenPos);
+    
+    // Calculate the difference
+    const diffX = Math.abs(centerX - screenPos.x);
+    const diffY = Math.abs(centerY - screenPos.y);
+    console.log('Coordinate conversion accuracy:', { diffX, diffY, isAccurate: diffX < 1 && diffY < 1 });
   };
 
   // ============================================================================
@@ -350,6 +531,7 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
           )}
           <span className={styles.sanctuaryIcon}>🏛️</span>
           <h3 className={styles.sanctuaryTitle}>{sanctuary.currentLevel.name}</h3>
+          <span className={styles.canvasSizeIndicator}>{canvasSize}x{canvasSize}</span>
           
           {/* Selected Tile Indicator */}
           {sanctuary.selectedTile && (
@@ -518,6 +700,44 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
                 >
                   STATS
                 </button>
+                <button 
+                  style={{
+                    ...unifiedButtonStyle,
+                    background: 'var(--color-accent-gold)',
+                    fontSize: '10px',
+                    padding: '2px 4px'
+                  }}
+                  onClick={testCoordinateConversion}
+                  title="Test Coordinate Conversion"
+                >
+                  TEST
+                </button>
+                <div style={{ display: 'flex', gap: '4px', marginTop: '4px' }}>
+                  <button 
+                    style={{
+                      ...unifiedButtonStyle,
+                      background: canvasSize === '512' ? 'var(--color-accent-gold)' : 'var(--color-accent-beaver)',
+                      fontSize: '10px',
+                      padding: '2px 4px'
+                    }}
+                    onClick={() => setCanvasSize('512')}
+                    title="512x512 Canvas"
+                  >
+                    512
+                  </button>
+                  <button 
+                    style={{
+                      ...unifiedButtonStyle,
+                      background: canvasSize === '1024' ? 'var(--color-accent-gold)' : 'var(--color-accent-beaver)',
+                      fontSize: '10px',
+                      padding: '2px 4px'
+                    }}
+                    onClick={() => setCanvasSize('1024')}
+                    title="1024x1024 Canvas"
+                  >
+                    1024
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -610,6 +830,72 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
                 >
                   Z2
                 </button>
+
+                {/* Z Filter Presets */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 6 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: 12, opacity: 0.8 }}>Filter:</span>
+                    {sanctuary.zLevelFilter.length === 0 ? (
+                      <span style={{ fontSize: 12 }}>All</span>
+                    ) : (
+                      sanctuary.zLevelFilter.map((z) => (
+                        <span key={z} style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 4,
+                          background: 'var(--color-accent-beaver)',
+                          color: '#fff',
+                          borderRadius: 12,
+                          padding: '2px 6px',
+                          fontSize: 11
+                        }}>
+                          Z{z}
+                          <button
+                            onClick={() => actions.sanctuary.removeZLevelFilter(z)}
+                            style={{
+                              background: 'transparent',
+                              color: '#fff',
+                              border: 'none',
+                              cursor: 'pointer',
+                              fontSize: 12,
+                              lineHeight: 1
+                            }}
+                            title={`Remove Z${z} from filter`}
+                          >
+                            ✕
+                          </button>
+                        </span>
+                      ))
+                    )}
+                  </div>
+                  <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                    <button
+                      style={{ ...unifiedButtonStyle, fontSize: 10, padding: '2px 6px' }}
+                      onClick={() => applyZFilter('all')}
+                      title="Show all Z levels"
+                    >ALL</button>
+                    <button
+                      style={{ ...unifiedButtonStyle, fontSize: 10, padding: '2px 6px' }}
+                      onClick={() => applyZFilter([0, 1])}
+                      title="Show Z0 and Z1"
+                    >0+1</button>
+                    <button
+                      style={{ ...unifiedButtonStyle, fontSize: 10, padding: '2px 6px' }}
+                      onClick={() => applyZFilter([1, 2])}
+                      title="Show Z1 and Z2"
+                    >1+2</button>
+                    <button
+                      style={{ ...unifiedButtonStyle, fontSize: 10, padding: '2px 6px' }}
+                      onClick={applyCurrPlusMinusOne}
+                      title="Show current Z and its neighbors"
+                    >CURR±1</button>
+                    <button
+                      style={{ ...unifiedButtonStyle, fontSize: 10, padding: '2px 6px' }}
+                      onClick={applyToCurrent}
+                      title="Show all Z levels up to current"
+                    >TO CURR</button>
+                  </div>
+                </div>
               </div>
             )}
           </div>
@@ -625,6 +911,17 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
           <div>Visible: {performance.visibleBlocks}</div>
           <div>Draw Calls: {performance.drawCalls}</div>
           <div>Grade: {performance.isOptimized ? 'Optimized' : 'Standard'}</div>
+        </div>
+      )}
+
+      {/* Debug Coordinate Display */}
+      {sanctuary.showPerformance && (
+        <div className={styles.debugDisplay}>
+          <div>Mouse: {input.lastMousePosition ? `${input.lastMousePosition.x.toFixed(1)}, ${input.lastMousePosition.y.toFixed(1)}` : 'N/A'}</div>
+          <div>Grid: {sanctuary.hoverCell ? `${sanctuary.hoverCell.x}, ${sanctuary.hoverCell.y}, ${sanctuary.hoverCell.z}` : 'N/A'}</div>
+          <div>Camera: {`${sanctuary.camera.position.x.toFixed(1)}, ${sanctuary.camera.position.y.toFixed(1)}, ${sanctuary.camera.position.z.toFixed(1)}`}</div>
+          <div>Zoom: {sanctuary.camera.zoom.toFixed(2)}x</div>
+          <div>Z-Level: {sanctuary.currentZLevel}</div>
         </div>
       )}
 
@@ -815,14 +1112,17 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
           onMouseMove={actions.input.handleMouseMove}
           onMouseUp={actions.input.handleMouseUp}
           onMouseLeave={actions.input.handleMouseLeave}
+          onClick={actions.input.handleMouseClick}
           onWheel={actions.input.handleWheel}
           onTouchStart={actions.input.handleTouchStart}
           onTouchMove={actions.input.handleTouchMove}
           onTouchEnd={actions.input.handleTouchEnd}
           onContextMenu={actions.input.handleContextMenu}
+          tabIndex={0}
           style={{
             cursor: sanctuary.selectedTile ? 'crosshair' : 'default',
-            touchAction: 'none'
+            width: `${canvasSize}px`,
+            height: `${canvasSize}px`
           }}
         />
       </div>
@@ -851,6 +1151,12 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
           </div>
           <div className={styles.instructionItem}>
             <strong>Ctrl+C:</strong> Toggle All Button Groups
+          </div>
+          <div className={styles.instructionItem}>
+            <strong>Ctrl+D:</strong> Toggle Debug Info (Coordinates)
+          </div>
+          <div className={styles.instructionItem}>
+            <strong>Canvas Size:</strong> Use 512/1024 buttons in Tools to switch between fixed canvas sizes
           </div>
         </div>
       )}

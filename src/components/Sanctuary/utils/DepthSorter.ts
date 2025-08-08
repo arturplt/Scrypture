@@ -50,15 +50,15 @@ export class DepthSorter {
    * Sort blocks by Z-level first, then by depth within each Z-level
    */
   static sortBlocksByZLevel(blocks: Block[]): SortedBlock[] {
-    // Group blocks by Z-level
+    // Group blocks by Z level
     const blocksByZLevel = new Map<number, Block[]>();
     
-    blocks.forEach(block => {
-      if (!blocksByZLevel.has(block.z)) {
-        blocksByZLevel.set(block.z, []);
+    for (const block of blocks) {
+      if (!blocksByZLevel.has(block.position.z)) {
+        blocksByZLevel.set(block.position.z, []);
       }
-      blocksByZLevel.get(block.z)!.push(block);
-    });
+      blocksByZLevel.get(block.position.z)!.push(block);
+    }
 
     // Sort Z-levels (lowest to highest)
     const sortedZLevels = Array.from(blocksByZLevel.keys()).sort((a, b) => a - b);
@@ -165,9 +165,9 @@ export class DepthSorter {
    * Get blocks sorted for efficient rendering (opaque first, then transparent)
    */
   static getOptimizedRenderOrder(blocks: Block[]): { opaque: SortedBlock[]; transparent: SortedBlock[] } {
-    // This is a simplified version - in a real implementation, you'd check block transparency
-    const opaqueBlocks = blocks.filter(block => true); // All blocks are opaque for now
-    const transparentBlocks = blocks.filter(block => false); // No transparent blocks for now
+    // Separate opaque and transparent blocks
+    const opaqueBlocks = blocks.filter(_block => true); // All blocks are opaque for now
+    const transparentBlocks = blocks.filter(_block => false); // No transparent blocks for now
 
     return {
       opaque: this.sortOpaqueBlocks(opaqueBlocks),

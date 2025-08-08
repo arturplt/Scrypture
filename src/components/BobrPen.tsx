@@ -11,13 +11,15 @@ interface BobrPenProps {
   completedTasksCount: number;
   className?: string;
   onTaskCreated?: (taskId: string) => void;
+  onOpenSanctuaryModal?: () => void;
 }
 
 const BobrPen: React.FC<BobrPenProps> = ({
   user,
   completedTasksCount,
   className = '',
-  onTaskCreated
+  onTaskCreated,
+  onOpenSanctuaryModal
 }) => {
   const [showEvolutionNotification, setShowEvolutionNotification] = useState(false);
   const [activeView, setActiveView] = useState<'dam' | 'bobr' | 'sanctuary'>('bobr');
@@ -92,7 +94,7 @@ const BobrPen: React.FC<BobrPenProps> = ({
           {/* View Toggle Buttons */}
           <div className={styles.viewToggle}>
             <button
-              className={`${styles.toggleButton} ${activeView === 'dam' ? styles.active : ''}`}
+              className={`${styles.toggleButton} ${styles.dam} ${activeView === 'dam' ? styles.active : ''}`}
               onClick={() => setActiveView('dam')}
             >
               🏗️ Dam
@@ -104,8 +106,14 @@ const BobrPen: React.FC<BobrPenProps> = ({
               🦫 Bóbr
             </button>
             <button
-              className={`${styles.toggleButton} ${activeView === 'sanctuary' ? styles.active : ''}`}
-              onClick={() => setActiveView('sanctuary')}
+              className={`${styles.toggleButton} ${styles.sanctuary} ${activeView === 'sanctuary' ? styles.active : ''}`}
+              onClick={() => {
+                if (onOpenSanctuaryModal) {
+                  onOpenSanctuaryModal();
+                } else {
+                  setActiveView('sanctuary');
+                }
+              }}
             >
               🏛️ Sanctuary
             </button>

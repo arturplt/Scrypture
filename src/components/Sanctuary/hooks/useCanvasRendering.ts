@@ -5,6 +5,7 @@ import { Camera } from '../types/Camera';
 import { CullingSystem } from '../systems/CullingSystem';
 import { SpatialIndex } from '../systems/SpatialIndexSystem';
 import { PerformanceMonitor } from '../utils/PerformanceMonitor';
+import { screenToGrid, gridToScreen } from '../utils/CoordinateUtils';
 
 export interface CanvasRenderingState {
   canvasRef: React.RefObject<HTMLCanvasElement>;
@@ -46,7 +47,7 @@ export interface CanvasRenderingActions {
 export const useCanvasRendering = (
   state: SanctuaryState,
   cullingSystem: CullingSystem,
-  performanceMonitor: PerformanceMonitor
+  performanceMonitor: PerformanceMonitor | null
 ): [CanvasRenderingState, CanvasRenderingActions] => {
   // Canvas refs
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -60,48 +61,36 @@ export const useCanvasRendering = (
   const [tileSheetLoaded, setTileSheetLoaded] = useState(false);
   const [performanceMetrics, setPerformanceMetrics] = useState<any | null>(null);
   
-  // Coordinate conversion utilities
-  const screenToGrid = useCallback((screenX: number, screenY: number): { x: number; y: number; z: number } => {
+  // Coordinate conversion utilities - now using the proper CoordinateUtils
+  const screenToGridConverter = useCallback((screenX: number, screenY: number): { x: number; y: number; z: number } => {
     const canvas = canvasRef.current;
     if (!canvas) return { x: 0, y: 0, z: 0 };
     
-    const rect = canvas.getBoundingClientRect();
-    const canvasX = screenX - rect.left;
-    const canvasY = screenY - rect.top;
+    // Use the proper coordinate conversion utility that handles device pixel ratio and canvas scaling
+    const result = screenToGrid(screenX, screenY, canvas, state.camera, state.currentZLevel);
     
-    // Convert to world coordinates (accounting for camera)
-    const worldX = (canvasX - state.camera.position.x) / state.camera.zoom;
-    const worldY = (canvasY - state.camera.position.y) / state.camera.zoom;
+    // Debug logging for coordinate conversion
+    if (state.showPerformance) {
+      console.log('Coordinate Conversion:', {
+        screen: { x: screenX, y: screenY },
+        canvas: canvas.getBoundingClientRect(),
+        camera: state.camera,
+        result: result,
+        canvasSize: { width: canvas.width, height: canvas.height },
+        dpr: window.devicePixelRatio
+      });
+    }
     
-    // Convert to isometric grid coordinates using actual tile dimensions
-    const tileWidth = 32; // Actual tile width from tile sheet
-    const tileHeight = 16; // Half height for isometric projection
-    
-    // Isometric to grid conversion
-    // For isometric projection: x = (gridX - gridY) * tileWidth/2, y = (gridX + gridY) * tileHeight/2
-    // Solving for gridX and gridY:
-    // gridX = (x / (tileWidth/2) + y / (tileHeight/2)) / 2
-    // gridY = (y / (tileHeight/2) - x / (tileWidth/2)) / 2
-    const gridX = Math.round((worldX / (tileWidth / 2) + worldY / (tileHeight / 2)) / 2);
-    const gridY = Math.round((worldY / (tileHeight / 2) - worldX / (tileWidth / 2)) / 2);
-    const gridZ = state.currentZLevel;
-    
-    return { x: gridX, y: gridY, z: gridZ };
-  }, [state.camera, state.currentZLevel]);
+    return { x: result.x, y: result.y, z: result.z };
+  }, [state.camera, state.currentZLevel, state.showPerformance]);
   
-  const gridToScreen = useCallback((gridX: number, gridY: number, gridZ: number): { x: number; y: number } => {
-    const tileWidth = 32; // Actual tile width from tile sheet
-    const tileHeight = 16; // Half height for isometric projection
+  const gridToScreenConverter = useCallback((gridX: number, gridY: number, gridZ: number): { x: number; y: number } => {
+    const canvas = canvasRef.current;
+    if (!canvas) return { x: 0, y: 0 };
     
-    // Isometric projection
-    const isoX = (gridX - gridY) * (tileWidth / 2);
-    const isoY = (gridX + gridY) * (tileHeight / 2) - gridZ * (tileHeight * 2); // Account for Z-level spacing
-    
-    // Convert to screen coordinates (accounting for camera)
-    const screenX = isoX * state.camera.zoom + state.camera.position.x;
-    const screenY = isoY * state.camera.zoom + state.camera.position.y;
-    
-    return { x: screenX, y: screenY };
+    // Use the proper coordinate conversion utility that handles device pixel ratio and canvas scaling
+    const result = gridToScreen(gridX, gridY, gridZ, canvas, state.camera);
+    return { x: result.x, y: result.y };
   }, [state.camera]);
   
   // Rendering functions
@@ -270,6 +259,62 @@ export const useCanvasRendering = (
     
     ctx.restore();
   }, [state.showGrid, state.hoverCell, state.currentZLevel]);
+
+  const renderHeightMapOverlay = useCallback((ctx: CanvasRenderingContext2D) => {
+    if (!state.showHeightMap || !state.currentHeightMap) return;
+
+    const { width, height, data, minHeight, maxHeight } = state.currentHeightMap;
+
+    const tileWidth = 32;
+    const tileHeight = 16;
+    const gridRadius = 20; // match grid drawing extent
+
+    // Helper to map a height value to a color
+    const getColorForHeight = (h: number): string => {
+      const t = Math.max(0, Math.min(1, (h - minHeight) / Math.max(maxHeight - minHeight, 1)));
+      // Simple terrain-like gradient
+      if (t < 0.25) return 'rgba(0, 80, 200, 0.35)'; // deep water
+      if (t < 0.35) return 'rgba(0, 120, 220, 0.35)'; // shallow water
+      if (t < 0.45) return 'rgba(194, 178, 128, 0.35)'; // sand
+      if (t < 0.75) return 'rgba(34, 139, 34, 0.35)'; // grass
+      if (t < 0.9) return 'rgba(120, 120, 120, 0.35)'; // rock
+      return 'rgba(255, 255, 255, 0.5)'; // snow
+    };
+
+    ctx.save();
+    ctx.imageSmoothingEnabled = false;
+
+    for (let gx = -gridRadius; gx <= gridRadius; gx++) {
+      for (let gy = -gridRadius; gy <= gridRadius; gy++) {
+        // Map grid coordinate to heightmap coordinate (wrap around, centered)
+        const mapX = ((gx + Math.floor(width / 2)) % width + width) % width;
+        const mapY = ((gy + Math.floor(height / 2)) % height + height) % height;
+        const h = data[mapY][mapX];
+
+        const isoX = (gx - gy) * (tileWidth / 2);
+        const isoY = (gx + gy) * (tileHeight / 2) - state.currentZLevel * (tileHeight * 2);
+
+        const centerX = Math.round(isoX);
+        const centerY = Math.round(isoY);
+
+        const top = { x: centerX, y: centerY - tileHeight / 2 };
+        const right = { x: centerX + tileWidth / 2, y: centerY };
+        const bottom = { x: centerX, y: centerY + tileHeight / 2 };
+        const left = { x: centerX - tileWidth / 2, y: centerY };
+
+        ctx.beginPath();
+        ctx.moveTo(top.x, top.y);
+        ctx.lineTo(right.x, right.y);
+        ctx.lineTo(bottom.x, bottom.y);
+        ctx.lineTo(left.x, left.y);
+        ctx.closePath();
+        ctx.fillStyle = getColorForHeight(h);
+        ctx.fill();
+      }
+    }
+
+    ctx.restore();
+  }, [state.showHeightMap, state.currentHeightMap, state.currentZLevel]);
   
   const renderScene = useCallback((ctx: CanvasRenderingContext2D, tileSheet: HTMLImageElement) => {
     const startTime = performance.now();
@@ -307,6 +352,9 @@ export const useCanvasRendering = (
       return a.position.x - b.position.x;
     });
     
+    // Optional: render height map overlay under blocks
+    renderHeightMapOverlay(ctx);
+
     // Render blocks
     let drawCalls = 0;
     sortedBlocks.forEach(block => {
@@ -327,13 +375,15 @@ export const useCanvasRendering = (
     
     // Update performance metrics
     const renderTime = performance.now() - startTime;
-    const metrics = performanceMonitor.collectMetrics();
-    metrics.renderTime = renderTime;
-    metrics.blockCount = state.blocks.length;
-    metrics.visibleBlocks = filteredBlocks.length;
-    metrics.drawCalls = drawCalls;
-    
-    setPerformanceMetrics(metrics);
+    if (performanceMonitor) {
+      const metrics = performanceMonitor.collectMetrics();
+      metrics.renderTime = renderTime;
+      metrics.blockCount = state.blocks.length;
+      metrics.visibleBlocks = filteredBlocks.length;
+      metrics.drawCalls = drawCalls;
+      
+      setPerformanceMetrics(metrics);
+    }
   }, [
     state.camera, 
     state.blocks, 
@@ -412,13 +462,15 @@ export const useCanvasRendering = (
     
     // Update performance metrics for fallback scene
     const renderTime = performance.now() - startTime;
-    const metrics = performanceMonitor.collectMetrics();
-    metrics.renderTime = renderTime;
-    metrics.blockCount = state.blocks.length;
-    metrics.visibleBlocks = state.blocks.length; // All blocks are visible in fallback
-    metrics.drawCalls = drawCalls;
-    
-    setPerformanceMetrics(metrics);
+    if (performanceMonitor) {
+      const metrics = performanceMonitor.collectMetrics();
+      metrics.renderTime = renderTime;
+      metrics.blockCount = state.blocks.length;
+      metrics.visibleBlocks = state.blocks.length; // All blocks are visible in fallback
+      metrics.drawCalls = drawCalls;
+      
+      setPerformanceMetrics(metrics);
+    }
   }, [state.blocks, state.camera, state.showGrid, renderGrid, performanceMonitor]);
   
   // Game loop
@@ -447,10 +499,12 @@ export const useCanvasRendering = (
     const fps = frameTime > 0 ? 1000 / frameTime : 60;
     
     // Update performance metrics with calculated FPS
-    const metrics = performanceMonitor.collectMetrics();
-    metrics.fps = fps;
-    metrics.frameTime = frameTime;
-    setPerformanceMetrics(metrics);
+    if (performanceMonitor) {
+      const metrics = performanceMonitor.collectMetrics();
+      metrics.fps = fps;
+      metrics.frameTime = frameTime;
+      setPerformanceMetrics(metrics);
+    }
     
     animationFrameRef.current = requestAnimationFrame(gameLoop);
   }, [isLoaded, state.camera, cullingSystem, renderScene, renderFallbackScene, tileSheetLoaded, tileSheet, performanceMonitor]);
@@ -491,8 +545,8 @@ export const useCanvasRendering = (
     setCanvasLoaded: setIsLoaded,
     setTileSheet,
     setTileSheetLoaded,
-    screenToGrid,
-    gridToScreen,
+    screenToGrid: screenToGridConverter,
+    gridToScreen: gridToScreenConverter,
     renderBlock,
     renderHoverPreview,
     renderSelectionHighlight,

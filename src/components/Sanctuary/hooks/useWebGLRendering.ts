@@ -125,12 +125,13 @@ export function useWebGLRendering(): [WebGLRenderingState, WebGLRenderingActions
       canvasRef.current = canvas;
       
       // Try WebGL 2.0 first, fallback to 1.0
-      let gl = canvas.getContext('webgl2') as WebGL2RenderingContext;
+      let gl: WebGL2RenderingContext | WebGLRenderingContext | null = canvas.getContext('webgl2');
       if (!gl) {
-        gl = canvas.getContext('webgl') as WebGLRenderingContext;
-        if (!gl) {
-          throw new Error('WebGL not supported');
-        }
+        gl = canvas.getContext('webgl');
+      }
+      
+      if (!gl) {
+        throw new Error('WebGL not supported');
       }
 
       glRef.current = gl;

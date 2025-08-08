@@ -15,7 +15,10 @@ export const StatsDisplay: React.FC = () => {
       mind: user?.mind,
       soul: user?.soul
     });
-  }, [user?.level, user?.experience, user?.body, user?.mind, user?.soul]);
+    
+    // Also log the raw user object to see all fields
+    console.log('📊 StatsDisplay: Full user object:', user);
+  }, [user?.level, user?.experience, user?.body, user?.mind, user?.soul, user]);
 
   if (!user) {
     return (

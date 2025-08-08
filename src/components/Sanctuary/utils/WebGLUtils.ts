@@ -127,7 +127,7 @@ export class WebGLUtils {
   /**
    * Create vertex data for an isometric tile
    */
-  static createIsometricTileVertices(x: number, y: number, z: number, size: number = 32): Float32Array {
+  static createIsometricTileVertices(x: number, y: number, _z: number, size: number = 32): Float32Array {
     const halfSize = size / 2;
     const quarterSize = size / 4;
     
@@ -168,14 +168,14 @@ export class WebGLUtils {
    */
   static getWebGLContext(canvas: HTMLCanvasElement, options?: WebGLContextAttributes): WebGL2RenderingContext | WebGLRenderingContext | null {
     // Try WebGL 2.0 first
-    let gl = canvas.getContext('webgl2', options);
-    
-    // Fallback to WebGL 1.0
-    if (!gl) {
-      gl = canvas.getContext('webgl', options);
+    const gl2 = canvas.getContext('webgl2', options);
+    if (gl2) {
+      return gl2;
     }
     
-    return gl;
+    // Fallback to WebGL 1.0
+    const gl1 = canvas.getContext('webgl', options);
+    return gl1;
   }
 
   /**

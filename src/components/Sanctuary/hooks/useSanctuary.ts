@@ -19,7 +19,7 @@ export interface SanctuaryHookState {
   // System instances
   cullingSystem: CullingSystem;
   spatialIndex: SpatialIndex;
-  performanceMonitor: PerformanceMonitor;
+  performanceMonitor: PerformanceMonitor | null;
 }
 
 export interface SanctuaryHookActions {
@@ -40,7 +40,12 @@ export const useSanctuary = (): [SanctuaryHookState, SanctuaryHookActions] => {
   // Initialize core systems
   const spatialIndex = useMemo(() => new SpatialIndex(), []);
   const cullingSystem = useMemo(() => new CullingSystem(spatialIndex), [spatialIndex]);
-  const performanceMonitor = useMemo(() => new PerformanceMonitor(), []);
+  const performanceMonitor = useMemo(() => {
+    // Create a temporary canvas to get WebGL context for PerformanceMonitor
+    const tempCanvas = document.createElement('canvas');
+    const gl = tempCanvas.getContext('webgl2') || tempCanvas.getContext('webgl');
+    return gl ? new PerformanceMonitor(gl) : null;
+  }, []);
   
   // Initialize all hooks
   const [sanctuaryState, sanctuaryActions] = useSanctuaryState();
@@ -61,7 +66,7 @@ export const useSanctuary = (): [SanctuaryHookState, SanctuaryHookActions] => {
   );
   
   // Update performance metrics when canvas metrics change
-  useMemo(() => {
+  useEffect(() => {
     if (canvasState.performanceMetrics) {
       performanceActions.updateMetrics(canvasState.performanceMetrics);
     }

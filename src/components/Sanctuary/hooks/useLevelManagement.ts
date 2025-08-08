@@ -75,7 +75,16 @@ export const useLevelManagement = (
         modifiedAt: new Date()
       };
       
-      LevelManager.saveLevel(levelToSave);
+      try {
+        LevelManager.saveLevel(levelToSave);
+      } catch (err: any) {
+        // Surface a helpful message on quota exceed
+        if (err && (err.name === 'QuotaExceededError' || err.name === 'NS_ERROR_DOM_QUOTA_REACHED')) {
+          setSaveError('Storage is full. Oldest levels may have been pruned. Consider exporting or deleting unused levels.');
+        } else {
+          setSaveError(err?.message || 'Failed to save level');
+        }
+      }
       
       setCurrentLevelId(levelToSave.id);
       

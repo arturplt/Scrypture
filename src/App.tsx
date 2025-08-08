@@ -27,6 +27,7 @@ import AnalyticsDashboard from './components/AnalyticsDashboard';
 import Pixelite from './components/Pixelite';
 import { Synthesizer } from './components/Synthesizer';
 import { CombinationLockModal } from './components/CombinationLockModal';
+import SanctuaryModalDemo from './components/SanctuaryModalDemo';
 
 import { Task, Achievement } from './types';
 import styles from './App.module.css';
@@ -261,6 +262,7 @@ function AppContent() {
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [showPixelite, setShowPixelite] = useState(false);
   const [showSynthesizer, setShowSynthesizer] = useState(false);
+  const [showSanctuaryDemo, setShowSanctuaryDemo] = useState(false);
   const [showCombinationLock, setShowCombinationLock] = useState(false);
   const [isSecretMenuUnlocked, setIsSecretMenuUnlocked] = useState(false);
   const [isClosingLock, setIsClosingLock] = useState(false);
@@ -526,6 +528,7 @@ function AppContent() {
           user={user}
           completedTasksCount={tasks.filter(task => task.completed).length}
           onTaskCreated={handleTaskCreated}
+          onOpenSanctuaryModal={() => setShowSanctuaryDemo(true)}
         />
         
         {!showStartHere ? (
@@ -567,6 +570,7 @@ function AppContent() {
         <div className={styles.secretMenuSection}>
           <h3 className={styles.secretMenuTitle}>🔐 Secret Menu</h3>
           <div className={styles.secretMenuButtons}>
+
             {!isSecretMenuUnlocked ? (
               <button 
                 className={styles.secretMenuButton}
@@ -590,6 +594,13 @@ function AppContent() {
                   title="8-Bit Synthesizer"
                 >
                   🎵 Synthesizer
+                </button>
+                <button 
+                  className={styles.secretMenuButton}
+                  onClick={() => setShowSanctuaryDemo(true)}
+                  title="Isometric Sanctuary Builder"
+                >
+                  🏛️ Sanctuary
                 </button>
               </>
             )}
@@ -615,6 +626,12 @@ function AppContent() {
       <Synthesizer
         isOpen={showSynthesizer}
         onClose={() => setShowSynthesizer(false)}
+      />
+
+      {/* Sanctuary Demo Modal */}
+      <SanctuaryModalDemo 
+        isOpen={showSanctuaryDemo}
+        onClose={() => setShowSanctuaryDemo(false)}
       />
 
       {/* Combination Lock - Expanding from Secret Menu */}

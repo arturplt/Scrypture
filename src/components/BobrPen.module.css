@@ -106,6 +106,32 @@
   box-shadow: var(--shadow-active);
 }
 
+/* Dam button - green when active */
+.toggleButton.dam.active {
+  background: #4CAF50;
+  color: white;
+  border-color: #4CAF50;
+  box-shadow: var(--shadow-active);
+}
+
+.toggleButton.dam:hover {
+  border-color: #4CAF50;
+  color: #4CAF50;
+}
+
+/* Sanctuary button - blue when active */
+.toggleButton.sanctuary.active {
+  background: #2196F3;
+  color: white;
+  border-color: #2196F3;
+  box-shadow: var(--shadow-active);
+}
+
+.toggleButton.sanctuary:hover {
+  border-color: #2196F3;
+  color: #2196F3;
+}
+
 .activeSection {
   width: 100%;
   min-width: 0;
