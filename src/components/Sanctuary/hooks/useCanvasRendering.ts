@@ -338,12 +338,14 @@ export const useCanvasRendering = (
     // Get visible blocks using culling system and z-level filtering
     // Temporarily disable culling to test coordinate fixes
     const culledBlocks = state.blocks; // cullingSystem.getVisibleBlocks(state.camera);
-    const visibleBlocks = state.blocks.filter(block => 
-      state.zLevelFilter.length === 0 || state.zLevelFilter.includes(block.position.z)
-    );
-    const filteredBlocks = visibleBlocks; // culledBlocks.filter(block => 
-      // visibleBlocks.some(vb => vb.id === block.id)
-    // );
+    // If shade is enabled, render ALL blocks and dim by active Z logic.
+    // Otherwise, only render filtered blocks.
+    const visibleBlocks = state.shadeInactiveZLevels
+      ? state.blocks
+      : state.blocks.filter(block =>
+          state.zLevelFilter.length === 0 || state.zLevelFilter.includes(block.position.z)
+        );
+    const filteredBlocks = visibleBlocks;
     
     // Sort blocks for painter's algorithm so higher Z renders "in front"
     // Draw order: lowest Z first -> highest Z last, then Y, then X
@@ -359,7 +361,31 @@ export const useCanvasRendering = (
     // Render blocks
     let drawCalls = 0;
     sortedBlocks.forEach(block => {
-      renderBlock(ctx, block, tileSheet);
+      // Dimming inactive Z-layers when shade option enabled
+      const isActiveZ = (state.zLevelFilter.length > 0)
+        ? state.zLevelFilter.includes(block.position.z)
+        : block.position.z === state.currentZLevel;
+      
+      // Debug logging
+      if (state.shadeInactiveZLevels) {
+        console.log('Shade Debug:', {
+          blockZ: block.position.z,
+          currentZ: state.currentZLevel,
+          zFilter: state.zLevelFilter,
+          isActiveZ,
+          shadeEnabled: state.shadeInactiveZLevels
+        });
+      }
+      
+      // Apply shading logic
+      if (state.shadeInactiveZLevels && !isActiveZ) {
+        ctx.save();
+        ctx.globalAlpha = 0.35;
+        renderBlock(ctx, block, tileSheet);
+        ctx.restore();
+      } else {
+        renderBlock(ctx, block, tileSheet);
+      }
       drawCalls++;
     });
     
@@ -393,6 +419,8 @@ export const useCanvasRendering = (
     state.selectedTile, 
     state.selectedBlock, 
     state.showGrid,
+    state.shadeInactiveZLevels,
+    state.currentZLevel,
     cullingSystem,
     performanceMonitor,
     renderBlock,

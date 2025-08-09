@@ -60,14 +60,25 @@ export const useInputHandling = (
       return;
     }
     
-    // Left click for building/selection
+    // Left click for building/selection/erase
     if (event.button === 0) {
       // Pass raw screen coordinates to screenToGrid
       const gridPos = canvasActions.screenToGrid(event.clientX, event.clientY);
       stateActions.setHoverCell(gridPos);
       
+      // Erase mode: remove block at grid position
+      if (state.eraseMode) {
+        const blockAtPosition = state.blocks.find(block => 
+          block.position.x === gridPos.x && 
+          block.position.y === gridPos.y && 
+          block.position.z === gridPos.z
+        );
+        if (blockAtPosition) {
+          stateActions.removeBlock(blockAtPosition.id);
+        }
+      }
       // Place block if tile is selected
-      if (state.selectedTile) {
+      else if (state.selectedTile) {
         const newBlock = {
           id: `block_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           type: state.selectedTile.type,
@@ -91,7 +102,7 @@ export const useInputHandling = (
         stateActions.addBlock(newBlock);
       }
       
-      // Select block if no tile is selected
+      // Select block if no tile is selected and not erasing
       else {
         const blockAtPosition = state.blocks.find(block => 
           block.position.x === gridPos.x && 

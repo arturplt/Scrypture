@@ -38,6 +38,10 @@ export interface SanctuaryState {
   
   // Fill mode state
   fillMode: boolean;
+  // Erase mode state
+  eraseMode: boolean;
+  // Shade inactive Z-levels
+  shadeInactiveZLevels: boolean;
   
   // Collapsible groups state
   collapsedGroups: {
@@ -103,6 +107,12 @@ export interface SanctuaryStateActions {
   
   // Fill mode management
   setFillMode: (mode: boolean) => void;
+  // Erase mode management
+  setEraseMode: (mode: boolean) => void;
+  toggleEraseMode: () => void;
+  // Shade inactive Z-levels management
+  setShadeInactiveZLevels: (shade: boolean) => void;
+  toggleShadeInactiveZLevels: () => void;
   
   // Collapsible groups management
   toggleGroupCollapse: (groupName: keyof SanctuaryState['collapsedGroups']) => void;
@@ -175,6 +185,10 @@ export const useSanctuaryState = (): [SanctuaryState, SanctuaryStateActions] => 
   
   // Fill mode state
   const [fillMode, setFillMode] = useState(false);
+  // Erase mode state
+  const [eraseMode, setEraseMode] = useState(false);
+  // Shade inactive Z-levels
+  const [shadeInactiveZLevels, setShadeInactiveZLevels] = useState(false);
   
   // Collapsible groups state
   const [collapsedGroups, setCollapsedGroups] = useState<SanctuaryState['collapsedGroups']>({
@@ -245,6 +259,16 @@ export const useSanctuaryState = (): [SanctuaryState, SanctuaryStateActions] => 
   
   const togglePerformanceModal = useCallback(() => {
     setShowPerformanceModal(prev => !prev);
+  }, []);
+
+  // Erase mode management
+  const toggleEraseMode = useCallback(() => {
+    setEraseMode(prev => !prev);
+  }, []);
+  
+  // Shade inactive Z-levels management
+  const toggleShadeInactiveZLevels = useCallback(() => {
+    setShadeInactiveZLevels(prev => !prev);
   }, []);
   
   const setPerformanceModalVisible = useCallback((show: boolean) => {
@@ -325,6 +349,8 @@ export const useSanctuaryState = (): [SanctuaryState, SanctuaryStateActions] => 
     currentHeightMap,
     heightMapConfig,
     fillMode,
+    eraseMode,
+    shadeInactiveZLevels,
     collapsedGroups,
     levelNameInput,
     expandedCategory
@@ -367,6 +393,10 @@ export const useSanctuaryState = (): [SanctuaryState, SanctuaryStateActions] => 
     setCurrentHeightMap,
     setHeightMapConfig,
     setFillMode,
+    setEraseMode,
+    toggleEraseMode,
+    setShadeInactiveZLevels,
+    toggleShadeInactiveZLevels,
     toggleGroupCollapse,
     setLevelNameInput,
     setExpandedCategory,

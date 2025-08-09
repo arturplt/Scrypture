@@ -64,22 +64,35 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
     transition: 'background-color 0.2s'
   };
 
-  // Block categories for the UI
-  const blockCategories = [
-    { type: 'cube', name: 'Cubes' },
-    { type: 'flat', name: 'Flats' },
-    { type: 'ramp', name: 'Ramps' },
-    { type: 'corner', name: 'Corners' },
-    { type: 'staircase', name: 'Stairs' },
-    { type: 'pillar', name: 'Pillars' },
-    { type: 'water', name: 'Water' },
-  ];
-
-  const palettes = [
-    { name: 'green', color: '#4CAF50' },
-    { name: 'gray', color: '#9E9E9E' },
-    { name: 'orange', color: '#FF9800' },
-  ];
+  // Minimal selector: categories/palettes removed for a flat sprite grid
+  const tileGroups = React.useMemo(() => {
+    return [
+      {
+        key: 'green',
+        label: 'Green',
+        color: '#4CAF50',
+        tiles: ISOMETRIC_TILES.filter(t => t.palette === 'green' && t.type !== 'water')
+      },
+      {
+        key: 'gray',
+        label: 'Gray',
+        color: '#9E9E9E',
+        tiles: ISOMETRIC_TILES.filter(t => t.palette === 'gray' && t.type !== 'water')
+      },
+      {
+        key: 'orange',
+        label: 'Orange',
+        color: '#FF9800',
+        tiles: ISOMETRIC_TILES.filter(t => t.palette === 'orange' && t.type !== 'water')
+      },
+      {
+        key: 'water',
+        label: 'Water',
+        color: '#2196F3',
+        tiles: ISOMETRIC_TILES.filter(t => t.type === 'water')
+      }
+    ];
+  }, []);
 
   // Load tile sheet on mount
   useEffect(() => {
@@ -875,6 +888,13 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
                   MANAGER
                 </button>
                 <button 
+                  className={`${styles.shadeToggle} ${sanctuary.shadeInactiveZLevels ? styles.shadeToggleActive : ''}`}
+                  onClick={() => actions.sanctuary.toggleShadeInactiveZLevels()}
+                  title={sanctuary.shadeInactiveZLevels ? 'Shade Inactive: ON' : 'Shade Inactive: OFF'}
+                >
+                  SHADE
+                </button>
+                <button 
                   style={{
                     ...unifiedButtonStyle,
                     background: sanctuary.currentZLevel === 0 ? 'var(--color-accent-gold)' : 'var(--color-accent-beaver)'
@@ -1092,6 +1112,13 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
         <div className={styles.blockSelector}>
           <div className={styles.blockSelectorHeader}>
             <button 
+              className={`${styles.toolToggle} ${sanctuary.eraseMode ? styles.toolToggleActive : ''}`}
+              onClick={() => actions.sanctuary.toggleEraseMode()}
+              title={sanctuary.eraseMode ? 'Erase: ON' : 'Erase: OFF'}
+            >
+              Erase
+            </button>
+            <button 
               className={styles.closeButton}
               onClick={() => actions.sanctuary.toggleBlockMenu()}
               title="Close Block Selector"
@@ -1099,74 +1126,35 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
               ✕
             </button>
           </div>
-          
-          <div className={styles.blockCategories}>
-            {blockCategories.map(category => {
-              const isExpanded = sanctuary.expandedCategory === category.type;
-              
+          <div className={styles.minimalGroupsGrid}>
+            {tileGroups.map((group) => {
+              const isExpanded = sanctuary.expandedCategory === group.key;
               return (
-                <div key={category.type} className={styles.blockCategory}>
-                  <div 
-                    className={styles.categoryHeader}
-                    onClick={() => actions.sanctuary.setExpandedCategory(isExpanded ? null : category.type)}
+                <div key={group.key} className={styles.minimalGroup}>
+                  <div
+                    className={styles.groupHeader}
+                    onClick={() =>
+                      actions.sanctuary.setExpandedCategory(isExpanded ? null : (group.key as any))
+                    }
+                    title={`${isExpanded ? 'Collapse' : 'Expand'} ${group.label}`}
                     style={{ cursor: 'pointer' }}
                   >
-                    <h4>{category.name}</h4>
                     <span className={styles.expandIcon}>{isExpanded ? '▼' : '▶'}</span>
+                    <span className={styles.groupColorDot} style={{ backgroundColor: group.color }} />
+                    <span>{group.label}</span>
                   </div>
-                  
                   {isExpanded && (
-                    <div className={styles.expandedContent}>
-                      {category.type === 'water' ? (
-                        // Special rendering for water category
-                        <div className={styles.tileGrid}>
-                          {ISOMETRIC_TILES.filter(tile => tile.type === 'water').map(tile => (
-                            <button
-                              key={tile.id}
-                              className={`${styles.tileButton} ${sanctuary.selectedTile?.id === tile.id ? styles.active : ''}`}
-                              onClick={() => actions.sanctuary.setSelectedTile(tile)}
-                              title={`${tile.name} (water) - ${tile.sourceX},${tile.sourceY}`}
-                            >
-                              <TilePreview tile={tile} size={32} />
-                            </button>
-                          ))}
-                        </div>
-                      ) : (
-                        // Regular rendering for other categories
-                        <div className={styles.paletteGrid}>
-                          {palettes.map(palette => {
-                            const tiles = ISOMETRIC_TILES.filter(tile => 
-                              tile.type === category.type && tile.palette === palette.name
-                            );
-                            
-                            if (tiles.length === 0) return null;
-                            
-                            return (
-                              <div key={palette.name} className={styles.paletteSection}>
-                                <div className={styles.paletteHeader}>
-                                  <div 
-                                    className={styles.paletteButton}
-                                    style={{ backgroundColor: palette.color }}
-                                  />
-                                </div>
-                                
-                                <div className={styles.tileGrid}>
-                                  {tiles.map(tile => (
-                                    <button
-                                      key={tile.id}
-                                      className={`${styles.tileButton} ${sanctuary.selectedTile?.id === tile.id ? styles.active : ''}`}
-                                      onClick={() => actions.sanctuary.setSelectedTile(tile)}
-                                      title={`${tile.name} (${tile.palette}) - ${tile.sourceX},${tile.sourceY}`}
-                                    >
-                                      <TilePreview tile={tile} size={32} />
-                                    </button>
-                                  ))}
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
+                    <div className={styles.groupTileGrid}>
+                      {group.tiles.map((tile) => (
+                        <button
+                          key={tile.id}
+                          className={`${styles.tileButton} ${sanctuary.selectedTile?.id === tile.id ? styles.active : ''}`}
+                          onClick={() => actions.sanctuary.setSelectedTile(tile)}
+                          title={tile.name}
+                        >
+                          <TilePreview tile={tile} size={32} />
+                        </button>
+                      ))}
                     </div>
                   )}
                 </div>
