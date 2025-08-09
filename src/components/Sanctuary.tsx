@@ -406,6 +406,20 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
     applyZFilter(target);
   };
 
+  // Checkbox handler for Z-level filter list
+  const toggleZFilterCheckbox = (z: number, checked: boolean) => {
+    // Treat empty filter as "all selected"
+    const current = sanctuary.zLevelFilter.length === 0 ? availableZLevels : sanctuary.zLevelFilter;
+    if (checked) {
+      const newList = Array.from(new Set([...current, z])).sort((a, b) => a - b);
+      actions.sanctuary.setZLevelFilter(newList);
+    } else {
+      const newList = current.filter((n) => n !== z);
+      // If nothing selected, interpret as show all (empty array)
+      actions.sanctuary.setZLevelFilter(newList.length === 0 ? [] : newList);
+    }
+  };
+
   const addZLevel = (level: number, name: string) => {
     // This would integrate with the ZLevelManager system
     console.log(`Adding Z-level ${level}: ${name}`);
@@ -444,28 +458,27 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
     actions.sanctuary.setHeightMapConfig(cfg as any);
 
     // Generate with in-app system if available via MapGenerator (fallback: simple client-side generator)
-    try {
-      // Lazy import to avoid bundling issues if types move
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { HeightMapGenerator } = require('./Sanctuary/systems/HeightMapSystem');
-      const gen = new HeightMapGenerator();
-      const map = gen.generateHeightMap(cfg as any);
-      actions.sanctuary.setCurrentHeightMap(map);
-      if (!sanctuary.showHeightMap) actions.sanctuary.setHeightMapVisible(true);
-    } catch (e) {
-      console.warn('HeightMapSystem dynamic import failed, using fallback', e);
-      // Minimal fallback height map (flat)
-      const data: number[][] = Array.from({ length: (cfg as any).height }, () => Array((cfg as any).width).fill(0));
-      actions.sanctuary.setCurrentHeightMap({
-        width: (cfg as any).width,
-        height: (cfg as any).height,
-        data,
-        minHeight: (cfg as any).minHeight,
-        maxHeight: (cfg as any).maxHeight,
-        seed: Math.floor(Math.random() * 1e6)
+    import('./Sanctuary/systems/HeightMapSystem')
+      .then(({ HeightMapGenerator }) => {
+        const gen = new HeightMapGenerator();
+        const map = gen.generateHeightMap(cfg as any);
+        actions.sanctuary.setCurrentHeightMap(map);
+        if (!sanctuary.showHeightMap) actions.sanctuary.setHeightMapVisible(true);
+      })
+      .catch((e) => {
+        console.warn('HeightMapSystem dynamic import failed, using fallback', e);
+        // Minimal fallback height map (flat)
+        const data: number[][] = Array.from({ length: (cfg as any).height }, () => Array((cfg as any).width).fill(0));
+        actions.sanctuary.setCurrentHeightMap({
+          width: (cfg as any).width,
+          height: (cfg as any).height,
+          data,
+          minHeight: (cfg as any).minHeight,
+          maxHeight: (cfg as any).maxHeight,
+          seed: Math.floor(Math.random() * 1e6)
+        });
+        if (!sanctuary.showHeightMap) actions.sanctuary.setHeightMapVisible(true);
       });
-      if (!sanctuary.showHeightMap) actions.sanctuary.setHeightMapVisible(true);
-    }
   };
 
   const exportHeightMap = () => {
@@ -478,6 +491,71 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
     a.download = `${sanctuary.currentLevel.name.replace(/\s+/g, '_')}_heightmap.json`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  // Island preset: Z0 water, Z1 gray, Z2 green, Z3 orange
+  const generateIslandPreset = () => {
+    const width = 32;
+    const height = 32;
+    const halfW = Math.floor(width / 2);
+    const halfH = Math.floor(height / 2);
+
+    const waterTile = ISOMETRIC_TILES.find(t => t.type === 'water');
+    const grayTile = ISOMETRIC_TILES.find(t => t.type === 'cube' && t.palette === 'gray');
+    const greenTile = ISOMETRIC_TILES.find(t => t.type === 'cube' && t.palette === 'green');
+    const orangeTile = ISOMETRIC_TILES.find(t => t.type === 'cube' && t.palette === 'orange');
+
+    if (!waterTile) {
+      console.warn('No water tile found; island generation aborted.');
+      return;
+    }
+
+    const blocks: any[] = [];
+    const maxR = Math.min(halfW, halfH) - 2;
+    const r1 = maxR * 0.95;
+    const r2 = maxR * 0.65;
+    const r3 = maxR * 0.35;
+
+    const pushBlock = (tile: any, x: number, y: number, z: number) => {
+      blocks.push({
+        id: `block_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        type: tile.type,
+        position: { x, y, z },
+        sprite: {
+          sourceX: tile.sourceX,
+          sourceY: tile.sourceY,
+          width: tile.width,
+          height: tile.height,
+          sheetPath: TILE_SHEET_CONFIG.imagePath
+        },
+        rotation: 0 as 0,
+        palette: tile.palette || 'green',
+        properties: {
+          walkable: true,
+          climbable: false,
+          interactable: false,
+          destructible: true
+        }
+      });
+    };
+
+    for (let gx = -halfW; gx < halfW; gx++) {
+      for (let gy = -halfH; gy < halfH; gy++) {
+        const dx = gx + 0.5;
+        const dy = gy + 0.5;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        // Base water at Z0
+        pushBlock(waterTile, gx, gy, 0);
+
+        // Land tiers
+        if (dist <= r1 && grayTile) pushBlock(grayTile, gx, gy, 1);
+        if (dist <= r2 && greenTile) pushBlock(greenTile, gx, gy, 2);
+        if (dist <= r3 && orangeTile) pushBlock(orangeTile, gx, gy, 3);
+      }
+    }
+
+    actions.sanctuary.setBlocks(blocks as any);
   };
 
   // Test coordinate conversion
@@ -700,18 +778,7 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
                 >
                   STATS
                 </button>
-                <button 
-                  style={{
-                    ...unifiedButtonStyle,
-                    background: 'var(--color-accent-gold)',
-                    fontSize: '10px',
-                    padding: '2px 4px'
-                  }}
-                  onClick={testCoordinateConversion}
-                  title="Test Coordinate Conversion"
-                >
-                  TEST
-                </button>
+
                 <div style={{ display: 'flex', gap: '4px', marginTop: '4px' }}>
                   <button 
                     style={{
@@ -762,6 +829,13 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
                 >
                   GENERATE
                 </button>
+                  <button 
+                    style={unifiedButtonStyle}
+                    onClick={generateIslandPreset}
+                    title="Island Preset (Z0 water, Z1 gray, Z2 green, Z3 orange)"
+                  >
+                    ISLAND
+                  </button>
                 <button 
                   style={unifiedButtonStyle}
                   onClick={() => actions.sanctuary.toggleHeightMap()}
@@ -868,32 +942,26 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
                       ))
                     )}
                   </div>
-                  <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                    <button
-                      style={{ ...unifiedButtonStyle, fontSize: 10, padding: '2px 6px' }}
-                      onClick={() => applyZFilter('all')}
-                      title="Show all Z levels"
-                    >ALL</button>
-                    <button
-                      style={{ ...unifiedButtonStyle, fontSize: 10, padding: '2px 6px' }}
-                      onClick={() => applyZFilter([0, 1])}
-                      title="Show Z0 and Z1"
-                    >0+1</button>
-                    <button
-                      style={{ ...unifiedButtonStyle, fontSize: 10, padding: '2px 6px' }}
-                      onClick={() => applyZFilter([1, 2])}
-                      title="Show Z1 and Z2"
-                    >1+2</button>
-                    <button
-                      style={{ ...unifiedButtonStyle, fontSize: 10, padding: '2px 6px' }}
-                      onClick={applyCurrPlusMinusOne}
-                      title="Show current Z and its neighbors"
-                    >CURR±1</button>
-                    <button
-                      style={{ ...unifiedButtonStyle, fontSize: 10, padding: '2px 6px' }}
-                      onClick={applyToCurrent}
-                      title="Show all Z levels up to current"
-                    >TO CURR</button>
+
+                  {/* Checkbox list for precise Z-level filtering */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 6 }}>
+                    <span style={{ fontSize: 12, opacity: 0.8 }}>Filter List:</span>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, auto)', gap: 8 }}>
+                      {availableZLevels.map((z) => {
+                        const allSelected = sanctuary.zLevelFilter.length === 0;
+                        const checked = allSelected || sanctuary.zLevelFilter.includes(z);
+                        return (
+                          <label key={`zchk_${z}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              onChange={(e) => toggleZFilterCheckbox(z, e.currentTarget.checked)}
+                            />
+                            Z{z}
+                          </label>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -949,6 +1017,44 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Z-Level Manager */}
+      {sanctuary.showZLevelManager && (
+        <div className={styles.levelMenu}>
+          <div className={styles.levelMenuHeader}>
+            <h4>Z-Level Manager</h4>
+            <button onClick={() => actions.sanctuary.toggleZLevelManager()}>✕</button>
+          </div>
+          <div className={styles.levelList}>
+            <h5>Available Z-Levels</h5>
+            {availableZLevels.map((z) => {
+              const isCurrent = sanctuary.currentZLevel === z;
+              const isFiltered = sanctuary.zLevelFilter.length === 0 || sanctuary.zLevelFilter.includes(z);
+              return (
+                <div key={z} className={styles.levelItem}>
+                  <span>Z{z}</span>
+                  <div className={styles.levelItemActions}>
+                    <button onClick={() => switchToZLevel(z)} disabled={isCurrent}>
+                      {isCurrent ? 'Current' : 'Go'}
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (sanctuary.zLevelFilter.includes(z)) {
+                          actions.sanctuary.removeZLevelFilter(z);
+                        } else {
+                          actions.sanctuary.setZLevelFilter([...sanctuary.zLevelFilter, z]);
+                        }
+                      }}
+                    >
+                      {isFiltered ? 'Hide' : 'Show'}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

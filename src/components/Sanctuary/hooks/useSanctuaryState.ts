@@ -121,7 +121,7 @@ export const useSanctuaryState = (): [SanctuaryState, SanctuaryStateActions] => 
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [camera, setCamera] = useState<Camera>({
     position: { x: 0, y: 0, z: 0 },
-    zoom: 2, // Increased zoom to better show the smaller grid
+    zoom: 1, // Default 1x zoom
     rotation: 0
   });
   const [currentLevel, setCurrentLevel] = useState<Level>({
@@ -132,7 +132,7 @@ export const useSanctuaryState = (): [SanctuaryState, SanctuaryStateActions] => 
     createdAt: new Date(),
     modifiedAt: new Date(),
     blocks: [],
-    camera: { position: { x: 0, y: 0, z: 0 }, zoom: 2, rotation: 0 },
+    camera: { position: { x: 0, y: 0, z: 0 }, zoom: 1, rotation: 0 },
     settings: { gravity: true }
   });
   

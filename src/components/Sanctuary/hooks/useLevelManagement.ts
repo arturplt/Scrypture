@@ -117,7 +117,7 @@ export const useLevelManagement = (
       if (level) {
         stateActions.setCurrentLevel(level);
         stateActions.setBlocks(level.blocks || []);
-        stateActions.setCamera(level.camera || { position: { x: 0, y: 0, z: 0 }, zoom: 2, rotation: 0 });
+        stateActions.setCamera(level.camera || { position: { x: 0, y: 0, z: 0 }, zoom: 1, rotation: 0 });
         setCurrentLevelId(levelId);
         return true;
       } else {
@@ -142,7 +142,7 @@ export const useLevelManagement = (
       createdAt: new Date(),
       modifiedAt: new Date(),
       blocks: [],
-      camera: { position: { x: 0, y: 0, z: 0 }, zoom: 2, rotation: 0 },
+      camera: { position: { x: 0, y: 0, z: 0 }, zoom: 1, rotation: 0 },
       settings: { gravity: true }
     };
     

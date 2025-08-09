@@ -345,11 +345,12 @@ export const useCanvasRendering = (
       // visibleBlocks.some(vb => vb.id === block.id)
     // );
     
-    // Sort blocks by depth (z DESC, then y ASC, then x ASC)
+    // Sort blocks for painter's algorithm so higher Z renders "in front"
+    // Draw order: lowest Z first -> highest Z last, then Y, then X
     const sortedBlocks = filteredBlocks.sort((a, b) => {
-      if (a.position.z !== b.position.z) return b.position.z - a.position.z;
-      if (a.position.y !== b.position.y) return a.position.y - b.position.y;
-      return a.position.x - b.position.x;
+      if (a.position.z !== b.position.z) return a.position.z - b.position.z; // Z asc
+      if (a.position.y !== b.position.y) return a.position.y - b.position.y; // Y asc
+      return a.position.x - b.position.x; // X asc
     });
     
     // Optional: render height map overlay under blocks
@@ -419,6 +420,8 @@ export const useCanvasRendering = (
     ctx.translate(pixelPerfectX, pixelPerfectY);
     ctx.scale(state.camera.zoom, state.camera.zoom);
     
+    // Optional: render height map overlay under blocks in fallback, too
+    renderHeightMapOverlay(ctx);
     // Render grid first (so blocks appear on top)
     if (state.showGrid) {
       renderGrid(ctx);
@@ -471,7 +474,7 @@ export const useCanvasRendering = (
       
       setPerformanceMetrics(metrics);
     }
-  }, [state.blocks, state.camera, state.showGrid, renderGrid, performanceMonitor]);
+  }, [state.blocks, state.camera, state.showGrid, renderGrid, renderHeightMapOverlay, performanceMonitor]);
   
   // Game loop
   const gameLoop = useCallback((currentTime: number) => {
