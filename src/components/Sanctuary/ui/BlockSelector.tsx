@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import styles from '../Sanctuary.module.css';
 import { ISOMETRIC_TILES, IsometricTileData } from '../../../data/isometric-tiles';
 import { TilePreview } from './TilePreview';
@@ -38,6 +38,18 @@ const BlockSelector: React.FC<BlockSelectorProps> = ({
     { name: 'orange', color: '#FF9800' },
   ];
 
+  // Minimalistic inventory-style UI: simple chips + flat grid
+  const [paletteFilter, setPaletteFilter] = useState<'all' | 'green' | 'gray' | 'orange'>('all');
+  const activeCategory = expandedCategory ?? 'all';
+
+  const visibleTiles = useMemo(() => {
+    return ISOMETRIC_TILES.filter((tile) => {
+      const categoryOk = activeCategory === 'all' ? true : tile.type === activeCategory;
+      const paletteOk = paletteFilter === 'all' ? true : tile.palette === paletteFilter;
+      return categoryOk && paletteOk;
+    });
+  }, [activeCategory, paletteFilter]);
+
   return (
     <div className={styles.blockSelector}>
       <div className={styles.blockSelectorHeader}>
@@ -49,79 +61,65 @@ const BlockSelector: React.FC<BlockSelectorProps> = ({
           ✕
         </button>
       </div>
-      
-      <div className={styles.blockCategories}>
-        {blockCategories.map(category => {
-          const isExpanded = expandedCategory === category.type;
-          
-          return (
-            <div key={category.type} className={styles.blockCategory}>
-              <div 
-                className={styles.categoryHeader}
-                onClick={() => onToggleCategory(isExpanded ? null : category.type)}
-                style={{ cursor: 'pointer' }}
-              >
-                <h4>{category.name}</h4>
-                <span className={styles.expandIcon}>{isExpanded ? '▼' : '▶'}</span>
-              </div>
-              
-              {isExpanded && (
-                <div className={styles.expandedContent}>
-                  {category.type === 'water' ? (
-                    // Special rendering for water category - show all water tiles directly
-                    <div className={styles.tileGrid}>
-                      {ISOMETRIC_TILES.filter(tile => tile.type === 'water').map(tile => (
-                        <button
-                          key={tile.id}
-                          className={`${styles.tileButton} ${selectedTile?.id === tile.id ? styles.active : ''}`}
-                          onClick={() => onSelectTile(tile)}
-                          title={`${tile.name} (water) - ${tile.sourceX},${tile.sourceY}`}
-                        >
-                          <TilePreview tile={tile} size={32} />
-                        </button>
-                      ))}
-                    </div>
-                  ) : (
-                    // Regular rendering for other categories - show palettes
-                    <div className={styles.paletteGrid}>
-                      {palettes.map(palette => {
-                        const tiles = ISOMETRIC_TILES.filter(tile => 
-                          tile.type === category.type && tile.palette === palette.name
-                        );
-                        
-                        if (tiles.length === 0) return null;
-                        
-                        return (
-                          <div key={palette.name} className={styles.paletteSection}>
-                            <div className={styles.paletteHeader}>
-                              <div 
-                                className={styles.paletteButton}
-                                style={{ backgroundColor: palette.color }}
-                              />
-                            </div>
-                            
-                            <div className={styles.tileGrid}>
-                              {tiles.map(tile => (
-                                <button
-                                  key={tile.id}
-                                  className={`${styles.tileButton} ${selectedTile?.id === tile.id ? styles.active : ''}`}
-                                  onClick={() => onSelectTile(tile)}
-                                  title={`${tile.name} (${tile.palette}) - ${tile.sourceX},${tile.sourceY}`}
-                                >
-                                  <TilePreview tile={tile} size={32} />
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          );
-        })}
+
+      {/* Filters bar */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '0 8px 8px' }}>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+          <span style={{ fontSize: 12, opacity: 0.8 }}>Category:</span>
+          <button
+            onClick={() => onToggleCategory(null)}
+            style={{
+              padding: '4px 8px', borderRadius: 12, border: 'none', cursor: 'pointer',
+              background: activeCategory === 'all' ? 'var(--color-accent-gold)' : 'var(--color-accent-beaver)',
+              color: '#fff', fontSize: 12
+            }}
+          >All</button>
+          {blockCategories.map((c) => (
+            <button
+              key={c.type}
+              onClick={() => onToggleCategory(c.type)}
+              style={{
+                padding: '4px 8px', borderRadius: 12, border: 'none', cursor: 'pointer',
+                background: activeCategory === c.type ? 'var(--color-accent-gold)' : 'var(--color-accent-beaver)',
+                color: '#fff', fontSize: 12
+              }}
+            >{c.name}</button>
+          ))}
+        </div>
+
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+          <span style={{ fontSize: 12, opacity: 0.8 }}>Palette:</span>
+          {[{ name: 'all', color: '#666' }, ...palettes].map((p) => (
+            <button
+              key={p.name}
+              onClick={() => setPaletteFilter(p.name as any)}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                padding: '4px 8px', borderRadius: 12, border: 'none', cursor: 'pointer',
+                background: paletteFilter === p.name ? 'var(--color-accent-gold)' : 'var(--color-accent-beaver)',
+                color: '#fff', fontSize: 12
+              }}
+              title={p.name === 'all' ? 'All palettes' : p.name}
+            >
+              <span style={{ width: 10, height: 10, borderRadius: '50%', background: p.color }} />
+              {p.name.toUpperCase()}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Flat grid */}
+      <div className={styles.tileGrid}>
+        {visibleTiles.map((tile) => (
+          <button
+            key={tile.id}
+            className={`${styles.tileButton} ${selectedTile?.id === tile.id ? styles.active : ''}`}
+            onClick={() => onSelectTile(tile)}
+            title={`${tile.name} (${tile.palette}) - ${tile.sourceX},${tile.sourceY}`}
+          >
+            <TilePreview tile={tile} size={32} />
+          </button>
+        ))}
       </div>
     </div>
   );

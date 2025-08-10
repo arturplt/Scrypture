@@ -8,6 +8,7 @@ interface SanctuaryBottomBarProps {
   onFillVisibleArea: () => void;
   onGenerateWithAllBlocks: () => void;
   onGenerateProceduralMap: (size: string) => void;
+  onGenerateIslandPreset?: () => void;
   onToggleHeightMap: () => void;
   onExportHeightMap: () => void;
   onToggleZLevelManager: () => void;
@@ -23,6 +24,7 @@ const SanctuaryBottomBar: React.FC<SanctuaryBottomBarProps> = ({
   onFillVisibleArea,
   onGenerateWithAllBlocks,
   onGenerateProceduralMap,
+  onGenerateIslandPreset,
   onToggleHeightMap,
   onExportHeightMap,
   onToggleZLevelManager,
@@ -110,6 +112,15 @@ const SanctuaryBottomBar: React.FC<SanctuaryBottomBarProps> = ({
             >
               GENERATE
             </button>
+            {onGenerateIslandPreset && (
+              <button 
+                style={unifiedButtonStyle}
+                onClick={onGenerateIslandPreset}
+                title="Generate Island Preset (Z0 water, Z1 gray, Z2 green, Z3 orange)"
+              >
+                ISLAND
+              </button>
+            )}
             <button 
               style={unifiedButtonStyle}
               onClick={onToggleHeightMap}

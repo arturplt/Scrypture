@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { ISOMETRIC_TILES } from '../../data/isometric-tiles';
 import { useSanctuary } from './hooks/useSanctuary';
 import {
   SanctuaryTopBar,
@@ -29,6 +30,127 @@ const Sanctuary: React.FC<SanctuaryProps> = ({ className, onExit }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
+
+  // Height map: generate and export
+  const generateProceduralMap = (size: string) => {
+    type PresetName = 'small' | 'medium' | 'large';
+    const presetName: PresetName = (['small', 'medium', 'large'] as const).includes(size as PresetName)
+      ? (size as PresetName)
+      : 'small';
+
+    const presets = {
+      small: { width: 32, height: 32, octaves: 4, frequency: 0.08, amplitude: 1.0, persistence: 0.5, lacunarity: 2.0, minHeight: 0, maxHeight: 100, smoothing: 1.0 },
+      medium: { width: 64, height: 64, octaves: 5, frequency: 0.06, amplitude: 1.0, persistence: 0.5, lacunarity: 2.0, minHeight: 0, maxHeight: 100, smoothing: 1.5 },
+      large: { width: 128, height: 128, octaves: 6, frequency: 0.045, amplitude: 1.0, persistence: 0.5, lacunarity: 2.1, minHeight: 0, maxHeight: 100, smoothing: 2.0 }
+    } as const;
+
+    const cfg = presets[presetName];
+    actions.sanctuary.setHeightMapConfig(cfg as any);
+
+    import('./systems/HeightMapSystem')
+      .then((mod) => {
+        const gen = new mod.HeightMapGenerator();
+        const map = gen.generateHeightMap(cfg as any);
+        actions.sanctuary.setCurrentHeightMap(map);
+        if (!state.sanctuary.showHeightMap) actions.sanctuary.setHeightMapVisible(true);
+      })
+      .catch((e) => {
+        console.warn('HeightMapSystem dynamic import failed, using fallback', e);
+        const data: number[][] = Array.from({ length: (cfg as any).height }, () => Array((cfg as any).width).fill(0));
+        actions.sanctuary.setCurrentHeightMap({
+          width: (cfg as any).width,
+          height: (cfg as any).height,
+          data,
+          minHeight: (cfg as any).minHeight,
+          maxHeight: (cfg as any).maxHeight,
+          seed: Math.floor(Math.random() * 1e6)
+        });
+        if (!state.sanctuary.showHeightMap) actions.sanctuary.setHeightMapVisible(true);
+      });
+  };
+
+  const exportHeightMap = () => {
+    const hm = state.sanctuary.currentHeightMap;
+    if (!hm) return;
+    const blob = new Blob([JSON.stringify(hm, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${(state.levelManagement.currentLevelId || 'level').replace(/\s+/g, '_')}_heightmap.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // Island preset: z0 water, z1 gray, z2 green, z3 orange
+  const generateIslandPreset = () => {
+    // Configuration
+    const width = 32;
+    const height = 32;
+    const halfW = Math.floor(width / 2);
+    const halfH = Math.floor(height / 2);
+
+    // Choose representative tiles for each layer
+    const waterTile = ISOMETRIC_TILES.find(t => t.type === 'water');
+    const grayTile = ISOMETRIC_TILES.find(t => t.type === 'cube' && t.palette === 'gray');
+    const greenTile = ISOMETRIC_TILES.find(t => t.type === 'cube' && t.palette === 'green');
+    const orangeTile = ISOMETRIC_TILES.find(t => t.type === 'cube' && t.palette === 'orange');
+
+    if (!waterTile) {
+      console.warn('No water tile found; island generation aborted.');
+      return;
+    }
+
+    const blocks: any[] = [];
+
+    // Radial thresholds for island tiers
+    const maxR = Math.min(halfW, halfH) - 2;
+    const r1 = maxR * 0.95; // gray ring
+    const r2 = maxR * 0.65; // green
+    const r3 = maxR * 0.35; // orange center
+
+    // Helper to push a block for a given tile at position
+    const pushBlock = (tile: any, x: number, y: number, z: number) => {
+      blocks.push({
+        id: `block_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        type: tile.type,
+        position: { x, y, z },
+        sprite: {
+          sourceX: tile.sourceX,
+          sourceY: tile.sourceY,
+          width: tile.width,
+          height: tile.height,
+          sheetPath: '/assets/Tilemaps/isometric-sandbox-sheet.png'
+        },
+        rotation: 0 as 0,
+        palette: tile.palette || 'green',
+        properties: {
+          walkable: true,
+          climbable: false,
+          interactable: false,
+          destructible: true
+        }
+      });
+    };
+
+    for (let gx = -halfW; gx < halfW; gx++) {
+      for (let gy = -halfH; gy < halfH; gy++) {
+        const dx = gx + 0.5; // slight center bias for smoother circle
+        const dy = gy + 0.5;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        // Base water everywhere at z0
+        pushBlock(waterTile, gx, gy, 0);
+
+        // Land tiers stacked above
+        if (dist <= r1 && grayTile) pushBlock(grayTile, gx, gy, 1);
+        if (dist <= r2 && greenTile) pushBlock(greenTile, gx, gy, 2);
+        if (dist <= r3 && orangeTile) pushBlock(orangeTile, gx, gy, 3);
+      }
+    }
+
+    // Replace current blocks with preset
+    actions.sanctuary.setBlocks(blocks as any);
+  };
 
   // Handle exit
   const handleExit = () => {
@@ -206,9 +328,10 @@ const Sanctuary: React.FC<SanctuaryProps> = ({ className, onExit }) => {
         onResetTerrain={() => actions.sanctuary.setBlocks([])}
         onFillVisibleArea={() => {}}
         onGenerateWithAllBlocks={() => {}}
-        onGenerateProceduralMap={(_size: string) => {}}
-        onToggleHeightMap={() => actions.sanctuary.setHeightMapVisible(!state.sanctuary.showHeightMap)}
-        onExportHeightMap={() => {}}
+        onGenerateProceduralMap={generateProceduralMap}
+        onGenerateIslandPreset={generateIslandPreset}
+        onToggleHeightMap={() => actions.sanctuary.toggleHeightMap()}
+        onExportHeightMap={exportHeightMap}
         onToggleZLevelManager={() => actions.sanctuary.setZLevelManagerVisible(!state.sanctuary.showZLevelManager)}
         onToggleAtlasEditor={() => actions.sanctuary.setAtlasEditorVisible(!state.sanctuary.showAtlasEditor)}
         showHeightMap={state.sanctuary.showHeightMap}
