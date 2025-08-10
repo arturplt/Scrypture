@@ -3,6 +3,7 @@ import styles from './Sanctuary.module.css';
 import { ISOMETRIC_TILES, TILE_SHEET_CONFIG, IsometricTileData } from '../data/isometric-tiles';
 import AtlasEditor from './AtlasEditor';
 import { HeightMapGenerator } from './Sanctuary/systems/HeightMapSystem';
+import { LevelManager } from './Sanctuary/utils/LevelManager';
 import { useSanctuary } from './Sanctuary/hooks';
 
 // ============================================================================
@@ -36,6 +37,170 @@ const TilePreview: React.FC<TilePreviewProps> = ({ tile, size = 32, className })
         display: 'inline-block'
       }}
     />
+  );
+};
+
+// Storage Management Content Component
+const StorageManagementContent: React.FC = () => {
+  const [stats, setStats] = useState(() => LevelManager.getStorageStats());
+  const [confirmClear, setConfirmClear] = useState(false);
+
+  const refreshStats = () => {
+    setStats(LevelManager.getStorageStats());
+  };
+
+  const handleClearAll = () => {
+    if (confirmClear) {
+      LevelManager.clearAllLevels();
+      setConfirmClear(false);
+      refreshStats();
+    } else {
+      setConfirmClear(true);
+    }
+  };
+
+  const handleDeleteLevel = (levelName: string) => {
+    const levels = LevelManager.getAllLevels();
+    const level = levels.find(l => l.name === levelName);
+    if (level) {
+      LevelManager.deleteLevel(level.id);
+      refreshStats();
+    }
+  };
+
+  return (
+    <div style={{ fontSize: 14 }}>
+      {/* Storage Overview */}
+      <div style={{ marginBottom: 20, padding: 12, background: '#2a2a2a', borderRadius: 6 }}>
+        <h5 style={{ margin: '0 0 8px 0', color: '#ffd700' }}>Storage Overview</h5>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+          <div>Total Levels: <strong>{stats.totalLevels}</strong></div>
+          <div>Total Blocks: <strong>{stats.totalBlocks.toLocaleString()}</strong></div>
+          <div>Estimated Size: <strong>{stats.estimatedSize}</strong></div>
+                          <div>Storage Limit: <strong>10MB</strong></div>
+        </div>
+      </div>
+
+      {/* Level Details */}
+      <div style={{ marginBottom: 20 }}>
+        <h5 style={{ margin: '0 0 8px 0', color: '#ffd700' }}>Level Details</h5>
+        <div style={{ maxHeight: 200, overflow: 'auto', border: '1px solid #444', borderRadius: 4 }}>
+          {stats.levels.length === 0 ? (
+            <div style={{ padding: 12, textAlign: 'center', color: '#888' }}>No levels stored</div>
+          ) : (
+            stats.levels.map((level, index) => (
+              <div key={index} style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center', 
+                padding: '8px 12px',
+                borderBottom: index < stats.levels.length - 1 ? '1px solid #333' : 'none',
+                background: index % 2 === 0 ? '#2a2a2a' : 'transparent'
+              }}>
+                <div>
+                  <div style={{ fontWeight: 'bold' }}>{level.name}</div>
+                  <div style={{ fontSize: 12, color: '#888' }}>
+                    {level.blocks.toLocaleString()} blocks • {level.size}
+                  </div>
+                </div>
+                <button
+                  onClick={() => handleDeleteLevel(level.name)}
+                  style={{
+                    background: '#d32f2f',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: 4,
+                    padding: '4px 8px',
+                    fontSize: 12,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Delete
+                </button>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+
+      {/* Actions */}
+      <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between' }}>
+        <button
+          onClick={refreshStats}
+          style={{
+            background: '#1976d2',
+            color: 'white',
+            border: 'none',
+            borderRadius: 4,
+            padding: '8px 16px',
+            cursor: 'pointer'
+          }}
+        >
+          Refresh Stats
+        </button>
+        
+        <div style={{ display: 'flex', gap: 8 }}>
+          {confirmClear ? (
+            <>
+              <button
+                onClick={() => setConfirmClear(false)}
+                style={{
+                  background: '#666',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: 4,
+                  padding: '8px 16px',
+                  cursor: 'pointer'
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleClearAll}
+                style={{
+                  background: '#d32f2f',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: 4,
+                  padding: '8px 16px',
+                  cursor: 'pointer'
+                }}
+              >
+                Confirm Clear All
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={handleClearAll}
+              style={{
+                background: '#d32f2f',
+                color: 'white',
+                border: 'none',
+                borderRadius: 4,
+                padding: '8px 16px',
+                cursor: 'pointer'
+              }}
+            >
+              Clear All Levels
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Warning */}
+      {stats.estimatedSize.includes('MB') && parseFloat(stats.estimatedSize) > 8 && (
+        <div style={{ 
+          marginTop: 16, 
+          padding: 12, 
+          background: '#d32f2f20', 
+          border: '1px solid #d32f2f', 
+          borderRadius: 4,
+          color: '#ffcdd2'
+        }}>
+          ⚠️ Storage usage is high (over 8MB). Consider deleting unused levels to prevent storage quota issues.
+        </div>
+      )}
+    </div>
   );
 };
 
@@ -470,34 +635,148 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
     URL.revokeObjectURL(url);
   };
 
+  // Test height map generation
+  const testHeightMapGeneration = () => {
+    console.log('🧪 Testing height map generation...');
+    console.log('Current config:', sanctuary.heightMapConfig);
+    console.log('Current height map:', sanctuary.currentHeightMap);
+    
+    try {
+      const testConfig = {
+        width: 64,
+        height: 64,
+        octaves: 4,
+        frequency: 0.05,
+        amplitude: 1.0,
+        persistence: 0.5,
+        lacunarity: 2.0,
+        minHeight: 0,
+        maxHeight: 255,
+        smoothing: 1.0
+      };
+      
+      console.log('🧪 Using test config:', testConfig);
+      
+      const gen = new HeightMapGenerator();
+      const testMap = gen.generateHeightMap(testConfig);
+      
+      console.log('🧪 Test map generated:', {
+        width: testMap.width,
+        height: testMap.height,
+        dataLength: testMap.data.length,
+        sampleData: testMap.data[0]?.slice(0, 5)
+      });
+      
+      actions.sanctuary.setCurrentHeightMap(testMap);
+      console.log('🧪 Test map set in state');
+      
+    } catch (error) {
+      console.error('🧪 Test failed:', error);
+    }
+  };
+
   // Regenerate height map from current config
   const regenerateHeightMapFromConfig = () => {
     const cfg = sanctuary.heightMapConfig as any;
+    
+    // Validate config
+    if (!cfg) {
+      console.error('🗺️ No height map config found');
+      return;
+    }
+    
+    console.log('🗺️ Regenerating height map with config:', cfg);
+    
     try {
       const gen = new HeightMapGenerator();
       const map = gen.generateHeightMap(cfg);
+      
+      // Validate generated map
+      if (!map || !map.data || !Array.isArray(map.data)) {
+        console.error('🗺️ Generated height map is invalid:', map);
+        return;
+      }
+      
+      console.log('🗺️ Height map generated successfully:', {
+        width: map.width,
+        height: map.height,
+        dataLength: map.data.length,
+        minHeight: map.minHeight,
+        maxHeight: map.maxHeight
+      });
+      
       actions.sanctuary.setCurrentHeightMap(map);
-      // Do not auto-show overlay
     } catch (e) {
-      console.warn('HeightMap regeneration failed', e);
+      console.error('🗺️ HeightMap regeneration failed:', e);
+      
+      // Create fallback height map
+      console.log('🗺️ Creating fallback height map...');
+      const fallbackData: number[][] = Array.from({ length: cfg.height || 128 }, () => 
+        Array(cfg.width || 128).fill(0)
+      );
+      
+      const fallbackMap = {
+        width: cfg.width || 128,
+        height: cfg.height || 128,
+        data: fallbackData,
+        minHeight: cfg.minHeight || 0,
+        maxHeight: cfg.maxHeight || 255,
+        seed: Math.floor(Math.random() * 1e6)
+      };
+      
+      actions.sanctuary.setCurrentHeightMap(fallbackMap);
     }
   };
 
   // Generate terrain blocks from current height map with Z and palette rules
   const generateTerrainFromHeightMap = async (size: number, name: string) => {
+    console.log(`🗺️ Generating terrain: ${size}x${size} "${name}"`);
 
-    // Ensure height map matches requested size
-    if ((sanctuary.heightMapConfig as any).width !== size || (sanctuary.heightMapConfig as any).height !== size) {
+    // Check storage before generating
+    const currentStats = LevelManager.getStorageStats();
+    const estimatedNewBlocks = size * size;
+    const estimatedNewSize = (estimatedNewBlocks * 200) / (1024 * 1024); // Rough estimate: 200 bytes per block
+    
+    console.log(`💾 Storage check: Current ${currentStats.estimatedSize}, adding ~${estimatedNewSize.toFixed(2)}MB`);
+    
+    // Update warning threshold to align with 10MB limit (~8MB soft warning)
+    if (currentStats.estimatedSize.includes('MB') && parseFloat(currentStats.estimatedSize) + estimatedNewSize > 8) {
+      console.warn(`⚠️ Large terrain generation may cause storage quota issues. Consider using a smaller size or clearing old levels.`);
+    }
+
+    // Prepare a local height map to avoid relying on async state updates
+    let localMap = sanctuary.currentHeightMap as any | null;
+
+    // Ensure height map matches requested size (generate if null or size mismatch)
+    const needsResize = !localMap || localMap.width !== size || localMap.height !== size;
+    if (needsResize) {
+      console.log(`🔄 Generating height map for ${size}x${size}`);
       actions.sanctuary.setHeightMapConfig({ ...sanctuary.heightMapConfig, width: size, height: size } as any);
       try {
         const gen = new HeightMapGenerator();
-        const newMap = gen.generateHeightMap({ ...(sanctuary.heightMapConfig as any), width: size, height: size } as any);
-        actions.sanctuary.setCurrentHeightMap(newMap);
-      } catch {}
+        localMap = gen.generateHeightMap({ ...(sanctuary.heightMapConfig as any), width: size, height: size } as any);
+        actions.sanctuary.setCurrentHeightMap(localMap);
+        console.log(`✅ Height map ready`, { w: localMap.width, h: localMap.height });
+      } catch (error) {
+        console.error(`❌ Failed to generate height map:`, error);
+        return;
+      }
     }
 
-    const hm = sanctuary.currentHeightMap;
-    if (!hm) return;
+    const hm = localMap;
+    if (!hm || !hm.data || !Array.isArray(hm.data) || !Array.isArray(hm.data[0])) {
+      console.error(`❌ Invalid height map data`, hm);
+      return;
+    }
+
+    console.log(`📊 Height map data:`, {
+      width: hm.width,
+      height: hm.height,
+      dataLength: hm.data?.length,
+      minHeight: hm.minHeight,
+      maxHeight: hm.maxHeight,
+      hasData: !!hm.data
+    });
 
     // Helper: pick a representative tile by palette or water type
     const pickWater = () => ISOMETRIC_TILES.find(t => t.type === 'water') || ISOMETRIC_TILES[0];
@@ -509,11 +788,29 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
     const greenTile = pickByPalette('green');
     const grayTile = pickByPalette('gray');
 
+    console.log(`🎨 Selected tiles:`, {
+      water: waterTile?.name,
+      orange: orangeTile?.name,
+      green: greenTile?.name,
+      gray: grayTile?.name
+    });
+
     const minH: number = hm.minHeight ?? 0;
     const maxH: number = hm.maxHeight ?? 255;
     const range = Math.max(1, maxH - minH);
 
+    console.log(`📈 Height range: ${minH} to ${maxH} (range: ${range})`);
+
+    // Center the generated terrain around the world origin so it appears in view
+    const offsetX = Math.floor(hm.width / 2);
+    const offsetY = Math.floor(hm.height / 2);
+
     const blocks: any[] = [];
+    let waterBlocks = 0;
+    let orangeBlocks = 0;
+    let greenBlocks = 0;
+    let grayBlocks = 0;
+
     for (let y = 0; y < hm.height; y++) {
       for (let x = 0; x < hm.width; x++) {
         const h = hm.data[y][x] as number;
@@ -524,18 +821,23 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
         let tile: IsometricTileData;
         if (zLevel === 0) {
           tile = waterTile;
+          waterBlocks++;
         } else if (zLevel >= 1 && zLevel <= 3) {
           tile = orangeTile;
+          orangeBlocks++;
         } else if (zLevel >= 4 && zLevel <= 7) {
           tile = greenTile;
+          greenBlocks++;
         } else {
           tile = grayTile;
+          grayBlocks++;
         }
 
         const newBlock = {
           id: `block_${x}_${y}_${zLevel}_${Math.random().toString(36).slice(2, 8)}`,
           type: tile.type,
-          position: { x, y, z: zLevel },
+          // Centered world position
+          position: { x: x - offsetX, y: y - offsetY, z: zLevel },
           sprite: {
             sourceX: tile.sourceX,
             sourceY: tile.sourceY,
@@ -556,9 +858,24 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
       }
     }
 
-    // Set blocks first, then create the level snapshot so it captures the terrain
-    actions.sanctuary.setBlocks(blocks);
+    console.log(`🏗️ Generated ${blocks.length} blocks:`, {
+      water: waterBlocks,
+      orange: orangeBlocks,
+      green: greenBlocks,
+      gray: grayBlocks,
+      total: blocks.length
+    });
+
+    console.log(`💾 Creating new level...`);
+    // Important: create the new level first (this clears state.blocks)
     await actions.levelManagement.createNewLevel(name, `Generated ${size}x${size} terrain from height map`);
+
+    // Now set the generated terrain blocks so they are visible and part of current state
+    actions.sanctuary.setBlocks(blocks);
+    console.log(`📊 Blocks after setBlocks (may reflect next tick): ${sanctuary.blocks.length}`);
+    console.log(`📊 First few blocks:`, blocks.slice(0, 3));
+
+    console.log(`💾 Saving level...`);
     // Immediately save with current blocks
     await actions.levelManagement.saveLevel({
       ...sanctuary.currentLevel,
@@ -567,47 +884,26 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
       camera: sanctuary.camera,
       modifiedAt: new Date()
     } as any);
+    
     // Ensure Z buttons cover 0..10
     if ((actions.sanctuary as any).setDefinedZLevels) {
       (actions.sanctuary as any).setDefinedZLevels(Array.from({ length: 11 }, (_, i) => i));
     }
     actions.sanctuary.setCurrentZLevel(5);
+    
+    // Log success and storage info
+    const finalStats = LevelManager.getStorageStats();
+    console.log(`✅ Terrain generated successfully! Created ${blocks.length.toLocaleString()} blocks.`);
+    console.log(`💾 Final storage: ${finalStats.estimatedSize} (${finalStats.totalLevels} levels, ${finalStats.totalBlocks.toLocaleString()} total blocks)`);
   };
 
-  // Test coordinate conversion
-  const testCoordinateConversion = () => {
-    const canvasElement = canvas.canvasRef.current;
-    if (!canvasElement) return;
-    
-    const rect = canvasElement.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    
-    console.log('Testing coordinate conversion at canvas center:', {
-      screenX: centerX,
-      screenY: centerY,
-      canvasRect: rect,
-      canvasSize: canvasSize
-    });
-    
-    // Test the coordinate conversion
-    const gridPos = actions.canvas.screenToGrid(centerX, centerY);
-    console.log('Grid position at center:', gridPos);
-    
-    // Test converting back to screen
-    const screenPos = actions.canvas.gridToScreen(gridPos.x, gridPos.y, gridPos.z);
-    console.log('Back to screen position:', screenPos);
-    
-    // Calculate the difference
-    const diffX = Math.abs(centerX - screenPos.x);
-    const diffY = Math.abs(centerY - screenPos.y);
-    console.log('Coordinate conversion accuracy:', { diffX, diffY, isAccurate: diffX < 1 && diffY < 1 });
-  };
+
 
   // Height map preview canvas ref
   const heightMapPreviewRef = useRef<HTMLCanvasElement>(null);
   // Terrain generation modal state
   const [showTerrainModal, setShowTerrainModal] = useState(false);
+  const [showStorageModal, setShowStorageModal] = useState(false);
   const [terrainSize, setTerrainSize] = useState<number>(128);
   const [terrainName, setTerrainName] = useState<string>('Generated Terrain');
 
@@ -619,40 +915,111 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
 
   // Draw height map preview in manager modal
   useEffect(() => {
+    console.log('🎨 Canvas effect triggered:', {
+      showManager: sanctuary.showHeightMapManager,
+      hasHeightMap: !!sanctuary.currentHeightMap,
+      heightMapData: sanctuary.currentHeightMap ? {
+        width: sanctuary.currentHeightMap.width,
+        height: sanctuary.currentHeightMap.height,
+        dataLength: sanctuary.currentHeightMap.data?.length,
+        hasData: !!sanctuary.currentHeightMap.data
+      } : null
+    });
+    
     if (!sanctuary.showHeightMapManager) return;
+    
+    // Auto-generate height map if none exists
+    if (!sanctuary.currentHeightMap) {
+      console.log('🗺️ No height map found, generating default...');
+      regenerateHeightMapFromConfig();
+      return;
+    }
+    
     const hm = sanctuary.currentHeightMap;
     const canvas = heightMapPreviewRef.current;
-    if (!canvas) return;
+    if (!canvas) {
+      console.warn('🎨 Canvas ref not found');
+      return;
+    }
     const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    // Clear
+    if (!ctx) {
+      console.warn('🎨 Canvas context not found');
+      return;
+    }
+    
+    // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    if (!hm) return;
+    
+    // Validate height map data
+    if (!hm || !hm.data || !Array.isArray(hm.data) || hm.data.length === 0) {
+      console.warn('🗺️ Invalid height map data:', hm);
+      return;
+    }
 
     const width: number = hm.width;
     const height: number = hm.height;
+    
+    // Validate dimensions
+    if (width <= 0 || height <= 0) {
+      console.warn('🗺️ Invalid height map dimensions:', { width, height });
+      return;
+    }
+    
     // Fit into 256x256 while preserving aspect
     const maxSize = 256;
     const scale = Math.max(1, Math.floor(Math.min(maxSize / width, maxSize / height)));
     const drawWidth = width * scale;
     const drawHeight = height * scale;
+    
+    // Set canvas dimensions
     canvas.width = drawWidth;
     canvas.height = drawHeight;
+    
+    // Clear again after resize
+    ctx.clearRect(0, 0, drawWidth, drawHeight);
 
     const minH: number = hm.minHeight ?? 0;
     const maxH: number = hm.maxHeight ?? 100;
+    
     const getColorForHeight = (h: number): string => {
       const t = Math.max(0, Math.min(1, (h - minH) / Math.max(maxH - minH, 1)));
       const v = Math.round(t * 255);
       return `rgb(${v},${v},${v})`;
     };
 
+    // Draw height map pixels
+    let pixelsDrawn = 0;
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
-        const h = hm.data[y][x] as number;
-        ctx.fillStyle = getColorForHeight(h);
-        ctx.fillRect(x * scale, y * scale, scale, scale);
+        if (hm.data[y] && typeof hm.data[y][x] === 'number') {
+          const h = hm.data[y][x] as number;
+          ctx.fillStyle = getColorForHeight(h);
+          ctx.fillRect(x * scale, y * scale, scale, scale);
+          pixelsDrawn++;
+        }
       }
+    }
+    
+    console.log('🗺️ Height map preview rendered:', { 
+      width, 
+      height, 
+      drawWidth, 
+      drawHeight, 
+      scale, 
+      pixelsDrawn,
+      canvasWidth: canvas.width,
+      canvasHeight: canvas.height
+    });
+  }, [sanctuary.showHeightMapManager, sanctuary.currentHeightMap]);
+
+  // Auto-generate height map when manager opens
+  useEffect(() => {
+    if (sanctuary.showHeightMapManager && !sanctuary.currentHeightMap) {
+      console.log('🗺️ Height map manager opened, generating initial height map...');
+      const timer = setTimeout(() => {
+        regenerateHeightMapFromConfig();
+      }, 100);
+      return () => clearTimeout(timer);
     }
   }, [sanctuary.showHeightMapManager, sanctuary.currentHeightMap]);
 
@@ -772,6 +1139,13 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
                   title="Reset Terrain"
                 >
                   RESET
+                </button>
+                <button 
+                  style={unifiedButtonStyle}
+                  onClick={() => setShowStorageModal(true)}
+                  title="Storage Management"
+                >
+                  STORAGE
                 </button>
               </div>
             )}
@@ -1386,6 +1760,33 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+              {/* Status indicator */}
+              {!sanctuary.currentHeightMap && (
+                <div style={{ 
+                  padding: '8px 12px', 
+                  background: '#333', 
+                  borderRadius: 4, 
+                  fontSize: 12, 
+                  color: '#ccc',
+                  textAlign: 'center'
+                }}>
+                  Generating height map...
+                </div>
+              )}
+              
+              {/* Debug info */}
+              <div style={{ 
+                padding: '4px 8px', 
+                background: '#222', 
+                borderRadius: 4, 
+                fontSize: 10, 
+                color: '#888',
+                fontFamily: 'monospace'
+              }}>
+                Config: {sanctuary.heightMapConfig?.width || 'N/A'}x{sanctuary.heightMapConfig?.height || 'N/A'} | 
+                Map: {sanctuary.currentHeightMap ? `${sanctuary.currentHeightMap.width}x${sanctuary.currentHeightMap.height}` : 'None'}
+              </div>
+              
               <canvas
                 ref={heightMapPreviewRef}
                 style={{
@@ -1393,7 +1794,8 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
                   height: 256,
                   imageRendering: 'pixelated' as const,
                   borderRadius: 4,
-                  background: '#000'
+                  background: '#000',
+                  border: sanctuary.currentHeightMap ? '1px solid #444' : '1px solid #666'
                 }}
               />
               {/* Controls */}
@@ -1461,6 +1863,18 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'center' }}>
                 <button
                   style={unifiedButtonStyle}
+                  onClick={testHeightMapGeneration}
+                >
+                  Test
+                </button>
+                <button
+                  style={unifiedButtonStyle}
+                  onClick={regenerateHeightMapFromConfig}
+                >
+                  Generate Height Map
+                </button>
+                <button
+                  style={unifiedButtonStyle}
                   onClick={() => {
                     const sz = (sanctuary.heightMapConfig as any)?.width || 128;
                     const nm = sanctuary.currentLevel.name || 'Generated Terrain';
@@ -1518,6 +1932,22 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
                 maxLength={40}
                 placeholder="Level name"
               />
+              
+              {/* Storage warning for large terrains */}
+              {terrainSize >= 128 && (
+                <div style={{ 
+                  gridColumn: 'span 3', 
+                  padding: '8px', 
+                  background: '#d32f2f20', 
+                  border: '1px solid #d32f2f', 
+                  borderRadius: 4,
+                  color: '#ffcdd2',
+                  fontSize: 11,
+                  textAlign: 'center'
+                }}>
+                  ⚠️ Large terrain ({terrainSize}x{terrainSize} = {(terrainSize * terrainSize).toLocaleString()} blocks) may cause storage issues
+                </div>
+              )}
             </div>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 10 }}>
               <button style={unifiedButtonStyle} onClick={() => setShowTerrainModal(false)}>Cancel</button>
@@ -1527,6 +1957,35 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
               >
                 Generate
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Storage Management Modal */}
+      {showStorageModal && (
+        <div
+          style={{
+            position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'rgba(0,0,0,0.25)', zIndex: 1300
+          }}
+        >
+          <div
+            style={{
+              background: 'var(--color-surface, #1e1e1e)', color: 'var(--color-text, #fff)',
+              borderRadius: 8, padding: 16, width: 500, maxHeight: '80vh', overflow: 'auto',
+              boxShadow: '0 4px 16px rgba(0,0,0,0.25)'
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <h4 style={{ margin: 0, fontSize: 16 }}>Storage Management</h4>
+              <button onClick={() => setShowStorageModal(false)} style={{ background: 'transparent', border: 'none', color: 'inherit', cursor: 'pointer', fontSize: 18 }}>✕</button>
+            </div>
+            
+            <StorageManagementContent />
+            
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 16 }}>
+              <button style={unifiedButtonStyle} onClick={() => setShowStorageModal(false)}>Close</button>
             </div>
           </div>
         </div>

@@ -108,6 +108,18 @@ export const useCanvasRendering = (
     const pixelPerfectX = Math.round(isoX);
     const pixelPerfectY = Math.round(isoY);
     
+    // Debug logging for block rendering (only for first few blocks to avoid spam)
+    if (state.blocks.length > 0 && state.blocks.length < 10) {
+      console.log(`🔲 Rendering block:`, {
+        id: block.id,
+        position: { x, y, z },
+        isometric: { isoX, isoY },
+        pixelPerfect: { pixelPerfectX, pixelPerfectY },
+        sprite: block.sprite,
+        tileSheetSize: `${tileSheet.width}x${tileSheet.height}`
+      });
+    }
+    
     ctx.save();
     ctx.translate(pixelPerfectX, pixelPerfectY);
     ctx.rotate((block.rotation * Math.PI) / 180);
@@ -124,7 +136,7 @@ export const useCanvasRendering = (
     );
     
     ctx.restore();
-  }, []);
+  }, [state.blocks.length]);
   
   const renderHoverPreview = useCallback((ctx: CanvasRenderingContext2D, tileSheet: HTMLImageElement) => {
     if (!state.hoverCell || !state.selectedTile) return;
@@ -344,6 +356,19 @@ export const useCanvasRendering = (
     const filteredBlocks = visibleBlocks; // culledBlocks.filter(block => 
       // visibleBlocks.some(vb => vb.id === block.id)
     // );
+    
+    // Debug logging for block rendering
+    if (state.blocks.length > 0 && state.blocks.length < 100) { // Only log for reasonable block counts
+      console.log(`🎨 Rendering scene:`, {
+        totalBlocks: state.blocks.length,
+        visibleBlocks: visibleBlocks.length,
+        filteredBlocks: filteredBlocks.length,
+        zLevelFilter: state.zLevelFilter,
+        camera: state.camera,
+        tileSheetLoaded: !!tileSheet,
+        tileSheetSize: tileSheet ? `${tileSheet.width}x${tileSheet.height}` : 'N/A'
+      });
+    }
     
     // Sort blocks by depth so higher Z renders on top
     // Draw order: z ASC (low first), then y ASC, then x ASC

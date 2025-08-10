@@ -43,7 +43,10 @@ export const useSanctuary = (): [SanctuaryHookState, SanctuaryHookActions] => {
   const performanceMonitor = useMemo(() => {
     // Create a temporary canvas to get WebGL context for PerformanceMonitor
     const tempCanvas = document.createElement('canvas');
-    const gl = tempCanvas.getContext('webgl2') || tempCanvas.getContext('webgl');
+    // Avoid triggering software WebGL fallback; only use hardware contexts
+    const gl =
+      (tempCanvas.getContext('webgl2', { failIfMajorPerformanceCaveat: true }) as WebGL2RenderingContext | null) ||
+      (tempCanvas.getContext('webgl', { failIfMajorPerformanceCaveat: true }) as WebGLRenderingContext | null);
     return gl ? new PerformanceMonitor(gl) : null;
   }, []);
   
