@@ -95,6 +95,11 @@ export const ISOMETRIC_TILES: IsometricTileData[] = [
   { id: 56, name: 'Water Block 2', type: 'water', palette: 'blue', sourceX: 96, sourceY: 64, width: 32, height: 32, isometric: true },
   { id: 57, name: 'Water Block 3', type: 'water', palette: 'blue', sourceX: 64, sourceY: 64, width: 32, height: 32, isometric: true },
   { id: 58, name: 'Water Block 4', type: 'water', palette: 'blue', sourceX: 32, sourceY: 64, width: 32, height: 32, isometric: true },
+  // Additional water blocks (row at y=160)
+  { id: 59, name: 'Water Block 5', type: 'water', palette: 'blue', sourceX: 0, sourceY: 160, width: 32, height: 32, isometric: true },
+  { id: 60, name: 'Water Block 6', type: 'water', palette: 'blue', sourceX: 32, sourceY: 160, width: 32, height: 32, isometric: true },
+  { id: 61, name: 'Water Block 7', type: 'water', palette: 'blue', sourceX: 64, sourceY: 160, width: 32, height: 32, isometric: true },
+  { id: 62, name: 'Water Block 8', type: 'water', palette: 'blue', sourceX: 96, sourceY: 160, width: 32, height: 32, isometric: true },
 ];
 
 export const getTileById = (id: number): IsometricTileData | undefined => {
