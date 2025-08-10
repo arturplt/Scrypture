@@ -98,10 +98,11 @@ export const useCanvasRendering = (
     const { x, y, z } = block.position;
     const tileWidth = 32; // Actual tile width from tile sheet
     const tileHeight = 16; // Half height for isometric projection
+    const zSpacing = tileHeight; // vertical spacing between Z levels
     
     // Isometric projection with increased Z-level spacing for more dramatic elevation
     const isoX = (x - y) * (tileWidth / 2);
-    const isoY = (x + y) * (tileHeight / 2) - z * (tileHeight * 2); // Doubled Z-level spacing
+    const isoY = (x + y) * (tileHeight / 2) - z * zSpacing;
     
     // Snap to pixel boundaries for crisp rendering
     const pixelPerfectX = Math.round(isoX);
@@ -131,10 +132,11 @@ export const useCanvasRendering = (
     const { x, y, z } = state.hoverCell;
     const tileWidth = 32; // Actual tile width from tile sheet
     const tileHeight = 16; // Half height for isometric projection
+    const zSpacing = tileHeight;
     
     // Isometric projection with increased Z-level spacing
     const isoX = (x - y) * (tileWidth / 2);
-    const isoY = (x + y) * (tileHeight / 2) - z * (tileHeight * 2);
+    const isoY = (x + y) * (tileHeight / 2) - z * zSpacing;
     
     // Snap to pixel boundaries for crisp rendering
     const pixelPerfectX = Math.round(isoX);
@@ -164,10 +166,11 @@ export const useCanvasRendering = (
     const { x, y, z } = state.selectedBlock.position;
     const tileWidth = 32; // Actual tile width from tile sheet
     const tileHeight = 16; // Half height for isometric projection
+    const zSpacing = tileHeight;
     
     // Calculate isometric position with increased Z-level spacing
     const isoX = (x - y) * (tileWidth / 2);
-    const isoY = (x + y) * (tileHeight / 2) - z * (tileHeight * 2);
+    const isoY = (x + y) * (tileHeight / 2) - z * zSpacing;
     
     // Snap to pixel boundaries for crisp rendering
     const pixelPerfectX = Math.round(isoX);
@@ -186,6 +189,7 @@ export const useCanvasRendering = (
     
     const tileWidth = 32; // Actual tile width from tile sheet
     const tileHeight = 16; // Half height for isometric projection
+    const zSpacing = tileHeight;
     const gridSize = 20; // Reduced grid size since tiles are larger
     
     ctx.save();
@@ -196,7 +200,7 @@ export const useCanvasRendering = (
     if (state.hoverCell) {
       const { x, y, z } = state.hoverCell;
       const isoX = (x - y) * (tileWidth / 2);
-      const isoY = (x + y) * (tileHeight / 2) - z * (tileHeight * 2); // Account for Z-level spacing
+      const isoY = (x + y) * (tileHeight / 2) - z * zSpacing;
       
       // Snap to pixel boundaries for crisp rendering
       const centerX = Math.round(isoX);
@@ -267,18 +271,14 @@ export const useCanvasRendering = (
 
     const tileWidth = 32;
     const tileHeight = 16;
+    const zSpacing = tileHeight;
     const gridRadius = 20; // match grid drawing extent
 
     // Helper to map a height value to a color
     const getColorForHeight = (h: number): string => {
       const t = Math.max(0, Math.min(1, (h - minHeight) / Math.max(maxHeight - minHeight, 1)));
-      // Simple terrain-like gradient
-      if (t < 0.25) return 'rgba(0, 80, 200, 0.35)'; // deep water
-      if (t < 0.35) return 'rgba(0, 120, 220, 0.35)'; // shallow water
-      if (t < 0.45) return 'rgba(194, 178, 128, 0.35)'; // sand
-      if (t < 0.75) return 'rgba(34, 139, 34, 0.35)'; // grass
-      if (t < 0.9) return 'rgba(120, 120, 120, 0.35)'; // rock
-      return 'rgba(255, 255, 255, 0.5)'; // snow
+      const v = Math.round(t * 255);
+      return `rgba(${v}, ${v}, ${v}, 0.5)`;
     };
 
     ctx.save();
@@ -292,7 +292,7 @@ export const useCanvasRendering = (
         const h = data[mapY][mapX];
 
         const isoX = (gx - gy) * (tileWidth / 2);
-        const isoY = (gx + gy) * (tileHeight / 2) - state.currentZLevel * (tileHeight * 2);
+        const isoY = (gx + gy) * (tileHeight / 2) - state.currentZLevel * zSpacing;
 
         const centerX = Math.round(isoX);
         const centerY = Math.round(isoY);
@@ -345,20 +345,29 @@ export const useCanvasRendering = (
       // visibleBlocks.some(vb => vb.id === block.id)
     // );
     
-    // Sort blocks by depth (z DESC, then y ASC, then x ASC)
+    // Sort blocks by depth so higher Z renders on top
+    // Draw order: z ASC (low first), then y ASC, then x ASC
     const sortedBlocks = filteredBlocks.sort((a, b) => {
-      if (a.position.z !== b.position.z) return b.position.z - a.position.z;
+      if (a.position.z !== b.position.z) return a.position.z - b.position.z;
       if (a.position.y !== b.position.y) return a.position.y - b.position.y;
       return a.position.x - b.position.x;
     });
     
-    // Optional: render height map overlay under blocks
-    renderHeightMapOverlay(ctx);
+    // Height map overlay intentionally disabled (never show overlay)
 
     // Render blocks
     let drawCalls = 0;
     sortedBlocks.forEach(block => {
-      renderBlock(ctx, block, tileSheet);
+      // Shade inactive layers if enabled
+      const shouldShade = (state as any).shadeInactive && block.position.z !== state.currentZLevel;
+      if (shouldShade) {
+        ctx.save();
+        ctx.globalAlpha = 0.4;
+        renderBlock(ctx, block, tileSheet);
+        ctx.restore();
+      } else {
+        renderBlock(ctx, block, tileSheet);
+      }
       drawCalls++;
     });
     
@@ -429,11 +438,12 @@ export const useCanvasRendering = (
     state.blocks.forEach((block) => {
       const { x, y, z } = block.position;
       const tileWidth = 32; // Actual tile width from tile sheet
-      const tileHeight = 16; // Half height for isometric projection
+    const tileHeight = 16; // Half height for isometric projection
+    const zSpacing = tileHeight;
       
       // Calculate isometric position (matching the coordinate system)
       const isoX = (x - y) * (tileWidth / 2);
-      const isoY = (x + y) * (tileHeight / 2) - z * (tileHeight * 2); // Account for Z-level spacing
+      const isoY = (x + y) * (tileHeight / 2) - z * zSpacing;
       
       // Snap to pixel boundaries for crisp rendering
       const pixelPerfectX = Math.round(isoX);

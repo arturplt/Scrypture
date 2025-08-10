@@ -145,6 +145,9 @@ android-project/
 capacitor.config.ts
 Docs/isometric-tilemap-reference.md
 
+# Reference folder (art assets and images)
+Reference/
+
 # Task files
 # tasks.json
 # tasks/ 

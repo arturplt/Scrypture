@@ -24,6 +24,7 @@ export interface SanctuaryState {
   showLevelMenu: boolean;
   showZLevelManager: boolean;
   showHeightMap: boolean;
+  showHeightMapManager: boolean;
   showAtlasEditor: boolean;
   showResetConfirmation: boolean;
   showRenameDialog: boolean;
@@ -38,6 +39,12 @@ export interface SanctuaryState {
   
   // Fill mode state
   fillMode: boolean;
+  // Erase mode state
+  eraseMode: boolean;
+  // Brush settings
+  brushSize: number;
+  // Z-building mode (auto-increment Z after placement)
+  zBuildMode: boolean;
   
   // Collapsible groups state
   collapsedGroups: {
@@ -52,6 +59,12 @@ export interface SanctuaryState {
   // Level management state
   levelNameInput: string;
   expandedCategory: string | null;
+
+  // Defined Z levels (UI buttons persist regardless of blocks)
+  definedZLevels: number[];
+
+  // Rendering: shade/dim inactive Z layers
+  shadeInactive: boolean;
 }
 
 export interface SanctuaryStateActions {
@@ -87,6 +100,8 @@ export interface SanctuaryStateActions {
   setZLevelManagerVisible: (show: boolean) => void;
   toggleHeightMap: () => void;
   setHeightMapVisible: (show: boolean) => void;
+  toggleHeightMapManager: () => void;
+  setHeightMapManagerVisible: (show: boolean) => void;
   toggleAtlasEditor: () => void;
   setAtlasEditorVisible: (show: boolean) => void;
   setShowResetConfirmation: (show: boolean) => void;
@@ -103,6 +118,14 @@ export interface SanctuaryStateActions {
   
   // Fill mode management
   setFillMode: (mode: boolean) => void;
+  // Erase mode management
+  setEraseMode: (mode: boolean) => void;
+  // Brush settings management
+  setBrushSize: (size: number) => void;
+  // Z-building mode management
+  setZBuildMode: (mode: boolean) => void;
+  // Shade inactive Z layers
+  setShadeInactive: (shade: boolean) => void;
   
   // Collapsible groups management
   toggleGroupCollapse: (groupName: keyof SanctuaryState['collapsedGroups']) => void;
@@ -114,6 +137,14 @@ export interface SanctuaryStateActions {
   // Level operations
   setCurrentLevel: (level: Level) => void;
   updateCurrentLevel: (updates: Partial<Level>) => void;
+
+  // Z-level definitions management
+  addDefinedZLevel: (level: number) => void;
+  setDefinedZLevels: (levels: number[]) => void;
+
+  // Undo stack
+  pushUndo: () => void;
+  undo: () => void;
 }
 
 export const useSanctuaryState = (): [SanctuaryState, SanctuaryStateActions] => {
@@ -150,6 +181,7 @@ export const useSanctuaryState = (): [SanctuaryState, SanctuaryStateActions] => 
   const [showLevelMenu, setShowLevelMenu] = useState(false);
   const [showZLevelManager, setShowZLevelManager] = useState(false);
   const [showHeightMap, setShowHeightMap] = useState(false);
+  const [showHeightMapManager, setShowHeightMapManager] = useState(false);
   const [showAtlasEditor, setShowAtlasEditor] = useState(false);
   const [showResetConfirmation, setShowResetConfirmation] = useState(false);
   const [showRenameDialog, setShowRenameDialog] = useState(false);
@@ -161,20 +193,26 @@ export const useSanctuaryState = (): [SanctuaryState, SanctuaryStateActions] => 
   // Height map state
   const [currentHeightMap, setCurrentHeightMap] = useState<any | null>(null);
   const [heightMapConfig, setHeightMapConfig] = useState<any>({
-    width: 32,
-    height: 32,
-    octaves: 4,
-    frequency: 0.1,
+    width: 128,
+    height: 128,
+    octaves: 6,
+    frequency: 0.02,
     amplitude: 1.0,
     persistence: 0.5,
     lacunarity: 2.0,
     minHeight: 0,
-    maxHeight: 100,
-    smoothing: 1.0
+    maxHeight: 255,
+    smoothing: 1.5
   });
   
   // Fill mode state
   const [fillMode, setFillMode] = useState(false);
+  // Erase mode state
+  const [eraseMode, setEraseMode] = useState(false);
+  // Brush settings state
+  const [brushSize, setBrushSize] = useState<number>(1);
+  // Z-building mode
+  const [zBuildMode, setZBuildMode] = useState<boolean>(false);
   
   // Collapsible groups state
   const [collapsedGroups, setCollapsedGroups] = useState<SanctuaryState['collapsedGroups']>({
@@ -189,6 +227,41 @@ export const useSanctuaryState = (): [SanctuaryState, SanctuaryStateActions] => 
   // Level management state
   const [levelNameInput, setLevelNameInput] = useState('');
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
+  // Defined Z levels for UI buttons
+  const [definedZLevels, setDefinedZLevelsState] = useState<number[]>([0, 1, 2]);
+  // Shade inactive layers
+  const [shadeInactive, setShadeInactive] = useState<boolean>(false);
+  // Undo stack snapshots
+  const [undoStack, setUndoStack] = useState<Block[][]>([]);
+
+  const cloneBlocks = (arr: Block[]): Block[] => arr.map(b => ({
+    ...b,
+    position: { ...b.position },
+    sprite: { ...b.sprite },
+    properties: { ...b.properties }
+  }));
+
+  const pushUndo = useCallback(() => {
+    setUndoStack(prev => {
+      const next = [...prev, cloneBlocks(blocks)];
+      if (next.length > 50) next.shift();
+      return next;
+    });
+  }, [blocks]);
+
+  const undo = useCallback(() => {
+    setUndoStack(prev => {
+      if (prev.length === 0) return prev;
+      const next = [...prev];
+      const last = next.pop();
+      if (last) {
+        setBlocks(last);
+        setSelectedBlock(null);
+        setHoverCell(null);
+      }
+      return next;
+    });
+  }, []);
   
   // Block management actions
   const addBlock = useCallback((block: Block) => {
@@ -275,6 +348,14 @@ export const useSanctuaryState = (): [SanctuaryState, SanctuaryStateActions] => 
     setShowHeightMap(show);
   }, []);
   
+  const toggleHeightMapManager = useCallback(() => {
+    setShowHeightMapManager(prev => !prev);
+  }, []);
+  
+  const setHeightMapManagerVisible = useCallback((show: boolean) => {
+    setShowHeightMapManager(show);
+  }, []);
+  
   const toggleAtlasEditor = useCallback(() => {
     setShowAtlasEditor(prev => !prev);
   }, []);
@@ -294,6 +375,15 @@ export const useSanctuaryState = (): [SanctuaryState, SanctuaryStateActions] => 
   // Z-level management
   const removeZLevelFilter = useCallback((level: number) => {
     setZLevelFilter(prev => prev.filter(l => l !== level));
+  }, []);
+
+  // Defined Z levels actions
+  const addDefinedZLevel = useCallback((level: number) => {
+    setDefinedZLevelsState(prev => {
+      if (prev.includes(level)) return prev;
+      const next = [...prev, level].sort((a, b) => a - b);
+      return next;
+    });
   }, []);
   
   // Level operations
@@ -317,6 +407,7 @@ export const useSanctuaryState = (): [SanctuaryState, SanctuaryStateActions] => 
     showLevelMenu,
     showZLevelManager,
     showHeightMap,
+    showHeightMapManager,
     showAtlasEditor,
     showResetConfirmation,
     showRenameDialog,
@@ -325,9 +416,14 @@ export const useSanctuaryState = (): [SanctuaryState, SanctuaryStateActions] => 
     currentHeightMap,
     heightMapConfig,
     fillMode,
+    eraseMode,
+    brushSize,
+    zBuildMode,
     collapsedGroups,
     levelNameInput,
-    expandedCategory
+    expandedCategory,
+    definedZLevels,
+    shadeInactive
   };
   
   // Compose actions object
@@ -357,6 +453,8 @@ export const useSanctuaryState = (): [SanctuaryState, SanctuaryStateActions] => 
     setZLevelManagerVisible,
     toggleHeightMap,
     setHeightMapVisible,
+    toggleHeightMapManager,
+    setHeightMapManagerVisible,
     toggleAtlasEditor,
     setAtlasEditorVisible,
     setShowResetConfirmation,
@@ -367,11 +465,19 @@ export const useSanctuaryState = (): [SanctuaryState, SanctuaryStateActions] => 
     setCurrentHeightMap,
     setHeightMapConfig,
     setFillMode,
+    setEraseMode,
+    setBrushSize,
+    setZBuildMode,
+    setShadeInactive,
     toggleGroupCollapse,
     setLevelNameInput,
     setExpandedCategory,
     setCurrentLevel,
-    updateCurrentLevel
+    updateCurrentLevel,
+    addDefinedZLevel,
+    setDefinedZLevels: setDefinedZLevelsState,
+    pushUndo,
+    undo
   };
   
   return [state, actions];

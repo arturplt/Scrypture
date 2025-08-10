@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styles from './Sanctuary.module.css';
 import { ISOMETRIC_TILES, TILE_SHEET_CONFIG, IsometricTileData } from '../data/isometric-tiles';
 import AtlasEditor from './AtlasEditor';
+import { HeightMapGenerator } from './Sanctuary/systems/HeightMapSystem';
 import { useSanctuary } from './Sanctuary/hooks';
 
 // ============================================================================
@@ -64,22 +65,7 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
     transition: 'background-color 0.2s'
   };
 
-  // Block categories for the UI
-  const blockCategories = [
-    { type: 'cube', name: 'Cubes' },
-    { type: 'flat', name: 'Flats' },
-    { type: 'ramp', name: 'Ramps' },
-    { type: 'corner', name: 'Corners' },
-    { type: 'staircase', name: 'Stairs' },
-    { type: 'pillar', name: 'Pillars' },
-    { type: 'water', name: 'Water' },
-  ];
-
-  const palettes = [
-    { name: 'green', color: '#4CAF50' },
-    { name: 'gray', color: '#9E9E9E' },
-    { name: 'orange', color: '#FF9800' },
-  ];
+  // Minimalistic block selector uses fixed sections without additional categories/palettes constants
 
   // Load tile sheet on mount
   useEffect(() => {
@@ -376,14 +362,23 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
     actions.sanctuary.setCurrentZLevel(level);
   };
 
+  // Add a new Z level by adding a persistent button and switching to it
+  const addNewZLevel = () => {
+    const maxZ = availableZLevels.length ? availableZLevels[availableZLevels.length - 1] : 0;
+    const nextZ = Math.max(sanctuary.currentZLevel, maxZ) + 1;
+    if (actions.sanctuary.addDefinedZLevel) {
+      actions.sanctuary.addDefinedZLevel(nextZ);
+    }
+    actions.sanctuary.setCurrentZLevel(nextZ);
+    console.log(`Added Z-level ${nextZ}`);
+  };
+
   // Multi-Z presets helpers
   const availableZLevels = React.useMemo(() => {
-    const set = new Set<number>();
-    sanctuary.blocks.forEach(b => set.add(b.position.z));
-    // Always include 0,1,2 as common defaults even if no blocks yet
-    [0, 1, 2].forEach(z => set.add(z));
+    const set = new Set<number>(sanctuary.definedZLevels || []);
+    set.add(sanctuary.currentZLevel);
     return Array.from(set).sort((a, b) => a - b);
-  }, [sanctuary.blocks]);
+  }, [sanctuary.definedZLevels, sanctuary.currentZLevel]);
 
   const applyZFilter = (levels: number[] | 'all') => {
     if (levels === 'all' || levels.length === 0) {
@@ -435,26 +430,21 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
   const generateProceduralMap = (size: 'small' | 'medium' | 'large') => {
     // Basic preset configs
     const presets = {
-      small: { width: 32, height: 32, octaves: 4, frequency: 0.08, amplitude: 1.0, persistence: 0.5, lacunarity: 2.0, minHeight: 0, maxHeight: 100, smoothing: 1.0 },
-      medium: { width: 64, height: 64, octaves: 5, frequency: 0.06, amplitude: 1.0, persistence: 0.5, lacunarity: 2.0, minHeight: 0, maxHeight: 100, smoothing: 1.5 },
-      large: { width: 128, height: 128, octaves: 6, frequency: 0.045, amplitude: 1.0, persistence: 0.5, lacunarity: 2.1, minHeight: 0, maxHeight: 100, smoothing: 2.0 }
+      small: { width: 64, height: 64, octaves: 5, frequency: 0.03, amplitude: 1.0, persistence: 0.5, lacunarity: 2.0, minHeight: 0, maxHeight: 255, smoothing: 1.2 },
+      medium: { width: 96, height: 96, octaves: 6, frequency: 0.025, amplitude: 1.0, persistence: 0.5, lacunarity: 2.0, minHeight: 0, maxHeight: 255, smoothing: 1.5 },
+      large: { width: 128, height: 128, octaves: 7, frequency: 0.02, amplitude: 1.0, persistence: 0.5, lacunarity: 2.1, minHeight: 0, maxHeight: 255, smoothing: 1.8 }
     } as const;
 
     const cfg = presets[size];
     actions.sanctuary.setHeightMapConfig(cfg as any);
 
-    // Generate with in-app system if available via MapGenerator (fallback: simple client-side generator)
     try {
-      // Lazy import to avoid bundling issues if types move
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { HeightMapGenerator } = require('./Sanctuary/systems/HeightMapSystem');
       const gen = new HeightMapGenerator();
       const map = gen.generateHeightMap(cfg as any);
       actions.sanctuary.setCurrentHeightMap(map);
-      if (!sanctuary.showHeightMap) actions.sanctuary.setHeightMapVisible(true);
+      // Do not auto-show overlay
     } catch (e) {
-      console.warn('HeightMapSystem dynamic import failed, using fallback', e);
-      // Minimal fallback height map (flat)
+      console.warn('HeightMap generation failed, using fallback', e);
       const data: number[][] = Array.from({ length: (cfg as any).height }, () => Array((cfg as any).width).fill(0));
       actions.sanctuary.setCurrentHeightMap({
         width: (cfg as any).width,
@@ -464,7 +454,7 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
         maxHeight: (cfg as any).maxHeight,
         seed: Math.floor(Math.random() * 1e6)
       });
-      if (!sanctuary.showHeightMap) actions.sanctuary.setHeightMapVisible(true);
+      // Do not auto-show overlay
     }
   };
 
@@ -478,6 +468,110 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
     a.download = `${sanctuary.currentLevel.name.replace(/\s+/g, '_')}_heightmap.json`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  // Regenerate height map from current config
+  const regenerateHeightMapFromConfig = () => {
+    const cfg = sanctuary.heightMapConfig as any;
+    try {
+      const gen = new HeightMapGenerator();
+      const map = gen.generateHeightMap(cfg);
+      actions.sanctuary.setCurrentHeightMap(map);
+      // Do not auto-show overlay
+    } catch (e) {
+      console.warn('HeightMap regeneration failed', e);
+    }
+  };
+
+  // Generate terrain blocks from current height map with Z and palette rules
+  const generateTerrainFromHeightMap = async (size: number, name: string) => {
+
+    // Ensure height map matches requested size
+    if ((sanctuary.heightMapConfig as any).width !== size || (sanctuary.heightMapConfig as any).height !== size) {
+      actions.sanctuary.setHeightMapConfig({ ...sanctuary.heightMapConfig, width: size, height: size } as any);
+      try {
+        const gen = new HeightMapGenerator();
+        const newMap = gen.generateHeightMap({ ...(sanctuary.heightMapConfig as any), width: size, height: size } as any);
+        actions.sanctuary.setCurrentHeightMap(newMap);
+      } catch {}
+    }
+
+    const hm = sanctuary.currentHeightMap;
+    if (!hm) return;
+
+    // Helper: pick a representative tile by palette or water type
+    const pickWater = () => ISOMETRIC_TILES.find(t => t.type === 'water') || ISOMETRIC_TILES[0];
+    const pickByPalette = (palette: 'orange' | 'green' | 'gray') =>
+      ISOMETRIC_TILES.find(t => t.palette === palette && t.type !== 'water') || ISOMETRIC_TILES.find(t => t.palette === palette) || ISOMETRIC_TILES[0];
+
+    const waterTile = pickWater();
+    const orangeTile = pickByPalette('orange');
+    const greenTile = pickByPalette('green');
+    const grayTile = pickByPalette('gray');
+
+    const minH: number = hm.minHeight ?? 0;
+    const maxH: number = hm.maxHeight ?? 255;
+    const range = Math.max(1, maxH - minH);
+
+    const blocks: any[] = [];
+    for (let y = 0; y < hm.height; y++) {
+      for (let x = 0; x < hm.width; x++) {
+        const h = hm.data[y][x] as number;
+        const t = Math.max(0, Math.min(1, (h - minH) / range));
+        const zLevel = Math.max(0, Math.min(10, Math.round(t * 10)));
+
+        // Choose tile per spec
+        let tile: IsometricTileData;
+        if (zLevel === 0) {
+          tile = waterTile;
+        } else if (zLevel >= 1 && zLevel <= 3) {
+          tile = orangeTile;
+        } else if (zLevel >= 4 && zLevel <= 7) {
+          tile = greenTile;
+        } else {
+          tile = grayTile;
+        }
+
+        const newBlock = {
+          id: `block_${x}_${y}_${zLevel}_${Math.random().toString(36).slice(2, 8)}`,
+          type: tile.type,
+          position: { x, y, z: zLevel },
+          sprite: {
+            sourceX: tile.sourceX,
+            sourceY: tile.sourceY,
+            width: tile.width,
+            height: tile.height,
+            sheetPath: TILE_SHEET_CONFIG.imagePath
+          },
+          rotation: 0 as 0,
+          palette: (tile as any).palette || 'green',
+          properties: {
+            walkable: true,
+            climbable: false,
+            interactable: false,
+            destructible: true
+          }
+        };
+        blocks.push(newBlock);
+      }
+    }
+
+    // Set blocks first, then create the level snapshot so it captures the terrain
+    actions.sanctuary.setBlocks(blocks);
+    await actions.levelManagement.createNewLevel(name, `Generated ${size}x${size} terrain from height map`);
+    // Immediately save with current blocks
+    await actions.levelManagement.saveLevel({
+      ...sanctuary.currentLevel,
+      name,
+      blocks,
+      camera: sanctuary.camera,
+      modifiedAt: new Date()
+    } as any);
+    // Ensure Z buttons cover 0..10
+    if ((actions.sanctuary as any).setDefinedZLevels) {
+      (actions.sanctuary as any).setDefinedZLevels(Array.from({ length: 11 }, (_, i) => i));
+    }
+    actions.sanctuary.setCurrentZLevel(5);
   };
 
   // Test coordinate conversion
@@ -509,6 +603,67 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
     const diffY = Math.abs(centerY - screenPos.y);
     console.log('Coordinate conversion accuracy:', { diffX, diffY, isAccurate: diffX < 1 && diffY < 1 });
   };
+
+  // Height map preview canvas ref
+  const heightMapPreviewRef = useRef<HTMLCanvasElement>(null);
+  // Terrain generation modal state
+  const [showTerrainModal, setShowTerrainModal] = useState(false);
+  const [terrainSize, setTerrainSize] = useState<number>(128);
+  const [terrainName, setTerrainName] = useState<string>('Generated Terrain');
+
+  const openTerrainModal = () => {
+    setTerrainSize(((sanctuary.heightMapConfig as any)?.width as number) || 128);
+    setTerrainName(sanctuary.currentLevel.name || 'Generated Terrain');
+    setShowTerrainModal(true);
+  };
+
+  // Draw height map preview in manager modal
+  useEffect(() => {
+    if (!sanctuary.showHeightMapManager) return;
+    const hm = sanctuary.currentHeightMap;
+    const canvas = heightMapPreviewRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    // Clear
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (!hm) return;
+
+    const width: number = hm.width;
+    const height: number = hm.height;
+    // Fit into 256x256 while preserving aspect
+    const maxSize = 256;
+    const scale = Math.max(1, Math.floor(Math.min(maxSize / width, maxSize / height)));
+    const drawWidth = width * scale;
+    const drawHeight = height * scale;
+    canvas.width = drawWidth;
+    canvas.height = drawHeight;
+
+    const minH: number = hm.minHeight ?? 0;
+    const maxH: number = hm.maxHeight ?? 100;
+    const getColorForHeight = (h: number): string => {
+      const t = Math.max(0, Math.min(1, (h - minH) / Math.max(maxH - minH, 1)));
+      const v = Math.round(t * 255);
+      return `rgb(${v},${v},${v})`;
+    };
+
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const h = hm.data[y][x] as number;
+        ctx.fillStyle = getColorForHeight(h);
+        ctx.fillRect(x * scale, y * scale, scale, scale);
+      }
+    }
+  }, [sanctuary.showHeightMapManager, sanctuary.currentHeightMap]);
+
+  // Live-regenerate height map when sliders change (debounced)
+  useEffect(() => {
+    if (!sanctuary.showHeightMapManager) return;
+    const handle = setTimeout(() => {
+      regenerateHeightMapFromConfig();
+    }, 200);
+    return () => clearTimeout(handle);
+  }, [sanctuary.showHeightMapManager, sanctuary.heightMapConfig]);
 
   // ============================================================================
   // RENDER
@@ -645,6 +800,44 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
                 <button 
                   style={{
                     ...unifiedButtonStyle,
+                    background: sanctuary.eraseMode ? 'var(--color-error)' : 'var(--color-accent-beaver)'
+                  }}
+                  onClick={() => actions.sanctuary.setEraseMode(!sanctuary.eraseMode)}
+                  title="Erase mode: click to remove blocks"
+                >
+                  {sanctuary.eraseMode ? 'ERASE: ON' : 'ERASE'}
+                </button>
+                <button 
+                  style={{
+                    ...unifiedButtonStyle,
+                    background: sanctuary.zBuildMode ? 'var(--color-accent-gold)' : 'var(--color-accent-beaver)'
+                  }}
+                  onClick={() => actions.sanctuary.setZBuildMode(!sanctuary.zBuildMode)}
+                  title="Z-Build mode: after each placement, active Z goes up by 1"
+                >
+                  {sanctuary.zBuildMode ? 'Z BUILD: ON' : 'Z BUILD'}
+                </button>
+                {/* Brush sizes */}
+                <div style={{ display: 'flex', gap: 4 }}>
+                  {[1,3,5,7].map(size => (
+                    <button
+                      key={size}
+                      style={{
+                        ...unifiedButtonStyle,
+                        background: sanctuary.brushSize === size ? 'var(--color-accent-gold)' : 'var(--color-accent-beaver)',
+                        fontSize: 10,
+                        padding: '2px 6px'
+                      }}
+                      onClick={() => actions.sanctuary.setBrushSize(size)}
+                      title={`Circle brush size ${size}`}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+                <button 
+                  style={{
+                    ...unifiedButtonStyle,
                     background: 'var(--color-accent-beaver)'
                   }}
                   onClick={fillVisibleArea}
@@ -688,6 +881,13 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
                 </button>
                 <button 
                   style={unifiedButtonStyle}
+                  onClick={() => actions.sanctuary.undo()}
+                  title="Undo (Ctrl+Z)"
+                >
+                  UNDO
+                </button>
+                <button 
+                  style={unifiedButtonStyle}
                   onClick={() => actions.sanctuary.toggleGrid()}
                   title="Show/Hide Grid"
                 >
@@ -699,18 +899,6 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
                   title="Performance Monitor"
                 >
                   STATS
-                </button>
-                <button 
-                  style={{
-                    ...unifiedButtonStyle,
-                    background: 'var(--color-accent-gold)',
-                    fontSize: '10px',
-                    padding: '2px 4px'
-                  }}
-                  onClick={testCoordinateConversion}
-                  title="Test Coordinate Conversion"
-                >
-                  TEST
                 </button>
                 <div style={{ display: 'flex', gap: '4px', marginTop: '4px' }}>
                   <button 
@@ -757,24 +945,10 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
               <div className={styles.buttonGroupContent}>
                 <button 
                   style={unifiedButtonStyle}
-                  onClick={() => generateProceduralMap('small')}
-                  title="Generate Island"
+                  onClick={() => actions.sanctuary.toggleHeightMapManager()}
+                  title="Height Map Manager"
                 >
-                  GENERATE
-                </button>
-                <button 
-                  style={unifiedButtonStyle}
-                  onClick={() => actions.sanctuary.toggleHeightMap()}
-                  title="Show/Hide Height Map"
-                >
-                  {sanctuary.showHeightMap ? 'HIDE' : 'SHOW'}
-                </button>
-                <button 
-                  style={unifiedButtonStyle}
-                  onClick={exportHeightMap}
-                  title="Export Height Map"
-                >
-                  EXPORT
+                  MANAGER
                 </button>
               </div>
             )}
@@ -795,41 +969,36 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
               <div className={styles.buttonGroupContent}>
                 <button 
                   style={unifiedButtonStyle}
-                  onClick={() => actions.sanctuary.toggleZLevelManager()}
-                  title="Z-Level Manager"
+                  onClick={addNewZLevel}
+                  title="Add new Z level"
                 >
-                  MANAGER
+                  ADD
                 </button>
                 <button 
                   style={{
                     ...unifiedButtonStyle,
-                    background: sanctuary.currentZLevel === 0 ? 'var(--color-accent-gold)' : 'var(--color-accent-beaver)'
+                    background: sanctuary.shadeInactive ? 'var(--color-accent-gold)' : 'var(--color-accent-beaver)'
                   }}
-                  onClick={() => switchToZLevel(0)}
-                  title="Switch to Ground Level (Z=0)"
+                  onClick={() => actions.sanctuary.setShadeInactive(!sanctuary.shadeInactive)}
+                  title="Shade inactive Z levels"
                 >
-                  Z0
+                  SHADE
                 </button>
-                <button 
-                  style={{
-                    ...unifiedButtonStyle,
-                    background: sanctuary.currentZLevel === 1 ? 'var(--color-accent-gold)' : 'var(--color-accent-beaver)'
-                  }}
-                  onClick={() => switchToZLevel(1)}
-                  title="Switch to Level 1 (Z=1)"
-                >
-                  Z1
-                </button>
-                <button 
-                  style={{
-                    ...unifiedButtonStyle,
-                    background: sanctuary.currentZLevel === 2 ? 'var(--color-accent-gold)' : 'var(--color-accent-beaver)'
-                  }}
-                  onClick={() => switchToZLevel(2)}
-                  title="Switch to Level 2 (Z=2)"
-                >
-                  Z2
-                </button>
+                <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                  {availableZLevels.map((z) => (
+                    <button
+                      key={z}
+                      style={{
+                        ...unifiedButtonStyle,
+                        background: sanctuary.currentZLevel === z ? 'var(--color-accent-gold)' : 'var(--color-accent-beaver)'
+                      }}
+                      onClick={() => switchToZLevel(z)}
+                      title={`Switch to Z=${z}`}
+                    >
+                      {`Z${z}`}
+                    </button>
+                  ))}
+                </div>
 
                 {/* Z Filter Presets */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 6 }}>
@@ -981,92 +1150,110 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
         </div>
       )}
 
-      {/* Block Selector */}
+      {/* Block Selector (Minimalistic: right-center, no bg, collapsible sections) */}
       {sanctuary.isBlockMenuOpen && (
-        <div className={styles.blockSelector}>
-          <div className={styles.blockSelectorHeader}>
-            <button 
-              className={styles.closeButton}
+        <div
+          style={{
+            position: 'fixed',
+            right: 8,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 8,
+            background: 'transparent',
+            padding: 0,
+            zIndex: 1000,
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <button
               onClick={() => actions.sanctuary.toggleBlockMenu()}
               title="Close Block Selector"
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: 'inherit',
+                cursor: 'pointer',
+                fontSize: 16,
+              }}
             >
               ✕
             </button>
           </div>
-          
-          <div className={styles.blockCategories}>
-            {blockCategories.map(category => {
-              const isExpanded = sanctuary.expandedCategory === category.type;
-              
+
+          {(() => {
+            const sections = [
+              { id: 'water', title: 'Water', tiles: ISOMETRIC_TILES.filter(t => t.type === 'water') },
+              { id: 'gray', title: 'Grey', tiles: ISOMETRIC_TILES.filter(t => t.palette === 'gray') },
+              { id: 'green', title: 'Green', tiles: ISOMETRIC_TILES.filter(t => t.palette === 'green') },
+              { id: 'orange', title: 'Orange', tiles: ISOMETRIC_TILES.filter(t => t.palette === 'orange') },
+            ];
+
+            return sections.map(section => {
+              const isExpanded = sanctuary.expandedCategory === section.id;
+              const columns = Math.ceil(section.tiles.length / 2) || 1;
               return (
-                <div key={category.type} className={styles.blockCategory}>
-                  <div 
-                    className={styles.categoryHeader}
-                    onClick={() => actions.sanctuary.setExpandedCategory(isExpanded ? null : category.type)}
-                    style={{ cursor: 'pointer' }}
+                <div key={section.id} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <button
+                    onClick={() => actions.sanctuary.setExpandedCategory(isExpanded ? null : section.id)}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      padding: 0,
+                      margin: 0,
+                      color: 'inherit',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      fontWeight: 700,
+                      fontSize: 12,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                    }}
+                    title={section.title}
                   >
-                    <h4>{category.name}</h4>
-                    <span className={styles.expandIcon}>{isExpanded ? '▼' : '▶'}</span>
-                  </div>
-                  
+                    <span>{isExpanded ? '▼' : '▶'}</span>
+                    <span>{section.title}</span>
+                  </button>
+
                   {isExpanded && (
-                    <div className={styles.expandedContent}>
-                      {category.type === 'water' ? (
-                        // Special rendering for water category
-                        <div className={styles.tileGrid}>
-                          {ISOMETRIC_TILES.filter(tile => tile.type === 'water').map(tile => (
-                            <button
-                              key={tile.id}
-                              className={`${styles.tileButton} ${sanctuary.selectedTile?.id === tile.id ? styles.active : ''}`}
-                              onClick={() => actions.sanctuary.setSelectedTile(tile)}
-                              title={`${tile.name} (water) - ${tile.sourceX},${tile.sourceY}`}
-                            >
-                              <TilePreview tile={tile} size={32} />
-                            </button>
-                          ))}
-                        </div>
-                      ) : (
-                        // Regular rendering for other categories
-                        <div className={styles.paletteGrid}>
-                          {palettes.map(palette => {
-                            const tiles = ISOMETRIC_TILES.filter(tile => 
-                              tile.type === category.type && tile.palette === palette.name
-                            );
-                            
-                            if (tiles.length === 0) return null;
-                            
-                            return (
-                              <div key={palette.name} className={styles.paletteSection}>
-                                <div className={styles.paletteHeader}>
-                                  <div 
-                                    className={styles.paletteButton}
-                                    style={{ backgroundColor: palette.color }}
-                                  />
-                                </div>
-                                
-                                <div className={styles.tileGrid}>
-                                  {tiles.map(tile => (
-                                    <button
-                                      key={tile.id}
-                                      className={`${styles.tileButton} ${sanctuary.selectedTile?.id === tile.id ? styles.active : ''}`}
-                                      onClick={() => actions.sanctuary.setSelectedTile(tile)}
-                                      title={`${tile.name} (${tile.palette}) - ${tile.sourceX},${tile.sourceY}`}
-                                    >
-                                      <TilePreview tile={tile} size={32} />
-                                    </button>
-                                  ))}
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
+                    <div
+                      style={{
+                        display: 'grid',
+                        gridAutoFlow: 'column',
+                        gridTemplateRows: 'repeat(2, auto)',
+                        gridTemplateColumns: `repeat(${columns}, auto)`,
+                        gap: 4,
+                      }}
+                    >
+                      {section.tiles.map(tile => (
+                        <button
+                          key={tile.id}
+                          onClick={() => actions.sanctuary.setSelectedTile(tile)}
+                          title={tile.name}
+                          style={{
+                            background: 'transparent',
+                            border: sanctuary.selectedTile?.id === tile.id ? '2px solid var(--color-accent-gold)' : '1px solid transparent',
+                            padding: 0,
+                            margin: 0,
+                            width: 34,
+                            height: 34,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <TilePreview tile={tile} size={30} />
+                        </button>
+                      ))}
                     </div>
                   )}
                 </div>
               );
-            })}
-          </div>
+            });
+          })()}
         </div>
       )}
 
@@ -1163,6 +1350,185 @@ const Sanctuary: React.FC<SanctuaryProps> = React.memo(({ className, onExit }) =
       {(!canvas.isLoaded || !canvas.tileSheetLoaded) && (
         <div className={styles.loadingOverlay}>
           {!canvas.isLoaded ? 'Loading Optimized Sanctuary...' : 'Loading Tile Sheet...'}
+        </div>
+      )}
+
+      {/* Height Map Manager Modal */}
+      {sanctuary.showHeightMapManager && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'rgba(0,0,0,0.2)',
+            zIndex: 1200,
+          }}
+        >
+          <div
+            style={{
+              background: 'var(--color-surface, #1e1e1e)',
+              color: 'var(--color-text, #fff)',
+              borderRadius: 8,
+              padding: 12,
+              minWidth: 280,
+              maxWidth: 360,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 8,
+              boxShadow: '0 4px 16px rgba(0,0,0,0.25)'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <h4 style={{ margin: 0, fontSize: 14 }}>Height Map Manager</h4>
+              <button onClick={() => actions.sanctuary.toggleHeightMapManager()} style={{ background: 'transparent', border: 'none', color: 'inherit', cursor: 'pointer' }}>✕</button>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+              <canvas
+                ref={heightMapPreviewRef}
+                style={{
+                  width: 256,
+                  height: 256,
+                  imageRendering: 'pixelated' as const,
+                  borderRadius: 4,
+                  background: '#000'
+                }}
+              />
+              {/* Controls */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr auto', gap: 6, width: '100%' }}>
+                <label style={{ fontSize: 11, opacity: 0.9 }}>Octaves</label>
+                <input
+                  type="range"
+                  min={1}
+                  max={10}
+                  step={1}
+                  value={sanctuary.heightMapConfig.octaves}
+                  onChange={(e) => actions.sanctuary.setHeightMapConfig({ ...sanctuary.heightMapConfig, octaves: parseInt(e.target.value, 10) })}
+                  className={styles.uiSlider}
+                />
+                <span style={{ fontSize: 11 }}>{sanctuary.heightMapConfig.octaves}</span>
+
+                <label style={{ fontSize: 11, opacity: 0.9 }}>Frequency</label>
+                <input
+                  type="range"
+                  min={0.005}
+                  max={0.08}
+                  step={0.001}
+                  value={sanctuary.heightMapConfig.frequency}
+                  onChange={(e) => actions.sanctuary.setHeightMapConfig({ ...sanctuary.heightMapConfig, frequency: parseFloat(e.target.value) })}
+                  className={styles.uiSlider}
+                />
+                <span style={{ fontSize: 11 }}>{sanctuary.heightMapConfig.frequency.toFixed(3)}</span>
+
+                <label style={{ fontSize: 11, opacity: 0.9 }}>Persistence</label>
+                <input
+                  type="range"
+                  min={0.3}
+                  max={0.9}
+                  step={0.05}
+                  value={sanctuary.heightMapConfig.persistence}
+                  onChange={(e) => actions.sanctuary.setHeightMapConfig({ ...sanctuary.heightMapConfig, persistence: parseFloat(e.target.value) })}
+                  className={styles.uiSlider}
+                />
+                <span style={{ fontSize: 11 }}>{sanctuary.heightMapConfig.persistence.toFixed(2)}</span>
+
+                <label style={{ fontSize: 11, opacity: 0.9 }}>Lacunarity</label>
+                <input
+                  type="range"
+                  min={1.5}
+                  max={3}
+                  step={0.1}
+                  value={sanctuary.heightMapConfig.lacunarity}
+                  onChange={(e) => actions.sanctuary.setHeightMapConfig({ ...sanctuary.heightMapConfig, lacunarity: parseFloat(e.target.value) })}
+                  className={styles.uiSlider}
+                />
+                <span style={{ fontSize: 11 }}>{sanctuary.heightMapConfig.lacunarity.toFixed(1)}</span>
+
+                <label style={{ fontSize: 11, opacity: 0.9 }}>Smoothing</label>
+                <input
+                  type="range"
+                  min={0}
+                  max={3}
+                  step={0.1}
+                  value={sanctuary.heightMapConfig.smoothing}
+                  onChange={(e) => actions.sanctuary.setHeightMapConfig({ ...sanctuary.heightMapConfig, smoothing: parseFloat(e.target.value) })}
+                  className={styles.uiSlider}
+                />
+                <span style={{ fontSize: 11 }}>{sanctuary.heightMapConfig.smoothing.toFixed(1)}</span>
+              </div>
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'center' }}>
+                <button
+                  style={unifiedButtonStyle}
+                  onClick={() => {
+                    const sz = (sanctuary.heightMapConfig as any)?.width || 128;
+                    const nm = sanctuary.currentLevel.name || 'Generated Terrain';
+                    generateTerrainFromHeightMap(sz, nm);
+                  }}
+                >
+                  Generate Terrain
+                </button>
+                <button style={unifiedButtonStyle} onClick={openTerrainModal}>
+                  Regen
+                </button>
+                <button style={unifiedButtonStyle} onClick={exportHeightMap}>
+                  Export
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Generate Terrain Modal */}
+      {sanctuary.showHeightMapManager && showTerrainModal && (
+        <div
+          style={{
+            position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'rgba(0,0,0,0.25)', zIndex: 1300
+          }}
+        >
+          <div
+            style={{
+              background: 'var(--color-surface, #1e1e1e)', color: 'var(--color-text, #fff)',
+              borderRadius: 8, padding: 12, width: 300, boxShadow: '0 4px 16px rgba(0,0,0,0.25)'
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h4 style={{ margin: 0, fontSize: 14 }}>Generate Terrain</h4>
+              <button onClick={() => setShowTerrainModal(false)} style={{ background: 'transparent', border: 'none', color: 'inherit', cursor: 'pointer' }}>✕</button>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr auto', gap: 8, marginTop: 8 }}>
+              <label style={{ fontSize: 11 }}>Size</label>
+              <input
+                type="range" min={32} max={256} step={32}
+                value={terrainSize}
+                onChange={(e) => setTerrainSize(Math.max(32, Math.min(256, parseInt(e.target.value, 10) || 128)))}
+                className={styles.uiSlider}
+              />
+              <span style={{ fontSize: 11 }}>{terrainSize}x{terrainSize}</span>
+
+              <label style={{ fontSize: 11 }}>Name</label>
+              <input
+                type="text"
+                value={terrainName}
+                onChange={(e) => setTerrainName(e.target.value.slice(0, 40))}
+                style={{ gridColumn: 'span 2', background: '#111', color: '#fff', border: '1px solid #444', borderRadius: 4, padding: '4px 6px' }}
+                maxLength={40}
+                placeholder="Level name"
+              />
+            </div>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 10 }}>
+              <button style={unifiedButtonStyle} onClick={() => setShowTerrainModal(false)}>Cancel</button>
+              <button
+                style={{ ...unifiedButtonStyle, background: 'var(--color-accent-gold)' }}
+                onClick={async () => { await generateTerrainFromHeightMap(terrainSize, terrainName || 'Generated Terrain'); setShowTerrainModal(false); }}
+              >
+                Generate
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

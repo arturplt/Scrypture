@@ -97,6 +97,10 @@ export const useSanctuary = (): [SanctuaryHookState, SanctuaryHookActions] => {
     sanctuaryActions.setCurrentZLevel(0);
     sanctuaryActions.setZLevelFilter([]);
     sanctuaryActions.setFillMode(false);
+    sanctuaryActions.setZBuildMode(false);
+    if ((sanctuaryActions as any).setDefinedZLevels) {
+      (sanctuaryActions as any).setDefinedZLevels([0, 1, 2]);
+    }
     
     // Reset UI state
     sanctuaryActions.setInstructionsVisible(false);

@@ -45,6 +45,8 @@ export const useInputHandling = (
   const isDragging = useRef(false);
   const isPanning = useRef(false);
   const lastMousePosition = useRef<{ x: number; y: number } | null>(null);
+  const lastPaintCell = useRef<{ x: number; y: number; z: number } | null>(null);
+  const didPlaceDuringStroke = useRef<boolean>(false);
   const keyStates = useRef<{ [key: string]: boolean }>({});
   const touchStartPosition = useRef<{ x: number; y: number } | null>(null);
 
@@ -59,46 +61,90 @@ export const useInputHandling = (
       event.preventDefault();
       return;
     }
+
+    // Middle click: select Z level under cursor based on blocks at grid cell
+    if (event.button === 1) {
+      event.preventDefault();
+      const gridPos = canvasActions.screenToGrid(event.clientX, event.clientY);
+      stateActions.setHoverCell(gridPos);
+      const blocksAtCell = state.blocks.filter(b => b.position.x === gridPos.x && b.position.y === gridPos.y);
+      if (blocksAtCell.length > 0) {
+        const zAtCursor = Math.max(...blocksAtCell.map(b => b.position.z));
+        if ((stateActions as any).addDefinedZLevel) {
+          (stateActions as any).addDefinedZLevel(zAtCursor);
+        }
+        stateActions.setCurrentZLevel(zAtCursor);
+      }
+      return;
+    }
     
-    // Left click for building/selection
+    // Left click for building/selection/erase (begin paint-drag)
     if (event.button === 0) {
+      isDragging.current = true;
+      didPlaceDuringStroke.current = false;
       // Pass raw screen coordinates to screenToGrid
       const gridPos = canvasActions.screenToGrid(event.clientX, event.clientY);
       stateActions.setHoverCell(gridPos);
       
-      // Place block if tile is selected
-      if (state.selectedTile) {
-        const newBlock = {
-          id: `block_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          type: state.selectedTile.type,
-          position: { x: gridPos.x, y: gridPos.y, z: gridPos.z },
-          sprite: {
-            sourceX: state.selectedTile.sourceX,
-            sourceY: state.selectedTile.sourceY,
-            width: state.selectedTile.width,
-            height: state.selectedTile.height,
-            sheetPath: '/assets/Tilemaps/isometric-sandbox-sheet.png'
-          },
-          rotation: 0 as 0,
-          palette: state.selectedTile.palette || 'green',
-          properties: {
-            walkable: true,
-            climbable: false,
-            interactable: false,
-            destructible: true
+      const paintCircle = (center: {x:number;y:number;z:number}) => {
+        const radius = Math.floor(state.brushSize / 2);
+        for (let dy = -radius; dy <= radius; dy++) {
+          for (let dx = -radius; dx <= radius; dx++) {
+            if (dx*dx + dy*dy <= radius*radius) {
+              const cx = center.x + dx;
+              const cy = center.y + dy;
+              const cz = center.z;
+              if (state.eraseMode) {
+                const block = state.blocks.find(b => b.position.x === cx && b.position.y === cy && b.position.z === cz);
+                if (block) stateActions.removeBlock(block.id);
+              } else if (state.selectedTile) {
+                // Skip if a block already exists at this position to avoid duplicates
+                const exists = state.blocks.some(b => b.position.x === cx && b.position.y === cy && b.position.z === cz);
+                if (!exists) {
+                  const newBlock = {
+                    id: `block_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                    type: state.selectedTile.type,
+                    position: { x: cx, y: cy, z: cz },
+                    sprite: {
+                      sourceX: state.selectedTile.sourceX,
+                      sourceY: state.selectedTile.sourceY,
+                      width: state.selectedTile.width,
+                      height: state.selectedTile.height,
+                      sheetPath: '/assets/Tilemaps/isometric-sandbox-sheet.png'
+                    },
+                    rotation: 0 as 0,
+                    palette: state.selectedTile.palette || 'green',
+                    properties: {
+                      walkable: true,
+                      climbable: false,
+                      interactable: false,
+                      destructible: true
+                    }
+                  };
+                  stateActions.addBlock(newBlock);
+                  didPlaceDuringStroke.current = true;
+                }
+              }
+            }
           }
-        };
-        stateActions.addBlock(newBlock);
-      }
-      
-      // Select block if no tile is selected
-      else {
-        const blockAtPosition = state.blocks.find(block => 
-          block.position.x === gridPos.x && 
-          block.position.y === gridPos.y && 
+        }
+      };
+
+      if (state.eraseMode || state.selectedTile) {
+        // Snapshot before mutating blocks
+        (stateActions as any).pushUndo && (stateActions as any).pushUndo();
+        paintCircle(gridPos);
+        lastPaintCell.current = gridPos;
+        // Z-build mode increment moved to mouse up to avoid spamming during draw
+      } else {
+        // Selection fallback when not drawing/erasing
+        const blockAtPosition = state.blocks.find(block =>
+          block.position.x === gridPos.x &&
+          block.position.y === gridPos.y &&
           block.position.z === gridPos.z
         );
         stateActions.setSelectedBlock(blockAtPosition || null);
+        lastPaintCell.current = gridPos;
       }
     }
   }, [state.selectedTile, state.blocks, stateActions, canvasActions]);
@@ -123,6 +169,64 @@ export const useInputHandling = (
     // Update hover cell - pass raw screen coordinates to screenToGrid
     const gridPos = canvasActions.screenToGrid(event.clientX, event.clientY);
     stateActions.setHoverCell(gridPos);
+
+    // Paint while dragging with left button (draw or erase continuously)
+    if (isDragging.current) {
+      const sameCell =
+        lastPaintCell.current &&
+        lastPaintCell.current.x === gridPos.x &&
+        lastPaintCell.current.y === gridPos.y &&
+        lastPaintCell.current.z === gridPos.z;
+
+      if (!sameCell) {
+        const paintCircle = (center: {x:number;y:number;z:number}) => {
+          const radius = Math.floor(state.brushSize / 2);
+          for (let dy = -radius; dy <= radius; dy++) {
+            for (let dx = -radius; dx <= radius; dx++) {
+              if (dx*dx + dy*dy <= radius*radius) {
+                const cx = center.x + dx;
+                const cy = center.y + dy;
+                const cz = center.z;
+                if (state.eraseMode) {
+                  const block = state.blocks.find(b => b.position.x === cx && b.position.y === cy && b.position.z === cz);
+                  if (block) stateActions.removeBlock(block.id);
+                } else if (state.selectedTile) {
+                  const exists = state.blocks.some(b => b.position.x === cx && b.position.y === cy && b.position.z === cz);
+                  if (!exists) {
+                    const newBlock = {
+                      id: `block_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                      type: state.selectedTile.type,
+                      position: { x: cx, y: cy, z: cz },
+                      sprite: {
+                        sourceX: state.selectedTile.sourceX,
+                        sourceY: state.selectedTile.sourceY,
+                        width: state.selectedTile.width,
+                        height: state.selectedTile.height,
+                        sheetPath: '/assets/Tilemaps/isometric-sandbox-sheet.png'
+                      },
+                      rotation: 0 as 0,
+                      palette: state.selectedTile.palette || 'green',
+                      properties: {
+                        walkable: true,
+                        climbable: false,
+                        interactable: false,
+                        destructible: true
+                      }
+                    };
+                    stateActions.addBlock(newBlock);
+                    didPlaceDuringStroke.current = true;
+                  }
+                }
+              }
+            }
+          }
+        };
+        // Snapshot before mutating blocks
+        (stateActions as any).pushUndo && (stateActions as any).pushUndo();
+        paintCircle(gridPos);
+        lastPaintCell.current = gridPos;
+      }
+    }
     
     // Debug coordinate conversion on mouse move (only when debug is enabled)
     if (state.showPerformance) {
@@ -140,15 +244,27 @@ export const useInputHandling = (
   }, [state.camera, state.showPerformance, state.currentZLevel, stateActions, canvasActions]);
 
   const handleMouseUp = useCallback((_event: React.MouseEvent<HTMLCanvasElement>) => {
+    // Advance Z on click up if zBuildMode was active and we placed at least one block
+    if (state.zBuildMode && didPlaceDuringStroke.current && !state.eraseMode && state.selectedTile) {
+      const nextZ = state.currentZLevel + 1;
+      if ((stateActions as any).addDefinedZLevel) {
+        (stateActions as any).addDefinedZLevel(nextZ);
+      }
+      stateActions.setCurrentZLevel(nextZ);
+    }
     isDragging.current = false;
     isPanning.current = false;
     lastMousePosition.current = null;
-  }, []);
+    lastPaintCell.current = null;
+    didPlaceDuringStroke.current = false;
+  }, [state.zBuildMode, state.eraseMode, state.selectedTile, state.currentZLevel, stateActions]);
 
   const handleMouseLeave = useCallback((_event: React.MouseEvent<HTMLCanvasElement>) => {
     isDragging.current = false;
     isPanning.current = false;
     lastMousePosition.current = null;
+    lastPaintCell.current = null;
+    didPlaceDuringStroke.current = false;
     stateActions.setHoverCell(null);
   }, [stateActions]);
 
@@ -238,6 +354,24 @@ export const useInputHandling = (
         stateActions.setSelectedTile(null);
         stateActions.setSelectedBlock(null);
         break;
+      case 'arrowup': {
+        event.preventDefault();
+        const nextZ = state.currentZLevel + 1;
+        if ((stateActions as any).addDefinedZLevel) {
+          (stateActions as any).addDefinedZLevel(nextZ);
+        }
+        stateActions.setCurrentZLevel(nextZ);
+        break;
+      }
+      case 'arrowdown': {
+        event.preventDefault();
+        const nextZ = state.currentZLevel - 1;
+        if ((stateActions as any).addDefinedZLevel) {
+          (stateActions as any).addDefinedZLevel(nextZ);
+        }
+        stateActions.setCurrentZLevel(nextZ);
+        break;
+      }
       case 'delete':
       case 'backspace':
         if (state.selectedBlock) {
@@ -248,6 +382,12 @@ export const useInputHandling = (
       case 'g':
         if (event.ctrlKey || event.metaKey) {
           stateActions.toggleGrid();
+        }
+        break;
+      case 'z':
+        if (event.ctrlKey || event.metaKey) {
+          event.preventDefault();
+          (stateActions as any).undo && (stateActions as any).undo();
         }
         break;
       case 'p':
@@ -272,7 +412,7 @@ export const useInputHandling = (
         }
         break;
     }
-  }, [state.selectedBlock, state.fillMode, stateActions]);
+  }, [state.selectedBlock, state.fillMode, state.currentZLevel, stateActions]);
 
   const handleKeyUp = useCallback((event: KeyboardEvent) => {
     keyStates.current[event.key.toLowerCase()] = false;

@@ -52,37 +52,70 @@ export class HeightMapGenerator {
       }
     }
 
-    // Generate multi-octave noise
+    // Generate multi-octave noise with domain warping for richer features
     let currentAmplitude = amplitude;
     let currentFrequency = frequency;
-    let maxValue = 0;
 
     for (let octave = 0; octave < octaves; octave++) {
       for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
-          const nx = x * currentFrequency;
-          const ny = y * currentFrequency;
-          const noiseValue = this.noise(nx, ny) * currentAmplitude;
+          // Simple domain warp using two low-frequency noise fields
+          const warpScale = 0.5;
+          const wx = this.noise(x * currentFrequency * 0.3, y * currentFrequency * 0.3) * warpScale;
+          const wy = this.noise((x + 1000) * currentFrequency * 0.3, (y + 1000) * currentFrequency * 0.3) * warpScale;
+          const nx = (x + wx * 10) * currentFrequency;
+          const ny = (y + wy * 10) * currentFrequency;
+          const base = this.noise(nx, ny);
+          // Ridge transform to emphasize mountains
+          const ridge = 1 - Math.abs(base * 2 - 1);
+          // Valley transform (inverted ridge)
+          const valley = Math.abs(base * 2 - 1);
+          // Blend base, ridge, valley
+          const noiseValue = (0.5 * base + 0.35 * ridge + 0.15 * valley) * currentAmplitude;
           data[y][x] += noiseValue;
-          maxValue = Math.max(maxValue, data[y][x]);
         }
       }
       currentAmplitude *= persistence;
       currentFrequency *= lacunarity;
     }
 
-    // Normalize to 0-1 range
-    if (maxValue > 0) {
+    // Compute min/max
+    let minValue = Infinity;
+    let maxValue = -Infinity;
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const v = data[y][x];
+        if (v < minValue) minValue = v;
+        if (v > maxValue) maxValue = v;
+      }
+    }
+
+    // Normalize to 0-1 using min/max
+    const range = Math.max(1e-6, maxValue - minValue);
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        data[y][x] = (data[y][x] - minValue) / range;
+      }
+    }
+
+    // Apply smoothing if specified (assign result)
+    if (smoothing > 0) {
+      const smoothed = this.applyGaussianBlur(data, smoothing);
       for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
-          data[y][x] = data[y][x] / maxValue;
+          data[y][x] = Math.max(0, Math.min(1, smoothed[y][x]));
         }
       }
     }
 
-    // Apply smoothing if specified
-    if (smoothing > 0) {
-      this.applyGaussianBlur(data, smoothing);
+    // Enhance contrast to accent valleys and mountains
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const t = data[y][x];
+        // Curve: emphasize extremes, compress mid
+        const enhanced = Math.pow(t, 1.2) * (1 - Math.pow(1 - t, 1.2)) * 2;
+        data[y][x] = Math.max(0, Math.min(1, enhanced));
+      }
     }
 
     // Scale to desired height range
