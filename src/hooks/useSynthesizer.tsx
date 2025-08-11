@@ -280,9 +280,10 @@ export const useSynthesizer = (): SynthesizerContextType => {
 
 
   // Create distortion curve based on type and amount
-  const createDistortionCurve = useCallback((amount: number, type: 'soft' | 'hard' | 'bitcrusher'): Float32Array => {
+  const createDistortionCurve = useCallback((amount: number, type: 'soft' | 'hard' | 'bitcrusher'): Float32Array<ArrayBuffer> => {
     const samples = 44100;
-    const curve = new Float32Array(samples);
+    const buffer = new ArrayBuffer(samples * Float32Array.BYTES_PER_ELEMENT);
+    const curve = new Float32Array(buffer) as Float32Array<ArrayBuffer>;
     const deg = Math.PI / 180;
 
     for (let i = 0; i < samples; i++) {
@@ -353,7 +354,8 @@ export const useSynthesizer = (): SynthesizerContextType => {
         track.effects.distortion.type
       ) as any;
     } else {
-      const linearCurve = new Float32Array(44100);
+      const linearBuffer = new ArrayBuffer(44100 * Float32Array.BYTES_PER_ELEMENT);
+      const linearCurve = new Float32Array(linearBuffer) as Float32Array<ArrayBuffer>;
       for (let i = 0; i < 44100; i++) {
         const x = (i * 2) / 44100 - 1;
         linearCurve[i] = x;
@@ -650,7 +652,8 @@ export const useSynthesizer = (): SynthesizerContextType => {
         ) as any;
       } else {
         // Disable distortion by setting a linear curve (no distortion)
-        const linearCurve = new Float32Array(44100);
+        const linearBuffer = new ArrayBuffer(44100 * Float32Array.BYTES_PER_ELEMENT);
+        const linearCurve = new Float32Array(linearBuffer) as Float32Array<ArrayBuffer>;
         for (let i = 0; i < 44100; i++) {
           const x = (i * 2) / 44100 - 1;
           linearCurve[i] = x; // Linear response = no distortion
