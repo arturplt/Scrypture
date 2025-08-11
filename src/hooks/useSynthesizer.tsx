@@ -350,12 +350,12 @@ export const useSynthesizer = (): SynthesizerContextType => {
     if (track.effects.distortion.enabled) {
       trackNodes.distortion.curve = createDistortionCurve(track.effects.distortion.amount, track.effects.distortion.type);
     } else {
-      const linearCurve = new Float32Array(44100) as Float32Array;
+      const linearCurve = new Float32Array(44100);
       for (let i = 0; i < 44100; i++) {
         const x = (i * 2) / 44100 - 1;
         linearCurve[i] = x;
       }
-      trackNodes.distortion.curve = linearCurve;
+      trackNodes.distortion.curve = linearCurve as any;
     }
     
     // Update compression
@@ -644,12 +644,12 @@ export const useSynthesizer = (): SynthesizerContextType => {
         distortionRef.current.curve = createDistortionCurve(state.distortionAmount, state.distortionType);
       } else {
         // Disable distortion by setting a linear curve (no distortion)
-        const linearCurve = new Float32Array(44100) as Float32Array;
+        const linearCurve = new Float32Array(44100);
         for (let i = 0; i < 44100; i++) {
           const x = (i * 2) / 44100 - 1;
           linearCurve[i] = x; // Linear response = no distortion
         }
-        distortionRef.current.curve = linearCurve;
+        distortionRef.current.curve = linearCurve as any;
       }
     }
   }, [state.distortionEnabled, state.distortionAmount, state.distortionType, createDistortionCurve]);
