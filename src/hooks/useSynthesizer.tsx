@@ -350,7 +350,7 @@ export const useSynthesizer = (): SynthesizerContextType => {
     if (track.effects.distortion.enabled) {
       trackNodes.distortion.curve = createDistortionCurve(track.effects.distortion.amount, track.effects.distortion.type);
     } else {
-      const linearCurve = new Float32Array(44100);
+      const linearCurve = new Float32Array(44100) as Float32Array;
       for (let i = 0; i < 44100; i++) {
         const x = (i * 2) / 44100 - 1;
         linearCurve[i] = x;
@@ -644,7 +644,7 @@ export const useSynthesizer = (): SynthesizerContextType => {
         distortionRef.current.curve = createDistortionCurve(state.distortionAmount, state.distortionType);
       } else {
         // Disable distortion by setting a linear curve (no distortion)
-        const linearCurve = new Float32Array(44100);
+        const linearCurve = new Float32Array(44100) as Float32Array;
         for (let i = 0; i < 44100; i++) {
           const x = (i * 2) / 44100 - 1;
           linearCurve[i] = x; // Linear response = no distortion
