@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Atlas Preview - UI Element Mapping</title>
+  <style>
+    body {
+      font-family: 'Press Start 2P', monospace;
+      background: #23211a;
+      color: #e8e5d2;
+      margin: 0;
+      padding: 20px;
+    }
+    
+    .preview-container {
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+         .atlas-viewer {
+       margin-bottom: 30px;
+       overflow: auto;
+       background: #2d2b22;
+       border: 2px solid #b6a432;
+       padding: 20px;
+     }
+     
+     .atlas-container {
+       position: relative;
+       display: inline-block;
+       text-align: center;
+     }
+     
+     .atlas-image {
+       image-rendering: pixelated;
+       border: 1px solid #666;
+       cursor: crosshair;
+       display: block;
+     }
+    
+         .grid-overlay {
+       position: absolute;
+       top: 0px;
+       left: 0px;
+       right: 0px;
+       bottom: 0px;
+       pointer-events: none;
+     }
+    
+    .grid-line {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .grid-line.vertical {
+      width: 1px;
+      height: 100%;
+    }
+    
+    .grid-line.horizontal {
+      height: 1px;
+      width: 100%;
+    }
+    
+         .element-highlight {
+       position: absolute;
+       border: 2px solid #00ff00;
+       background: rgba(0, 255, 0, 0.1);
+       pointer-events: auto;
+       cursor: pointer;
+       transition: all 0.2s ease;
+     }
+     
+     .element-highlight.hover {
+       border-color: #ffff00;
+       background: rgba(255, 255, 0, 0.2);
+     }
+     
+     .element-highlight.selected {
+       border-color: #ff00ff;
+       background: rgba(255, 0, 255, 0.3);
+       border-width: 3px;
+     }
+     
+     .floating-label {
+       position: absolute;
+       background: rgba(26, 24, 18, 0.95);
+       border: 2px solid #b6a432;
+       border-radius: 4px;
+       padding: 8px 12px;
+       color: #e8e5d2;
+       font-family: inherit;
+       font-size: 11px;
+       pointer-events: auto;
+       cursor: pointer;
+       z-index: 1000;
+       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+       white-space: nowrap;
+       transition: all 0.2s ease;
+     }
+     
+     .floating-label:hover {
+       background: rgba(182, 164, 50, 0.95);
+       color: #1a1812;
+     }
+     
+     .floating-label .name {
+       font-weight: bold;
+       margin-bottom: 2px;
+       display: block;
+     }
+     
+     .floating-label .coords {
+       color: #b6a432;
+       font-size: 10px;
+     }
+     
+     .floating-label .copy-hint {
+       color: #666;
+       font-size: 9px;
+       font-style: italic;
+       margin-top: 2px;
+       display: block;
+     }
+    
+    .info-panel {
+      background: #2d2b22;
+      border: 2px solid #39362a;
+      padding: 20px;
+      max-height: 600px;
+      overflow-y: auto;
+    }
+    
+    .controls {
+      background: #2d2b22;
+      padding: 15px;
+      border: 2px solid #39362a;
+      margin-bottom: 20px;
+    }
+    
+    .filters {
+      background: #2d2b22;
+      padding: 15px;
+      border: 2px solid #39362a;
+      margin-bottom: 20px;
+    }
+    
+    select, button, input {
+      background: #1a1812;
+      color: #e8e5d2;
+      border: 1px solid #b6a432;
+      padding: 8px 12px;
+      margin: 5px;
+      font-family: inherit;
+      font-size: 12px;
+    }
+    
+    button:hover {
+      background: #b6a432;
+      color: #1a1812;
+    }
+    
+    .element-list {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    
+    .element-item {
+      padding: 8px;
+      margin: 2px 0;
+      background: #1a1812;
+      border: 1px solid #39362a;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .element-item:hover {
+      background: #b6a432;
+      color: #1a1812;
+    }
+    
+    .element-item.selected {
+      background: #00ff00;
+      color: #000;
+    }
+    
+    .element-details {
+      margin-top: 15px;
+      padding: 10px;
+      background: #1a1812;
+      border: 1px solid #666;
+    }
+    
+    .element-details h4 {
+      margin: 0 0 10px 0;
+      color: #b6a432;
+    }
+    
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 5px 0;
+      font-size: 11px;
+    }
+    
+    .detail-label {
+      color: #b6a432;
+    }
+    
+    .detail-value {
+      color: #e8e5d2;
+    }
+    
+    .status {
+      background: #2d2b22;
+      padding: 15px;
+      border: 2px solid #b6a432;
+      margin-bottom: 20px;
+    }
+    
+    .section-title {
+      color: #b6a432;
+      border-bottom: 1px solid #b6a432;
+      padding-bottom: 5px;
+      margin-bottom: 15px;
+    }
+    
+    .zoom-controls {
+      margin-top: 10px;
+    }
+    
+         .zoom-controls button {
+       margin: 0 5px;
+     }
+     
+     /* Custom scrollbar styling */
+     .atlas-viewer::-webkit-scrollbar {
+       height: 12px;
+       width: 12px;
+     }
+     
+     .atlas-viewer::-webkit-scrollbar-track {
+       background: #1a1812;
+       border-radius: 6px;
+     }
+     
+     .atlas-viewer::-webkit-scrollbar-thumb {
+       background: #b6a432;
+       border-radius: 6px;
+       border: 2px solid #1a1812;
+     }
+     
+     .atlas-viewer::-webkit-scrollbar-thumb:hover {
+       background: #d4c456;
+     }
+     
+     .atlas-viewer::-webkit-scrollbar-corner {
+       background: #1a1812;
+     }
+  </style>
+</head>
+<body>
+  <div class="preview-container">
+    <div class="header">
+      <h1>🎨 Atlas Preview - UI Element Mapping</h1>
+      <p>Interactive preview of the Framesandbuttonsatlas.png with element highlighting</p>
+    </div>
+    
+    <div class="status" id="status">
+      <h3>Status</h3>
+      <div id="status-content">Loading...</div>
+    </div>
+    
+    <div class="controls">
+      <h3>Controls</h3>
+      <div>
+        <label>Show Grid: </label>
+        <input type="checkbox" id="show-grid" checked>
+        
+        <label>Show Highlights: </label>
+        <input type="checkbox" id="show-highlights" checked>
+        
+                 <label>Zoom: </label>
+         <div class="zoom-controls">
+           <button onclick="setZoom(1)">1x</button>
+           <button onclick="setZoom(4)">4x</button>
+         </div>
+      </div>
+    </div>
+    
+    <div class="filters">
+      <h3>Filters</h3>
+      <div>
+        <label>Category: </label>
+        <select id="category-filter">
+          <option value="">All Categories</option>
+          <option value="button">Buttons</option>
+          <option value="frame">Frames</option>
+        </select>
+        
+        <label>Theme: </label>
+        <select id="theme-filter">
+          <option value="">All Themes</option>
+        </select>
+        
+        <label>Search: </label>
+        <input type="text" id="search-filter" placeholder="Search elements...">
+      </div>
+    </div>
+    
+    <div class="atlas-viewer">
+      <div class="atlas-container">
+        <div id="atlas-wrapper">
+          <img id="atlas-image" class="atlas-image" alt="UI Atlas" />
+          <div id="grid-overlay" class="grid-overlay"></div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="info-panel">
+      <h3 class="section-title">Elements</h3>
+      <div id="element-list" class="element-list">
+        <!-- Elements will be listed here -->
+      </div>
+      
+      <div id="element-details" class="element-details" style="display: none;">
+        <h4>Element Details</h4>
+        <div id="details-content">
+          <!-- Details will be shown here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="asset-test.js"></script>
+  <script>
+    // Data is now available globally from asset-test.js
+
+    let currentZoom = 1;
+    let currentCategoryFilter = '';
+    let currentThemeFilter = '';
+    let currentSearchFilter = '';
+         let selectedElement = null;
+     let selectedHighlight = null;
+     let floatingLabel = null;
+     let atlasLoaded = false;
+     let atlasWidth = 0;
+     let atlasHeight = 0;
+
+    function updateStatus() {
+      const statusEl = document.getElementById('status-content');
+      const totalElements = UI_ELEMENT_MAPPING.buttons.length + UI_ELEMENT_MAPPING.frames.length;
+      
+      statusEl.innerHTML = `
+        <div>Atlas Loaded: ${atlasLoaded ? 'Yes' : 'No'}</div>
+        <div>Atlas Dimensions: ${atlasWidth} x ${atlasHeight}</div>
+        <div>Expected Dimensions: ${ATLAS_METADATA.atlasWidth} x ${ATLAS_METADATA.atlasHeight}</div>
+        <div>Total UI Elements: ${totalElements}</div>
+        <div>Expected Total: ${ATLAS_METADATA.totalSprites}</div>
+        <div>Buttons: ${UI_ELEMENT_MAPPING.buttons.length}</div>
+        <div>Frames: ${UI_ELEMENT_MAPPING.frames.length}</div>
+        <div>Zoom Level: ${Math.round(currentZoom * 100)}%</div>
+      `;
+    }
+
+    function setZoom(zoom) {
+      currentZoom = zoom;
+      const atlasImage = document.getElementById('atlas-image');
+      atlasImage.style.transform = `scale(${zoom})`;
+      atlasImage.style.transformOrigin = 'top left';
+      updateStatus();
+      updateGrid();
+      updateHighlights();
+    }
+
+                             function updateGrid() {
+         const gridOverlay = document.getElementById('grid-overlay');
+         const atlasImage = document.getElementById('atlas-image');
+         gridOverlay.innerHTML = '';
+         
+         if (!document.getElementById('show-grid').checked) return;
+         
+         // Get the actual displayed image dimensions
+         const displayWidth = atlasImage.offsetWidth;
+         const displayHeight = atlasImage.offsetHeight;
+         
+         // Calculate the scaled grid size based on actual display size
+         const gridSizeX = displayWidth / (atlasWidth / 16);
+         const gridSizeY = displayHeight / (atlasHeight / 16);
+         
+         // Calculate how many grid lines we need
+         const numVerticalLines = Math.ceil(atlasWidth / 16);
+         const numHorizontalLines = Math.ceil(atlasHeight / 16);
+         
+                   // Vertical lines
+          for (let i = 0; i <= numVerticalLines; i++) {
+            const line = document.createElement('div');
+            line.className = 'grid-line vertical';
+            line.style.left = ((i * gridSizeX) - gridSizeX) + 'px';
+            line.style.height = displayHeight + 'px';
+            gridOverlay.appendChild(line);
+          }
+          
+          // Horizontal lines
+          for (let i = 0; i <= numHorizontalLines; i++) {
+            const line = document.createElement('div');
+            line.className = 'grid-line horizontal';
+            line.style.top = ((i * gridSizeY) - gridSizeY) + 'px';
+            line.style.width = displayWidth + 'px';
+            gridOverlay.appendChild(line);
+          }
+       }
+
+         function updateHighlights() {
+       const gridOverlay = document.getElementById('grid-overlay');
+       const existingHighlights = gridOverlay.querySelectorAll('.element-highlight');
+       existingHighlights.forEach(h => h.remove());
+       
+       // Clear selection when highlights are updated
+       selectedHighlight = null;
+       if (floatingLabel) {
+         floatingLabel.remove();
+         floatingLabel = null;
+       }
+       
+       if (!document.getElementById('show-highlights').checked) return;
+      
+      const allElements = [...UI_ELEMENT_MAPPING.buttons, ...UI_ELEMENT_MAPPING.frames];
+      const filteredElements = allElements.filter(element => {
+        if (currentCategoryFilter && element.category !== currentCategoryFilter) return false;
+        if (currentThemeFilter && element.theme !== currentThemeFilter) return false;
+        if (currentSearchFilter && !element.name.toLowerCase().includes(currentSearchFilter) && 
+            !element.id.toLowerCase().includes(currentSearchFilter)) return false;
+        return true;
+      });
+      
+                                                       filteredElements.forEach(element => {
+           const highlight = document.createElement('div');
+           highlight.className = 'element-highlight';
+           
+                       // Get the actual displayed image dimensions and apply zoom
+            const atlasImage = document.getElementById('atlas-image');
+            const displayWidth = atlasImage.offsetWidth;
+            const displayHeight = atlasImage.offsetHeight;
+            
+            // Calculate the scale factors including zoom
+            const scaleX = (displayWidth / atlasWidth) * currentZoom;
+            const scaleY = (displayHeight / atlasHeight) * currentZoom;
+            
+            // Position the highlight relative to the image with zoom
+            highlight.style.left = (element.x * scaleX) + 'px';
+            highlight.style.top = (element.y * scaleY) + 'px';
+            highlight.style.width = (element.width * scaleX) + 'px';
+            highlight.style.height = (element.height * scaleY) + 'px';
+           highlight.dataset.elementId = element.id;
+        
+        highlight.addEventListener('mouseenter', () => {
+          highlight.classList.add('hover');
+          showElementDetails(element);
+        });
+        
+        highlight.addEventListener('mouseleave', () => {
+          highlight.classList.remove('hover');
+        });
+        
+                 highlight.addEventListener('click', () => {
+           selectElement(element, highlight);
+         });
+         
+         gridOverlay.appendChild(highlight);
+      });
+    }
+
+    function showElementDetails(element) {
+      const detailsEl = document.getElementById('element-details');
+      const contentEl = document.getElementById('details-content');
+      
+      contentEl.innerHTML = `
+        <div class="detail-row">
+          <span class="detail-label">ID:</span>
+          <span class="detail-value">${element.id}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Name:</span>
+          <span class="detail-value">${element.name}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Position:</span>
+          <span class="detail-value">(${element.x}, ${element.y})</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Size:</span>
+          <span class="detail-value">${element.width} x ${element.height}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Category:</span>
+          <span class="detail-value">${element.category}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Subcategory:</span>
+          <span class="detail-value">${element.subcategory}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Theme:</span>
+          <span class="detail-value">${element.theme}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">State:</span>
+          <span class="detail-value">${element.state}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Usage:</span>
+          <span class="detail-value">${element.usage}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">CSS Class:</span>
+          <span class="detail-value">${element.cssClass}</span>
+        </div>
+      `;
+      
+      detailsEl.style.display = 'block';
+    }
+
+         function selectElement(element, highlight = null) {
+       // Clear previous selection
+       if (selectedHighlight) {
+         selectedHighlight.classList.remove('selected');
+       }
+       
+       // Remove previous floating label
+       if (floatingLabel) {
+         floatingLabel.remove();
+         floatingLabel = null;
+       }
+       
+       selectedElement = element;
+       selectedHighlight = highlight;
+       
+       // Mark new selection
+       if (highlight) {
+         highlight.classList.add('selected');
+         createFloatingLabel(element, highlight);
+       }
+       
+       updateElementList();
+       showElementDetails(element);
+     }
+     
+     function createFloatingLabel(element, highlight) {
+       const gridOverlay = document.getElementById('grid-overlay');
+       
+       // Create floating label
+       floatingLabel = document.createElement('div');
+       floatingLabel.className = 'floating-label';
+       floatingLabel.innerHTML = `
+         <span class="name">${element.name}</span>
+         <span class="coords">(${element.x}, ${element.y}) ${element.width}×${element.height}</span>
+         <span class="copy-hint">Click to copy coordinates</span>
+       `;
+       
+       // Position the label next to the highlight
+       const highlightRect = highlight.getBoundingClientRect();
+       const containerRect = gridOverlay.getBoundingClientRect();
+       
+       // Position to the right of the highlight, or above if not enough space
+       let left = highlightRect.right - containerRect.left + 10;
+       let top = highlightRect.top - containerRect.top;
+       
+       // If label would go off-screen to the right, position it to the left
+       if (left + 200 > containerRect.width) {
+         left = highlightRect.left - containerRect.left - 210;
+       }
+       
+       // If label would go off-screen to the bottom, position it above
+       if (top + 80 > containerRect.height) {
+         top = highlightRect.bottom - containerRect.top - 80;
+       }
+       
+       floatingLabel.style.left = left + 'px';
+       floatingLabel.style.top = top + 'px';
+       
+       // Add click handler to copy coordinates
+       floatingLabel.addEventListener('click', () => {
+         const coords = `${element.x}, ${element.y}, ${element.width}, ${element.height}`;
+         navigator.clipboard.writeText(coords).then(() => {
+           const originalText = floatingLabel.innerHTML;
+           floatingLabel.innerHTML = `
+             <span class="name">${element.name}</span>
+             <span class="coords">Copied!</span>
+             <span class="copy-hint">${coords}</span>
+           `;
+           setTimeout(() => {
+             floatingLabel.innerHTML = originalText;
+           }, 1500);
+         });
+       });
+       
+       gridOverlay.appendChild(floatingLabel);
+     }
+
+    function populateThemeFilter() {
+      const themes = new Set();
+      [...UI_ELEMENT_MAPPING.buttons, ...UI_ELEMENT_MAPPING.frames].forEach(el => {
+        if (el.theme) themes.add(el.theme);
+      });
+      
+      const themeSelect = document.getElementById('theme-filter');
+      themeSelect.innerHTML = '<option value="">All Themes</option>';
+      Array.from(themes).sort().forEach(theme => {
+        const option = document.createElement('option');
+        option.value = theme;
+        option.textContent = theme.charAt(0).toUpperCase() + theme.slice(1);
+        themeSelect.appendChild(option);
+      });
+    }
+
+    function filterElements() {
+      const categoryFilter = document.getElementById('category-filter').value;
+      const themeFilter = document.getElementById('theme-filter').value;
+      const searchFilter = document.getElementById('search-filter').value.toLowerCase();
+      
+      currentCategoryFilter = categoryFilter;
+      currentThemeFilter = themeFilter;
+      currentSearchFilter = searchFilter;
+      
+      updateElementList();
+      updateHighlights();
+    }
+
+    function updateElementList() {
+      const listEl = document.getElementById('element-list');
+      listEl.innerHTML = '';
+      
+      const allElements = [...UI_ELEMENT_MAPPING.buttons, ...UI_ELEMENT_MAPPING.frames];
+      const filteredElements = allElements.filter(element => {
+        if (currentCategoryFilter && element.category !== currentCategoryFilter) return false;
+        if (currentThemeFilter && element.theme !== currentThemeFilter) return false;
+        if (currentSearchFilter && !element.name.toLowerCase().includes(currentSearchFilter) && 
+            !element.id.toLowerCase().includes(currentSearchFilter)) return false;
+        return true;
+      });
+      
+      filteredElements.forEach(element => {
+        const item = document.createElement('div');
+        item.className = 'element-item';
+        if (selectedElement && selectedElement.id === element.id) {
+          item.classList.add('selected');
+        }
+        
+        item.innerHTML = `
+          <div><strong>${element.name}</strong></div>
+          <div style="font-size: 10px; color: #b6a432;">${element.id} (${element.x},${element.y})</div>
+        `;
+        
+        item.addEventListener('click', () => {
+          selectElement(element);
+        });
+        
+        listEl.appendChild(item);
+      });
+    }
+
+    async function init() {
+      const ASSETS_PREFIX = window.location.protocol === 'file:' ? 'public' : '';
+      const atlasPath = `${ASSETS_PREFIX}/assets/Frames/Framesandbuttonsatlas.png`;
+      
+      try {
+        const atlasImage = document.getElementById('atlas-image');
+        atlasImage.src = atlasPath;
+        
+                 atlasImage.onload = () => {
+           atlasLoaded = true;
+           atlasWidth = atlasImage.naturalWidth;
+           atlasHeight = atlasImage.naturalHeight;
+           
+           // Validate against expected dimensions
+           if (atlasWidth !== ATLAS_METADATA.atlasWidth || atlasHeight !== ATLAS_METADATA.atlasHeight) {
+             console.warn(`Atlas dimensions mismatch! Expected: ${ATLAS_METADATA.atlasWidth}x${ATLAS_METADATA.atlasHeight}, Got: ${atlasWidth}x${atlasHeight}`);
+           }
+           
+           updateStatus();
+           populateThemeFilter();
+           updateElementList();
+           
+           // Small delay to ensure image is positioned
+           setTimeout(() => {
+             updateGrid();
+             updateHighlights();
+           }, 100);
+         };
+        
+        atlasImage.onerror = () => {
+          console.error('Failed to load atlas image');
+          updateStatus();
+        };
+        
+      } catch (error) {
+        console.error('Asset loading failed:', error);
+        updateStatus();
+      }
+    }
+
+    // Event listeners
+    document.getElementById('show-grid').addEventListener('change', updateGrid);
+    document.getElementById('show-highlights').addEventListener('change', updateHighlights);
+    document.getElementById('category-filter').addEventListener('change', filterElements);
+    document.getElementById('theme-filter').addEventListener('change', filterElements);
+    document.getElementById('search-filter').addEventListener('input', filterElements);
+
+    // Initialize
+    init();
+  </script>
+</body>
+</html>

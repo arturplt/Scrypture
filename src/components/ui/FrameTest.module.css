@@ -1,0 +1,300 @@
+/* Frame Test Component Styles */
+
+.container {
+  padding: 20px;
+  font-family: 'Press Start 2P', monospace;
+  background: #23211a;
+  color: #e8e5d2;
+  min-height: 100vh;
+}
+
+.container h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #b6a432;
+}
+
+.controls {
+  background: #2d2b22;
+  padding: 20px;
+  border: 2px solid #39362a;
+  border-radius: 8px;
+  margin-bottom: 30px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: center;
+}
+
+.controlGroup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.controlGroup label {
+  font-size: 12px;
+  color: #b6a432;
+  min-width: 60px;
+}
+
+.select {
+  background: #1a1812;
+  color: #e8e5d2;
+  border: 1px solid #b6a432;
+  padding: 8px 12px;
+  font-family: inherit;
+  font-size: 12px;
+  border-radius: 4px;
+}
+
+.scaleButtons {
+  display: flex;
+  gap: 5px;
+}
+
+.scaleButton {
+  background: #1a1812;
+  color: #e8e5d2;
+  border: 1px solid #b6a432;
+  padding: 8px 12px;
+  font-family: inherit;
+  font-size: 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.scaleButton:hover {
+  background: #b6a432;
+  color: #1a1812;
+}
+
+.scaleButton.active {
+  background: #b6a432;
+  color: #1a1812;
+  font-weight: bold;
+}
+
+.slider {
+  width: 150px;
+  height: 6px;
+  background: #1a1812;
+  border: 1px solid #b6a432;
+  border-radius: 3px;
+  outline: none;
+}
+
+.slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  background: #b6a432;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  background: #b6a432;
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+}
+
+.sizeLabel {
+  font-size: 12px;
+  color: #e8e5d2;
+  min-width: 50px;
+}
+
+.frameGrid {
+  display: grid;
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+.frameSection {
+  background: #2d2b22;
+  padding: 20px;
+  border: 2px solid #39362a;
+  border-radius: 8px;
+}
+
+.frameSection h3 {
+  margin-bottom: 20px;
+  color: #b6a432;
+  font-size: 14px;
+}
+
+.testFrame {
+  margin: 0 auto;
+  display: block;
+}
+
+.frameContent {
+  text-align: center;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.frameContent h4 {
+  margin-bottom: 10px;
+  color: #b6a432;
+}
+
+.frameContent p {
+  margin: 5px 0;
+  color: #e8e5d2;
+}
+
+.themeGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 15px;
+}
+
+.themeFrame {
+  text-align: center;
+}
+
+.smallFrame {
+  margin: 0 auto;
+}
+
+.themeLabel {
+  font-size: 8px;
+  color: #e8e5d2;
+  text-align: center;
+  margin-top: 5px;
+}
+
+.scaleGrid {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.scaleFrame {
+  text-align: center;
+}
+
+.scaleTestFrame {
+  margin: 0 auto;
+}
+
+.scaleLabel {
+  font-size: 8px;
+  color: #e8e5d2;
+  text-align: center;
+}
+
+.responsiveContainer {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.responsiveFrame {
+  width: 100%;
+}
+
+.responsiveContent {
+  text-align: center;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.responsiveContent h4 {
+  margin-bottom: 10px;
+  color: #b6a432;
+}
+
+.responsiveContent p {
+  margin: 5px 0;
+  color: #e8e5d2;
+}
+
+.info {
+  background: #2d2b22;
+  padding: 20px;
+  border: 2px solid #39362a;
+  border-radius: 8px;
+}
+
+.info h3 {
+  margin-bottom: 15px;
+  color: #b6a432;
+  font-size: 14px;
+}
+
+.info ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.info li {
+  margin: 8px 0;
+  font-size: 12px;
+  color: #e8e5d2;
+  padding-left: 20px;
+  position: relative;
+}
+
+.info li::before {
+  content: '✅';
+  position: absolute;
+  left: 0;
+  color: #4CAF50;
+}
+
+.error {
+  color: #f44336;
+  background: rgba(244, 67, 54, 0.1);
+  padding: 15px;
+  border: 1px solid #f44336;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .controlGroup {
+    justify-content: space-between;
+  }
+  
+  .themeGrid {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  }
+  
+  .scaleGrid {
+    gap: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 10px;
+  }
+  
+  .controls {
+    padding: 15px;
+  }
+  
+  .frameSection {
+    padding: 15px;
+  }
+  
+  .themeGrid {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 10px;
+  }
+}

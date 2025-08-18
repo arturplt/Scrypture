@@ -1,0 +1,139 @@
+/* Frame Component Styles */
+
+.frame {
+  /* Base frame styles */
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  
+  /* Ensure pixel-perfect rendering */
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  
+  /* Smooth transitions for theme switching */
+  transition: border-image 0.2s ease-in-out;
+}
+
+.frame-content {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  
+  /* Ensure content doesn't interfere with border */
+  position: relative;
+  z-index: 1;
+}
+
+/* Loading state */
+.frame-loading {
+  border: 2px dashed #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  font-size: 12px;
+  background: rgba(0, 0, 0, 0.1);
+  animation: frame-loading-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes frame-loading-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+/* Error state */
+.frame-error {
+  border: 2px solid #f44336;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f44336;
+  font-size: 12px;
+  background: rgba(244, 67, 54, 0.1);
+}
+
+/* Theme-specific styles */
+.frame-wood {
+  /* Wood theme specific styles */
+}
+
+.frame-modern {
+  /* Modern/DIY theme specific styles */
+}
+
+.frame-sci-fi {
+  /* Sci-fi/Galactic theme specific styles */
+}
+
+.frame-organic {
+  /* Organic/Goo theme specific styles */
+}
+
+.frame-crystal {
+  /* Crystal/Ice theme specific styles */
+}
+
+.frame-nature {
+  /* Nature/Leafy theme specific styles */
+}
+
+.frame-parchment {
+  /* Parchment/Scroll theme specific styles */
+}
+
+.frame-dark {
+  /* Dark/Skull theme specific styles */
+}
+
+/* Responsive scaling */
+@media (max-width: 768px) {
+  .frame {
+    /* Reduce corner thickness on mobile */
+    border-width: 12px !important;
+  }
+  
+  .frame-content {
+    padding: 6px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .frame {
+    /* Further reduce corner thickness on small mobile */
+    border-width: 8px !important;
+  }
+  
+  .frame-content {
+    padding: 4px !important;
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .frame {
+    /* Ensure crisp rendering on high DPI displays */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: optimize-contrast;
+  }
+}
+
+/* Accessibility improvements */
+.frame:focus-within {
+  outline: 2px solid #b6a432;
+  outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+  .frame {
+    border-image: none !important;
+    border: 1px solid #000 !important;
+    background: #fff !important;
+    color: #000 !important;
+  }
+}

@@ -48,7 +48,7 @@ To create the most engaging and effective life management system by combining pr
 
 ### **Core Philosophy**
 - **Tasks become meaningful transformations** with experience rewards
-- **Life areas become Core Attributes** (Body, Mind, Soul, Career, Home, Skills)
+- **Life areas become Core Attributes** (Body, Mind, Soul,)
 - **Habits amplify your personal power** through consistent practice
 - **Achievements unlock permanent benefits** and recognition
 - **Social features** allow community formation and collaborative growth

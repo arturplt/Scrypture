@@ -1,0 +1,404 @@
+/* Theme Selector Component Styles */
+
+.container {
+  background: #2a2a2a;
+  border-radius: 8px;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: 'Press Start 2P', monospace;
+  color: #e8e5d2;
+}
+
+.compact {
+  padding: 12px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #444;
+}
+
+.header h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #e8e5d2;
+}
+
+.currentThemes {
+  display: flex;
+  gap: 16px;
+  font-size: 10px;
+}
+
+.currentTheme {
+  padding: 4px 8px;
+  background: #444;
+  border-radius: 4px;
+  color: #ccc;
+}
+
+.currentTheme strong {
+  color: #e8e5d2;
+}
+
+.searchContainer {
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 8px 12px;
+  background: #1a1a1a;
+  border: 2px solid #444;
+  border-radius: 4px;
+  color: #e8e5d2;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.searchInput:focus {
+  border-color: #60a5fa;
+}
+
+.searchInput::placeholder {
+  color: #666;
+}
+
+.clearSearch {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 2px;
+  border-radius: 2px;
+  transition: color 0.2s ease;
+}
+
+.clearSearch:hover {
+  color: #e8e5d2;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+  border-bottom: 2px solid #444;
+}
+
+.tab {
+  padding: 8px 16px;
+  background: #333;
+  border: none;
+  border-radius: 4px 4px 0 0;
+  color: #ccc;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.tab:hover {
+  background: #444;
+  color: #e8e5d2;
+}
+
+.tab.active {
+  background: #60a5fa;
+  color: #1a1a1a;
+}
+
+.content {
+  min-height: 200px;
+}
+
+.themeGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.themeCard {
+  background: #1a1a1a;
+  border: 2px solid #444;
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.themeCard:hover {
+  border-color: #60a5fa;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(96, 165, 250, 0.2);
+}
+
+.themeCard.selected {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.themeHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.themeHeader h4 {
+  margin: 0;
+  font-size: 12px;
+  font-weight: normal;
+}
+
+.selectedBadge {
+  background: #10b981;
+  color: #1a1a1a;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 8px;
+  font-weight: bold;
+}
+
+.themeDescription {
+  font-size: 8px;
+  line-height: 1.4;
+  margin-bottom: 12px;
+  opacity: 0.8;
+}
+
+.themePreview {
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60px;
+}
+
+.previewFrame {
+  border: 1px solid #444;
+}
+
+.previewContent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 4px;
+}
+
+.buttonPreview {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px;
+}
+
+.previewButton {
+  transform: scale(0.8);
+}
+
+.themeTags {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.tag {
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 6px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.colorPalette {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+}
+
+.colorSwatch {
+  width: 16px;
+  height: 16px;
+  border-radius: 2px;
+  border: 1px solid #444;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.colorSwatch:hover {
+  transform: scale(1.2);
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  color: #ccc;
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #444;
+  border-top: 2px solid #60a5fa;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 12px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.error {
+  padding: 20px;
+  text-align: center;
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: 8px;
+  border: 1px solid #ef4444;
+}
+
+.noResults,
+.noThemes {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+  font-style: italic;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    padding: 12px;
+  }
+
+  .header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .currentThemes {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .themeGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .themeCard {
+    padding: 12px;
+  }
+
+  .tabs {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .tab {
+    border-radius: 4px;
+    text-align: left;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 8px;
+  }
+
+  .themeCard {
+    padding: 8px;
+  }
+
+  .themeHeader h4 {
+    font-size: 10px;
+  }
+
+  .themeDescription {
+    font-size: 7px;
+  }
+
+  .colorSwatch {
+    width: 12px;
+    height: 12px;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .themeCard,
+  .tab,
+  .colorSwatch {
+    transition: none;
+  }
+
+  .spinner {
+    animation: none;
+  }
+}
+
+/* Focus styles */
+.themeCard:focus-visible,
+.tab:focus-visible,
+.searchInput:focus-visible {
+  outline: 2px solid #60a5fa;
+  outline-offset: 2px;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .themeCard {
+    border-width: 3px;
+  }
+
+  .tab {
+    border: 2px solid transparent;
+  }
+
+  .tab.active {
+    border-color: #e8e5d2;
+  }
+}
+
+/* Print styles */
+@media print {
+  .container {
+    background: white;
+    color: black;
+    border: 1px solid #ccc;
+  }
+
+  .themeCard {
+    break-inside: avoid;
+    border: 1px solid #ccc;
+  }
+
+  .tabs,
+  .searchContainer {
+    display: none;
+  }
+}

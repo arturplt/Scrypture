@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scrypture - Frame Gallery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --w: 192px;           /* frame width in px */
+      --h: 192px;           /* frame height in px */
+      --scale: 1;           /* 1x | 2x | 4x for inner sprites */
+      --corner: 16px;       /* corner/edge thickness in px */
+      --font-size: 12px;    /* base text size (px) */
+      --gap: 16px;
+      --label-size: 10px;
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: #23211a;
+      color: #e8e5d2;
+      font-family: 'Press Start 2P', monospace;
+    }
+
+    .page {
+      min-height: 100%;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    header {
+      padding: 12px 16px;
+      border-bottom: 4px solid #b6a432;
+      background: #2d2b22;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 14px;
+      letter-spacing: 1px;
+    }
+
+    .controls {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-left: auto;
+    }
+
+    .control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 10px;
+      background: #1a1812;
+      padding: 6px 8px;
+      border: 2px solid #39362a;
+    }
+
+    /* Removed range inputs; keep accent for radios */
+    input[type="radio"] {
+      accent-color: #b6a432;
+    }
+
+    main {
+      padding: 20px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr; /* one frame per line */
+      gap: var(--gap);
+      align-items: start;
+    }
+
+    .cell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      user-select: none;
+    }
+
+    /* 9-slice style using border-image; corners fixed by --corner, edges repeat */
+    .frame {
+      width: var(--w);
+      height: var(--h);
+      position: relative;
+      border-style: solid;
+      border-width: calc(var(--corner) * var(--scale));
+      /* Note: border-image props set inline per frame to inject the correct image */
+      image-rendering: pixelated; /* may not affect border-image but kept for consistency */
+    }
+
+    .inner {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 4px;
+    }
+
+    .sample-text {
+      font-size: var(--font-size);
+      line-height: 1.1;
+      color: #fff9d6;
+      text-shadow: 0 2px 0 #000, 2px 0 0 #000, -2px 0 0 #000, 0 -2px 0 #000;
+      word-break: break-word;
+    }
+
+    .beaver {
+      width: 64px;
+      height: 64px;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+
+    .label {
+      font-size: var(--label-size);
+      color: #b6a432;
+      text-align: center;
+    }
+
+    footer {
+      padding: 10px 16px;
+      border-top: 4px solid #b6a432;
+      background: #2d2b22;
+      font-size: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .toggles {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .kbd { border: 1px solid #b6a432; padding: 2px 4px; font-size: 10px; }
+  </style>
+  <script>
+    /* Frame definitions and simple generator */
+    // Use absolute "/assets" when served, and "public/assets" when opened via file://
+    const ASSETS_PREFIX = (location.protocol === 'file:') ? 'public' : '';
+
+    const frames = [
+      { name: 'DIY',       file: `${ASSETS_PREFIX}/assets/Frames/diy.png`,      borderSlice: 16 },
+      { name: 'Galactic',  file: `${ASSETS_PREFIX}/assets/Frames/Galactic.png`, borderSlice: 16 },
+      { name: 'Goo',       file: `${ASSETS_PREFIX}/assets/Frames/Goo.png`,      borderSlice: 16 },
+      { name: 'Ice',       file: `${ASSETS_PREFIX}/assets/Frames/Ice.png`,      borderSlice: 16 },
+      { name: 'Leafy',     file: `${ASSETS_PREFIX}/assets/Frames/Leafy.png`,    borderSlice: 16 },
+      { name: 'Scroll',    file: `${ASSETS_PREFIX}/assets/Frames/Scroll.png`,   borderSlice: 16 },
+      { name: 'Skull',     file: `${ASSETS_PREFIX}/assets/Frames/Skull.png`,    borderSlice: 16 },
+      { name: 'Wood',      file: `${ASSETS_PREFIX}/assets/Frames/Wood.png`,     borderSlice: 16 },
+    ];
+
+    const BEAVER_ICON = `${ASSETS_PREFIX}/assets/Icons/beaver_32.png`;
+
+    function $(sel, root=document) { return root.querySelector(sel); }
+    function $$(sel, root=document) { return Array.from(root.querySelectorAll(sel)); }
+
+    function renderGrid({ text, showText, showIcon }) {
+      const grid = $('.grid');
+      grid.innerHTML = '';
+      for (const f of frames) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+
+        const frame = document.createElement('div');
+        frame.className = 'frame';
+        // Set border-image to simulate a 9-slice (4x4 grid using halves → corners fixed, edges repeat)
+        const slice = f.borderSlice || 16; // source slice in px
+        frame.style.borderImageSource = `url('${f.file}')`;
+        frame.style.borderImageSlice = `${slice}`;
+        frame.style.borderImageWidth = 'calc(var(--corner) * var(--scale))';
+        frame.style.borderImageRepeat = 'repeat'; // repeat on both axes so width extends same as height
+        frame.style.borderImageOutset = '0';
+        frame.style.borderImage = `url('${f.file}') ${slice} fill / calc(var(--corner) * var(--scale)) / 0 repeat`;
+        frame.style.borderWidth = 'calc(var(--corner) * var(--scale))';
+
+        const inner = document.createElement('div');
+        inner.className = 'inner';
+
+        if (showText) {
+          const t = document.createElement('div');
+          t.className = 'sample-text';
+          t.textContent = text;
+          inner.appendChild(t);
+        }
+
+        if (showIcon) {
+          const img = document.createElement('img');
+          img.className = 'beaver';
+          img.src = BEAVER_ICON;
+          img.alt = 'Bóber';
+          inner.appendChild(img);
+        }
+
+        frame.appendChild(inner);
+        cell.appendChild(frame);
+
+        const label = document.createElement('div');
+        label.className = 'label';
+        label.textContent = `${f.name} (${f.file.split('/').pop()})`;
+        cell.appendChild(label);
+
+        grid.appendChild(cell);
+      }
+    }
+
+    function setScale(scale) {
+      document.documentElement.style.setProperty('--scale', String(scale));
+    }
+
+    function init() {
+      const scaleRadios = $$('input[name="scale"]');
+      const textInput = $('#text');
+      const showText = $('#showText');
+      const showIcon = $('#showIcon');
+      const widthInput = $('#width');
+      const heightInput = $('#height');
+
+      function update() {
+        renderGrid({
+          text: textInput.value,
+          showText: showText.checked,
+          showIcon: showIcon.checked,
+        });
+      }
+
+      // Initialize values
+      setScale(1);
+      document.documentElement.style.setProperty('--w', widthInput.value + 'px');
+      document.documentElement.style.setProperty('--h', heightInput.value + 'px');
+      update();
+
+      // Bind events
+      scaleRadios.forEach(r => r.addEventListener('change', (e) => {
+        const value = Number(e.target.value);
+        setScale(value);
+        update();
+      }));
+      widthInput.addEventListener('input', (e) => {
+        const val = e.target.value;
+        document.documentElement.style.setProperty('--w', val + 'px');
+        update();
+      });
+      heightInput.addEventListener('input', (e) => {
+        const val = e.target.value;
+        document.documentElement.style.setProperty('--h', val + 'px');
+        update();
+      });
+      textInput.addEventListener('input', update);
+      showText.addEventListener('change', update);
+      showIcon.addEventListener('change', update);
+
+      // Re-render when inputs change to keep content
+      scaleRadios.forEach(r => r.addEventListener('change', update));
+      widthInput.addEventListener('input', update);
+      heightInput.addEventListener('input', update);
+
+      // Keyboard shortcuts for quick scaling among 1x, 2x, 4x
+      document.addEventListener('keydown', (ev) => {
+        const allowed = [1, 2, 4];
+        const current = Number(getComputedStyle(document.documentElement).getPropertyValue('--scale')) || 1;
+        const idx = allowed.indexOf(current);
+        if (ev.key === '+' || ev.key === '=') {
+          const next = allowed[Math.min(allowed.length - 1, idx + 1)] || 4;
+          setScale(next);
+          const radio = document.querySelector(`input[name="scale"][value="${next}"]`);
+          if (radio) { radio.checked = true; }
+          update();
+          ev.preventDefault();
+        }
+        if (ev.key === '-' || ev.key === '_') {
+          const prev = allowed[Math.max(0, idx - 1)] || 1;
+          setScale(prev);
+          const radio = document.querySelector(`input[name="scale"][value="${prev}"]`);
+          if (radio) { radio.checked = true; }
+          update();
+          ev.preventDefault();
+        }
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <h1>🖼️ Frame Gallery</h1>
+      <div class="controls">
+        <fieldset class="control" style="border:2px solid #39362a">
+          <legend>Scale</legend>
+          <label><input type="radio" name="scale" value="1" checked> 1x</label>
+          <label><input type="radio" name="scale" value="2"> 2x</label>
+          <label><input type="radio" name="scale" value="4"> 4x</label>
+        </fieldset>
+        <label class="control">
+          <span>Width</span>
+          <input id="width" type="number" min="64" max="2048" step="8" value="192" style="width:80px; font-family: inherit; font-size: 10px; padding: 4px; border: 1px solid #39362a; background:#1a1812; color:#fff9d6;" />
+          <span>px</span>
+        </label>
+        <label class="control">
+          <span>Height</span>
+          <input id="height" type="number" min="64" max="2048" step="8" value="192" style="width:80px; font-family: inherit; font-size: 10px; padding: 4px; border: 1px solid #39362a; background:#1a1812; color:#fff9d6;" />
+          <span>px</span>
+        </label>
+        <label class="control" style="min-width: 240px;">
+          <span>Sample</span>
+          <input id="text" type="text" value="Scrypture" style="flex:1; font-family: inherit; font-size: 10px; padding: 4px; border: 1px solid #39362a; background:#1a1812; color:#fff9d6;" />
+        </label>
+      </div>
+    </header>
+
+    <main>
+      <div class="grid" aria-live="polite"></div>
+    </main>
+
+    <footer>
+      <div class="toggles">
+        <label><input id="showText" type="checkbox" checked> Show text</label>
+        <label><input id="showIcon" type="checkbox" checked> Show Bóber icon</label>
+      </div>
+      <div>
+        Sizes: 1x, 2x, 4x. Shortcuts: <span class="kbd">+</span>/<span class="kbd">-</span> to cycle scale.
+      </div>
+    </footer>
+  </div>
+</body>
+</html>
+
+

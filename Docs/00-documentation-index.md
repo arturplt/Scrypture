@@ -1,239 +1,193 @@
-# Scrypture MVP Documentation Index
+# Scrypture Documentation Index
 
-*"Essential documentation for Scrypture MVP development - focused, practical, and implementable"*
+**Version:** 1.0.0  
+**Last Updated:** July 27, 2025  
+**Status:** MVP Development  
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue)
-![Status](https://img.shields.io/badge/status-MVP_Development-yellow)
-![Features](https://img.shields.io/badge/features-30_Core-blue)
-
-## 🚀 **Quick Start for Developers**
-
-### **New to Scrypture? Start Here:**
-1. **[quick-start-guide.md](quick-start-guide.md)** - Get up and running in 30 minutes (30 min read)
-2. **[01-overview.md](01-overview.md)** - Project vision and core concepts (5 min read)
-3. **[terminology-guide.md](terminology-guide.md)** - Terminology rules and implementation (3 min read)
-4. **[02-mvp-features.md](02-mvp-features.md)** - Essential MVP features and implementation (15 min read)
-5. **[03-technical-specs.md](03-technical-specs.md)** - System architecture and technical details (10 min read)
-6. **[04-api-reference.md](04-api-reference.md)** - API endpoints and integration (10 min read)
-7. **[05-database-schema.md](05-database-schema.md)** - Database design and migrations (5 min read)
-8. **[06-development-guide.md](06-development-guide.md)** - Setup, implementation, and deployment (15 min read)
-9. **[07-mvp-checklist.md](07-mvp-checklist.md)** - Implementation tracking and status (5 min read)
-10. **[12-achievement-system.md](12-achievement-system.md)** - Complete Achievement system documentation (20 min read)
-11. **[bobr-companion-guide.md](bobr-companion-guide.md)** - Complete Bóbr Companion system documentation (15 min read)
-
-### **For Specific Roles:**
-- **👤 New Users**: [quick-start-guide.md](quick-start-guide.md) → [01-overview.md](01-overview.md) → [02-mvp-features.md](02-mvp-features.md)
-- **👨‍💻 Developers**: [quick-start-guide.md](quick-start-guide.md) → [06-development-guide.md](06-development-guide.md) → [03-technical-specs.md](03-technical-specs.md) → [04-api-reference.md](04-api-reference.md)
-- **🎨 Designers**: [quick-start-guide.md](quick-start-guide.md) → [02-mvp-features.md](02-mvp-features.md) → [10-color-system.md](10-color-system.md)
-- **📊 Product Managers**: [quick-start-guide.md](quick-start-guide.md) → [01-overview.md](01-overview.md) → [07-mvp-checklist.md](07-mvp-checklist.md)
+---
 
 ## 📚 **Documentation Overview**
 
-This index serves as the master navigation guide for the Scrypture MVP documentation suite. It organizes all documentation into logical groups, maps dependencies, and provides quick access to specific information.
+Welcome to the comprehensive documentation for **Scrypture: Grimoirium Vivendi** - a gamified habit and task management system that transforms productivity into a mystical journey of intentional living.
 
-### **MVP Documentation Philosophy**
-- **Essential Features Only**: 30 core features that deliver the core value proposition
-- **Implementation First**: Focus on practical implementation over comprehensive specifications
-- **User-Centric**: Every feature serves a clear user need
-- **Progressive Enhancement**: Start simple, add complexity later
-- **Quality Over Quantity**: 30 well-implemented features > 100+ incomplete features
-- **Terminology Consistency**: All code uses plain English, UI can display Latin mode (toggleable)
+This documentation is organized to serve different audiences and use cases, from high-level overviews to detailed technical specifications.
 
-## 🎯 **Quick Navigation**
+---
 
-### **By Development Phase**
-- **🚀 Planning**: [01-overview.md](01-overview.md) → [02-mvp-features.md](02-mvp-features.md)
-- **⚙️ Development**: [06-development-guide.md](06-development-guide.md) → [03-technical-specs.md](03-technical-specs.md) → [04-api-reference.md](04-api-reference.md)
-- **🧪 Testing**: [06-development-guide.md](06-development-guide.md) → [07-mvp-checklist.md](07-mvp-checklist.md)
-- **🚀 Deployment**: [06-development-guide.md](06-development-guide.md) → [03-technical-specs.md](03-technical-specs.md)
+## 🎯 **Quick Start Guides**
 
-### **By User Role**
-- **👤 New Users**: [01-overview.md](01-overview.md) → [02-mvp-features.md](02-mvp-features.md) → [07-mvp-checklist.md](07-mvp-checklist.md)
-- **👨‍💻 Developers**: [06-development-guide.md](06-development-guide.md) → [03-technical-specs.md](03-technical-specs.md) → [04-api-reference.md](04-api-reference.md)
-- **🎨 Designers**: [02-mvp-features.md](02-mvp-features.md) → [10-color-system.md](10-color-system.md)
-- **📊 Product Managers**: [01-overview.md](01-overview.md) → [07-mvp-checklist.md](07-mvp-checklist.md)
+### For New Users
+- **[01-overview.md](01-overview.md)** - Project overview, core concepts, and terminology
+- **[quick-start-guide.md](quick-start-guide.md)** - Get up and running in minutes
+- **[terminology-guide.md](terminology-guide.md)** - Understanding Scrypture's unique language
 
-## 📋 **Documentation Categories**
+### For Developers
+- **[06-development-guide.md](06-development-guide.md)** - Setup, architecture, and development workflow
+- **[03-technical-specs.md](03-technical-specs.md)** - System architecture and technical details
+- **[test-suite-documentation.md](test-suite-documentation.md)** - Testing framework and guidelines
 
-### **1. Core Documentation** 📖
-*Essential documentation for MVP development*
+---
 
-| Document | Purpose | Target Audience | Dependencies | Status |
-|----------|---------|-----------------|--------------|--------|
-| **[quick-start-guide.md](quick-start-guide.md)** | Get developers up and running quickly | New developers, contributors | None | ✅ Complete |
-| **[01-overview.md](01-overview.md)** | Project vision, core concepts, target audience | All users, stakeholders | None | ✅ Complete |
-| **[terminology-guide.md](terminology-guide.md)** | Terminology rules and implementation guidelines | All users, developers | 01-overview.md | ✅ Complete |
-| **[02-mvp-features.md](02-mvp-features.md)** | MVP feature specifications and user flows | Developers, designers, users | 01-overview.md, terminology-guide.md | ✅ Complete |
-| **[03-technical-specs.md](03-technical-specs.md)** | System architecture, performance, security | Developers, architects | 01-overview.md, 02-mvp-features.md | ✅ Complete |
-| **[04-api-reference.md](04-api-reference.md)** | API endpoints, authentication, responses | Frontend/backend developers | 03-technical-specs.md | ✅ Complete |
-| **[05-database-schema.md](05-database-schema.md)** | Database design, relationships, indexes | Backend developers, DBAs | 03-technical-specs.md | ✅ Complete |
-| **[06-development-guide.md](06-development-guide.md)** | Setup, implementation, deployment | Developers, DevOps | 03-technical-specs.md | ✅ Complete |
-| **[07-mvp-checklist.md](07-mvp-checklist.md)** | Implementation tracking and status | Developers, QA, product managers | 02-mvp-features.md | ✅ Complete |
-| **[test-suite-improvements.md](test-suite-improvements.md)** | Test suite enhancements and current status | Developers, QA engineers | 06-development-guide.md | ✅ Complete |
-| **[development-workflow-guide.md](development-workflow-guide.md)** | Edit 1 thing, test, document workflow | All developers | 06-development-guide.md | ✅ Complete |
+## 📋 **Core Documentation**
 
-**Key Concepts**: MVP features, technical architecture, implementation guidance, deployment procedures
+### **Project Foundation**
+- **[01-overview.md](01-overview.md)** - Core concept, vision, and target audience
+- **[02-mvp-features.md](02-mvp-features.md)** - Detailed feature specifications
+- **[07-mvp-checklist.md](07-mvp-checklist.md)** - Implementation tracking and status
 
-### **2. Design Documentation** 🎨
-*Visual design and user experience specifications*
+### **Technical Architecture**
+- **[03-technical-specs.md](03-technical-specs.md)** - System architecture and data models
+- **[04-api-reference.md](04-api-reference.md)** - Service layer and API documentation
+- **[05-database-schema.md](05-database-schema.md)** - Data structure and persistence
 
-| Document | Purpose | Target Audience | Dependencies |
-|----------|---------|-----------------|--------------|
-| **[10-color-system.md](10-color-system.md)** | Color palette, accessibility, theming | Designers, frontend developers | 02-mvp-features.md |
-| **[11-ui-enhancements.md](11-ui-enhancements.md)** | Recent UI enhancements and UX improvements | Designers, frontend developers, users | 02-mvp-features.md, 10-color-system.md |
+### **Development Resources**
+- **[06-development-guide.md](06-development-guide.md)** - Setup, workflow, and best practices
+- **[test-suite-documentation.md](test-suite-documentation.md)** - Testing strategy and implementation
+- **[test-results-summary.md](test-results-summary.md)** - Current test coverage and results
 
-**Key Concepts**: User experience, accessibility compliance, design system, responsive design, UI enhancements
+---
 
-### **3. Audio & Sound Documentation** 🎵
-*Sound engine and audio system specifications*
+## 🎨 **Design & UI Documentation**
 
-| Document | Purpose | Target Audience | Dependencies |
-|----------|---------|-----------------|--------------|
-| **[13-synthesizer-sound-engine.md](13-synthesizer-sound-engine.md)** | Complete synthesizer sound engine documentation | Audio developers, frontend developers, designers | 02-mvp-features.md, 03-technical-specs.md |
-| **[14-multi-track-synthesizer-roadmap.md](14-multi-track-synthesizer-roadmap.md)** | Multi-track synthesizer development roadmap | Audio developers, frontend developers, project managers | 13-synthesizer-sound-engine.md |
+### **Visual Design**
+- **[10-color-system.md](10-color-system.md)** - Color palette and visual design system
+- **[11-ui-enhancements.md](11-ui-enhancements.md)** - UI component improvements and patterns
+- **[ui-gamification-checklist.md](ui-gamification-checklist.md)** - Gamification UI elements
 
-**Key Concepts**: Web Audio API, real-time synthesis, musical composition, gamified audio feedback, Scrypture integration, multi-track architecture, ambient sound engine
+### **Asset Management**
+- **[asset-management-guide.md](asset-management-guide.md)** - Atlas mapping and sprite management
+- **[component-rendering-optimization-guide.md](component-rendering-optimization-guide.md)** - Performance optimization
+- **[atlas-mapping-documentation.md](atlas-mapping-documentation.md)** - UI element mapping system
 
-## 🔗 **Dependency Mapping**
+---
 
-### **Core Dependencies (MVP)**
-```mermaid
-graph TD
-    A[01-overview.md] --> T[terminology-guide.md]
-    
-    T --> B[02-mvp-features.md]
-    A --> B
-    
-    B --> D[03-technical-specs.md]
-    B --> E[10-color-system.md]
-    
-    D --> F[04-api-reference.md]
-    D --> G[05-database-schema.md]
-    
-    D --> H[06-development-guide.md]
-    
-    B --> I[07-mvp-checklist.md]
-```
+## 🎮 **Feature Documentation**
 
-## 📖 **Reading Paths**
+### **Core Systems**
+- **[12-achievement-system.md](12-achievement-system.md)** - Achievement system design and implementation
+- **[13-synthesizer-sound-engine.md](13-synthesizer-sound-engine.md)** - Audio system and synthesizer
+- **[14-multi-track-synthesizer-roadmap.md](14-multi-track-synthesizer-roadmap.md)** - Advanced audio features
+- **[15-sanctuary-game-environment.md](15-sanctuary-game-environment.md)** - Sanctuary sandbox environment
 
-### **For New Team Members**
-1. **[quick-start-guide.md](quick-start-guide.md)** - Get up and running (30 min)
-2. **[01-overview.md](01-overview.md)** - Understand the project vision (5 min)
-3. **[02-mvp-features.md](02-mvp-features.md)** - Learn about core features (15 min)
-4. **[07-mvp-checklist.md](07-mvp-checklist.md)** - Know what to implement (5 min)
+### **Advanced Features**
+- **[sanctuary-sandbox-guide.md](sanctuary-sandbox-guide.md)** - Sanctuary environment usage
+- **[isometric-sandbox-documentation.md](isometric-sandbox-documentation.md)** - Isometric tile system
+- **[track-management-ui-guide.md](track-management-ui-guide.md)** - Track management interface
+- **[track-management-implementation-summary.md](track-management-implementation-summary.md)** - Implementation details
 
-### **For Developers**
-1. **[quick-start-guide.md](quick-start-guide.md)** - Quick setup and first contribution (30 min)
-2. **[06-development-guide.md](06-development-guide.md)** - Detailed setup and implementation (15 min)
-3. **[03-technical-specs.md](03-technical-specs.md)** - System architecture (10 min)
-4. **[04-api-reference.md](04-api-reference.md)** - API endpoints (10 min)
-5. **[05-database-schema.md](05-database-schema.md)** - Data models (5 min)
-6. **[07-mvp-checklist.md](07-mvp-checklist.md)** - Implementation tasks (5 min)
+---
 
-### **For Designers**
-1. **[02-mvp-features.md](02-mvp-features.md)** - User experience flows (15 min)
-2. **[10-color-system.md](10-color-system.md)** - Color palette (10 min)
+## 🚀 **Deployment & Operations**
 
-### **For Product Managers**
-1. **[01-overview.md](01-overview.md)** - Project vision (5 min)
-2. **[07-mvp-checklist.md](07-mvp-checklist.md)** - Implementation status (5 min)
+### **Deployment Guides**
+- **[DEPLOYMENT_GUIDE.md](../DEPLOYMENT_GUIDE.md)** - Complete deployment process
+- **[DEPLOYMENT_TROUBLESHOOTING.md](../DEPLOYMENT_TROUBLESHOOTING.md)** - Common issues and solutions
+- **[DEPLOYMENT_CHECKLIST.md](../DEPLOYMENT_CHECKLIST.md)** - Pre-deployment checklist
 
-## 🔍 **Search Index**
+### **Performance & Optimization**
+- **[performance-optimization-summary.md](performance-optimization-summary.md)** - Performance improvements
+- **[performance-testing-guide.md](performance-testing-guide.md)** - Performance testing methodology
+- **[cache-management-technical.md](cache-management-technical.md)** - Cache management strategies
 
-### **By Concept**
-- **Bóbr Companion**: [01-overview.md](01-overview.md), [02-mvp-features.md](02-mvp-features.md), [bobr-companion-guide.md](bobr-companion-guide.md)
-- **Tasks**: [02-mvp-features.md](02-mvp-features.md), [terminology-guide.md](terminology-guide.md)
-- **Habits**: [02-mvp-features.md](02-mvp-features.md)
-- **Terminology**: [terminology-guide.md](terminology-guide.md), [01-overview.md](01-overview.md)
-- **Themes**: [10-color-system.md](10-color-system.md)
-- **Database**: [05-database-schema.md](05-database-schema.md)
-- **API**: [04-api-reference.md](04-api-reference.md), [03-technical-specs.md](03-technical-specs.md)
-- **Audio & Sound**: [13-synthesizer-sound-engine.md](13-synthesizer-sound-engine.md), [14-multi-track-synthesizer-roadmap.md](14-multi-track-synthesizer-roadmap.md)
+---
 
-### **By Technology**
-- **Frontend**: [02-mvp-features.md](02-mvp-features.md), [10-color-system.md](10-color-system.md)
-- **Backend**: [03-technical-specs.md](03-technical-specs.md), [05-database-schema.md](05-database-schema.md), [04-api-reference.md](04-api-reference.md)
-- **Development**: [06-development-guide.md](06-development-guide.md), [03-technical-specs.md](03-technical-specs.md)
-- **Design**: [10-color-system.md](10-color-system.md)
-- **Audio**: [13-synthesizer-sound-engine.md](13-synthesizer-sound-engine.md), [14-multi-track-synthesizer-roadmap.md](14-multi-track-synthesizer-roadmap.md)
+## 🧪 **Testing & Quality Assurance**
 
-## 📝 **Documentation Standards**
+### **Testing Documentation**
+- **[test-suite-documentation.md](test-suite-documentation.md)** - Testing framework overview
+- **[test-suite-improvements.md](test-suite-improvements.md)** - Testing enhancements
+- **[test-coverage-improvements.md](test-coverage-improvements.md)** - Coverage improvements
+- **[test-results-summary.md](test-results-summary.md)** - Current test status
 
-### **File Naming Convention**
-- **00-**: Index and navigation documents
-- **01-06**: Core MVP documentation (overview, features, technical, API, database, development)
-- **07**: Implementation tracking
-- **10**: Design documentation
+### **E2E Testing**
+- **[e2e-testing-documentation.md](e2e-testing-documentation.md)** - End-to-end testing guide
+- **[e2e-testing-setup.md](e2e-testing-setup.md)** - E2E testing setup
+- **[e2e-testing-quick-reference.md](e2e-testing-quick-reference.md)** - Quick reference guide
+- **[e2e-testing-summary.md](e2e-testing-summary.md)** - E2E testing results
 
-### **Content Structure**
-Each document should include:
-1. **Header**: Title, version, status badges
-2. **Overview**: Purpose and target audience
-3. **Main Content**: Detailed information
-4. **Cross-References**: Links to related documents
-5. **Implementation**: Code examples and technical details (where applicable)
+---
 
-### **MVP Focus Guidelines**
-- **Essential Features**: Document only MVP features (30 core features)
-- **Implementation First**: Prioritize practical implementation guidance
-- **Progressive Enhancement**: Start simple, add complexity later
-- **Developer Experience**: Focus on setup, development, and deployment
+## 🔧 **Technical Guides**
 
-### **Update Process**
-1. **Review**: Regular review of documentation accuracy
-2. **Update**: Update documents when features change
-3. **Cross-Reference**: Ensure all links remain valid
-4. **Version**: Update version numbers and dates
-5. **Index**: Update this index when documents change
+### **Data Management**
+- **[data-clearing-guide.md](data-clearing-guide.md)** - Data management and clearing
+- **[database-setup-guide.md](database-setup-guide.md)** - Database configuration
+- **[auto-save-guide.md](auto-save-guide.md)** - Auto-save functionality
 
-## 🚀 **Quick Reference**
+### **Security & Configuration**
+- **[security-guide.md](security-guide.md)** - Security considerations and best practices
+- **[mobile-debug-guide.md](mobile-debug-guide.md)** - Mobile debugging and optimization
 
-### **Most Important Documents**
-- **[quick-start-guide.md](quick-start-guide.md)** - Start here for new developers
-- **[01-overview.md](01-overview.md)** - Project vision and understanding
-- **[terminology-guide.md](terminology-guide.md)** - Terminology rules and implementation
-- **[02-mvp-features.md](02-mvp-features.md)** - Core feature specifications
-- **[06-development-guide.md](06-development-guide.md)** - Implementation guidance
-- **[03-technical-specs.md](03-technical-specs.md)** - System architecture
-- **[04-api-reference.md](04-api-reference.md)** - API reference
+---
 
-### **Recently Updated**
-- **[quick-start-guide.md](quick-start-guide.md)** - New comprehensive developer onboarding guide
-- **[00-documentation-index.md](00-documentation-index.md)** - MVP-focused reorganization
-- **[terminology-guide.md](terminology-guide.md)** - New comprehensive terminology guide
-- **[02-mvp-features.md](02-mvp-features.md)** - Simplified feature specifications with implementation examples
-- **[03-technical-specs.md](03-technical-specs.md)** - Simplified technical architecture
-- **[04-api-reference.md](04-api-reference.md)** - Simplified API documentation
-- **[05-database-schema.md](05-database-schema.md)** - Simplified database design
-- **[06-development-guide.md](06-development-guide.md)** - New implementation guide with practical examples
+## 📖 **User Guides**
 
-## 📞 **Documentation Support**
+### **Feature Guides**
+- **[bobr-companion-guide.md](bobr-companion-guide.md)** - Bóbr companion system
+- **[development-workflow-guide.md](development-workflow-guide.md)** - Development workflow
+- **[isometric-tilemap-fixes.md](isometric-tilemap-fixes.md)** - Tilemap troubleshooting
 
-### **Getting Help**
-- **Missing Information**: Check related documents in the dependency map
-- **Conflicting Information**: Refer to the most recently updated document
-- **Technical Questions**: Start with [03-technical-specs.md](03-technical-specs.md)
-- **Implementation Questions**: Use [06-development-guide.md](06-development-guide.md)
-- **Feature Questions**: Check [02-mvp-features.md](02-mvp-features.md)
+---
+
+## 🔄 **Migration & Updates**
+
+### **Version Management**
+- **[09-migration-guide.md](09-migration-guide.md)** - Data migration between versions
+- **[start-here-fixes-summary.md](start-here-fixes-summary.md)** - Recent fixes and improvements
+
+---
+
+## 📊 **Documentation Statistics**
+
+- **Total Documents:** 35+
+- **Core Documentation:** 15 documents
+- **Technical Guides:** 12 documents
+- **User Guides:** 8 documents
+- **Last Updated:** July 27, 2025
+
+---
+
+## 🎯 **Documentation Principles**
+
+### **Organization**
+- **Logical Flow:** Documents are organized from high-level to detailed technical information
+- **Cross-References:** Related documents are linked throughout for easy navigation
+- **Version Control:** All documentation is version-controlled and updated with code changes
+
+### **Content Standards**
+- **Clarity:** Clear, concise language suitable for the target audience
+- **Completeness:** Comprehensive coverage of all features and systems
+- **Accuracy:** Regular updates to maintain accuracy with current implementation
+- **Examples:** Practical examples and code snippets where appropriate
+
+### **Maintenance**
+- **Regular Reviews:** Documentation is reviewed and updated with each major release
+- **User Feedback:** Documentation improvements based on user questions and feedback
+- **Automated Checks:** Links and references are validated regularly
+
+---
+
+## 🚀 **Getting Help**
+
+### **Documentation Issues**
+If you find issues with the documentation:
+1. Check the [GitHub Issues](https://github.com/arturplt/Scrypture/issues) for existing reports
+2. Create a new issue with the `documentation` label
+3. Include specific details about what needs to be clarified or corrected
+
+### **Feature Requests**
+For new documentation needs:
+1. Create a feature request with the `documentation` label
+2. Describe the audience and purpose of the requested documentation
+3. Suggest where it should fit in the documentation structure
 
 ### **Contributing**
-- **Adding Content**: Follow the content structure standards
-- **Updating**: Update version numbers and cross-references
-- **Reviewing**: Ensure accuracy and completeness
-- **Indexing**: Update this index when documents change
+To contribute to the documentation:
+1. Follow the established format and style
+2. Update the documentation index when adding new documents
+3. Ensure all links and references are accurate
+4. Test any code examples or procedures
 
 ---
 
-## 📚 **Documentation Statistics**
-
-| Category | Documents | Pages | Last Updated | Status |
-|----------|-----------|-------|--------------|--------|
-| **Core Documentation** | 9 | ~1,500 | 2024-01-15 | ✅ Complete |
-| **Design Documentation** | 1 | ~200 | 2024-01-15 | ✅ Complete |
-| **Audio & Sound Documentation** | 2 | ~1,200 | 2024-01-15 | ✅ Complete |
-| **Total** | **12** | **~2,900** | **2024-01-15** | **✅ MVP Ready** |
-
----
-
-*"In the pages of this index, every document finds its place, every concept its home, and every reader their path to understanding."* 📚✨ 
+*"In the pages of this documentation, every concept becomes clear, every feature becomes accessible, and every developer becomes empowered to contribute to the Scrypture journey."* 📚✨ 

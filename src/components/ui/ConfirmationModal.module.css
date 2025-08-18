@@ -1,0 +1,124 @@
+/* Enhanced Confirmation Modal Component Styles */
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px 0;
+}
+
+.iconContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.icon {
+  font-size: 48px;
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.messageContainer {
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.message {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--modal-text, #e8e5d2);
+  font-family: 'Press Start 2P', monospace;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+  margin: 0;
+  word-wrap: break-word;
+  hyphens: auto;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.cancelButton {
+  min-width: 100px;
+}
+
+.confirmButton {
+  min-width: 100px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .content {
+    gap: 16px;
+    padding: 16px 0;
+  }
+
+  .icon {
+    font-size: 40px;
+  }
+
+  .message {
+    font-size: 12px;
+  }
+
+  .actions {
+    gap: 10px;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .cancelButton,
+  .confirmButton {
+    width: 100%;
+    min-width: unset;
+  }
+}
+
+@media (max-width: 480px) {
+  .content {
+    gap: 12px;
+    padding: 12px 0;
+  }
+
+  .icon {
+    font-size: 36px;
+  }
+
+  .message {
+    font-size: 10px;
+  }
+
+  .actions {
+    gap: 8px;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .icon {
+    filter: none;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .message {
+    font-weight: bold;
+  }
+}
+
+/* Print styles */
+@media print {
+  .actions {
+    display: none;
+  }
+}
