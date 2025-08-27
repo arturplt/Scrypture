@@ -1,172 +1,131 @@
 # Atlas Mapping Documentation
 
-**Version:** 1.0.0  
-**Last Updated:** July 27, 2025  
+**Version:** 2.0.0  
+**Last Updated:** December 2024  
 **Status:** Active Development  
 
 ---
 
 ## 📚 **Overview**
 
-The Atlas Mapping system is the core data structure that defines all UI elements in Scrypture. This document provides detailed information about the sprite atlas organization, mapping structure, and how to work with the centralized asset system.
+The Atlas Mapping system is the core data structure that defines all UI elements in Scrypture. This document provides detailed information about the dynamic sprite atlas organization, mapping structure, and how to work with the centralized asset system.
+
+The system now uses a **dynamic generation approach** with 619 sprites across 30 color themes, organized into multiple categories and themes for maximum flexibility and maintainability.
 
 ---
 
 ## 🎯 **Atlas Structure**
 
 ### **Texture Sheet Specifications**
-- **Dimensions**: 960x576 pixels
-- **Grid Size**: 64x64 pixel base units
-- **Total Sprites**: 107 sprites across 12 rows
+- **Dimensions**: 352x512 pixels (dynamically calculated)
+- **Grid Size**: 16x16 pixel base units
+- **Total Sprites**: 619 sprites across multiple categories
 - **Format**: PNG with transparency support
-- **File Location**: `/public/assets/Frames/Framesandbuttonsatlas.png`
+- **File Location**: `/public/assets/Frames/Atlas.png`
 
-### **Row Organization**
+### **Dynamic Theme System**
 
-#### **Row 1 (y: 0-15) - Small Frames (16x16)**
-Default state frames for compact UI elements:
-- **frame-wood-small** (0,0)
-- **frame-wood-ornate** (16,0)
-- **frame-birch** (32,0) and (48,0)
-- **frame-moss-stone2** (64,0)
-- **frame-moss-stone3** (80,0)
-- **frame-moss-stone** (96,0)
+The atlas uses a **dynamic generation system** with 30 color themes organized into 4 rows:
 
-#### **Row 2 (y: 16-31) - Small Frames Activated (16x16)**
-Active/hover states for small frames:
-- **frame-wood-small-blue** (0,16)
-- **frame-wood-ornate-activated** (16,16)
-- **frame-birch-activated** (32,16) and (48,16)
-- **frame-moss-stone2-activated** (64,16)
-- **frame-moss-stone3-activated** (80,16)
-- **frame-moss-stone-activated** (96,16)
+#### **Row 1 (y: 0-96) - Main 4x7 Grid (8 themes)**
+Each theme contains 28 sprites in a 4x7 grid layout:
+- **green** (0,0)
+- **dark-green** (64,0)
+- **blue-stone** (128,0)
+- **red** (192,0)
+- **purple** (256,0)
+- **orange** (320,0)
+- **yellow** (384,0)
+- **cyan** (448,0)
 
-#### **Row 3 (y: 32-47) - Wide Buttons Default (32x16)**
-Horizontal buttons in normal state:
-- **button-wide-body-default** (0,32)
-- **button-wide-mind-default** (32,32)
-- **button-wide-soul-default** (64,32)
-- **button-wide-ice-default** (96,32)
-- **button-wide-stone-default** (128,32)
-- **button-wide-gold-default** (160,32)
-- **button-wide-wood-default** (192,32)
-- **button-wide-metal-default** (224,32)
-- **button-wide-ore-default** (256,32)
+#### **Row 2 (y: 112-176) - 4x4 Frame System (8 themes)**
+Each theme contains 16 sprites in a 4x4 frame system:
+- **green-frame** (0,112)
+- **red-frame** (64,112)
+- **forest-green** (128,112)
+- **burnt-red** (192,112)
+- **silver** (256,112)
+- **gold** (320,112)
+- **pale-blue** (384,112)
+- **green-ornate** (448,112)
 
-#### **Row 4 (y: 48-63) - Wide Buttons Active (32x16)**
-Horizontal buttons in active/hover state:
-- **button-wide-body-active** (0,48)
-- **button-wide-mind-active** (32,48)
-- **button-wide-soul-active** (64,48)
-- **button-wide-ice-active** (96,48)
-- **button-wide-stone-active** (128,48)
-- **button-wide-gold-active** (160,48)
+#### **Row 3 (y: 176-240) - 4x4 Frame System (8 themes)**
+Each theme contains 16 sprites in a 4x4 frame system:
+- **green-button** (0,176)
+- **red-button** (64,176)
+- **green-button-activated** (128,176)
+- **red-button-activated** (192,176)
+- **grey-brown** (256,176)
+- **purple-button** (320,176)
+- **orange-button** (384,176)
+- **blue-ornate** (448,176)
 
-#### **Row 5 (y: 64-95) - Square Buttons Default (32x32)**
-Standard action buttons in normal state:
-- **button-square-stone-default** (0,64)
-- **button-square-rune-default** (32,64)
-- **button-square-neon-default** (64,64)
-- **button-square-digi1-default** (96,64)
-- **button-square-digi2-default** (128,64)
-- **button-square-digiblue1-default** (160,64)
-- **button-square-digiblue2-default** (192,64)
+#### **Row 4 (y: 240-304) - 4x4 Frame System (6 themes)**
+Each theme contains 16 sprites in a 4x4 frame system:
+- **thick-gold** (0,240)
+- **skinny-gold** (64,240)
+- **turquoise** (128,240)
+- **bronze** (192,240)
+- **gunmetal** (256,240)
+- **royal-blue** (320,240)
 
-#### **Row 6 (y: 96-127) - Square Buttons Active (32x32)**
-Standard action buttons in active state:
-- **button-square-stone-active** (0,96)
-- **button-square-rune-active** (32,96)
-- **button-square-neon-active** (64,96)
-- **button-square-digi1-active** (96,96)
-- **button-square-digi2-active** (128,96)
-- **button-square-digiblue1-active** (160,96)
-- **button-square-digiblue2-active** (192,96)
+### **Additional UI Elements**
 
-#### **Row 7 (y: 128-159) - Large Buttons Default (64x32)**
-Prominent call-to-action buttons in normal state:
-- **button-large-1** (0,128)
-- **button-large-2** (64,128)
-- **button-large-3** (128,128)
-- **button-large-4** (192,128)
-- **button-large-5** (256,128)
-- **button-large-6** (320,128)
+#### **Text Elements (y: 304-368)**
+- **text-sanctuary** (0,304) 80x32 - Large title text
+- **text-bober** (0,336) 64x32 - Medium subtitle text
+- **text-dam** (0,368) 48x32 - Medium subtitle text
 
-#### **Row 8 (y: 160-191) - Large Buttons Active (64x32)**
-Prominent call-to-action buttons in active state:
-- **button-large-1-active** (0,160)
-- **button-large-2-active** (64,160)
-- **button-large-3-active** (128,160)
-- **button-large-4-active** (192,160)
-- **button-large-5-active** (256,160)
+#### **Navigation Buttons (y: 400-432)**
+- **button-large-previous** (0,400) 32x32 - Large previous button
+- **button-large-next** (32,400) 32x32 - Large next button
+- **button-back** (0,432) 48x16 - Back navigation button
+- **button-next** (48,432) 48x16 - Next navigation button
+- **button-wooden-wide** (96,432) 48x16 - Wide wooden button
+- **button-small** (144,432) 16x16 - Small button
 
-#### **Row 9 (y: 192-255) - Frames Row 1 (64x64)**
-First row of full-size frames (15 frames):
-- **frame-woodsmall** (0,192)
-- **frame-wood-ornate** (64,192)
-- **frame-birch** (128,192)
-- **frame-moss-stone** (192,192)
-- **frame-moss-stone2** (256,192)
-- **frame-moss-stone3** (320,192)
-- **frame-fancy-card** (384,192)
-- **frame-water-card** (448,192)
-- **frame-plain** (512,192)
-- **frame-plain2** (576,192)
-- **frame-warning** (640,192)
-- **frame-dark-red** (704,192)
-- **frame-notification** (768,192)
-- **frame-simple-ornate** (832,192)
-- **frame-gold-ornate** (896,192)
+#### **Icons Row (y: 448)**
+9 icons, each 16x16:
+- **icon-save** (0,448) - Save icon
+- **icon-stats** (16,448) - Stats icon
+- **icon-lock** (32,448) - Lock icon
+- **icon-book** (48,448) - Book icon
+- **icon-crown** (64,448) - Crown icon
+- **icon-trophy** (80,448) - Trophy icon
+- **icon-edit** (96,448) - Edit icon
+- **icon-target** (112,448) - Target icon
+- **icon-lotus** (128,448) - Lotus icon
 
-#### **Row 10 (y: 256-319) - Frames Row 2 (64x64)**
-Second row of full-size frames (14 frames):
-- **frame-stone** (0,256)
-- **frame-mossy-stone** (64,256)
-- **frame-rune1** (128,256)
-- **frame-rune2** (192,256)
-- **frame-skull** (256,256)
-- **frame-witch** (320,256)
-- **frame-slav** (384,256)
-- **frame-pumpkin** (448,256)
-- **frame-birch** (512,256)
-- **frame-compas** (576,256)
-- **frame-leag** (640,256)
-- **frame-starred** (704,256)
-- **frame-book** (768,256)
-- **frame-eq** (832,256)
+#### **Difficulty Numbers (y: 464)**
+10 difficulty level indicators, each 16x16:
+- **difficulty-0** through **difficulty-9** (0,464) to (144,464)
 
-#### **Row 11 (y: 320-383) - Frames Row 3 (64x64)**
-Third row of full-size frames (9 frames):
-- **frame-stone-ornate** (0,320)
-- **frame-stone-uranium** (64,320)
-- **frame-tech** (128,320)
-- **frame-red-tech** (192,320)
-- **frame-stone-red-crack** (256,320)
-- **frame-rune3** (320,320)
-- **frame-cross** (384,320)
-- **frame-rune4** (448,320)
-- **frame-slavic2** (512,320)
+#### **Difficulty Level Buttons (y: 480)**
+- **button-low** (0,480) 32x16 - Low difficulty button
+- **button-medium** (32,480) 48x16 - Medium difficulty button
+- **button-high** (80,480) 32x16 - High difficulty button
 
-#### **Row 12 (y: 384-447) - Frames Row 4 (64x64)**
-Fourth row of full-size frames (7 frames):
-- **frame-ice** (0,384)
-- **frame-ice1** (64,384)
-- **frame-ice2** (128,384)
-- **frame-star** (192,384)
-- **frame-neon-stars** (256,384)
-- **frame-neon-orange** (320,384)
-- **frame-metal-block** (384,384)
+#### **Attribute Buttons (y: 496)**
+- **button-body** (0,496) 32x16 - Body attribute button
+- **button-mind** (32,496) 32x16 - Mind attribute button
+- **button-soul** (64,496) 32x16 - Soul attribute button
 
-#### **Row 13 (y: 448-511) - Frames Row 5 (64x64)**
-Fifth row of full-size frames (9 frames):
-- **frame-script** (0,448)
-- **frame-diy** (64,448)
-- **frame-goo** (128,448)
-- **frame-fossil** (192,448)
-- **frame-simple-leaf** (256,448)
-- **frame-pretzel** (320,448)
-- **frame-antlers** (384,448)
-- **frame-dark-metal** (448,448)
-- **frame-runic-dark** (512,448)
+#### **Action Buttons (y: 496)**
+- **button-plus-large** (96,496) 16x16 - Large plus button
+- **button-plus-small** (112,496) 16x16 - Small plus button
+- **button-minus-large** (128,496) 16x16 - Large minus button
+- **button-minus-small** (144,496) 16x16 - Small minus button
+
+#### **Directional Buttons**
+- **button-left** (160,480) 16x16 - Left direction button
+- **button-up** (176,480) 16x16 - Up direction button
+- **button-right** (192,480) 16x16 - Right direction button
+- **button-down** (176,496) 16x16 - Down direction button
+
+#### **Large Attribute Icons (y: 464)**
+- **icon-fist** (208,464) 48x48 - Fist attribute icon
+- **icon-brain** (256,464) 48x48 - Brain attribute icon
+- **icon-soul** (304,464) 48x48 - Soul attribute icon
 
 ---
 
@@ -181,295 +140,241 @@ interface AtlasSprite {
   y: number;                     // Y position in atlas
   width: number;                 // Sprite width
   height: number;                // Sprite height
-  category: 'frame' | 'button';  // Element type
-  subcategory?: string;          // Size variant (wide, square, large)
+  category: 'frame' | 'bar' | 'button' | 'break' | 'text' | 'icon';
   theme: string;                 // Visual theme
-  state?: 'normal' | 'active' | 'hover'; // Interaction state
+  color: string;                 // Color variant
+  state?: 'normal' | 'active';   // Interaction state
   description: string;           // Detailed description
+}
+```
+
+### **Theme Configuration**
+```typescript
+interface ThemeConfig {
+  name: string;                  // Theme name
+  color: string;                 // Color variant
+  xOffset: number;               // X offset in atlas
+  yOffset: number;               // Y offset in atlas
+  rowType: 'main' | 'frame';     // Row type for sprite generation
 }
 ```
 
 ### **Atlas Metadata**
 ```typescript
 interface AtlasMetadata {
-  atlasWidth: number;    // Total atlas width (960)
-  atlasHeight: number;   // Total atlas height (576)
-  spriteSize: number;    // Base sprite size (64)
-  totalSprites: number;  // Total number of sprites (107)
+  atlasWidth: number;    // Total atlas width (352)
+  atlasHeight: number;   // Total atlas height (512)
+  spriteSize: number;    // Base sprite size (16)
+  totalSprites: number;  // Total number of sprites (619)
 }
 ```
 
-### **Complete Atlas Structure**
-```typescript
-const ATLAS_MAPPING = {
-  sprites: AtlasSprite[],    // Array of all sprites
-  metadata: AtlasMetadata    // Atlas metadata
-};
+---
+
+## 🔧 **Implementation**
+
+### **File Structure**
+```
+src/data/
+├── atlasMapping.ts          # Main atlas mapping with dynamic generation
+├── asset-test.js            # JavaScript version for HTML preview
+├── asset-test.ts            # TypeScript interfaces
+└── asset-test.html          # Interactive preview
 ```
 
----
+### **Dynamic Generation System**
 
-## 🎨 **Theme Categories**
+The atlas mapping uses a dynamic generation system with:
 
-### **Frame Themes**
+1. **Base Sprite Definitions**: Predefined sprite templates for each row type
+2. **Theme Configurations**: Array of 30 theme configurations
+3. **Generator Function**: Creates sprites for each theme with proper offsets
+4. **Automatic Metadata**: Calculates dimensions and sprite counts dynamically
 
-#### **Natural Materials**
-- **wood**: Natural wooden frames with grain texture
-- **birch**: Light birch wood with natural grain
-- **stone**: Rock and stone-based frames
-- **moss-stone**: Organic stone with moss growth
-- **mossy-stone**: Alternative moss stone variant
+### **Base Sprite Arrays**
 
-#### **Decorative**
-- **ornate**: Decorative frames with intricate details
-- **simple-ornate**: Basic ornate variant
-- **gold-ornate**: Luxurious gold ornate frames
-- **stone-ornate**: Ornate stone frames
+#### **BASE_MAIN_SPRITES (28 sprites)**
+Used for Row 1 and Row 4 themes, includes:
+- Frame corners, edges, and backgrounds
+- Horizontal and vertical bars
+- Progress bars
+- Break elements
+- Buttons
 
-#### **Mystical & Magical**
-- **rune**: Mystical frames with magical symbols
-- **runic-dark**: Dark runic frames
-- **witch**: Witch-themed magical frames
-- **skull**: Bone and skull-themed frames
-
-#### **Technological**
-- **tech**: High-tech futuristic frames
-- **red-tech**: Red-themed tech frames
-- **digi1/digi2**: Digital pattern variants
-- **digiblue1/digiblue2**: Blue digital variants
-
-#### **Elemental**
-- **ice**: Crystalline and frost-themed frames
-- **ice1/ice2**: Ice frame variants
-- **water-card**: Water-themed flowing frames
-
-#### **Cultural & Thematic**
-- **slav/slavic2**: Slavic cultural frames
-- **pumpkin**: Harvest and seasonal frames
-- **cross**: Religious and spiritual frames
-- **compass**: Navigation and exploration frames
-- **book**: Literary and knowledge frames
-- **equipment**: Gear and mechanical frames
-
-#### **Special Effects**
-- **neon-stars**: Glowing celestial frames
-- **neon-orange**: Bright orange neon frames
-- **star/starred**: Star-themed frames
-- **metal-block**: Industrial metal frames
-
-#### **Organic & Unique**
-- **script**: Handwritten text frames
-- **diy**: Handmade and craft frames
-- **goo**: Organic slimy frames
-- **fossil**: Ancient bone frames
-- **simple-leaf**: Natural leaf frames
-- **pretzel**: Twisted organic frames
-- **antlers**: Horn and antler frames
-
-#### **Status & Alert**
-- **warning**: Alert and caution frames
-- **notification**: Information frames
-- **dark-red**: Ominous dark red frames
-- **plain/plain2**: Simple plain frames
-- **fancy-card**: Elegant card frames
-
-### **Button Themes**
-
-#### **Core Attributes**
-- **body**: Red-themed for physical attributes
-- **mind**: Green-themed for mental attributes
-- **soul**: Brown-themed for spiritual attributes
-
-#### **Materials**
-- **stone**: Grey stone with natural texture
-- **metal**: Dark metallic with rivets
-- **wood**: Dark wooden with grain
-- **gold**: Golden-yellow with metallic shine
-- **ore**: Metallic ore texture
-
-#### **Elements**
-- **ice**: Light blue crystalline
-- **tech**: Digital and technological
+#### **BASE_FRAME_SPRITES (16 sprites)**
+Used for Row 2 and Row 3 themes, includes:
+- 3x3 frame system (9 sprites)
+- 3x1 horizontal bar (3 sprites)
+- 1x3 vertical bar (3 sprites)
+- 1x1 button (1 sprite)
 
 ---
 
-## 🛠️ **Usage Examples**
+## 🎨 **Categories and Themes**
 
-### **Getting a Specific Sprite**
+### **Categories**
+- **frame**: UI frames and borders
+- **bar**: Progress bars and dividers
+- **button**: Interactive buttons
+- **break**: Page breaks and separators
+- **text**: Text elements and labels
+- **icon**: Decorative and functional icons
+
+### **Themes**
+- **corner**: Frame corner elements
+- **edge**: Frame edge elements
+- **background**: Background elements
+- **horizontal**: Horizontal bars and elements
+- **vertical**: Vertical bars and elements
+- **progress**: Progress bar elements
+- **navigation**: Navigation buttons
+- **action**: Action buttons and icons
+- **difficulty**: Difficulty-related elements
+- **attribute**: Character attribute elements
+- **direction**: Directional buttons
+- **title**: Title text elements
+- **subtitle**: Subtitle text elements
+- **data**: Data-related icons
+- **security**: Security-related icons
+- **knowledge**: Knowledge-related icons
+- **royalty**: Royalty-related icons
+- **achievement**: Achievement-related icons
+- **goal**: Goal-related icons
+- **nature**: Nature-related icons
+- **wooden**: Wooden-themed elements
+
+### **Colors**
+30 color variants including:
+- green, dark-green, blue-stone, red, purple, orange, yellow, cyan
+- forest-green, burnt-red, silver, gold, pale-blue, green-ornate
+- grey-brown, blue-ornate, thick-gold, skinny-gold, turquoise
+- bronze, gunmetal, royal-blue
+
+---
+
+## 🛠️ **Usage**
+
+### **Getting Sprites by Category**
 ```typescript
-import { ATLAS_MAPPING } from '../data/atlasMapping';
+// Get all button sprites
+const buttons = ATLAS_MAPPING.sprites.filter(sprite => sprite.category === 'button');
 
-// Find a specific sprite by ID
-const woodFrame = ATLAS_MAPPING.sprites.find(sprite => sprite.id === 'frame-wood-small');
-
-// Find sprites by category and theme
-const stoneFrames = ATLAS_MAPPING.sprites.filter(sprite => 
-  sprite.category === 'frame' && sprite.theme === 'stone'
-);
-
-// Find buttons by size and state
-const activeWideButtons = ATLAS_MAPPING.sprites.filter(sprite => 
-  sprite.category === 'button' && 
-  sprite.subcategory === 'wide' && 
-  sprite.state === 'active'
+// Get all frame sprites for a specific theme
+const greenFrames = ATLAS_MAPPING.sprites.filter(sprite => 
+  sprite.category === 'frame' && sprite.color === 'green'
 );
 ```
 
-### **Converting to UI Elements**
+### **Getting Sprites by Theme**
 ```typescript
-import { convertSpriteToUIElement } from '../data/uiElementMapping';
+// Get all navigation buttons
+const navButtons = ATLAS_MAPPING.sprites.filter(sprite => sprite.theme === 'navigation');
 
-// Convert a sprite to UI element format
-const sprite = ATLAS_MAPPING.sprites[0];
-const uiElement = convertSpriteToUIElement(sprite);
-
-// Convert all sprites
-const uiElements = ATLAS_MAPPING.sprites.map(convertSpriteToUIElement);
+// Get all difficulty elements
+const difficultyElements = ATLAS_MAPPING.sprites.filter(sprite => sprite.theme === 'difficulty');
 ```
 
-### **CSS Background Positioning**
+### **Getting Sprites by Color**
 ```typescript
-// Calculate CSS background position
-function getBackgroundPosition(sprite: AtlasSprite) {
-  return `-${sprite.x}px -${sprite.y}px`;
-}
+// Get all green elements
+const greenElements = ATLAS_MAPPING.sprites.filter(sprite => sprite.color === 'green');
 
-// Example usage
-const woodFrame = ATLAS_MAPPING.sprites.find(s => s.id === 'frame-wood-small');
-const backgroundPosition = getBackgroundPosition(woodFrame);
-// Result: "-0px -0px"
+// Get all gold elements
+const goldElements = ATLAS_MAPPING.sprites.filter(sprite => sprite.color === 'gold');
 ```
 
 ---
 
-## 🔧 **Development Tools**
+## 🔍 **Preview and Testing**
 
-### **Sprite Validation**
-```typescript
-// Validate sprite positioning
-function validateAtlasMapping() {
-  const positions = new Set();
-  const errors = [];
+### **Interactive HTML Preview**
+The `asset-test.html` file provides an interactive preview of all atlas elements with:
+- **Visual highlighting** of sprites on hover
+- **Filtering** by category, theme, and color
+- **Search functionality** by name or ID
+- **Detailed information** display for each sprite
+- **Zoom controls** for better visibility
 
-  ATLAS_MAPPING.sprites.forEach(sprite => {
-    const key = `${sprite.x},${sprite.y}`;
-    if (positions.has(key)) {
-      errors.push(`Duplicate position: ${key} for sprite ${sprite.id}`);
-    }
-    positions.add(key);
-
-    // Check bounds
-    if (sprite.x + sprite.width > ATLAS_MAPPING.metadata.atlasWidth) {
-      errors.push(`Sprite ${sprite.id} exceeds atlas width`);
-    }
-    if (sprite.y + sprite.height > ATLAS_MAPPING.metadata.atlasHeight) {
-      errors.push(`Sprite ${sprite.id} exceeds atlas height`);
-    }
-  });
-
-  return errors;
-}
-```
-
-### **Sprite Statistics**
-```typescript
-// Generate sprite statistics
-function getAtlasStatistics() {
-  const stats = {
-    totalSprites: ATLAS_MAPPING.sprites.length,
-    categories: {},
-    themes: {},
-    sizes: {}
-  };
-
-  ATLAS_MAPPING.sprites.forEach(sprite => {
-    // Count by category
-    stats.categories[sprite.category] = (stats.categories[sprite.category] || 0) + 1;
-    
-    // Count by theme
-    stats.themes[sprite.theme] = (stats.themes[sprite.theme] || 0) + 1;
-    
-    // Count by size
-    const size = `${sprite.width}x${sprite.height}`;
-    stats.sizes[size] = (stats.sizes[size] || 0) + 1;
-  });
-
-  return stats;
-}
-```
-
-### **Export Functions**
-```typescript
-// Export to different formats
-function exportToCSS() {
-  return ATLAS_MAPPING.sprites.map(sprite => `
-.${sprite.id} {
-  background-position: -${sprite.x}px -${sprite.y}px;
-  width: ${sprite.width}px;
-  height: ${sprite.height}px;
-}`).join('\n');
-}
-
-function exportToJSON() {
-  return JSON.stringify(ATLAS_MAPPING, null, 2);
-}
-```
+### **Accessing the Preview**
+1. Open `asset-test.html` in a web browser
+2. Use the filter controls to explore different categories
+3. Hover over sprites to see their details
+4. Use the search box to find specific elements
 
 ---
 
-## 📊 **Performance Considerations**
+## 📊 **Statistics**
 
-### **Memory Usage**
-- **Single texture**: All sprites in one 960x576 texture
-- **Efficient loading**: One HTTP request vs. 107 individual requests
-- **GPU optimization**: Reduced draw calls through texture batching
+### **Current Atlas Stats**
+- **Total Sprites**: 619
+- **Color Themes**: 30
+- **Categories**: 6
+- **Themes**: 21
+- **Atlas Dimensions**: 352x512 pixels
+- **Base Sprite Size**: 16x16 pixels
 
-### **Rendering Performance**
-- **CSS background positioning**: Hardware-accelerated
-- **Border image slicing**: Efficient 9-slice scaling for frames
-- **Sprite caching**: Browser caches single texture file
-
-### **Development Performance**
-- **Type safety**: TypeScript interfaces prevent errors
-- **Centralized data**: Single source of truth for all sprites
-- **Automated validation**: Catch positioning conflicts early
-
----
-
-## 🔄 **Maintenance & Updates**
-
-### **Adding New Sprites**
-1. **Update texture atlas**: Add new sprites to the PNG file
-2. **Add sprite data**: Include new sprite in `ATLAS_MAPPING.sprites`
-3. **Update metadata**: Adjust `atlasHeight` and `totalSprites` if needed
-4. **Validate positioning**: Run validation to check for conflicts
-5. **Update documentation**: Document new sprites and themes
-
-### **Version Control**
-- **Atlas versions**: Track changes to the texture file
-- **Mapping versions**: Version control for sprite data
-- **Breaking changes**: Document incompatible updates
-
-### **Quality Assurance**
-- **Visual testing**: Verify sprite alignment and appearance
-- **Performance testing**: Monitor loading and rendering performance
-- **Cross-browser testing**: Ensure compatibility across browsers
+### **Breakdown by Category**
+- **Frames**: 448 sprites (30 themes × 16 sprites + 8 themes × 28 sprites)
+- **Buttons**: 89 sprites (various sizes and themes)
+- **Icons**: 12 sprites (functional and decorative)
+- **Text**: 13 sprites (labels and difficulty numbers)
+- **Bars**: 42 sprites (progress and divider bars)
+- **Breaks**: 15 sprites (page breaks and separators)
 
 ---
 
-## 📚 **Cross-References**
+## 🔄 **Maintenance**
 
-### **Related Documentation**
-- **[asset-management-guide.md](asset-management-guide.md)** - Complete asset management system
-- **[10-color-system.md](10-color-system.md)** - Color palette and theming
-- **[11-ui-enhancements.md](11-ui-enhancements.md)** - UI component improvements
+### **Adding New Themes**
+1. Add theme configuration to `THEME_CONFIGS` array
+2. Specify `name`, `color`, `xOffset`, `yOffset`, and `rowType`
+3. The system will automatically generate all sprites for the new theme
 
-### **Implementation Files**
-- `src/data/atlasMapping.ts` - TypeScript atlas mapping
-- `src/data/uiElementMapping.ts` - UI element conversions
-- `asset-test.js` - JavaScript export for HTML usage
-- `public/assets/Frames/Framesandbuttonsatlas.png` - Texture atlas file
+### **Adding New Base Sprites**
+1. Add sprite definition to appropriate base array
+2. Update sprite count calculations
+3. Regenerate atlas mapping
+
+### **Modifying Existing Sprites**
+1. Update base sprite definitions
+2. All themes using that base sprite will be automatically updated
+3. No manual coordinate adjustments needed
 
 ---
 
-*"In the precise grid of the atlas, every pixel finds its purpose, every sprite its position, creating a harmonious visual language that speaks to the soul of Scrypture."* 🎨✨
+## 🚀 **Future Enhancements**
+
+### **Planned Features**
+- **Animation Support**: Multi-frame sprite sequences
+- **State Variations**: More interaction states (hover, disabled, etc.)
+- **Size Variants**: Additional size options for existing elements
+- **Theme Presets**: Predefined theme combinations
+- **Export Tools**: Automated sprite sheet generation
+
+### **Performance Optimizations**
+- **Sprite Batching**: Grouped rendering for better performance
+- **Lazy Loading**: Load sprites on demand
+- **Caching**: Cache frequently used sprite data
+- **Compression**: Optimize sprite sheet file size
+
+---
+
+## 📝 **Changelog**
+
+### **Version 2.0.0 (December 2024)**
+- **Complete rewrite** of atlas mapping system
+- **Dynamic generation** with 30 color themes
+- **619 sprites** across 6 categories
+- **Interactive HTML preview** with filtering
+- **Modular architecture** for easy maintenance
+- **Comprehensive documentation** update
+
+### **Version 1.0.0 (July 2025)**
+- Initial atlas mapping system
+- 107 sprites across 12 rows
+- Static coordinate-based mapping
+- Basic categorization system
+
+---
+
+*This documentation is maintained as part of the Scrypture project. For questions or contributions, please refer to the project's development guidelines.*

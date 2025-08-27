@@ -8,10 +8,11 @@ interface UIElement {
   y: number;
   width: number;
   height: number;
-  category: 'button' | 'frame';
+  category: 'button' | 'frame' | 'bar' | 'break' | 'icon' | 'text';
   subcategory?: string;
   theme?: string;
   state?: 'normal' | 'active' | 'hover' | 'pressed';
+  color?: string;
   variant?: string;
   usage?: string;
   cssClass?: string;
@@ -31,6 +32,7 @@ function convertSpriteToUIElement(sprite: AtlasSprite): UIElement {
     subcategory: sprite.subcategory,
     theme: sprite.theme,
     state: sprite.state,
+    color: sprite.color,
     variant: 'basic',
     usage: sprite.category === 'button' ? 'general' : 'container',
     cssClass: sprite.id.replace(/-/g, '-'),
@@ -47,6 +49,18 @@ export const UI_ELEMENT_MAPPING = {
     .map(convertSpriteToUIElement),
   frames: ATLAS_MAPPING.sprites
     .filter(sprite => sprite.category === 'frame')
+    .map(convertSpriteToUIElement),
+  bars: ATLAS_MAPPING.sprites
+    .filter(sprite => sprite.category === 'bar')
+    .map(convertSpriteToUIElement),
+  breaks: ATLAS_MAPPING.sprites
+    .filter(sprite => sprite.category === 'break')
+    .map(convertSpriteToUIElement),
+  icons: ATLAS_MAPPING.sprites
+    .filter(sprite => sprite.category === 'icon')
+    .map(convertSpriteToUIElement),
+  texts: ATLAS_MAPPING.sprites
+    .filter(sprite => sprite.category === 'text')
     .map(convertSpriteToUIElement)
 };
 
@@ -55,22 +69,30 @@ export const ATLAS_METADATA = ATLAS_MAPPING.metadata;
 
 // Export utility functions
 export const getElementById = (id: string): UIElement | undefined => {
-  return [...UI_ELEMENT_MAPPING.buttons, ...UI_ELEMENT_MAPPING.frames]
+  return [...UI_ELEMENT_MAPPING.buttons, ...UI_ELEMENT_MAPPING.frames, ...UI_ELEMENT_MAPPING.bars, ...UI_ELEMENT_MAPPING.breaks, ...UI_ELEMENT_MAPPING.icons, ...UI_ELEMENT_MAPPING.texts]
     .find(element => element.id === id);
 };
 
-export const getElementsByCategory = (category: 'button' | 'frame'): UIElement[] => {
-  return category === 'button' ? UI_ELEMENT_MAPPING.buttons : UI_ELEMENT_MAPPING.frames;
+export const getElementsByCategory = (category: 'button' | 'frame' | 'bar' | 'break' | 'icon' | 'text'): UIElement[] => {
+  switch (category) {
+    case 'button': return UI_ELEMENT_MAPPING.buttons;
+    case 'frame': return UI_ELEMENT_MAPPING.frames;
+    case 'bar': return UI_ELEMENT_MAPPING.bars;
+    case 'break': return UI_ELEMENT_MAPPING.breaks;
+    case 'icon': return UI_ELEMENT_MAPPING.icons;
+    case 'text': return UI_ELEMENT_MAPPING.texts;
+    default: return [];
+  }
 };
 
 export const getElementsByTheme = (theme: string): UIElement[] => {
-  return [...UI_ELEMENT_MAPPING.buttons, ...UI_ELEMENT_MAPPING.frames]
+  return [...UI_ELEMENT_MAPPING.buttons, ...UI_ELEMENT_MAPPING.frames, ...UI_ELEMENT_MAPPING.bars, ...UI_ELEMENT_MAPPING.breaks, ...UI_ELEMENT_MAPPING.icons, ...UI_ELEMENT_MAPPING.texts]
     .filter(element => element.theme === theme);
 };
 
 export const getAvailableThemes = (): string[] => {
   const themes = new Set<string>();
-  [...UI_ELEMENT_MAPPING.buttons, ...UI_ELEMENT_MAPPING.frames].forEach(element => {
+  [...UI_ELEMENT_MAPPING.buttons, ...UI_ELEMENT_MAPPING.frames, ...UI_ELEMENT_MAPPING.bars, ...UI_ELEMENT_MAPPING.breaks, ...UI_ELEMENT_MAPPING.icons, ...UI_ELEMENT_MAPPING.texts].forEach(element => {
     if (element.theme) themes.add(element.theme);
   });
   return Array.from(themes).sort();

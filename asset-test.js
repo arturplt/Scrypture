@@ -1,1340 +1,280 @@
-// JavaScript version of the centralized atlas mapping data
-// This can be loaded directly in HTML without ES6 modules
+// Atlas Mapping for asset-test.html
+// This file mirrors the structure from src/data/atlasMapping.ts for direct use in HTML
 
-// Convert AtlasSprite data to UIElement format
-function convertSpriteToUIElement(sprite) {
-  return {
-    id: sprite.id,
-    name: sprite.name,
-    x: sprite.x,
-    y: sprite.y,
-    width: sprite.width,
-    height: sprite.height,
-    category: sprite.category,
-    subcategory: sprite.subcategory,
-    theme: sprite.theme,
-    state: sprite.state,
-    variant: 'basic',
-    usage: sprite.category === 'button' ? 'general' : 'container',
-    cssClass: sprite.id.replace(/-/g, '-'),
-    ...(sprite.category === 'frame' && {
-      borderSlice: { top: 16, right: 16, bottom: 16, left: 16 }
-    })
-  };
+// Theme configurations for 3 rows × 8-10 columns = 30 themes
+const THEME_CONFIGS = [
+  // Row 1 (y: 0-96) - 8 themes - Main 4x7 grid
+  { name: 'green', color: 'green', xOffset: 0, yOffset: 0, rowType: 'main' },
+  { name: 'dark-green', color: 'dark-green', xOffset: 64, yOffset: 0, rowType: 'main' },
+  { name: 'blue-stone', color: 'blue-stone', xOffset: 128, yOffset: 0, rowType: 'main' },
+  { name: 'red', color: 'red', xOffset: 192, yOffset: 0, rowType: 'main' },
+  { name: 'purple', color: 'purple', xOffset: 256, yOffset: 0, rowType: 'main' },
+  { name: 'orange', color: 'orange', xOffset: 320, yOffset: 0, rowType: 'main' },
+  { name: 'yellow', color: 'yellow', xOffset: 384, yOffset: 0, rowType: 'main' },
+  { name: 'cyan', color: 'cyan', xOffset: 448, yOffset: 0, rowType: 'main' },
+  
+  // Row 2 (y: 112-176) - 8 themes - 4x4 frame system
+  { name: 'green-frame', color: 'green', xOffset: 0, yOffset: 112, rowType: 'frame' },
+  { name: 'red-frame', color: 'red', xOffset: 64, yOffset: 112, rowType: 'frame' },
+  { name: 'forest-green', color: 'forest-green', xOffset: 128, yOffset: 112, rowType: 'frame' },
+  { name: 'burnt-red', color: 'burnt-red', xOffset: 192, yOffset: 112, rowType: 'frame' },
+  { name: 'silver', color: 'silver', xOffset: 256, yOffset: 112, rowType: 'frame' },
+  { name: 'gold', color: 'gold', xOffset: 320, yOffset: 112, rowType: 'frame' },
+  { name: 'pale-blue', color: 'pale-blue', xOffset: 384, yOffset: 112, rowType: 'frame' },
+  { name: 'green-ornate', color: 'green-ornate', xOffset: 448, yOffset: 112, rowType: 'frame' },
+  
+  // Row 3 (y: 176-240) - 8 themes - 4x4 frame system
+  { name: 'green-button', color: 'green', xOffset: 0, yOffset: 176, rowType: 'frame' },
+  { name: 'red-button', color: 'red', xOffset: 64, yOffset: 176, rowType: 'frame' },
+  { name: 'green-button-activated', color: 'green', xOffset: 128, yOffset: 176, rowType: 'frame' },
+  { name: 'red-button-activated', color: 'red', xOffset: 192, yOffset: 176, rowType: 'frame' },
+  { name: 'grey-brown', color: 'grey-brown', xOffset: 256, yOffset: 176, rowType: 'frame' },
+  { name: 'purple-button', color: 'purple', xOffset: 320, yOffset: 176, rowType: 'frame' },
+  { name: 'orange-button', color: 'orange', xOffset: 384, yOffset: 176, rowType: 'frame' },
+  { name: 'blue-ornate', color: 'blue-ornate', xOffset: 448, yOffset: 176, rowType: 'frame' },
+  
+  // Row 4 (y: 240-304) - 6 themes - 4x4 frame system
+  { name: 'thick-gold', color: 'thick-gold', xOffset: 0, yOffset: 240, rowType: 'frame' },
+  { name: 'skinny-gold', color: 'skinny-gold', xOffset: 64, yOffset: 240, rowType: 'frame' },
+  { name: 'turquoise', color: 'turquoise', xOffset: 128, yOffset: 240, rowType: 'frame' },
+  { name: 'bronze', color: 'bronze', xOffset: 192, yOffset: 240, rowType: 'frame' },
+  { name: 'gunmetal', color: 'gunmetal', xOffset: 256, yOffset: 240, rowType: 'frame' },
+  { name: 'royal-blue', color: 'royal-blue', xOffset: 320, yOffset: 240, rowType: 'frame' }
+];
+
+// Base sprite definitions for Row 1 - Main 4x7 Grid (28 sprites per theme)
+const BASE_MAIN_SPRITES = [
+  // Top Row - Corners and Top Edge
+  { id: 'frame-corner-top-left', name: 'Top Left Corner', x: 0, y: 0, width: 16, height: 16, category: 'frame', theme: 'corner', description: 'Top left corner - does not scale, maintains corner appearance' },
+  { id: 'frame-edge-top', name: 'Top Edge (Repeatable)', x: 16, y: 0, width: 16, height: 16, category: 'frame', theme: 'edge', description: 'Top edge - horizontally repeatable for scaling' },
+  { id: 'frame-corner-top-right', name: 'Top Right Corner', x: 32, y: 0, width: 16, height: 16, category: 'frame', theme: 'corner', description: 'Top right corner - does not scale, maintains corner appearance' },
+  
+  // Middle Row - Left Edge, Background, Right Edge
+  { id: 'frame-edge-left', name: 'Left Edge (Repeatable)', x: 0, y: 16, width: 16, height: 16, category: 'frame', theme: 'edge', description: 'Left edge - vertically repeatable for scaling' },
+  { id: 'frame-background', name: 'Background (Repeatable)', x: 16, y: 16, width: 16, height: 16, category: 'frame', theme: 'background', description: 'Background - both horizontally and vertically repeatable' },
+  { id: 'frame-edge-right', name: 'Right Edge (Repeatable)', x: 32, y: 16, width: 16, height: 16, category: 'frame', theme: 'edge', description: 'Right edge - vertically repeatable for scaling' },
+  
+  // Lower Frame Elements
+  { id: 'frame-bottom-left-frame', name: 'Lower Left Edge', x: 0, y: 48, width: 16, height: 16, category: 'frame', theme: 'edge', description: 'Lower left edge element' },
+  { id: 'frame-bottom-center', name: 'Lower BG (Repeatable)', x: 16, y: 48, width: 16, height: 16, category: 'frame', theme: 'background', description: 'Lower background - horizontally repeatable' },
+  { id: 'frame-bottom-right-frame', name: 'Lower Right Edge', x: 32, y: 48, width: 16, height: 16, category: 'frame', theme: 'edge', description: 'Lower right edge element' },
+  
+  // Partition Elements
+  { id: 'partition-left', name: 'Partition Left', x: 0, y: 32, width: 16, height: 16, category: 'frame', theme: 'edge', description: 'Left partition element' },
+  { id: 'partition-middle', name: 'Partition Middle (Repeatable)', x: 16, y: 32, width: 16, height: 16, category: 'frame', theme: 'background', description: 'Middle partition element - horizontally repeatable' },
+  { id: 'partition-right', name: 'Partition Right', x: 32, y: 32, width: 16, height: 16, category: 'frame', theme: 'edge', description: 'Right partition element' },
+  
+  // Bottom Row - Corners and Bottom Edge
+  { id: 'frame-corner-bottom-left', name: 'Bottom Left Corner', x: 0, y: 64, width: 16, height: 16, category: 'frame', theme: 'corner', description: 'Bottom left corner - does not scale, maintains corner appearance' },
+  { id: 'frame-edge-bottom', name: 'Bottom Edge (Repeatable)', x: 16, y: 64, width: 16, height: 16, category: 'frame', theme: 'edge', description: 'Bottom edge - horizontally repeatable for scaling' },
+  { id: 'frame-corner-bottom-right', name: 'Bottom Right Corner', x: 32, y: 64, width: 16, height: 16, category: 'frame', theme: 'corner', description: 'Bottom right corner - does not scale, maintains corner appearance' },
+  
+  // Horizontal Bar Breakdown
+  { id: 'bar-horizontal-left', name: 'Horizontal Bar Left', x: 0, y: 80, width: 16, height: 16, category: 'bar', theme: 'horizontal', description: 'Left part of horizontal bar - does not scale horizontally' },
+  { id: 'bar-horizontal-center', name: 'Horizontal Bar Center (Repeatable)', x: 16, y: 80, width: 16, height: 16, category: 'bar', theme: 'horizontal', description: 'Center part of horizontal bar - horizontally repeatable for scaling' },
+  { id: 'bar-horizontal-right', name: 'Horizontal Bar Right', x: 32, y: 80, width: 16, height: 16, category: 'bar', theme: 'horizontal', description: 'Right part of horizontal bar - does not scale horizontally' },
+  
+  // Progress Bar Breakdown
+  { id: 'bar-progress-left', name: 'Progress Bar Left', x: 0, y: 96, width: 16, height: 16, category: 'bar', theme: 'progress', description: 'Left part of progress bar - does not scale horizontally' },
+  { id: 'bar-progress-center', name: 'Progress Bar Center (Repeatable)', x: 16, y: 96, width: 16, height: 16, category: 'bar', theme: 'progress', description: 'Center part of progress bar - horizontally repeatable for scaling' },
+  { id: 'bar-progress-right', name: 'Progress Bar Right', x: 32, y: 96, width: 16, height: 16, category: 'bar', theme: 'progress', description: 'Right part of progress bar - does not scale horizontally' },
+  
+  // Break Elements
+  { id: 'break-horizontal', name: 'Horizontal Page Break', x: 48, y: 0, width: 16, height: 16, category: 'break', theme: 'horizontal', description: 'Horizontal page break element' },
+  { id: 'break-vertical', name: 'Vertical Page Break', x: 48, y: 16, width: 16, height: 16, category: 'break', theme: 'vertical', description: 'Vertical page break element' },
+  
+  // Vertical Bar Elements
+  { id: 'bar-vertical-top', name: 'Vertical Bar Top', x: 48, y: 32, width: 16, height: 16, category: 'bar', theme: 'vertical', description: 'Top part of vertical bar - does not scale vertically' },
+  { id: 'bar-vertical-center', name: 'Vertical Bar Center (Repeatable)', x: 48, y: 48, width: 16, height: 16, category: 'bar', theme: 'vertical', description: 'Center part of vertical bar - vertically repeatable for scaling' },
+  { id: 'bar-vertical-bottom', name: 'Vertical Bar Bottom', x: 48, y: 64, width: 16, height: 16, category: 'bar', theme: 'vertical', description: 'Bottom part of vertical bar - does not scale vertically' },
+  
+  // Buttons
+  { id: 'button-default', name: 'Default Button', x: 48, y: 80, width: 16, height: 16, category: 'button', theme: 'default', state: 'normal', description: '16x16 default button' },
+  { id: 'button-activated', name: 'Activated Button', x: 48, y: 96, width: 16, height: 16, category: 'button', theme: 'default', state: 'active', description: '16x16 activated button' }
+];
+
+// Base sprite definitions for Row 2 - 4x4 Frame System (16 sprites per theme)
+const BASE_FRAME_SPRITES = [
+  // 3x3 Main Frame (9 sprites)
+  // Top Row
+  { id: 'frame-corner-top-left', name: 'Frame Top Left Corner', x: 0, y: 0, width: 16, height: 16, category: 'frame', theme: 'corner', description: 'Top left corner of frame - does not scale, maintains corner appearance' },
+  { id: 'frame-edge-top', name: 'Frame Top Edge (Repeatable)', x: 16, y: 0, width: 16, height: 16, category: 'frame', theme: 'edge', description: 'Top edge of frame - horizontally repeatable for scaling' },
+  { id: 'frame-corner-top-right', name: 'Frame Top Right Corner', x: 32, y: 0, width: 16, height: 16, category: 'frame', theme: 'corner', description: 'Top right corner of frame - does not scale, maintains corner appearance' },
+  
+  // Middle Row
+  { id: 'frame-edge-left', name: 'Frame Left Edge (Repeatable)', x: 0, y: 16, width: 16, height: 16, category: 'frame', theme: 'edge', description: 'Left edge of frame - vertically repeatable for scaling' },
+  { id: 'frame-background', name: 'Frame Background (Repeatable)', x: 16, y: 16, width: 16, height: 16, category: 'frame', theme: 'background', description: 'Background of frame - both horizontally and vertically repeatable' },
+  { id: 'frame-edge-right', name: 'Frame Right Edge (Repeatable)', x: 32, y: 16, width: 16, height: 16, category: 'frame', theme: 'edge', description: 'Right edge of frame - vertically repeatable for scaling' },
+  
+  // Bottom Row
+  { id: 'frame-corner-bottom-left', name: 'Frame Bottom Left Corner', x: 0, y: 32, width: 16, height: 16, category: 'frame', theme: 'corner', description: 'Bottom left corner of frame - does not scale, maintains corner appearance' },
+  { id: 'frame-edge-bottom', name: 'Frame Bottom Edge (Repeatable)', x: 16, y: 32, width: 16, height: 16, category: 'frame', theme: 'edge', description: 'Bottom edge of frame - horizontally repeatable for scaling' },
+  { id: 'frame-corner-bottom-right', name: 'Frame Bottom Right Corner', x: 32, y: 32, width: 16, height: 16, category: 'frame', theme: 'corner', description: 'Bottom right corner of frame - does not scale, maintains corner appearance' },
+  
+  // 3x1 Horizontal Bar (3 sprites)
+  { id: 'bar-horizontal-left', name: 'Horizontal Bar Left', x: 0, y: 48, width: 16, height: 16, category: 'bar', theme: 'horizontal', description: 'Left part of horizontal bar - does not scale horizontally' },
+  { id: 'bar-horizontal-center', name: 'Horizontal Bar Center (Repeatable)', x: 16, y: 48, width: 16, height: 16, category: 'bar', theme: 'horizontal', description: 'Center part of horizontal bar - horizontally repeatable for scaling' },
+  { id: 'bar-horizontal-right', name: 'Horizontal Bar Right', x: 32, y: 48, width: 16, height: 16, category: 'bar', theme: 'horizontal', description: 'Right part of horizontal bar - does not scale horizontally' },
+  
+  // 1x3 Vertical Bar (3 sprites)
+  { id: 'bar-vertical-top', name: 'Vertical Bar Top', x: 48, y: 0, width: 16, height: 16, category: 'bar', theme: 'vertical', description: 'Top part of vertical bar - does not scale vertically' },
+  { id: 'bar-vertical-center', name: 'Vertical Bar Center (Repeatable)', x: 48, y: 16, width: 16, height: 16, category: 'bar', theme: 'vertical', description: 'Center part of vertical bar - vertically repeatable for scaling' },
+  { id: 'bar-vertical-bottom', name: 'Vertical Bar Bottom', x: 48, y: 32, width: 16, height: 16, category: 'bar', theme: 'vertical', description: 'Bottom part of vertical bar - does not scale vertically' },
+  
+  // 1x1 Button (1 sprite)
+  { id: 'button-default', name: 'Default Button', x: 48, y: 48, width: 16, height: 16, category: 'button', theme: 'default', state: 'normal', description: '16x16 default button' }
+];
+
+// Base sprite definitions for Row 3 - Button Variations (1 sprite per theme)
+const BASE_BUTTON_SPRITES = [
+  { id: 'button-default', name: 'Default Button', x: 0, y: 0, width: 16, height: 16, category: 'button', theme: 'default', state: 'normal', description: '16x16 default button' }
+];
+
+// Generator function to create sprites for a theme
+function generateThemeSprites(config) {
+  const sprites = [];
+  
+  if (config.rowType === 'main') {
+    // Generate main 4x7 grid sprites (28 sprites)
+    BASE_MAIN_SPRITES.forEach(baseSprite => {
+      sprites.push({
+        ...baseSprite,
+        id: `${baseSprite.id}-${config.color}`,
+        name: `${baseSprite.name} (${config.color})`,
+        x: baseSprite.x + config.xOffset,
+        y: baseSprite.y + config.yOffset,
+        color: config.color
+      });
+    });
+  } else if (config.rowType === 'frame') {
+    // Generate 4x4 frame system sprites (16 sprites)
+    BASE_FRAME_SPRITES.forEach(baseSprite => {
+      sprites.push({
+        ...baseSprite,
+        id: `${baseSprite.id}-${config.color}`,
+        name: `${baseSprite.name} (${config.color})`,
+        x: baseSprite.x + config.xOffset,
+        y: baseSprite.y + config.yOffset,
+        color: config.color
+      });
+    });
+  } else if (config.rowType === 'button') {
+    // Generate single button sprite (1 sprite)
+    BASE_BUTTON_SPRITES.forEach(baseSprite => {
+      // Handle special cases for activated buttons
+      let state = baseSprite.state || 'normal';
+      let name = baseSprite.name;
+      
+      if (config.name.includes('activated')) {
+        state = 'active';
+        name = 'Activated Button';
+      }
+      
+      sprites.push({
+        ...baseSprite,
+        id: `${baseSprite.id}-${config.color}`,
+        name: `${name} (${config.color})`,
+        x: baseSprite.x + config.xOffset,
+        y: baseSprite.y + config.yOffset,
+        color: config.color,
+        state: state
+      });
+    });
+  }
+  
+  return sprites;
 }
 
-// Atlas mapping data (copied from atlasMapping.ts)
+// Generate all sprites for all themes
+const allSprites = [];
+THEME_CONFIGS.forEach(config => {
+  allSprites.push(...generateThemeSprites(config));
+});
+
+// Add additional text and button elements
+const additionalSprites = [
+  // Text elements
+  { id: 'text-sanctuary', name: 'Text: Sanctuary', x: 0, y: 304, width: 80, height: 32, category: 'text', theme: 'title', color: 'default', description: 'Large title text for Sanctuary' },
+  { id: 'text-bober', name: 'Text: Bober', x: 0, y: 336, width: 64, height: 32, category: 'text', theme: 'subtitle', color: 'default', description: 'Medium text for Bober' },
+  { id: 'text-dam', name: 'Text: Dam', x: 0, y: 368, width: 48, height: 32, category: 'text', theme: 'subtitle', color: 'default', description: 'Medium text for Dam' },
+  
+  // Large navigation buttons
+  { id: 'button-large-previous', name: 'Large Previous Button', x: 0, y: 400, width: 32, height: 32, category: 'button', theme: 'navigation', color: 'default', state: 'normal', description: '32x32 large previous navigation button' },
+  { id: 'button-large-next', name: 'Large Next Button', x: 32, y: 400, width: 32, height: 32, category: 'button', theme: 'navigation', color: 'default', state: 'normal', description: '32x32 large next navigation button' },
+  
+  // Standard navigation buttons
+  { id: 'button-back', name: 'Back Button', x: 0, y: 432, width: 48, height: 16, category: 'button', theme: 'navigation', color: 'default', state: 'normal', description: '48x16 back navigation button' },
+  { id: 'button-next', name: 'Next Button', x: 48, y: 432, width: 48, height: 16, category: 'button', theme: 'navigation', color: 'default', state: 'normal', description: '48x16 next navigation button' },
+  { id: 'button-wooden-wide', name: 'Wooden Button Wide', x: 96, y: 432, width: 48, height: 16, category: 'button', theme: 'wooden', color: 'default', state: 'normal', description: '48x16 wide wooden button' },
+  { id: 'button-small', name: 'Small Button', x: 144, y: 432, width: 16, height: 16, category: 'button', theme: 'default', color: 'default', state: 'normal', description: '16x16 small button' },
+  
+  // Icons row at y: 448
+  { id: 'icon-save', name: 'Save Icon', x: 0, y: 448, width: 16, height: 16, category: 'icon', theme: 'action', color: 'default', description: '16x16 save icon' },
+  { id: 'icon-stats', name: 'Stats Icon', x: 16, y: 448, width: 16, height: 16, category: 'icon', theme: 'data', color: 'default', description: '16x16 stats icon' },
+  { id: 'icon-lock', name: 'Lock Icon', x: 32, y: 448, width: 16, height: 16, category: 'icon', theme: 'security', color: 'default', description: '16x16 lock icon' },
+  { id: 'icon-book', name: 'Book Icon', x: 48, y: 448, width: 16, height: 16, category: 'icon', theme: 'knowledge', color: 'default', description: '16x16 book icon' },
+  { id: 'icon-crown', name: 'Crown Icon', x: 64, y: 448, width: 16, height: 16, category: 'icon', theme: 'royalty', color: 'default', description: '16x16 crown icon' },
+  { id: 'icon-trophy', name: 'Trophy Icon', x: 80, y: 448, width: 16, height: 16, category: 'icon', theme: 'achievement', color: 'default', description: '16x16 trophy icon' },
+  { id: 'icon-edit', name: 'Edit Icon', x: 96, y: 448, width: 16, height: 16, category: 'icon', theme: 'action', color: 'default', description: '16x16 edit icon' },
+  { id: 'icon-target', name: 'Target Icon', x: 112, y: 448, width: 16, height: 16, category: 'icon', theme: 'goal', color: 'default', description: '16x16 target icon' },
+  { id: 'icon-lotus', name: 'Lotus Icon', x: 128, y: 448, width: 16, height: 16, category: 'icon', theme: 'nature', color: 'default', description: '16x16 lotus icon' },
+  
+  // Difficulty numbers row at y: 464
+  { id: 'difficulty-0', name: 'Difficulty 0', x: 0, y: 464, width: 16, height: 16, category: 'text', theme: 'difficulty', color: 'default', description: '16x16 difficulty level 0' },
+  { id: 'difficulty-1', name: 'Difficulty 1', x: 16, y: 464, width: 16, height: 16, category: 'text', theme: 'difficulty', color: 'default', description: '16x16 difficulty level 1' },
+  { id: 'difficulty-2', name: 'Difficulty 2', x: 32, y: 464, width: 16, height: 16, category: 'text', theme: 'difficulty', color: 'default', description: '16x16 difficulty level 2' },
+  { id: 'difficulty-3', name: 'Difficulty 3', x: 48, y: 464, width: 16, height: 16, category: 'text', theme: 'difficulty', color: 'default', description: '16x16 difficulty level 3' },
+  { id: 'difficulty-4', name: 'Difficulty 4', x: 64, y: 464, width: 16, height: 16, category: 'text', theme: 'difficulty', color: 'default', description: '16x16 difficulty level 4' },
+  { id: 'difficulty-5', name: 'Difficulty 5', x: 80, y: 464, width: 16, height: 16, category: 'text', theme: 'difficulty', color: 'default', description: '16x16 difficulty level 5' },
+  { id: 'difficulty-6', name: 'Difficulty 6', x: 96, y: 464, width: 16, height: 16, category: 'text', theme: 'difficulty', color: 'default', description: '16x16 difficulty level 6' },
+  { id: 'difficulty-7', name: 'Difficulty 7', x: 112, y: 464, width: 16, height: 16, category: 'text', theme: 'difficulty', color: 'default', description: '16x16 difficulty level 7' },
+  { id: 'difficulty-8', name: 'Difficulty 8', x: 128, y: 464, width: 16, height: 16, category: 'text', theme: 'difficulty', color: 'default', description: '16x16 difficulty level 8' },
+  { id: 'difficulty-9', name: 'Difficulty 9', x: 144, y: 464, width: 16, height: 16, category: 'text', theme: 'difficulty', color: 'default', description: '16x16 difficulty level 9' },
+  
+  // Difficulty level buttons row at y: 480
+  { id: 'button-low', name: 'Low Button', x: 0, y: 480, width: 32, height: 16, category: 'button', theme: 'difficulty', color: 'default', state: 'normal', description: '32x16 low difficulty button' },
+  { id: 'button-medium', name: 'Medium Button', x: 32, y: 480, width: 48, height: 16, category: 'button', theme: 'difficulty', color: 'default', state: 'normal', description: '48x16 medium difficulty button' },
+  { id: 'button-high', name: 'High Button', x: 80, y: 480, width: 32, height: 16, category: 'button', theme: 'difficulty', color: 'default', state: 'normal', description: '32x16 high difficulty button' },
+  
+  // Body, Mind, Soul buttons row at y: 496
+  { id: 'button-body', name: 'Body Button', x: 0, y: 496, width: 32, height: 16, category: 'button', theme: 'attribute', color: 'default', state: 'normal', description: '32x16 body attribute button' },
+  { id: 'button-mind', name: 'Mind Button', x: 32, y: 496, width: 32, height: 16, category: 'button', theme: 'attribute', color: 'default', state: 'normal', description: '32x16 mind attribute button' },
+  { id: 'button-soul', name: 'Soul Button', x: 64, y: 496, width: 32, height: 16, category: 'button', theme: 'attribute', color: 'default', state: 'normal', description: '32x16 soul attribute button' },
+  
+  // Plus and minus buttons at y: 496
+  { id: 'button-plus-large', name: 'Large Plus', x: 96, y: 496, width: 16, height: 16, category: 'button', theme: 'action', color: 'default', state: 'normal', description: '16x16 large plus button' },
+  { id: 'button-plus-small', name: 'Small Plus', x: 112, y: 496, width: 16, height: 16, category: 'button', theme: 'action', color: 'default', state: 'normal', description: '16x16 small plus button' },
+  { id: 'button-minus-large', name: 'Large Minus', x: 128, y: 496, width: 16, height: 16, category: 'button', theme: 'action', color: 'default', state: 'normal', description: '16x16 large minus button' },
+  { id: 'button-minus-small', name: 'Small Minus', x: 144, y: 496, width: 16, height: 16, category: 'button', theme: 'action', color: 'default', state: 'normal', description: '16x16 small minus button' },
+  
+  // Directional buttons
+  { id: 'button-left', name: 'Left Button', x: 160, y: 480, width: 16, height: 16, category: 'button', theme: 'direction', color: 'default', state: 'normal', description: '16x16 left direction button' },
+  { id: 'button-up', name: 'Up Button', x: 176, y: 480, width: 16, height: 16, category: 'button', theme: 'direction', color: 'default', state: 'normal', description: '16x16 up direction button' },
+  { id: 'button-right', name: 'Right Button', x: 192, y: 480, width: 16, height: 16, category: 'button', theme: 'direction', color: 'default', state: 'normal', description: '16x16 right direction button' },
+  { id: 'button-down', name: 'Down Button', x: 176, y: 496, width: 16, height: 16, category: 'button', theme: 'direction', color: 'default', state: 'normal', description: '16x16 down direction button' },
+  
+  // Large attribute icons at y: 464
+  { id: 'icon-fist', name: 'Fist Icon', x: 208, y: 464, width: 48, height: 48, category: 'icon', theme: 'attribute', color: 'default', description: '48x48 fist attribute icon' },
+  { id: 'icon-brain', name: 'Brain Icon', x: 256, y: 464, width: 48, height: 48, category: 'icon', theme: 'attribute', color: 'default', description: '48x48 brain attribute icon' },
+  { id: 'icon-soul', name: 'Soul Icon', x: 304, y: 464, width: 48, height: 48, category: 'icon', theme: 'attribute', color: 'default', description: '48x48 soul attribute icon' }
+];
+
+// Add additional sprites to the main array
+allSprites.push(...additionalSprites);
+
+// Calculate metadata
+const maxX = Math.max(...allSprites.map(s => s.x + s.width));
+const maxY = Math.max(...allSprites.map(s => s.y + s.height));
+
 const ATLAS_MAPPING = {
-  sprites: [
-    // ===== FRAMES (16x16) - ROW 1: DEFAULT STATE =====
-    {
-      id: 'frame-wood-small',
-      name: 'Wood Small Frame',
-      x: 0,
-      y: 0,
-      width: 16,
-      height: 16,
-      category: 'frame',
-      theme: 'wood',
-      description: 'Small wooden frame with natural grain - 9-slice design'
-    },
-    {
-      id: 'frame-wood-ornate',
-      name: 'Wood Ornate Frame',
-      x: 16,
-      y: 0,
-      width: 16,
-      height: 16,
-      category: 'frame',
-      theme: 'wood',
-      description: 'Ornate wooden frame with decorative elements - 9-slice design'
-    },
-    {
-      id: 'frame-birch',
-      name: 'Birch Frame',
-      x: 32,
-      y: 0,
-      width: 16,
-      height: 16,
-      category: 'frame',
-      theme: 'birch',
-      description: 'Birch wood frame with natural grain - 9-slice design'
-    },
-    {
-      id: 'frame-birch',
-      name: 'Birch Frame',
-      x: 48,
-      y: 0,
-      width: 16,
-      height: 16,
-      category: 'frame',
-      theme: 'birch',
-      description: 'Birch wood frame with natural grain - 9-slice design'
-    },
-    {
-      id: 'frame-moss-stone2',
-      name: 'Moss Stone Frame 2',
-      x: 64,
-      y: 0,
-      width: 16,
-      height: 16,
-      category: 'frame',
-      theme: 'moss-stone',
-      description: 'Second moss stone frame variant - 9-slice design'
-    },
-    {
-      id: 'frame-moss-stone3',
-      name: 'Moss Stone Frame 3',
-      x: 80,
-      y: 0,
-      width: 16,
-      height: 16,
-      category: 'frame',
-      theme: 'moss-stone',
-      description: 'Third moss stone frame variant - 9-slice design'
-    },
-    {
-      id: 'frame-moss-stone',
-      name: 'Moss Stone Frame',
-      x: 96,
-      y: 0,
-      width: 16,
-      height: 16,
-      category: 'frame',
-      theme: 'moss-stone',
-      description: 'Moss stone frame with organic growth - 9-slice design'
-    },
-    // ===== FRAMES (16x16) - ROW 2: ACTIVATED STATE =====
-    {
-      id: 'frame-wood-small-blue',
-      name: 'Wood Small Blue Frame',
-      x: 0,
-      y: 16,
-      width: 16,
-      height: 16,
-      category: 'frame',
-      theme: 'wood-blue',
-      description: 'Small wooden frame with blue tint - 9-slice design'
-    },
-    {
-      id: 'frame-wood-ornate-activated',
-      name: 'Wood Ornate Activated Frame',
-      x: 16,
-      y: 16,
-      width: 16,
-      height: 16,
-      category: 'frame',
-      theme: 'wood',
-      description: 'Ornate wooden frame in activated state - 9-slice design'
-    },
-    {
-      id: 'frame-birch-activated',
-      name: 'Birch Activated Frame',
-      x: 32,
-      y: 16,
-      width: 16,
-      height: 16,
-      category: 'frame',
-      theme: 'birch',
-      description: 'Birch wood frame in activated state - 9-slice design'
-    },
-    {
-      id: 'frame-birch-activated',
-      name: 'Birch Activated Frame',
-      x: 48,
-      y: 16,
-      width: 16,
-      height: 16,
-      category: 'frame',
-      theme: 'birch',
-      description: 'Birch wood frame in activated state - 9-slice design'
-    },
-    {
-      id: 'frame-moss-stone2-activated',
-      name: 'Moss Stone 2 Activated Frame',
-      x: 64,
-      y: 16,
-      width: 16,
-      height: 16,
-      category: 'frame',
-      theme: 'moss-stone',
-      description: 'Second moss stone frame in activated state - 9-slice design'
-    },
-    {
-      id: 'frame-moss-stone3-activated',
-      name: 'Moss Stone 3 Activated Frame',
-      x: 80,
-      y: 16,
-      width: 16,
-      height: 16,
-      category: 'frame',
-      theme: 'moss-stone',
-      description: 'Third moss stone frame in activated state - 9-slice design'
-    },
-    {
-      id: 'frame-moss-stone-activated',
-      name: 'Moss Stone Activated Frame',
-      x: 96,
-      y: 16,
-      width: 16,
-      height: 16,
-      category: 'frame',
-      theme: 'moss-stone',
-      description: 'Moss stone frame in activated state - 9-slice design'
-    },
-    // ===== WIDE BUTTONS (32x16) - ROW 3: DEFAULT STATE =====
-     {
-       id: 'button-wide-body-default',
-       name: 'Body Button (Wide)',
-       x: 0,
-       y: 32,
-       width: 32,
-       height: 16,
-       category: 'button',
-       subcategory: 'wide',
-       theme: 'body',
-       state: 'normal',
-       description: 'Red-themed wide button for physical attributes'
-     },
-     {
-       id: 'button-wide-mind-default',
-       name: 'Mind Button (Wide)',
-       x: 32,
-       y: 32,
-       width: 32,
-       height: 16,
-       category: 'button',
-       subcategory: 'wide',
-       theme: 'mind',
-       state: 'normal',
-       description: 'Green-themed wide button for mental attributes'
-     },
-     {
-       id: 'button-wide-soul-default',
-       name: 'Soul Button (Wide)',
-       x: 64,
-       y: 32,
-       width: 32,
-       height: 16,
-       category: 'button',
-       subcategory: 'wide',
-       theme: 'soul',
-       state: 'normal',
-       description: 'Brown-themed wide button for spiritual attributes'
-     },
-     {
-       id: 'button-wide-ice-default',
-       name: 'Ice Button (Wide)',
-       x: 96,
-       y: 32,
-       width: 32,
-       height: 16,
-       category: 'button',
-       subcategory: 'wide',
-       theme: 'ice',
-       state: 'normal',
-       description: 'Light blue crystalline wide button'
-     },
-     {
-       id: 'button-wide-stone-default',
-       name: 'Stone Button (Wide)',
-       x: 128,
-       y: 32,
-       width: 32,
-       height: 16,
-       category: 'button',
-       subcategory: 'wide',
-       theme: 'stone',
-       state: 'normal',
-       description: 'Grey stone wide button with natural texture'
-     },
-     {
-       id: 'button-wide-gold-default',
-       name: 'Gold Button (Wide)',
-       x: 160,
-       y: 32,
-       width: 32,
-       height: 16,
-       category: 'button',
-       subcategory: 'wide',
-       theme: 'gold',
-       state: 'normal',
-       description: 'Golden-yellow wide button with metallic shine'
-     },
-     {
-       id: 'button-wide-wood-default',
-       name: 'Wood Button (Wide)',
-       x: 192,
-       y: 32,
-       width: 32,
-       height: 16,
-       category: 'button',
-       subcategory: 'wide',
-       theme: 'wood',
-       state: 'normal',
-       description: 'Dark wooden wide button with grain texture'
-     },
-     {
-       id: 'button-wide-metal-default',
-       name: 'Metal Button (Wide)',
-       x: 224,
-       y: 32,
-       width: 32,
-       height: 16,
-       category: 'button',
-       subcategory: 'wide',
-       theme: 'metal',
-       state: 'normal',
-       description: 'Dark metallic wide button with rivets'
-     },
-    {
-      id: 'button-wide-ore-default',
-      name: 'Ore Button (Wide)',
-      x: 256,
-      y: 32,
-      width: 32,
-      height: 16,
-      category: 'button',
-      subcategory: 'wide',
-      theme: 'ore',
-      state: 'normal',
-      description: 'Ore-themed wide button with metallic texture'
-    },
-
-         // ===== WIDE BUTTONS (32x16) - ROW 4: ACTIVE/HOVER/PRESSED STATE =====
-     {
-       id: 'button-wide-body-active',
-       name: 'Body Button (Wide) - Active',
-       x: 0,
-       y: 48,
-       width: 32,
-       height: 16,
-       category: 'button',
-       subcategory: 'wide',
-       theme: 'body',
-       state: 'active',
-       description: 'Red-themed wide button in active/hover state'
-     },
-     {
-       id: 'button-wide-mind-active',
-       name: 'Mind Button (Wide) - Active',
-       x: 32,
-       y: 48,
-       width: 32,
-       height: 16,
-       category: 'button',
-       subcategory: 'wide',
-       theme: 'mind',
-       state: 'active',
-       description: 'Green-themed wide button in active/hover state'
-     },
-     {
-       id: 'button-wide-soul-active',
-       name: 'Soul Button (Wide) - Active',
-       x: 64,
-       y: 48,
-       width: 32,
-       height: 16,
-       category: 'button',
-       subcategory: 'wide',
-       theme: 'soul',
-       state: 'active',
-       description: 'Brown-themed wide button in active/hover state'
-     },
-     {
-       id: 'button-wide-ice-active',
-       name: 'Ice Button (Wide) - Active',
-       x: 96,
-       y: 48,
-       width: 32,
-       height: 16,
-       category: 'button',
-       subcategory: 'wide',
-       theme: 'ice',
-       state: 'active',
-       description: 'Ice wide button with glowing cyan outline'
-     },
-     {
-       id: 'button-wide-stone-active',
-       name: 'Stone Button (Wide) - Active',
-       x: 128,
-       y: 48,
-       width: 32,
-       height: 16,
-       category: 'button',
-       subcategory: 'wide',
-       theme: 'stone',
-       state: 'active',
-       description: 'Stone wide button with glowing magenta outline'
-     },
-     {
-       id: 'button-wide-gold-active',
-       name: 'Gold Button (Wide) - Active',
-       x: 160,
-       y: 48,
-       width: 32,
-       height: 16,
-       category: 'button',
-       subcategory: 'wide',
-       theme: 'gold',
-       state: 'active',
-       description: 'Gold wide button with glowing purple outline'
-     },
-
-    // ===== SQUARE BUTTONS (32x32) - ROW 4: DEFAULT STATE =====
-    {
-      id: 'button-square-stone-default',
-      name: 'Stone Button (Square)',
-      x: 0,
-      y: 64,
-      width: 32,
-      height: 32,
-      category: 'button',
-      subcategory: 'square',
-      theme: 'stone',
-      state: 'normal',
-      description: 'Stone-themed square button with natural texture'
-    },
-    {
-      id: 'button-square-rune-default',
-      name: 'Rune Button (Square)',
-      x: 32,
-      y: 64,
-      width: 32,
-      height: 32,
-      category: 'button',
-      subcategory: 'square',
-      theme: 'rune',
-      state: 'normal',
-      description: 'Rune-themed square button with mystical symbols'
-    },
-    {
-      id: 'button-square-neon-default',
-      name: 'Neon Button (Square)',
-      x: 64,
-      y: 64,
-      width: 32,
-      height: 32,
-      category: 'button',
-      subcategory: 'square',
-      theme: 'neon',
-      state: 'normal',
-      description: 'Neon-themed square button with glowing effects'
-    },
-    {
-      id: 'button-square-digi1-default',
-      name: 'Digi1 Button (Square)',
-      x: 96,
-      y: 64,
-      width: 32,
-      height: 32,
-      category: 'button',
-      subcategory: 'square',
-      theme: 'digi1',
-      state: 'normal',
-      description: 'Digital-themed square button with tech pattern 1'
-    },
-    {
-      id: 'button-square-digi2-default',
-      name: 'Digi2 Button (Square)',
-      x: 128,
-      y: 64,
-      width: 32,
-      height: 32,
-      category: 'button',
-      subcategory: 'square',
-      theme: 'digi2',
-      state: 'normal',
-      description: 'Digital-themed square button with tech pattern 2'
-    },
-    {
-      id: 'button-square-digiblue1-default',
-      name: 'Digiblue1 Button (Square)',
-      x: 160,
-      y: 64,
-      width: 32,
-      height: 32,
-      category: 'button',
-      subcategory: 'square',
-      theme: 'digiblue1',
-      state: 'normal',
-      description: 'Blue digital-themed square button with tech pattern 1'
-    },
-    {
-      id: 'button-square-digiblue2-default',
-      name: 'Digiblue2 Button (Square)',
-       x: 192,
-      y: 64,
-       width: 32,
-      height: 32,
-       category: 'button',
-      subcategory: 'square',
-      theme: 'digiblue2',
-      state: 'normal',
-      description: 'Blue digital-themed square button with tech pattern 2'
-    },
-
-    // ===== SQUARE BUTTONS (32x32) - ROW 5: ACTIVE STATE =====
-    {
-      id: 'button-square-stone-active',
-      name: 'Stone Button (Square) - Active',
-      x: 0,
-      y: 96,
-      width: 32,
-      height: 32,
-      category: 'button',
-      subcategory: 'square',
-      theme: 'stone',
-       state: 'active',
-      description: 'Stone-themed square button in active state'
-    },
-    {
-      id: 'button-square-rune-active',
-      name: 'Rune Button (Square) - Active',
-      x: 32,
-      y: 96,
-       width: 32,
-      height: 32,
-       category: 'button',
-      subcategory: 'square',
-      theme: 'rune',
-       state: 'active',
-      description: 'Rune-themed square button in active state'
-    },
-    {
-      id: 'button-square-neon-active',
-      name: 'Neon Button (Square) - Active',
-      x: 64,
-      y: 96,
-      width: 32,
-      height: 32,
-      category: 'button',
-      subcategory: 'square',
-      theme: 'neon',
-      state: 'active',
-      description: 'Neon-themed square button in active state'
-    },
-    {
-      id: 'button-square-digi1-active',
-      name: 'Digi1 Button (Square) - Active',
-      x: 96,
-      y: 96,
-      width: 32,
-      height: 32,
-      category: 'button',
-      subcategory: 'square',
-      theme: 'digi1',
-      state: 'active',
-      description: 'Digital-themed square button in active state'
-    },
-    {
-      id: 'button-square-digi2-active',
-      name: 'Digi2 Button (Square) - Active',
-      x: 128,
-      y: 96,
-      width: 32,
-      height: 32,
-      category: 'button',
-      subcategory: 'square',
-      theme: 'digi2',
-      state: 'active',
-      description: 'Digital-themed square button in active state'
-    },
-    {
-      id: 'button-square-digiblue1-active',
-      name: 'Digiblue1 Button (Square) - Active',
-      x: 160,
-      y: 96,
-      width: 32,
-      height: 32,
-      category: 'button',
-      subcategory: 'square',
-      theme: 'digiblue1',
-      state: 'active',
-      description: 'Blue digital-themed square button in active state'
-    },
-    {
-      id: 'button-square-digiblue2-active',
-      name: 'Digiblue2 Button (Square) - Active',
-      x: 192,
-      y: 96,
-      width: 32,
-      height: 32,
-      category: 'button',
-      subcategory: 'square',
-      theme: 'digiblue2',
-      state: 'active',
-      description: 'Blue digital-themed square button in active state'
-    },
-
-    // ===== LARGE BUTTONS (64x32) - ROW 6: DEFAULT STATE =====
-    {
-      id: 'button-large-1',
-      name: 'Large Button 1',
-      x: 0,
-      y: 128,
-      width: 64,
-      height: 32,
-      category: 'button',
-      subcategory: 'large',
-      theme: 'default',
-      state: 'normal',
-      description: 'Large button with dark grey stone/metal frame'
-    },
-    {
-      id: 'button-large-2',
-      name: 'Large Button 2',
-      x: 64,
-      y: 128,
-      width: 64,
-      height: 32,
-      category: 'button',
-      subcategory: 'large',
-      theme: 'default',
-      state: 'normal',
-      description: 'Large button with dark blue/purple sci-fi frame'
-    },
-    {
-      id: 'button-large-3',
-      name: 'Large Button 3',
-      x: 128,
-      y: 128,
-      width: 64,
-      height: 32,
-      category: 'button',
-      subcategory: 'large',
-      theme: 'default',
-      state: 'normal',
-      description: 'Large button with light grey/blue sci-fi frame'
-    },
-    {
-      id: 'button-large-4',
-      name: 'Large Button 4',
-      x: 192,
-      y: 128,
-      width: 64,
-      height: 32,
-      category: 'button',
-      subcategory: 'large',
-      theme: 'default',
-      state: 'normal',
-      description: 'Large button with brown wood/stone frame'
-    },
-    {
-      id: 'button-large-5',
-      name: 'Large Button 5',
-      x: 256,
-      y: 128,
-      width: 64,
-      height: 32,
-      category: 'button',
-      subcategory: 'large',
-      theme: 'default',
-      state: 'normal',
-      description: 'Large button with dark blue rounded frame'
-    },
-    {
-      id: 'button-large-6',
-      name: 'Large Button 6',
-      x: 320,
-      y: 128,
-      width: 64,
-      height: 32,
-      category: 'button',
-      subcategory: 'large',
-      theme: 'default',
-      state: 'normal',
-      description: 'Large button with ice/crystal frame'
-    },
-
-    // ===== FRAMES (64x64) - ROW 8: ALL 15 FRAMES IN ONE ROW =====
-    {
-      id: 'frame-woodsmall',
-      name: 'Wood Small Frame',
-      x: 0,
-      y: 192,
-      width: 64,
-      height: 64,
-      category: 'frame',
-      theme: 'wood',
-      description: 'Small wooden frame with natural grain - 9-slice design'
-    },
-    {
-      id: 'frame-wood-ornate',
-      name: 'Wood Ornate Frame',
-      x: 64,
-      y: 192,
-      width: 64,
-      height: 64,
-      category: 'frame',
-      theme: 'wood',
-      description: 'Ornate wooden frame with decorative elements - 9-slice design'
-    },
-    {
-      id: 'frame-birch',
-      name: 'Birch Frame',
-      x: 128,
-      y: 192,
-      width: 64,
-      height: 64,
-      category: 'frame',
-      theme: 'birch',
-      description: 'Birch wood frame with natural grain - 9-slice design'
-    },
-    {
-      id: 'frame-moss-stone',
-      name: 'Moss Stone Frame',
-      x: 192,
-      y: 192,
-      width: 64,
-      height: 64,
-      category: 'frame',
-      theme: 'moss-stone',
-      description: 'Moss stone frame with organic growth - 9-slice design'
-    },
-    {
-      id: 'frame-moss-stone2',
-      name: 'Moss Stone Frame 2',
-      x: 256,
-      y: 192,
-      width: 64,
-      height: 64,
-      category: 'frame',
-      theme: 'moss-stone',
-      description: 'Second moss stone frame variant - 9-slice design'
-    },
-    {
-      id: 'frame-moss-stone3',
-      name: 'Moss Stone Frame 3',
-      x: 320,
-      y: 192,
-      width: 64,
-      height: 64,
-      category: 'frame',
-      theme: 'moss-stone',
-      description: 'Third moss stone frame variant - 9-slice design'
-    },
-    {
-      id: 'frame-fancy-card',
-      name: 'Fancy Card Frame',
-      x: 384,
-      y: 192,
-      width: 64,
-      height: 64,
-      category: 'frame',
-      theme: 'card',
-      description: 'Fancy card-style frame with elegant design - 9-slice design'
-    },
-    {
-      id: 'frame-water-card',
-      name: 'Water Card Frame',
-      x: 448,
-      y: 192,
-      width: 64,
-      height: 64,
-      category: 'frame',
-      theme: 'card',
-      description: 'Water-themed card frame with flowing elements - 9-slice design'
-    },
-    {
-      id: 'frame-plain',
-      name: 'Plain Frame',
-      x: 512,
-      y: 192,
-      width: 64,
-      height: 64,
-      category: 'frame',
-      theme: 'plain',
-      description: 'Simple plain frame design - 9-slice design'
-    },
-    {
-      id: 'frame-plain2',
-      name: 'Plain Frame 2',
-      x: 576,
-      y: 192,
-      width: 64,
-      height: 64,
-      category: 'frame',
-      theme: 'plain',
-      description: 'Alternative plain frame design - 9-slice design'
-    },
-    {
-      id: 'frame-warning',
-      name: 'Warning Frame',
-      x: 640,
-      y: 192,
-      width: 64,
-      height: 64,
-      category: 'frame',
-      theme: 'warning',
-      description: 'Warning-themed frame with alert elements - 9-slice design'
-    },
-    {
-      id: 'frame-dark-red',
-      name: 'Dark Red Frame',
-      x: 704,
-      y: 192,
-      width: 64,
-      height: 64,
-      category: 'frame',
-      theme: 'dark-red',
-      description: 'Dark red frame with ominous appearance - 9-slice design'
-    },
-    {
-      id: 'frame-notification',
-      name: 'Notification Frame',
-      x: 768,
-      y: 192,
-      width: 64,
-      height: 64,
-      category: 'frame',
-      theme: 'notification',
-      description: 'Notification-themed frame with alert design - 9-slice design'
-    },
-    {
-      id: 'frame-simple-ornate',
-      name: 'Simple Ornate Frame',
-      x: 832,
-      y: 192,
-      width: 64,
-      height: 64,
-      category: 'frame',
-      theme: 'ornate',
-      description: 'Simple ornate frame with basic decorative elements - 9-slice design'
-    },
-    {
-      id: 'frame-gold-ornate',
-      name: 'Gold Ornate Frame',
-      x: 896,
-      y: 192,
-      width: 64,
-      height: 64,
-      category: 'frame',
-      theme: 'ornate',
-      description: 'Gold ornate frame with luxurious decorative elements - 9-slice design'
-    },
-    // ===== FRAMES (64x64) - ROW 9: 14 NEW FRAMES =====
-    {
-      id: 'frame-stone',
-      name: 'Stone Frame',
-      x: 0,
-      y: 256,
-       width: 64,
-       height: 64,
-       category: 'frame',
-      theme: 'stone',
-      description: 'Stone frame with natural rock texture - 9-slice design'
-     },
-         {
-      id: 'frame-mossy-stone',
-      name: 'Mossy Stone Frame',
-       x: 64,
-      y: 256,
-       width: 64,
-       height: 64,
-       category: 'frame',
-      theme: 'mossy-stone',
-      description: 'Mossy stone frame with organic growth - 9-slice design'
-     },
-     {
-      id: 'frame-rune1',
-      name: 'Rune Frame 1',
-       x: 128,
-      y: 256,
-       width: 64,
-       height: 64,
-       category: 'frame',
-      theme: 'rune',
-      description: 'Rune frame with mystical symbols - 9-slice design'
-     },
-     {
-      id: 'frame-rune2',
-      name: 'Rune Frame 2',
-       x: 192,
-      y: 256,
-       width: 64,
-       height: 64,
-       category: 'frame',
-      theme: 'rune',
-      description: 'Alternative rune frame with different symbols - 9-slice design'
-     },
-     {
-      id: 'frame-skull',
-      name: 'Skull Frame',
-       x: 256,
-      y: 256,
-       width: 64,
-       height: 64,
-       category: 'frame',
-      theme: 'skull',
-      description: 'Skull-themed frame with bone elements - 9-slice design'
-     },
-     {
-      id: 'frame-witch',
-      name: 'Witch Frame',
-       x: 320,
-      y: 256,
-       width: 64,
-       height: 64,
-       category: 'frame',
-      theme: 'witch',
-      description: 'Witch-themed frame with magical elements - 9-slice design'
-     },
-     {
-      id: 'frame-slav',
-      name: 'Slav Frame',
-       x: 384,
-      y: 256,
-       width: 64,
-       height: 64,
-       category: 'frame',
-      theme: 'slav',
-      description: 'Slavic-themed frame with cultural elements - 9-slice design'
-    },
-    {
-      id: 'frame-pumpkin',
-      name: 'Pumpkin Frame',
-      x: 448,
-      y: 256,
-      width: 64,
-      height: 64,
-      category: 'frame',
-      theme: 'pumpkin',
-      description: 'Pumpkin-themed frame with harvest elements - 9-slice design'
-    },
-    {
-      id: 'frame-birch',
-      name: 'Birch Frame',
-      x: 512,
-      y: 256,
-      width: 64,
-      height: 64,
-      category: 'frame',
-      theme: 'birch',
-      description: 'Birch wood frame with natural grain - 9-slice design'
-    },
-    {
-      id: 'frame-compas',
-      name: 'Compass Frame',
-      x: 576,
-      y: 256,
-      width: 64,
-      height: 64,
-      category: 'frame',
-      theme: 'compass',
-      description: 'Compass-themed frame with navigation elements - 9-slice design'
-    },
-    {
-      id: 'frame-leag',
-      name: 'League Frame',
-      x: 640,
-      y: 256,
-      width: 64,
-      height: 64,
-      category: 'frame',
-      theme: 'league',
-      description: 'League-themed frame with competitive elements - 9-slice design'
-    },
-    {
-      id: 'frame-starred',
-      name: 'Starred Frame',
-      x: 704,
-      y: 256,
-      width: 64,
-      height: 64,
-      category: 'frame',
-      theme: 'starred',
-      description: 'Starred frame with celestial elements - 9-slice design'
-    },
-    {
-      id: 'frame-book',
-      name: 'Book Frame',
-      x: 768,
-      y: 256,
-      width: 64,
-      height: 64,
-      category: 'frame',
-      theme: 'book',
-      description: 'Book-themed frame with literary elements - 9-slice design'
-    },
-    {
-      id: 'frame-eq',
-      name: 'Equipment Frame',
-      x: 832,
-      y: 256,
-      width: 64,
-      height: 64,
-      category: 'frame',
-      theme: 'equipment',
-      description: 'Equipment-themed frame with gear elements - 9-slice design'
-    },
-    // ===== FRAMES (64x64) - ROW 10: 9 NEW FRAMES =====
-    {
-      id: 'frame-stone-ornate',
-      name: 'Stone Ornate Frame',
-      x: 0,
-      y: 320,
-       width: 64,
-       height: 64,
-       category: 'frame',
-      theme: 'stone-ornate',
-      description: 'Ornate stone frame with decorative elements - 9-slice design'
-     },
-     {
-      id: 'frame-stone-uranium',
-      name: 'Stone Uranium Frame',
-       x: 64,
-      y: 320,
-       width: 64,
-       height: 64,
-       category: 'frame',
-      theme: 'stone-uranium',
-      description: 'Stone frame with uranium/radioactive elements - 9-slice design'
-     },
-     {
-      id: 'frame-tech',
-      name: 'Tech Frame',
-       x: 128,
-      y: 320,
-       width: 64,
-       height: 64,
-       category: 'frame',
-      theme: 'tech',
-      description: 'High-tech frame with futuristic elements - 9-slice design'
-     },
-     {
-      id: 'frame-red-tech',
-      name: 'Red Tech Frame',
-       x: 192,
-      y: 320,
-       width: 64,
-       height: 64,
-       category: 'frame',
-      theme: 'red-tech',
-      description: 'Red-themed tech frame with warning elements - 9-slice design'
-     },
-     {
-      id: 'frame-stone-red-crack',
-      name: 'Stone Red Crack Frame',
-       x: 256,
-      y: 320,
-       width: 64,
-       height: 64,
-       category: 'frame',
-      theme: 'stone-red-crack',
-      description: 'Stone frame with red crack patterns - 9-slice design'
-     },
-     {
-      id: 'frame-rune3',
-      name: 'Rune Frame 3',
-       x: 320,
-      y: 320,
-       width: 64,
-       height: 64,
-       category: 'frame',
-      theme: 'rune',
-      description: 'Third rune frame with different mystical symbols - 9-slice design'
-     },
-     {
-      id: 'frame-cross',
-      name: 'Cross Frame',
-       x: 384,
-      y: 320,
-       width: 64,
-       height: 64,
-       category: 'frame',
-      theme: 'cross',
-      description: 'Cross-themed frame with religious elements - 9-slice design'
-    },
-    {
-      id: 'frame-rune4',
-      name: 'Rune Frame 4',
-      x: 448,
-      y: 320,
-       width: 64,
-       height: 64,
-       category: 'frame',
-      theme: 'rune',
-      description: 'Fourth rune frame with advanced mystical symbols - 9-slice design'
-    },
-    {
-      id: 'frame-slavic2',
-      name: 'Slavic Frame 2',
-      x: 512,
-      y: 320,
-      width: 64,
-      height: 64,
-      category: 'frame',
-      theme: 'slavic',
-      description: 'Second Slavic-themed frame with different cultural elements - 9-slice design'
-    },
-    // ===== FRAMES (64x64) - ROW 11: 7 NEW FRAMES =====
-     {
-       id: 'frame-ice',
-       name: 'Ice Frame',
-      x: 0,
-      y: 384,
-      width: 64,
-      height: 64,
-      category: 'frame',
-      theme: 'ice',
-      description: 'Ice frame with crystalline elements - 9-slice design'
-    },
-    {
-      id: 'frame-ice1',
-      name: 'Ice Frame 1',
-       x: 64,
-      y: 384,
-       width: 64,
-       height: 64,
-       category: 'frame',
-       theme: 'ice',
-      description: 'First ice frame variant with frost patterns - 9-slice design'
-     },
-     {
-      id: 'frame-ice2',
-      name: 'Ice Frame 2',
-       x: 128,
-      y: 384,
-       width: 64,
-       height: 64,
-       category: 'frame',
-      theme: 'ice',
-      description: 'Second ice frame variant with snowflake elements - 9-slice design'
-     },
-     {
-      id: 'frame-star',
-      name: 'Star Frame',
-       x: 192,
-      y: 384,
-       width: 64,
-       height: 64,
-       category: 'frame',
-      theme: 'star',
-      description: 'Star-themed frame with celestial elements - 9-slice design'
-     },
-     {
-      id: 'frame-neon-stars',
-      name: 'Neon Stars Frame',
-       x: 256,
-      y: 384,
-       width: 64,
-       height: 64,
-       category: 'frame',
-      theme: 'neon-stars',
-      description: 'Neon stars frame with glowing celestial elements - 9-slice design'
-     },
-     {
-      id: 'frame-neon-orange',
-      name: 'Neon Orange Frame',
-       x: 320,
-      y: 384,
-       width: 64,
-       height: 64,
-       category: 'frame',
-      theme: 'neon-orange',
-      description: 'Neon orange frame with bright glowing elements - 9-slice design'
-     },
-     {
-      id: 'frame-metal-block',
-      name: 'Metal Block Frame',
-       x: 384,
-      y: 384,
-       width: 64,
-       height: 64,
-       category: 'frame',
-      theme: 'metal-block',
-      description: 'Metal block frame with industrial elements - 9-slice design'
-     },
-    // ===== FRAMES (64x64) - ROW 12: 9 NEW FRAMES =====
-     {
-      id: 'frame-script',
-      name: 'Script Frame',
-       x: 0,
-      y: 448,
-       width: 64,
-       height: 64,
-       category: 'frame',
-      theme: 'script',
-      description: 'Script frame with handwritten elements - 9-slice design'
-     },
-     {
-      id: 'frame-diy',
-      name: 'DIY Frame',
-       x: 64,
-      y: 448,
-       width: 64,
-       height: 64,
-       category: 'frame',
-      theme: 'diy',
-      description: 'DIY frame with handmade elements - 9-slice design'
-     },
-     {
-      id: 'frame-goo',
-      name: 'Goo Frame',
-       x: 128,
-      y: 448,
-       width: 64,
-       height: 64,
-       category: 'frame',
-      theme: 'goo',
-      description: 'Goo frame with organic slimy elements - 9-slice design'
-     },
-     {
-      id: 'frame-fossil',
-      name: 'Fossil Frame',
-       x: 192,
-      y: 448,
-       width: 64,
-       height: 64,
-       category: 'frame',
-      theme: 'fossil',
-      description: 'Fossil frame with ancient bone elements - 9-slice design'
-    },
-    {
-      id: 'frame-simple-leaf',
-      name: 'Simple Leaf Frame',
-      x: 256,
-      y: 448,
-      width: 64,
-      height: 64,
-      category: 'frame',
-      theme: 'simple-leaf',
-      description: 'Simple leaf frame with natural elements - 9-slice design'
-    },
-    {
-      id: 'frame-pretzel',
-      name: 'Pretzel Frame',
-      x: 320,
-      y: 448,
-      width: 64,
-      height: 64,
-      category: 'frame',
-      theme: 'pretzel',
-      description: 'Pretzel frame with twisted elements - 9-slice design'
-    },
-    {
-      id: 'frame-antlers',
-      name: 'Antlers Frame',
-      x: 384,
-      y: 448,
-      width: 64,
-      height: 64,
-      category: 'frame',
-      theme: 'antlers',
-      description: 'Antlers frame with horn elements - 9-slice design'
-    },
-    {
-      id: 'frame-dark-metal',
-      name: 'Dark Metal Frame',
-      x: 448,
-      y: 448,
-      width: 64,
-      height: 64,
-      category: 'frame',
-      theme: 'dark-metal',
-      description: 'Dark metal frame with shadowy elements - 9-slice design'
-    },
-    {
-      id: 'frame-runic-dark',
-      name: 'Runic Dark Frame',
-      x: 512,
-      y: 448,
-      width: 64,
-      height: 64,
-      category: 'frame',
-      theme: 'runic-dark',
-      description: 'Dark runic frame with shadowy mystical elements - 9-slice design'
-    },
-
-    // ===== LARGE BUTTONS (64x32) - ROW 7: ACTIVE STATE =====
-    {
-      id: 'button-large-1-active',
-      name: 'Large Button 1 (Active)',
-      x: 0,
-      y: 160,
-      width: 64,
-      height: 32,
-      category: 'button',
-      subcategory: 'large',
-      theme: 'default',
-      state: 'active',
-      description: 'Large button with dark grey stone/metal frame (active)'
-    },
-    {
-      id: 'button-large-2-active',
-      name: 'Large Button 2 (Active)',
-      x: 64,
-      y: 160,
-      width: 64,
-      height: 32,
-      category: 'button',
-      subcategory: 'large',
-      theme: 'default',
-      state: 'active',
-      description: 'Large button with dark blue/purple sci-fi frame (active)'
-    },
-    {
-      id: 'button-large-3-active',
-      name: 'Large Button 3 (Active)',
-      x: 128,
-      y: 160,
-      width: 64,
-      height: 32,
-      category: 'button',
-      subcategory: 'large',
-      theme: 'default',
-      state: 'active',
-      description: 'Large button with light grey/blue sci-fi frame (active)'
-    },
-    {
-      id: 'button-large-4-active',
-      name: 'Large Button 4 (Active)',
-      x: 192,
-      y: 160,
-      width: 64,
-      height: 32,
-      category: 'button',
-      subcategory: 'large',
-      theme: 'default',
-      state: 'active',
-      description: 'Large button with brown wood/stone frame (active)'
-    },
-    {
-      id: 'button-large-5-active',
-      name: 'Large Button 5 (Active)',
-      x: 256,
-      y: 160,
-      width: 64,
-      height: 32,
-      category: 'button',
-      subcategory: 'large',
-      theme: 'default',
-      state: 'active',
-      description: 'Large button with dark blue rounded frame (active)'
-     }
-  ],
-       metadata: {
-    atlasWidth: 960, // 15 sprites wide at 64px each for frames row
-    atlasHeight: 576, // 12 rows: 2 rows of new frames (32px) + 2 rows of wide buttons (32px) + 2 rows of square buttons (64px) + 2 rows of large buttons (64px) + 6 rows of frames (384px)
-    spriteSize: 64,
-    totalSprites: 107 // 107 sprites (14 new frames + 15 wide + 14 square + 10 large + 54 frames)
+  sprites: allSprites,
+  metadata: {
+    atlasWidth: maxX,
+    atlasHeight: maxY,
+    spriteSize: 16,
+    totalSprites: allSprites.length
   }
 };
 
-// Export the converted data for use in the HTML
-const UI_ELEMENT_MAPPING = {
-  buttons: ATLAS_MAPPING.sprites
-    .filter(sprite => sprite.category === 'button')
-    .map(convertSpriteToUIElement),
-  frames: ATLAS_MAPPING.sprites
-    .filter(sprite => sprite.category === 'frame')
-    .map(convertSpriteToUIElement)
-};
-
-// Export metadata
-const ATLAS_METADATA = ATLAS_MAPPING.metadata;
-
-// Make these available globally for the HTML script
-window.UI_ELEMENT_MAPPING = UI_ELEMENT_MAPPING;
-window.ATLAS_METADATA = ATLAS_METADATA;
+// Make ATLAS_MAPPING available globally for the HTML script
+window.ATLAS_MAPPING = ATLAS_MAPPING;

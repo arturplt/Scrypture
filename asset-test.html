@@ -68,25 +68,25 @@
       width: 100%;
     }
     
-         .element-highlight {
-       position: absolute;
-       border: 2px solid #00ff00;
-       background: rgba(0, 255, 0, 0.1);
-       pointer-events: auto;
-       cursor: pointer;
-       transition: all 0.2s ease;
-     }
-     
-     .element-highlight.hover {
-       border-color: #ffff00;
-       background: rgba(255, 255, 0, 0.2);
-     }
-     
-     .element-highlight.selected {
-       border-color: #ff00ff;
-       background: rgba(255, 0, 255, 0.3);
-       border-width: 3px;
-     }
+             .element-highlight {
+      position: absolute;
+      border: 1px solid #00ff00;
+      background: rgba(0, 255, 0, 0.1);
+      pointer-events: auto;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .element-highlight.hover {
+      border-color: #ffff00;
+      background: rgba(255, 255, 0, 0.2);
+    }
+    
+    .element-highlight.selected {
+      border-color: #ff00ff;
+      background: rgba(255, 0, 255, 0.3);
+      border-width: 2px;
+    }
      
      .floating-label {
        position: absolute;
@@ -286,11 +286,12 @@
         <label>Show Highlights: </label>
         <input type="checkbox" id="show-highlights" checked>
         
-                 <label>Zoom: </label>
-         <div class="zoom-controls">
-           <button onclick="setZoom(1)">1x</button>
-           <button onclick="setZoom(4)">4x</button>
-         </div>
+                         <label>Zoom: </label>
+        <div class="zoom-controls">
+          <button onclick="setZoom(1)">1x</button>
+          <button onclick="setZoom(2)">2x</button>
+          <button onclick="setZoom(4)">4x</button>
+        </div>
       </div>
     </div>
     
@@ -302,11 +303,42 @@
           <option value="">All Categories</option>
           <option value="button">Buttons</option>
           <option value="frame">Frames</option>
+          <option value="bar">Bars</option>
+          <option value="break">Breaks</option>
+          <option value="icon">Icons</option>
+          <option value="text">Text</option>
         </select>
         
         <label>Theme: </label>
         <select id="theme-filter">
           <option value="">All Themes</option>
+        </select>
+        
+        <label>Color: </label>
+        <select id="color-filter">
+          <option value="">All Colors</option>
+          <option value="green">Green</option>
+          <option value="dark-green">Dark Green</option>
+          <option value="blue-stone">Blue Stone</option>
+          <option value="red">Red</option>
+          <option value="purple">Purple</option>
+          <option value="orange">Orange</option>
+          <option value="yellow">Yellow</option>
+          <option value="cyan">Cyan</option>
+          <option value="forest-green">Forest Green</option>
+          <option value="burnt-red">Burnt Red</option>
+          <option value="silver">Silver</option>
+          <option value="gold">Gold</option>
+          <option value="pale-blue">Pale Blue</option>
+          <option value="green-ornate">Green Ornate</option>
+          <option value="grey-brown">Grey Brown</option>
+          <option value="blue-ornate">Blue Ornate</option>
+          <option value="thick-gold">Thick Gold</option>
+          <option value="skinny-gold">Skinny Gold</option>
+          <option value="turquoise">Turquoise</option>
+          <option value="bronze">Bronze</option>
+          <option value="gunmetal">Gunmetal</option>
+          <option value="royal-blue">Royal Blue</option>
         </select>
         
         <label>Search: </label>
@@ -345,6 +377,7 @@
     let currentZoom = 1;
     let currentCategoryFilter = '';
     let currentThemeFilter = '';
+    let currentColorFilter = '';
     let currentSearchFilter = '';
          let selectedElement = null;
      let selectedHighlight = null;
@@ -355,16 +388,21 @@
 
     function updateStatus() {
       const statusEl = document.getElementById('status-content');
-      const totalElements = UI_ELEMENT_MAPPING.buttons.length + UI_ELEMENT_MAPPING.frames.length;
+      const buttons = ATLAS_MAPPING.sprites.filter(s => s.category === 'button').length;
+      const frames = ATLAS_MAPPING.sprites.filter(s => s.category === 'frame').length;
+      const bars = ATLAS_MAPPING.sprites.filter(s => s.category === 'bar').length;
+      const breaks = ATLAS_MAPPING.sprites.filter(s => s.category === 'break').length;
       
       statusEl.innerHTML = `
         <div>Atlas Loaded: ${atlasLoaded ? 'Yes' : 'No'}</div>
         <div>Atlas Dimensions: ${atlasWidth} x ${atlasHeight}</div>
-        <div>Expected Dimensions: ${ATLAS_METADATA.atlasWidth} x ${ATLAS_METADATA.atlasHeight}</div>
-        <div>Total UI Elements: ${totalElements}</div>
-        <div>Expected Total: ${ATLAS_METADATA.totalSprites}</div>
-        <div>Buttons: ${UI_ELEMENT_MAPPING.buttons.length}</div>
-        <div>Frames: ${UI_ELEMENT_MAPPING.frames.length}</div>
+        <div>Expected Dimensions: ${ATLAS_MAPPING.metadata.atlasWidth} x ${ATLAS_MAPPING.metadata.atlasHeight}</div>
+        <div>Total UI Elements: ${ATLAS_MAPPING.sprites.length}</div>
+        <div>Expected Total: ${ATLAS_MAPPING.metadata.totalSprites}</div>
+        <div>Buttons: ${buttons}</div>
+        <div>Frames: ${frames}</div>
+        <div>Bars: ${bars}</div>
+        <div>Breaks: ${breaks}</div>
         <div>Zoom Level: ${Math.round(currentZoom * 100)}%</div>
       `;
     }
@@ -379,43 +417,47 @@
       updateHighlights();
     }
 
-                             function updateGrid() {
-         const gridOverlay = document.getElementById('grid-overlay');
-         const atlasImage = document.getElementById('atlas-image');
-         gridOverlay.innerHTML = '';
-         
-         if (!document.getElementById('show-grid').checked) return;
-         
-         // Get the actual displayed image dimensions
-         const displayWidth = atlasImage.offsetWidth;
-         const displayHeight = atlasImage.offsetHeight;
-         
-         // Calculate the scaled grid size based on actual display size
-         const gridSizeX = displayWidth / (atlasWidth / 16);
-         const gridSizeY = displayHeight / (atlasHeight / 16);
-         
-         // Calculate how many grid lines we need
-         const numVerticalLines = Math.ceil(atlasWidth / 16);
-         const numHorizontalLines = Math.ceil(atlasHeight / 16);
-         
-                   // Vertical lines
-          for (let i = 0; i <= numVerticalLines; i++) {
-            const line = document.createElement('div');
-            line.className = 'grid-line vertical';
-            line.style.left = ((i * gridSizeX) - gridSizeX) + 'px';
-            line.style.height = displayHeight + 'px';
-            gridOverlay.appendChild(line);
-          }
-          
-          // Horizontal lines
-          for (let i = 0; i <= numHorizontalLines; i++) {
-            const line = document.createElement('div');
-            line.className = 'grid-line horizontal';
-            line.style.top = ((i * gridSizeY) - gridSizeY) + 'px';
-            line.style.width = displayWidth + 'px';
-            gridOverlay.appendChild(line);
-          }
-       }
+                                 function updateGrid() {
+      const gridOverlay = document.getElementById('grid-overlay');
+      const atlasImage = document.getElementById('atlas-image');
+      gridOverlay.innerHTML = '';
+      
+      if (!document.getElementById('show-grid').checked) return;
+      
+      // Get the actual displayed image dimensions and apply zoom
+      const displayWidth = atlasImage.offsetWidth;
+      const displayHeight = atlasImage.offsetHeight;
+      
+      // Calculate the scale factors including zoom
+      const scaleX = (displayWidth / atlasWidth) * currentZoom;
+      const scaleY = (displayHeight / atlasHeight) * currentZoom;
+      
+      // Calculate the scaled grid size based on zoom level
+      const gridSizeX = 16 * scaleX;
+      const gridSizeY = 16 * scaleY;
+      
+      // Calculate how many grid lines we need
+      const numVerticalLines = Math.ceil(atlasWidth / 16);
+      const numHorizontalLines = Math.ceil(atlasHeight / 16);
+      
+      // Vertical lines
+      for (let i = 0; i <= numVerticalLines; i++) {
+        const line = document.createElement('div');
+        line.className = 'grid-line vertical';
+        line.style.left = (i * gridSizeX) + 'px';
+        line.style.height = (atlasHeight * scaleY) + 'px';
+        gridOverlay.appendChild(line);
+      }
+      
+      // Horizontal lines
+      for (let i = 0; i <= numHorizontalLines; i++) {
+        const line = document.createElement('div');
+        line.className = 'grid-line horizontal';
+        line.style.top = (i * gridSizeY) + 'px';
+        line.style.width = (atlasWidth * scaleX) + 'px';
+        gridOverlay.appendChild(line);
+      }
+    }
 
          function updateHighlights() {
        const gridOverlay = document.getElementById('grid-overlay');
@@ -431,10 +473,10 @@
        
        if (!document.getElementById('show-highlights').checked) return;
       
-      const allElements = [...UI_ELEMENT_MAPPING.buttons, ...UI_ELEMENT_MAPPING.frames];
-      const filteredElements = allElements.filter(element => {
+      const filteredElements = ATLAS_MAPPING.sprites.filter(element => {
         if (currentCategoryFilter && element.category !== currentCategoryFilter) return false;
         if (currentThemeFilter && element.theme !== currentThemeFilter) return false;
+        if (currentColorFilter && element.color !== currentColorFilter) return false;
         if (currentSearchFilter && !element.name.toLowerCase().includes(currentSearchFilter) && 
             !element.id.toLowerCase().includes(currentSearchFilter)) return false;
         return true;
@@ -503,24 +545,20 @@
           <span class="detail-value">${element.category}</span>
         </div>
         <div class="detail-row">
-          <span class="detail-label">Subcategory:</span>
-          <span class="detail-value">${element.subcategory}</span>
-        </div>
-        <div class="detail-row">
           <span class="detail-label">Theme:</span>
           <span class="detail-value">${element.theme}</span>
         </div>
         <div class="detail-row">
+          <span class="detail-label">Color:</span>
+          <span class="detail-value">${element.color}</span>
+        </div>
+        <div class="detail-row">
           <span class="detail-label">State:</span>
-          <span class="detail-value">${element.state}</span>
+          <span class="detail-value">${element.state || 'N/A'}</span>
         </div>
         <div class="detail-row">
-          <span class="detail-label">Usage:</span>
-          <span class="detail-value">${element.usage}</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">CSS Class:</span>
-          <span class="detail-value">${element.cssClass}</span>
+          <span class="detail-label">Description:</span>
+          <span class="detail-value">${element.description}</span>
         </div>
       `;
       
@@ -606,7 +644,7 @@
 
     function populateThemeFilter() {
       const themes = new Set();
-      [...UI_ELEMENT_MAPPING.buttons, ...UI_ELEMENT_MAPPING.frames].forEach(el => {
+      ATLAS_MAPPING.sprites.forEach(el => {
         if (el.theme) themes.add(el.theme);
       });
       
@@ -623,10 +661,12 @@
     function filterElements() {
       const categoryFilter = document.getElementById('category-filter').value;
       const themeFilter = document.getElementById('theme-filter').value;
+      const colorFilter = document.getElementById('color-filter').value;
       const searchFilter = document.getElementById('search-filter').value.toLowerCase();
       
       currentCategoryFilter = categoryFilter;
       currentThemeFilter = themeFilter;
+      currentColorFilter = colorFilter;
       currentSearchFilter = searchFilter;
       
       updateElementList();
@@ -637,10 +677,10 @@
       const listEl = document.getElementById('element-list');
       listEl.innerHTML = '';
       
-      const allElements = [...UI_ELEMENT_MAPPING.buttons, ...UI_ELEMENT_MAPPING.frames];
-      const filteredElements = allElements.filter(element => {
+      const filteredElements = ATLAS_MAPPING.sprites.filter(element => {
         if (currentCategoryFilter && element.category !== currentCategoryFilter) return false;
         if (currentThemeFilter && element.theme !== currentThemeFilter) return false;
+        if (currentColorFilter && element.color !== currentColorFilter) return false;
         if (currentSearchFilter && !element.name.toLowerCase().includes(currentSearchFilter) && 
             !element.id.toLowerCase().includes(currentSearchFilter)) return false;
         return true;
@@ -668,7 +708,7 @@
 
     async function init() {
       const ASSETS_PREFIX = window.location.protocol === 'file:' ? 'public' : '';
-      const atlasPath = `${ASSETS_PREFIX}/assets/Frames/Framesandbuttonsatlas.png`;
+      const atlasPath = `${ASSETS_PREFIX}/assets/Frames/Atlas.png`;
       
       try {
         const atlasImage = document.getElementById('atlas-image');
@@ -680,8 +720,8 @@
            atlasHeight = atlasImage.naturalHeight;
            
            // Validate against expected dimensions
-           if (atlasWidth !== ATLAS_METADATA.atlasWidth || atlasHeight !== ATLAS_METADATA.atlasHeight) {
-             console.warn(`Atlas dimensions mismatch! Expected: ${ATLAS_METADATA.atlasWidth}x${ATLAS_METADATA.atlasHeight}, Got: ${atlasWidth}x${atlasHeight}`);
+           if (atlasWidth !== ATLAS_MAPPING.metadata.atlasWidth || atlasHeight !== ATLAS_MAPPING.metadata.atlasHeight) {
+             console.warn(`Atlas dimensions mismatch! Expected: ${ATLAS_MAPPING.metadata.atlasWidth}x${ATLAS_MAPPING.metadata.atlasHeight}, Got: ${atlasWidth}x${atlasHeight}`);
            }
            
            updateStatus();
@@ -711,6 +751,7 @@
     document.getElementById('show-highlights').addEventListener('change', updateHighlights);
     document.getElementById('category-filter').addEventListener('change', filterElements);
     document.getElementById('theme-filter').addEventListener('change', filterElements);
+    document.getElementById('color-filter').addEventListener('change', filterElements);
     document.getElementById('search-filter').addEventListener('input', filterElements);
 
     // Initialize
