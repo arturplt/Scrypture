@@ -1,5 +1,6 @@
 import React from 'react';
 import { Achievement, AchievementProgress } from '../types';
+import { Card } from './ui';
 import styles from './AchievementCard.module.css';
 
 interface AchievementCardProps {
@@ -76,44 +77,63 @@ export const AchievementCard: React.FC<AchievementCardProps> = ({
     }
   };
 
-  const cardClasses = [
-    styles.card,
-    getRarityClass(achievement.rarity),
-    isUnlocked ? styles.cardUnlocked : styles.cardLocked,
-  ].filter(Boolean).join(' ');
+  const handleClick = () => {
+    onClick?.();
+  };
 
-  const iconClasses = [
-    styles.icon,
-    isUnlocked ? styles.iconUnlocked : styles.iconLocked,
-  ].filter(Boolean).join(' ');
+  const getCardStatus = () => {
+    return isUnlocked ? 'completed' : 'default';
+  };
 
-  const nameClasses = [
-    styles.name,
-    isUnlocked ? styles.nameUnlocked : '',
-  ].filter(Boolean).join(' ');
+  const getStatRewards = () => {
+    const stats = [];
+    if (achievement.rewards?.body) stats.push({ icon: '💪', value: achievement.rewards.body, label: 'Body' });
+    if (achievement.rewards?.mind) stats.push({ icon: '🧠', value: achievement.rewards.mind, label: 'Mind' });
+    if (achievement.rewards?.soul) stats.push({ icon: '✨', value: achievement.rewards.soul, label: 'Soul' });
+    if (achievement.rewards?.xp) stats.push({ icon: '⭐', value: achievement.rewards.xp, label: 'XP' });
+    return stats;
+  };
 
   return (
-    <div className={cardClasses} onClick={onClick} data-testid={`achievement-card-${achievement.id}`}>
-      <div className={styles.header}>
-        <div className={iconClasses}>
-          {isUnlocked ? achievement.icon : '🔒'}
-        </div>
-        <div className={styles.content}>
-          <h3 className={nameClasses}>{achievement.name}</h3>
-          <p className={styles.description}>{achievement.description}</p>
-          
-          <div className={styles.meta}>
-            <span className={styles.category}>{achievement.category}</span>
-            <span className={`${styles.rarity} ${getRarityTextClass(achievement.rarity)}`}>
-              {achievement.rarity}
-            </span>
+    <div className={styles.achievementCard}>
+      <Card
+        status={getCardStatus()}
+        onClick={handleClick}
+        className={`${styles.achievementCard} ${achievement.unlocked ? styles.unlocked : styles.locked}`}
+        hoverable={true}
+        theme="thick-gold"
+        width={4}
+        height={3}
+      >
+        <div className={styles.cardContent}>
+          {/* Header */}
+          <div className={styles.header}>
+            <div className={styles.iconSection}>
+              <div className={`${styles.achievementIcon} ${isUnlocked ? styles.iconUnlocked : styles.iconLocked}`}>
+                {isUnlocked ? achievement.icon : '🔒'}
+              </div>
+              <div className={styles.rarityBadge}>
+                <span className={`${styles.rarity} ${getRarityTextClass(achievement.rarity)}`}>
+                  {achievement.rarity}
+                </span>
+              </div>
+            </div>
+            <div className={styles.titleSection}>
+              <h3 className={`${styles.title} ${isUnlocked ? styles.titleUnlocked : styles.titleLocked}`}>
+                {achievement.name}
+              </h3>
+              <span className={styles.category}>{achievement.category}</span>
+            </div>
           </div>
 
-          {/* Progress bar for locked achievements */}
+          {/* Description */}
+          <p className={styles.description}>{achievement.description}</p>
+
+          {/* Progress Bar for locked achievements */}
           {!isUnlocked && showProgress && progress && (
-            <div className={styles.progressContainer} data-testid="achievement-progress">
+            <div className={styles.progressSection}>
               <div className={styles.progressLabel}>
-                Progress: {progress.currentValue} / {progress.targetValue}
+                {progress.currentValue} / {progress.targetValue}
               </div>
               <div className={styles.progressBar}>
                 <div 
@@ -128,39 +148,29 @@ export const AchievementCard: React.FC<AchievementCardProps> = ({
           )}
 
           {/* Rewards */}
-          {achievement.rewards && (
+          {getStatRewards().length > 0 && (
             <div className={styles.rewards}>
-              {achievement.rewards.xp && (
-                <span className={`${styles.reward} ${styles.rewardXP}`}>
-                  +{achievement.rewards.xp} XP
-                </span>
-              )}
-              {achievement.rewards.body && (
-                <span className={`${styles.reward} ${styles.rewardBody}`}>
-                  +{achievement.rewards.body} Body
-                </span>
-              )}
-              {achievement.rewards.mind && (
-                <span className={`${styles.reward} ${styles.rewardMind}`}>
-                  +{achievement.rewards.mind} Mind
-                </span>
-              )}
-              {achievement.rewards.soul && (
-                <span className={`${styles.reward} ${styles.rewardSoul}`}>
-                  +{achievement.rewards.soul} Soul
-                </span>
-              )}
+              {getStatRewards().map((stat, index) => (
+                <div key={index} className={styles.statReward}>
+                  <span className={styles.statIcon}>{stat.icon}</span>
+                  <span className={styles.statValue}>+{stat.value}</span>
+                </div>
+              ))}
             </div>
           )}
 
-          {/* Unlock date for unlocked achievements */}
-          {isUnlocked && achievement.unlockedAt && (
-            <div className={styles.unlockedAt} data-testid="achievement-unlocked">
-              Unlocked: {formatDate(achievement.unlockedAt)}
-            </div>
-          )}
+          {/* Footer */}
+          <div className={styles.footer}>
+            {isUnlocked && achievement.unlockedAt ? (
+              <span className={styles.unlockedDate}>
+                Unlocked: {formatDate(achievement.unlockedAt)}
+              </span>
+            ) : (
+              <span className={styles.lockedBadge}>Locked</span>
+            )}
+          </div>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }; 

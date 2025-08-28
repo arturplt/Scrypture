@@ -1,289 +1,211 @@
-/* Button Component Styles */
-
+/* Sprite-based Button Component */
 .button {
-  /* Base button styles */
-  border: none;
-  outline: none;
-  cursor: pointer;
-  font-family: 'Press Start 2P', monospace;
-  font-size: 10px;
-  color: #e8e5d2;
-  text-align: center;
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding: 4px 8px;
-  position: relative;
+  font-family: 'Press Start 2P', monospace;
+  font-size: var(--font-size-sm);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  outline: none;
   overflow: hidden;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
   
-  /* Ensure pixel-perfect rendering */
+  /* Pixel art rendering */
   image-rendering: pixelated;
   image-rendering: -moz-crisp-edges;
   image-rendering: crisp-edges;
-  
-  /* Smooth transitions */
-  transition: all 0.15s ease-in-out;
-  
-  /* Remove default button styling */
-  background: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
 }
 
-/* Button size variants */
-.button-small {
-  min-width: 32px;
-  min-height: 32px;
-  font-size: 8px;
-  padding: 2px 4px;
-}
-
-.button-wide {
-  min-width: 64px;
-  min-height: 32px;
-  font-size: 10px;
-  padding: 4px 8px;
-}
-
-.button-themed {
-  min-width: 32px;
-  min-height: 32px;
-  font-size: 9px;
-  padding: 3px 6px;
-}
-
-/* Button state styles */
-.state-normal {
-  /* Normal state - handled by sprite background */
-}
-
-.state-hover {
-  /* Hover state - handled by sprite background */
-  transform: translateY(-1px);
-  filter: brightness(1.1);
-}
-
-.state-pressed {
-  /* Pressed state - handled by sprite background */
-  transform: translateY(1px);
-  filter: brightness(0.9);
-}
-
-.state-disabled {
-  /* Disabled state */
-  opacity: 0.5;
-  cursor: not-allowed;
-  filter: grayscale(1);
-  transform: none;
-}
-
-/* Theme-specific styles */
-.button-body {
-  /* Body theme - red accent */
-}
-
-.button-mind {
-  /* Mind theme - green accent */
-}
-
-.button-soul {
-  /* Soul theme - brown accent */
-}
-
-/* Loading state */
-.loading {
-  cursor: wait;
-  pointer-events: none;
-}
-
-.loadingSpinner {
-  width: 12px;
-  height: 12px;
-  border: 2px solid transparent;
-  border-top: 2px solid #b6a432;
-  border-radius: 50%;
-  animation: button-spin 1s linear infinite;
-  margin-right: 4px;
-}
-
-@keyframes button-spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* Error state */
-.error {
-  background: #f44336 !important;
-  color: white;
-  border: 2px solid #d32f2f;
-  cursor: not-allowed;
-}
-
-/* Button content */
-.text {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
-  line-height: 1.2;
-}
-
-.icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-}
-
-/* Focus styles for accessibility */
-.button:focus-visible {
-  outline: 2px solid #b6a432;
+.button:focus {
+  outline: 2px solid var(--color-accent-gold);
   outline-offset: 2px;
 }
 
-.button:focus-visible:not(.state-disabled) {
+.buttonCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.buttonContent {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  color: var(--color-text-primary);
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
+  white-space: nowrap;
+}
+
+/* Size variants */
+.button-small {
+  min-width: 64px;
+  height: 24px;
+  padding: 4px 8px;
+  font-size: var(--font-size-xs);
+}
+
+.button-medium {
+  min-width: 96px;
+  height: 32px;
+  padding: 6px 12px;
+  font-size: var(--font-size-sm);
+}
+
+.button-large {
+  min-width: 128px;
+  height: 48px;
+  padding: 8px 16px;
+  font-size: var(--font-size-md);
+}
+
+/* Variant styles */
+.button-primary .buttonContent {
+  color: var(--color-text-primary);
+}
+
+.button-secondary .buttonContent {
+  color: var(--color-text-secondary);
+}
+
+.button-danger .buttonContent {
+  color: var(--color-text-primary);
+}
+
+.button-success .buttonContent {
+  color: var(--color-text-primary);
+}
+
+/* Interactive states */
+.button:not(.disabled):hover {
   transform: translateY(-1px);
   filter: brightness(1.1);
 }
 
-/* Touch device optimizations */
-@media (hover: none) and (pointer: coarse) {
-  .button {
-    /* Increase touch target size on mobile */
-    min-height: 44px;
-    min-width: 44px;
+.button:not(.disabled):active,
+.button.pressed {
+  transform: translateY(0);
+  filter: brightness(0.95);
+}
+
+.button.hovered:not(.disabled) {
+  filter: brightness(1.05);
+}
+
+/* Disabled state */
+.button.disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  filter: grayscale(0.5);
+}
+
+.button.disabled .buttonContent {
+  color: var(--color-text-muted);
+}
+
+/* Loading state */
+.button.loading {
+  cursor: wait;
+  opacity: 0.8;
+}
+
+.button.loading .buttonContent {
+  color: var(--color-text-muted);
+}
+
+.spinner {
+  display: inline-block;
+  animation: spin 1s linear infinite;
+  font-size: var(--font-size-sm);
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
   }
-  
-  .button-small {
-    min-width: 44px;
-    min-height: 44px;
-  }
-  
-  .button-wide {
-    min-width: 88px;
-    min-height: 44px;
-  }
-  
-  .button-themed {
-    min-width: 44px;
-    min-height: 44px;
-  }
-  
-  /* Disable hover effects on touch devices */
-  .state-hover {
-    transform: none;
-    filter: none;
+  to {
+    transform: rotate(360deg);
   }
 }
 
-/* High DPI displays */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+/* Focus states for accessibility */
+.button:focus-visible {
+  outline: 2px solid var(--color-accent-gold);
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
   .button {
-    /* Ensure crisp rendering on high DPI displays */
-    image-rendering: -webkit-optimize-contrast;
-    image-rendering: optimize-contrast;
+    border: 2px solid currentColor;
+  }
+  
+  .buttonContent {
+    text-shadow: none;
   }
 }
 
-/* Reduced motion preferences */
+/* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
   .button {
     transition: none;
   }
   
-  .loadingSpinner {
-    animation: none;
-  }
-  
-  .state-hover,
-  .state-pressed {
+  .button:not(.disabled):hover {
     transform: none;
   }
-}
-
-/* Print styles */
-@media print {
-  .button {
-    background: #fff !important;
-    color: #000 !important;
-    border: 1px solid #000 !important;
-    image-rendering: auto;
+  
+  .button:not(.disabled):active,
+  .button.pressed {
+    transform: none;
   }
   
-  .loadingSpinner {
-    display: none;
+  .spinner {
+    animation: none;
   }
 }
 
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  .button {
-    /* Ensure proper contrast in dark mode */
-    color: #e8e5d2;
-  }
-}
-
-/* Button group styles */
-.buttonGroup {
-  display: flex;
-  gap: 2px;
-}
-
-.buttonGroup .button {
-  border-radius: 0;
-}
-
-.buttonGroup .button:first-child {
-  border-top-left-radius: 4px;
-  border-bottom-left-radius: 4px;
-}
-
-.buttonGroup .button:last-child {
-  border-top-right-radius: 4px;
-  border-bottom-right-radius: 4px;
-}
-
-/* Responsive adjustments */
+/* Mobile optimizations */
 @media (max-width: 768px) {
   .button {
-    font-size: 9px;
+    transition: none;
   }
   
+  .button:not(.disabled):hover {
+    transform: none;
+    filter: none;
+  }
+  
+  .button:not(.disabled):active {
+    transform: none;
+    filter: brightness(0.9);
+  }
+  
+  /* Increase touch targets */
   .button-small {
-    font-size: 7px;
+    min-height: 32px;
+    padding: 8px 12px;
   }
   
-  .button-wide {
-    font-size: 9px;
+  .button-medium {
+    min-height: 44px;
+    padding: 12px 16px;
   }
   
-  .button-themed {
-    font-size: 8px;
-  }
-}
-
-@media (max-width: 480px) {
-  .button {
-    font-size: 8px;
-    padding: 3px 6px;
-  }
-  
-  .button-small {
-    font-size: 6px;
-    padding: 2px 3px;
-  }
-  
-  .button-wide {
-    font-size: 8px;
-    padding: 3px 6px;
-  }
-  
-  .button-themed {
-    font-size: 7px;
-    padding: 2px 4px;
+  .button-large {
+    min-height: 56px;
+    padding: 16px 20px;
   }
 }

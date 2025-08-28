@@ -6,7 +6,7 @@ export interface ThemeConfig {
   color: string;
   xOffset: number;
   yOffset: number;
-  rowType: 'main' | 'frame' | 'button';
+  rowType: 'main' | 'frame';
 }
 
 export interface AtlasSprite {
@@ -51,7 +51,7 @@ const THEME_CONFIGS: ThemeConfig[] = [
   { name: 'pale-blue', color: 'pale-blue', xOffset: 384, yOffset: 112, rowType: 'frame' },
   { name: 'green-ornate', color: 'green-ornate', xOffset: 448, yOffset: 112, rowType: 'frame' },
   
-  // Row 3 (y: 176-240) - 8 themes - Button variations
+  // Row 3 (y: 176-240) - 8 themes - Frame system (same as Row 2)
   { name: 'green-button', color: 'green', xOffset: 0, yOffset: 176, rowType: 'frame' },
   { name: 'red-button', color: 'red', xOffset: 64, yOffset: 176, rowType: 'frame' },
   { name: 'green-button-activated', color: 'green', xOffset: 128, yOffset: 176, rowType: 'frame' },
@@ -61,7 +61,7 @@ const THEME_CONFIGS: ThemeConfig[] = [
   { name: 'orange-button', color: 'orange', xOffset: 384, yOffset: 176, rowType: 'frame' },
   { name: 'blue-ornate', color: 'blue-ornate', xOffset: 448, yOffset: 176, rowType: 'frame' },
   
-  // Row 4 (y: 240-304) - 6 themes - Special variations
+  // Row 4 (y: 240-304) - 6 themes - Frame system (same as Row 2)
   { name: 'thick-gold', color: 'thick-gold', xOffset: 0, yOffset: 240, rowType: 'frame' },
   { name: 'skinny-gold', color: 'skinny-gold', xOffset: 64, yOffset: 240, rowType: 'frame' },
   { name: 'turquoise', color: 'turquoise', xOffset: 128, yOffset: 240, rowType: 'frame' },
@@ -152,8 +152,6 @@ const BASE_FRAME_SPRITES = [
   // 1x1 Button (1 sprite)
   { id: 'button-default', name: 'Default Button', x: 48, y: 48, width: 16, height: 16, category: 'button' as const, theme: 'default', state: 'normal' as const, description: '16x16 default button' }
 ];
-
-
 
 // Generator function to create sprites for a theme
 function generateThemeSprites(config: ThemeConfig): AtlasSprite[] {

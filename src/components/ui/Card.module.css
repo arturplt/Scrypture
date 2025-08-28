@@ -1,0 +1,330 @@
+/* Sprite-based Card Component */
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  transition: all var(--transition-normal);
+  margin-bottom: var(--spacing-md);
+  
+  /* Prevent text flickering during animations */
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+/* Hover states */
+.card.hoverable:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+}
+
+.card.clickable {
+  cursor: pointer;
+}
+
+.card.clickable:hover {
+  transform: translateY(-3px);
+  filter: brightness(1.1);
+}
+
+.card.clickable:active {
+  transform: translateY(-1px);
+  filter: brightness(0.95);
+}
+
+/* Status variants */
+.card.status-completed {
+  opacity: 0.8;
+  filter: grayscale(0.3);
+}
+
+.card.status-active {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.1);
+  }
+}
+
+.card.status-highlighted {
+  animation: highlight 1s ease-out;
+}
+
+@keyframes highlight {
+  0% {
+    filter: brightness(1);
+    transform: scale(1);
+  }
+  50% {
+    filter: brightness(1.2);
+    transform: scale(1.02);
+  }
+  100% {
+    filter: brightness(1);
+    transform: scale(1);
+  }
+}
+
+.card.status-disabled {
+  opacity: 0.6;
+  pointer-events: none;
+  filter: grayscale(0.7);
+}
+
+/* Priority variants */
+.card.priority-high {
+  border-left: 4px solid var(--color-error);
+}
+
+.card.priority-medium {
+  border-left: 4px solid var(--color-accent-gold);
+}
+
+.card.priority-low {
+  border-left: 4px solid var(--color-success);
+}
+
+/* Loading state */
+.card.loading {
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+/* Compact variant */
+.card.compact .cardContent {
+  padding: var(--spacing-sm);
+}
+
+.card.compact .cardTitle {
+  font-size: var(--font-size-sm);
+}
+
+.card.compact .cardSubtitle {
+  font-size: var(--font-size-xs);
+}
+
+/* Card Frame */
+.cardFrame {
+  width: 100%;
+  height: 100%;
+}
+
+/* Card Content */
+.cardContent {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: var(--spacing-sm);
+}
+
+/* Header */
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  flex-shrink: 0;
+}
+
+.headerContent {
+  flex: 1;
+  min-width: 0; /* Allow text truncation */
+}
+
+.cardTitle {
+  font-family: 'Press Start 2P', monospace;
+  font-size: var(--font-size-md);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-xs) 0;
+  line-height: 1.3;
+  word-break: break-word;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+}
+
+.titleCompleted {
+  text-decoration: line-through;
+  color: var(--color-text-muted);
+}
+
+.cardSubtitle {
+  font-family: 'Press Start 2P', monospace;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.4;
+  word-break: break-word;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+}
+
+.subtitleCompleted {
+  color: var(--color-text-muted);
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  gap: var(--spacing-xs);
+  flex-shrink: 0;
+  align-items: flex-start;
+}
+
+/* Body */
+.cardBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Loading State */
+.loadingState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  font-family: 'Press Start 2P', monospace;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
+  text-rendering: optimizeSpeed;
+}
+
+.spinner {
+  display: inline-block;
+  animation: spin 1s linear infinite;
+  font-size: var(--font-size-md);
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .card {
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .card.hoverable:hover,
+  .card.clickable:hover {
+    transform: none;
+    filter: none;
+  }
+
+  .card.clickable:active {
+    transform: none;
+    filter: brightness(0.9);
+  }
+
+  .cardTitle {
+    font-size: var(--font-size-sm);
+  }
+
+  .cardSubtitle {
+    font-size: var(--font-size-xs);
+  }
+
+  .actions {
+    gap: var(--spacing-xs);
+  }
+}
+
+@media (max-width: 480px) {
+  .cardHeader {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-xs);
+  }
+
+  .actions {
+    justify-content: flex-end;
+  }
+
+  .cardTitle {
+    font-size: var(--font-size-sm);
+  }
+
+  .cardSubtitle {
+    font-size: 10px;
+  }
+}
+
+/* Accessibility */
+.card:focus-visible {
+  outline: 2px solid var(--color-accent-gold);
+  outline-offset: 2px;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .card {
+    border: 2px solid currentColor;
+  }
+  
+  .cardTitle,
+  .cardSubtitle {
+    text-shadow: none;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .card.hoverable:hover,
+  .card.clickable:hover,
+  .card.clickable:active {
+    transition: none;
+    transform: none;
+    animation: none;
+  }
+
+  .card.status-active,
+  .card.status-highlighted {
+    animation: none;
+  }
+
+  .spinner {
+    animation: none;
+  }
+}
+
+/* Focus management */
+.card:focus {
+  z-index: 1;
+  position: relative;
+}
+
+/* Interaction states for touch devices */
+@media (hover: none) {
+  .card.hoverable:hover {
+    transform: none;
+    filter: none;
+  }
+  
+  .card.clickable:hover {
+    transform: none;
+    filter: none;
+  }
+  
+  .card.clickable:active {
+    filter: brightness(0.9);
+    transition: filter 0.1s;
+  }
+}

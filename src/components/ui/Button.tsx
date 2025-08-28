@@ -1,226 +1,167 @@
-/**
- * Button Component - Sprite-based button with state management
- * Supports small (16x16), wide (16x32), and themed buttons with hover/pressed states
- */
-
-import React, { useState, useMemo } from 'react';
-import { useAssetManager } from '../../hooks/useAssetManager';
+import React, { useRef, useEffect, useState } from 'react';
+import { getSpriteById } from '../../data/atlasMapping';
 import styles from './Button.module.css';
 
-export type ButtonSize = 'small' | 'wide' | 'themed';
-export type ButtonTheme = 'body' | 'mind' | 'soul';
-export type ButtonState = 'normal' | 'hover' | 'pressed' | 'disabled';
-
 export interface ButtonProps {
-  /** Button ID from asset manager */
-  buttonId?: string;
-  /** Button size category */
-  size?: ButtonSize;
-  /** Button theme (for themed buttons) */
-  theme?: ButtonTheme;
-  /** Button text content */
-  children?: React.ReactNode;
-  /** Click handler */
-  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
-  /** Whether button is disabled */
+  children: React.ReactNode;
+  onClick?: () => void;
   disabled?: boolean;
-  /** Additional CSS classes */
-  className?: string;
-  /** Inline styles */
-  style?: React.CSSProperties;
-  /** Button type */
+  variant?: 'primary' | 'secondary' | 'danger' | 'success';
+  size?: 'small' | 'medium' | 'large';
+  theme?: string;
   type?: 'button' | 'submit' | 'reset';
-  /** Accessibility label */
-  'aria-label'?: string;
-  /** Whether to show loading state */
+  className?: string;
   loading?: boolean;
-  /** Icon element */
-  icon?: React.ReactNode;
-  /** Whether to show loading state while assets load */
-  showLoading?: boolean;
 }
 
+const BUTTON_THEMES = {
+  primary: 'green-frame',
+  secondary: 'silver',
+  danger: 'red-frame',
+  success: 'green-button'
+};
+
+const BUTTON_SIZES = {
+  small: { scale: 1, padding: 8 },
+  medium: { scale: 2, padding: 12 },
+  large: { scale: 3, padding: 16 }
+};
+
 export const Button: React.FC<ButtonProps> = ({
-  buttonId,
-  size = 'small',
-  theme,
   children,
   onClick,
   disabled = false,
-  className = '',
-  style = {},
+  variant = 'primary',
+  size = 'medium',
+  theme,
   type = 'button',
-  'aria-label': ariaLabel,
-  loading = false,
-  icon,
-  showLoading = true
+  className = '',
+  loading = false
 }) => {
-  const { getButtonConfig, getButtonBackground, getButtonsBySize, isAssetLoaded } = useAssetManager();
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [atlasImage, setAtlasImage] = useState<HTMLImageElement | null>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [isPressed, setIsPressed] = useState(false);
 
-  // Determine button ID if not provided
-  const resolvedButtonId = useMemo(() => {
-    if (buttonId) return buttonId;
+  // Load atlas image
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => setAtlasImage(img);
+    img.src = '/assets/Frames/Atlas.png';
+  }, []);
+
+  // Get button configuration
+  const selectedTheme = theme || BUTTON_THEMES[variant];
+  const sizeConfig = BUTTON_SIZES[size];
+  
+  // Draw button frame
+  useEffect(() => {
+    if (!canvasRef.current || !atlasImage) return;
+
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Set canvas size
+    const buttonWidth = 96; // 3 sprites * 32px (scale 2)
+    const buttonHeight = 32; // 1 sprite * 32px (scale 2)
     
-    if (size === 'themed' && theme) {
-      return `button-${theme}`;
-    }
+    canvas.width = buttonWidth;
+    canvas.height = buttonHeight;
+
+    // Clear canvas
+    ctx.clearRect(0, 0, buttonWidth, buttonHeight);
     
-    const buttons = getButtonsBySize(size);
-    return buttons[0]?.id || `button-${size}-1`;
-  }, [buttonId, size, theme, getButtonsBySize]);
+    // Disable image smoothing for pixel art
+    ctx.imageSmoothingEnabled = false;
 
-  const buttonConfig = getButtonConfig(resolvedButtonId);
-  const isAssetReady = isAssetLoaded('frames-and-buttons');
+    // Get sprites for button frame
+    const leftSprite = getSpriteById(`frame-edge-left-${selectedTheme}`);
+    const centerSprite = getSpriteById(`frame-background-${selectedTheme}`);
+    const rightSprite = getSpriteById(`frame-edge-right-${selectedTheme}`);
 
-  // Determine current button state
-  const currentState: ButtonState = useMemo(() => {
-    if (disabled || loading) return 'disabled';
-    if (isPressed) return 'pressed';
-    if (isHovered) return 'hover';
-    return 'normal';
-  }, [disabled, loading, isPressed, isHovered]);
+    if (leftSprite && centerSprite && rightSprite) {
+      const spriteSize = 16 * sizeConfig.scale;
+      
+      // Draw left edge
+      ctx.drawImage(
+        atlasImage,
+        leftSprite.x, leftSprite.y, leftSprite.width, leftSprite.height,
+        0, 0, spriteSize, spriteSize
+      );
 
-  // Get background style for current state
-  const backgroundStyle = useMemo(() => {
-    if (!buttonConfig || !isAssetReady) return {};
-    
-    try {
-      const background = getButtonBackground(resolvedButtonId, currentState);
-      return { backgroundImage: background };
-    } catch (error) {
-      console.warn(`Failed to get button background for ${resolvedButtonId}:`, error);
-      return {};
+      // Draw center (repeatable)
+      ctx.drawImage(
+        atlasImage,
+        centerSprite.x, centerSprite.y, centerSprite.width, centerSprite.height,
+        spriteSize, 0, spriteSize, spriteSize
+      );
+
+      // Draw right edge
+      ctx.drawImage(
+        atlasImage,
+        rightSprite.x, rightSprite.y, rightSprite.width, rightSprite.height,
+        spriteSize * 2, 0, spriteSize, spriteSize
+      );
     }
-  }, [buttonConfig, isAssetReady, resolvedButtonId, currentState, getButtonBackground]);
+  }, [atlasImage, selectedTheme, sizeConfig.scale, isHovered, isPressed]);
 
-  // Calculate button dimensions
-  const buttonStyles = useMemo(() => {
-    const baseStyles = {
-      width: buttonConfig?.width ? `${buttonConfig.width * 2}px` : 'auto',
-      height: buttonConfig?.height ? `${buttonConfig.height * 2}px` : 'auto',
-      minWidth: size === 'wide' ? '64px' : '32px',
-      minHeight: '32px',
-      ...backgroundStyle,
-      ...style
-    };
-
-    return baseStyles;
-  }, [buttonConfig, size, backgroundStyle, style]);
-
-  // Event handlers
-  const handleMouseEnter = () => {
-    if (!disabled && !loading) {
-      setIsHovered(true);
-    }
-  };
-
-  const handleMouseLeave = () => {
-    setIsHovered(false);
-    setIsPressed(false);
-  };
-
-  const handleMouseDown = () => {
-    if (!disabled && !loading) {
-      setIsPressed(true);
-    }
-  };
-
-  const handleMouseUp = () => {
-    setIsPressed(false);
-  };
-
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleClick = () => {
     if (!disabled && !loading && onClick) {
-      onClick(event);
+      onClick();
     }
   };
 
-  // Loading state
-  if (!isAssetReady && showLoading) {
-    return (
-      <button
-        type={type}
-        disabled
-        className={`${styles.button} ${styles.loading} ${className}`}
-        style={buttonStyles}
-        aria-label={ariaLabel}
-      >
-        <div className={styles.loadingSpinner} />
-        {children}
-      </button>
-    );
-  }
-
-  // Error state (no button config)
-  if (!buttonConfig) {
-    return (
-      <button
-        type={type}
-        disabled
-        className={`${styles.button} ${styles.error} ${className}`}
-        style={buttonStyles}
-        aria-label={ariaLabel}
-      >
-        {children || `Button not found: ${resolvedButtonId}`}
-      </button>
-    );
-  }
+  const buttonClasses = [
+    styles.button,
+    styles[`button-${variant}`],
+    styles[`button-${size}`],
+    disabled && styles.disabled,
+    loading && styles.loading,
+    isHovered && styles.hovered,
+    isPressed && styles.pressed,
+    className
+  ].filter(Boolean).join(' ');
 
   return (
     <button
       type={type}
-      disabled={disabled || loading}
-      className={`
-        ${styles.button}
-        ${styles[`button-${size}`]}
-        ${theme ? styles[`button-${theme}`] : ''}
-        ${styles[`state-${currentState}`]}
-        ${loading ? styles.loading : ''}
-        ${className}
-      `}
-      style={buttonStyles}
+      className={buttonClasses}
       onClick={handleClick}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      onMouseDown={handleMouseDown}
-      onMouseUp={handleMouseUp}
-      aria-label={ariaLabel}
-      data-button-id={resolvedButtonId}
-      data-button-size={size}
-      data-button-theme={theme}
-      data-button-state={currentState}
+      disabled={disabled || loading}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => {
+        setIsHovered(false);
+        setIsPressed(false);
+      }}
+      onMouseDown={() => setIsPressed(true)}
+      onMouseUp={() => setIsPressed(false)}
     >
-      {loading && <div className={styles.loadingSpinner} />}
-      {icon && <span className={styles.icon}>{icon}</span>}
-      {children && <span className={styles.text}>{children}</span>}
+      <canvas 
+        ref={canvasRef}
+        className={styles.buttonCanvas}
+        style={{ 
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          pointerEvents: 'none',
+          zIndex: 1
+        }}
+      />
+      <span className={styles.buttonContent}>
+        {loading ? (
+          <>
+            <span className={styles.spinner}>⟳</span>
+            Loading...
+          </>
+        ) : (
+          children
+        )}
+      </span>
     </button>
   );
 };
 
-// Convenience components for different button types
-export const SmallButton: React.FC<Omit<ButtonProps, 'size'>> = (props) => (
-  <Button {...props} size="small" />
-);
-
-export const WideButton: React.FC<Omit<ButtonProps, 'size'>> = (props) => (
-  <Button {...props} size="wide" />
-);
-
-export const ThemedButton: React.FC<Omit<ButtonProps, 'size'> & { theme: ButtonTheme }> = (props) => (
-  <Button {...props} size="themed" />
-);
-
-// Specific themed buttons
-export const BodyButton: React.FC<Omit<ButtonProps, 'size' | 'theme'>> = (props) => (
-  <Button {...props} size="themed" theme="body" />
-);
-
-export const MindButton: React.FC<Omit<ButtonProps, 'size' | 'theme'>> = (props) => (
-  <Button {...props} size="themed" theme="mind" />
-);
-
-export const SoulButton: React.FC<Omit<ButtonProps, 'size' | 'theme'>> = (props) => (
-  <Button {...props} size="themed" theme="soul" />
-);
+export default Button;

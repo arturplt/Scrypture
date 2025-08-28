@@ -28,6 +28,7 @@ import Pixelite from './components/Pixelite';
 import { Synthesizer } from './components/Synthesizer';
 import { CombinationLockModal } from './components/CombinationLockModal';
 import SanctuaryModalDemo from './components/SanctuaryModalDemo';
+import { CardDemo } from './components/CardDemo';
 import { UIBuilder } from './components/UIBuilder';
 
 import { Task, Achievement } from './types';
@@ -265,6 +266,7 @@ function AppContent() {
   const [showSynthesizer, setShowSynthesizer] = useState(false);
   const [showSanctuaryDemo, setShowSanctuaryDemo] = useState(false);
   const [showUIBuilder, setShowUIBuilder] = useState(false);
+  const [showCardDemo, setShowCardDemo] = useState(false);
   const [showCombinationLock, setShowCombinationLock] = useState(false);
   const [isSecretMenuUnlocked, setIsSecretMenuUnlocked] = useState(false);
   const [isClosingLock, setIsClosingLock] = useState(false);
@@ -606,6 +608,13 @@ function AppContent() {
                 </button>
                 <button 
                   className={styles.secretMenuButton}
+                  onClick={() => setShowCardDemo(true)}
+                  title="Modern Card Components Demo"
+                >
+                  🎮 Card Demo
+                </button>
+                <button 
+                  className={styles.secretMenuButton}
                   onClick={() => setShowSanctuaryDemo(true)}
                   title="Isometric Sanctuary Builder"
                 >
@@ -642,6 +651,44 @@ function AppContent() {
         isOpen={showUIBuilder}
         onClose={() => setShowUIBuilder(false)}
       />
+
+      {/* Card Demo Modal */}
+      {showCardDemo && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          background: 'rgba(0, 0, 0, 0.8)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 2000
+        }}>
+          <div style={{ position: 'relative' }}>
+            <button
+              onClick={() => setShowCardDemo(false)}
+              style={{
+                position: 'absolute',
+                top: '10px',
+                right: '10px',
+                background: 'var(--color-danger)',
+                color: 'white',
+                border: 'none',
+                padding: '8px 12px',
+                cursor: 'pointer',
+                fontFamily: 'Press Start 2P',
+                fontSize: '12px',
+                zIndex: 2001
+              }}
+            >
+              ✕
+            </button>
+            <CardDemo />
+          </div>
+        </div>
+      )}
 
       {/* Sanctuary Demo Modal */}
       <SanctuaryModalDemo 

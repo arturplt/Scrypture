@@ -18,23 +18,23 @@ const THEME_CONFIGS = [
   { name: 'pale-blue', color: 'pale-blue', xOffset: 384, yOffset: 112, rowType: 'frame' },
   { name: 'green-ornate', color: 'green-ornate', xOffset: 448, yOffset: 112, rowType: 'frame' },
   
-  // Row 3 (y: 192-256) - 8 themes - Button variations
-  { name: 'green-button', color: 'green', xOffset: 0, yOffset: 192, rowType: 'button' },
-  { name: 'red-button', color: 'red', xOffset: 64, yOffset: 192, rowType: 'button' },
-  { name: 'green-button-activated', color: 'green', xOffset: 128, yOffset: 192, rowType: 'button' },
-  { name: 'red-button-activated', color: 'red', xOffset: 192, yOffset: 192, rowType: 'button' },
-  { name: 'grey-brown', color: 'grey-brown', xOffset: 256, yOffset: 192, rowType: 'button' },
-  { name: 'purple-button', color: 'purple', xOffset: 320, yOffset: 192, rowType: 'button' },
-  { name: 'orange-button', color: 'orange', xOffset: 384, yOffset: 192, rowType: 'button' },
-  { name: 'blue-ornate', color: 'blue-ornate', xOffset: 448, yOffset: 192, rowType: 'button' },
+  // Row 3 (y: 176-240) - 8 themes - Frame system (same as Row 2)
+  { name: 'green-button', color: 'green', xOffset: 0, yOffset: 176, rowType: 'frame' },
+  { name: 'red-button', color: 'red', xOffset: 64, yOffset: 176, rowType: 'frame' },
+  { name: 'green-button-activated', color: 'green', xOffset: 128, yOffset: 176, rowType: 'frame' },
+  { name: 'red-button-activated', color: 'red', xOffset: 192, yOffset: 176, rowType: 'frame' },
+  { name: 'grey-brown', color: 'grey-brown', xOffset: 256, yOffset: 176, rowType: 'frame' },
+  { name: 'purple-button', color: 'purple', xOffset: 320, yOffset: 176, rowType: 'frame' },
+  { name: 'orange-button', color: 'orange', xOffset: 384, yOffset: 176, rowType: 'frame' },
+  { name: 'blue-ornate', color: 'blue-ornate', xOffset: 448, yOffset: 176, rowType: 'frame' },
   
-  // Row 4 (y: 272-336) - 6 themes - Special variations
-  { name: 'thick-gold', color: 'thick-gold', xOffset: 0, yOffset: 272, rowType: 'main' },
-  { name: 'skinny-gold', color: 'skinny-gold', xOffset: 64, yOffset: 272, rowType: 'main' },
-  { name: 'turquoise', color: 'turquoise', xOffset: 128, yOffset: 272, rowType: 'main' },
-  { name: 'bronze', color: 'bronze', xOffset: 192, yOffset: 272, rowType: 'main' },
-  { name: 'gunmetal', color: 'gunmetal', xOffset: 256, yOffset: 272, rowType: 'main' },
-  { name: 'royal-blue', color: 'royal-blue', xOffset: 320, yOffset: 272, rowType: 'main' }
+  // Row 4 (y: 240-304) - 6 themes - Frame system (same as Row 2)
+  { name: 'thick-gold', color: 'thick-gold', xOffset: 0, yOffset: 240, rowType: 'frame' },
+  { name: 'skinny-gold', color: 'skinny-gold', xOffset: 64, yOffset: 240, rowType: 'frame' },
+  { name: 'turquoise', color: 'turquoise', xOffset: 128, yOffset: 240, rowType: 'frame' },
+  { name: 'bronze', color: 'bronze', xOffset: 192, yOffset: 240, rowType: 'frame' },
+  { name: 'gunmetal', color: 'gunmetal', xOffset: 256, yOffset: 240, rowType: 'frame' },
+  { name: 'royal-blue', color: 'royal-blue', xOffset: 320, yOffset: 240, rowType: 'frame' }
 ];
 
 // Base sprite definitions for Row 1 - Main 4x7 Grid (8 elements per theme)
@@ -125,10 +125,7 @@ const BASE_FRAME_SPRITES = [
   { id: 'button-default', name: 'Default Button', x: 48, y: 48, width: 16, height: 16, category: 'button', theme: 'default', state: 'normal', description: '16x16 default button' }
 ];
 
-// Base sprite definitions for Row 3 - Button Variations (1 sprite per theme)
-const BASE_BUTTON_SPRITES = [
-  { id: 'button-default', name: 'Default Button', x: 0, y: 0, width: 16, height: 16, category: 'button', theme: 'default', state: 'normal', description: '16x16 default button' }
-];
+
 
 // Generator function to create sprites for a theme
 function generateThemeSprites(config) {
@@ -139,8 +136,8 @@ function generateThemeSprites(config) {
     BASE_MAIN_SPRITES.forEach(baseSprite => {
       sprites.push({
         ...baseSprite,
-        id: `${baseSprite.id}-${config.color}`,
-        name: `${baseSprite.name} (${config.color})`,
+        id: `${baseSprite.id}-${config.name}`,
+        name: `${baseSprite.name} (${config.name})`,
         x: baseSprite.x + config.xOffset,
         y: baseSprite.y + config.yOffset,
         color: config.color
@@ -151,33 +148,11 @@ function generateThemeSprites(config) {
     BASE_FRAME_SPRITES.forEach(baseSprite => {
       sprites.push({
         ...baseSprite,
-        id: `${baseSprite.id}-${config.color}`,
-        name: `${baseSprite.name} (${config.color})`,
+        id: `${baseSprite.id}-${config.name}`,
+        name: `${baseSprite.name} (${config.name})`,
         x: baseSprite.x + config.xOffset,
         y: baseSprite.y + config.yOffset,
         color: config.color
-      });
-    });
-  } else if (config.rowType === 'button') {
-    // Generate single button sprite (1 sprite)
-    BASE_BUTTON_SPRITES.forEach(baseSprite => {
-      // Handle special cases for activated buttons
-      let state = baseSprite.state || 'normal';
-      let name = baseSprite.name;
-      
-      if (config.name.includes('activated')) {
-        state = 'active';
-        name = 'Activated Button';
-      }
-      
-      sprites.push({
-        ...baseSprite,
-        id: `${baseSprite.id}-${config.color}`,
-        name: `${name} (${config.color})`,
-        x: baseSprite.x + config.xOffset,
-        y: baseSprite.y + config.yOffset,
-        color: config.color,
-        state: state
       });
     });
   }

@@ -4,12 +4,13 @@ import { useTasks } from '../hooks/useTasks';
 import { TaskEditForm } from './TaskEditForm';
 import { AutoSaveIndicator } from './AutoSaveIndicator';
 import { formatRelativeTime } from '../utils/dateUtils';
+import { Card } from './ui';
 import styles from './TaskCard.module.css';
 
 interface TaskCardProps {
   task: Task;
   isHighlighted?: boolean;
-  triggerEdit?: boolean; // New prop to trigger inline edit
+  triggerEdit?: boolean;
   onEditTask?: (task: Task) => void;
 }
 
@@ -167,18 +168,37 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   // Don't render anything during transition to edit
   if (isTransitioningToEdit) {
     return (
-      <div className={getCardClassName()}>
+      <div className={getCardClassName()} style={{ width: '100%', height: '100%' }}>
         {/* Empty div to maintain layout during transition */}
       </div>
     );
   }
 
   return (
-    <div
+    <Card
+      theme="turquoise"
+      variant="standard"
+      customWidth={isEditing ? 600 : 400}
+      customHeight={isEditing ? 650 : 250}
       className={getCardClassName()}
-      onClick={handleCardClick}
+      onClick={isEditing ? undefined : handleCardClick}
+      hoverable={!isEditing}
       style={
         {
+          // Stretch to fill container but with minimum dimensions
+          width: '100%',
+          height: 'auto',
+          minWidth: isEditing ? '600px' : '400px',
+          minHeight: isEditing ? '650px' : '250px',
+          maxHeight: 'none',
+          // Disable hover effects when editing
+          ...(isEditing ? {
+            transform: 'none !important',
+            filter: 'none !important',
+            cursor: 'default',
+          } : {}),
+          // Ensure frame renders properly
+          isolation: 'isolate',
           // Set XP strip variables dynamically
           ...(task.statRewards?.xp
             ? {
@@ -242,7 +262,17 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 
       {isEditing ? (
         // Show TaskEditForm inside the card
-        <div className={styles.editFormContainer}>
+        <div className={styles.editFormContainer} style={{ 
+          width: '100%', 
+          height: 'auto',
+          minHeight: '580px',
+          padding: '16px',
+          paddingBottom: '32px',
+          overflow: 'visible',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '12px'
+        }}>
           <TaskEditForm task={task} onCancel={handleCancelEdit} />
         </div>
       ) : (
@@ -394,6 +424,6 @@ export const TaskCard: React.FC<TaskCardProps> = ({
           )}
         </>
       )}
-    </div>
+    </Card>
   );
 };
