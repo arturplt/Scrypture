@@ -1,17 +1,12 @@
 // Atlas Mapping for asset-test.html
 // This file mirrors the structure from src/data/atlasMapping.ts for direct use in HTML
 
-// Theme configurations for 3 rows × 8-10 columns = 30 themes
+// Theme configurations for 4 rows × 6-8 columns = 30 themes
 const THEME_CONFIGS = [
-  // Row 1 (y: 0-96) - 8 themes - Main 4x7 grid
+  // Row 1 (y: 0-96) - 3 themes - Main 4x7 grid (28 elements per theme)
   { name: 'green', color: 'green', xOffset: 0, yOffset: 0, rowType: 'main' },
   { name: 'dark-green', color: 'dark-green', xOffset: 64, yOffset: 0, rowType: 'main' },
   { name: 'blue-stone', color: 'blue-stone', xOffset: 128, yOffset: 0, rowType: 'main' },
-  { name: 'red', color: 'red', xOffset: 192, yOffset: 0, rowType: 'main' },
-  { name: 'purple', color: 'purple', xOffset: 256, yOffset: 0, rowType: 'main' },
-  { name: 'orange', color: 'orange', xOffset: 320, yOffset: 0, rowType: 'main' },
-  { name: 'yellow', color: 'yellow', xOffset: 384, yOffset: 0, rowType: 'main' },
-  { name: 'cyan', color: 'cyan', xOffset: 448, yOffset: 0, rowType: 'main' },
   
   // Row 2 (y: 112-176) - 8 themes - 4x4 frame system
   { name: 'green-frame', color: 'green', xOffset: 0, yOffset: 112, rowType: 'frame' },
@@ -23,27 +18,28 @@ const THEME_CONFIGS = [
   { name: 'pale-blue', color: 'pale-blue', xOffset: 384, yOffset: 112, rowType: 'frame' },
   { name: 'green-ornate', color: 'green-ornate', xOffset: 448, yOffset: 112, rowType: 'frame' },
   
-  // Row 3 (y: 176-240) - 8 themes - 4x4 frame system
-  { name: 'green-button', color: 'green', xOffset: 0, yOffset: 176, rowType: 'frame' },
-  { name: 'red-button', color: 'red', xOffset: 64, yOffset: 176, rowType: 'frame' },
-  { name: 'green-button-activated', color: 'green', xOffset: 128, yOffset: 176, rowType: 'frame' },
-  { name: 'red-button-activated', color: 'red', xOffset: 192, yOffset: 176, rowType: 'frame' },
-  { name: 'grey-brown', color: 'grey-brown', xOffset: 256, yOffset: 176, rowType: 'frame' },
-  { name: 'purple-button', color: 'purple', xOffset: 320, yOffset: 176, rowType: 'frame' },
-  { name: 'orange-button', color: 'orange', xOffset: 384, yOffset: 176, rowType: 'frame' },
-  { name: 'blue-ornate', color: 'blue-ornate', xOffset: 448, yOffset: 176, rowType: 'frame' },
+  // Row 3 (y: 192-256) - 8 themes - Button variations
+  { name: 'green-button', color: 'green', xOffset: 0, yOffset: 192, rowType: 'button' },
+  { name: 'red-button', color: 'red', xOffset: 64, yOffset: 192, rowType: 'button' },
+  { name: 'green-button-activated', color: 'green', xOffset: 128, yOffset: 192, rowType: 'button' },
+  { name: 'red-button-activated', color: 'red', xOffset: 192, yOffset: 192, rowType: 'button' },
+  { name: 'grey-brown', color: 'grey-brown', xOffset: 256, yOffset: 192, rowType: 'button' },
+  { name: 'purple-button', color: 'purple', xOffset: 320, yOffset: 192, rowType: 'button' },
+  { name: 'orange-button', color: 'orange', xOffset: 384, yOffset: 192, rowType: 'button' },
+  { name: 'blue-ornate', color: 'blue-ornate', xOffset: 448, yOffset: 192, rowType: 'button' },
   
-  // Row 4 (y: 240-304) - 6 themes - 4x4 frame system
-  { name: 'thick-gold', color: 'thick-gold', xOffset: 0, yOffset: 240, rowType: 'frame' },
-  { name: 'skinny-gold', color: 'skinny-gold', xOffset: 64, yOffset: 240, rowType: 'frame' },
-  { name: 'turquoise', color: 'turquoise', xOffset: 128, yOffset: 240, rowType: 'frame' },
-  { name: 'bronze', color: 'bronze', xOffset: 192, yOffset: 240, rowType: 'frame' },
-  { name: 'gunmetal', color: 'gunmetal', xOffset: 256, yOffset: 240, rowType: 'frame' },
-  { name: 'royal-blue', color: 'royal-blue', xOffset: 320, yOffset: 240, rowType: 'frame' }
+  // Row 4 (y: 272-336) - 6 themes - Special variations
+  { name: 'thick-gold', color: 'thick-gold', xOffset: 0, yOffset: 272, rowType: 'main' },
+  { name: 'skinny-gold', color: 'skinny-gold', xOffset: 64, yOffset: 272, rowType: 'main' },
+  { name: 'turquoise', color: 'turquoise', xOffset: 128, yOffset: 272, rowType: 'main' },
+  { name: 'bronze', color: 'bronze', xOffset: 192, yOffset: 272, rowType: 'main' },
+  { name: 'gunmetal', color: 'gunmetal', xOffset: 256, yOffset: 272, rowType: 'main' },
+  { name: 'royal-blue', color: 'royal-blue', xOffset: 320, yOffset: 272, rowType: 'main' }
 ];
 
-// Base sprite definitions for Row 1 - Main 4x7 Grid (28 sprites per theme)
+// Base sprite definitions for Row 1 - Main 4x7 Grid (8 elements per theme)
 const BASE_MAIN_SPRITES = [
+  // 1. Compound Frame (3x5 grid) - 15 sprites
   // Top Row - Corners and Top Edge
   { id: 'frame-corner-top-left', name: 'Top Left Corner', x: 0, y: 0, width: 16, height: 16, category: 'frame', theme: 'corner', description: 'Top left corner - does not scale, maintains corner appearance' },
   { id: 'frame-edge-top', name: 'Top Edge (Repeatable)', x: 16, y: 0, width: 16, height: 16, category: 'frame', theme: 'edge', description: 'Top edge - horizontally repeatable for scaling' },
@@ -69,27 +65,31 @@ const BASE_MAIN_SPRITES = [
   { id: 'frame-edge-bottom', name: 'Bottom Edge (Repeatable)', x: 16, y: 64, width: 16, height: 16, category: 'frame', theme: 'edge', description: 'Bottom edge - horizontally repeatable for scaling' },
   { id: 'frame-corner-bottom-right', name: 'Bottom Right Corner', x: 32, y: 64, width: 16, height: 16, category: 'frame', theme: 'corner', description: 'Bottom right corner - does not scale, maintains corner appearance' },
   
-  // Horizontal Bar Breakdown
-  { id: 'bar-horizontal-left', name: 'Horizontal Bar Left', x: 0, y: 80, width: 16, height: 16, category: 'bar', theme: 'horizontal', description: 'Left part of horizontal bar - does not scale horizontally' },
-  { id: 'bar-horizontal-center', name: 'Horizontal Bar Center (Repeatable)', x: 16, y: 80, width: 16, height: 16, category: 'bar', theme: 'horizontal', description: 'Center part of horizontal bar - horizontally repeatable for scaling' },
-  { id: 'bar-horizontal-right', name: 'Horizontal Bar Right', x: 32, y: 80, width: 16, height: 16, category: 'bar', theme: 'horizontal', description: 'Right part of horizontal bar - does not scale horizontally' },
-  
-  // Progress Bar Breakdown
-  { id: 'bar-progress-left', name: 'Progress Bar Left', x: 0, y: 96, width: 16, height: 16, category: 'bar', theme: 'progress', description: 'Left part of progress bar - does not scale horizontally' },
-  { id: 'bar-progress-center', name: 'Progress Bar Center (Repeatable)', x: 16, y: 96, width: 16, height: 16, category: 'bar', theme: 'progress', description: 'Center part of progress bar - horizontally repeatable for scaling' },
-  { id: 'bar-progress-right', name: 'Progress Bar Right', x: 32, y: 96, width: 16, height: 16, category: 'bar', theme: 'progress', description: 'Right part of progress bar - does not scale horizontally' },
-  
-  // Break Elements
-  { id: 'break-horizontal', name: 'Horizontal Page Break', x: 48, y: 0, width: 16, height: 16, category: 'break', theme: 'horizontal', description: 'Horizontal page break element' },
-  { id: 'break-vertical', name: 'Vertical Page Break', x: 48, y: 16, width: 16, height: 16, category: 'break', theme: 'vertical', description: 'Vertical page break element' },
-  
-  // Vertical Bar Elements
+  // 2. Vertical Bar (3 parts) - 3 sprites
   { id: 'bar-vertical-top', name: 'Vertical Bar Top', x: 48, y: 32, width: 16, height: 16, category: 'bar', theme: 'vertical', description: 'Top part of vertical bar - does not scale vertically' },
   { id: 'bar-vertical-center', name: 'Vertical Bar Center (Repeatable)', x: 48, y: 48, width: 16, height: 16, category: 'bar', theme: 'vertical', description: 'Center part of vertical bar - vertically repeatable for scaling' },
   { id: 'bar-vertical-bottom', name: 'Vertical Bar Bottom', x: 48, y: 64, width: 16, height: 16, category: 'bar', theme: 'vertical', description: 'Bottom part of vertical bar - does not scale vertically' },
   
-  // Buttons
+  // 3. Vertical Page Break - 1 sprite
+  { id: 'break-vertical', name: 'Vertical Page Break', x: 48, y: 16, width: 16, height: 16, category: 'break', theme: 'vertical', description: 'Vertical page break element' },
+  
+  // 4. Horizontal Bar (3 parts) - 3 sprites
+  { id: 'bar-horizontal-left', name: 'Horizontal Bar Left', x: 0, y: 80, width: 16, height: 16, category: 'bar', theme: 'horizontal', description: 'Left part of horizontal bar - does not scale horizontally' },
+  { id: 'bar-horizontal-center', name: 'Horizontal Bar Center (Repeatable)', x: 16, y: 80, width: 16, height: 16, category: 'bar', theme: 'horizontal', description: 'Center part of horizontal bar - horizontally repeatable for scaling' },
+  { id: 'bar-horizontal-right', name: 'Horizontal Bar Right', x: 32, y: 80, width: 16, height: 16, category: 'bar', theme: 'horizontal', description: 'Right part of horizontal bar - does not scale horizontally' },
+  
+  // 5. Horizontal Progress Bar (3 parts) - 3 sprites
+  { id: 'bar-progress-left', name: 'Progress Bar Left', x: 0, y: 96, width: 16, height: 16, category: 'bar', theme: 'progress', description: 'Left part of progress bar - does not scale horizontally' },
+  { id: 'bar-progress-center', name: 'Progress Bar Center (Repeatable)', x: 16, y: 96, width: 16, height: 16, category: 'bar', theme: 'progress', description: 'Center part of progress bar - horizontally repeatable for scaling' },
+  { id: 'bar-progress-right', name: 'Progress Bar Right', x: 32, y: 96, width: 16, height: 16, category: 'bar', theme: 'progress', description: 'Right part of progress bar - does not scale horizontally' },
+  
+  // 6. Horizontal Page Break - 1 sprite
+  { id: 'break-horizontal', name: 'Horizontal Page Break', x: 48, y: 0, width: 16, height: 16, category: 'break', theme: 'horizontal', description: 'Horizontal page break element' },
+  
+  // 7. Single Button 16x16 - 1 sprite
   { id: 'button-default', name: 'Default Button', x: 48, y: 80, width: 16, height: 16, category: 'button', theme: 'default', state: 'normal', description: '16x16 default button' },
+  
+  // 8. Activated Button - 1 sprite
   { id: 'button-activated', name: 'Activated Button', x: 48, y: 96, width: 16, height: 16, category: 'button', theme: 'default', state: 'active', description: '16x16 activated button' }
 ];
 
@@ -188,7 +188,9 @@ function generateThemeSprites(config) {
 // Generate all sprites for all themes
 const allSprites = [];
 THEME_CONFIGS.forEach(config => {
-  allSprites.push(...generateThemeSprites(config));
+  const themeSprites = generateThemeSprites(config);
+  console.log(`Generated ${themeSprites.length} sprites for theme "${config.color}":`, themeSprites);
+  allSprites.push(...themeSprites);
 });
 
 // Add additional text and button elements
@@ -268,7 +270,7 @@ const maxY = Math.max(...allSprites.map(s => s.y + s.height));
 
 const ATLAS_MAPPING = {
   sprites: allSprites,
-  metadata: {
+       metadata: {
     atlasWidth: maxX,
     atlasHeight: maxY,
     spriteSize: 16,
@@ -278,3 +280,6 @@ const ATLAS_MAPPING = {
 
 // Make ATLAS_MAPPING available globally for the HTML script
 window.ATLAS_MAPPING = ATLAS_MAPPING;
+
+// Make THEME_CONFIGS available globally for the HTML script
+window.THEME_CONFIGS = THEME_CONFIGS;

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Scrypture - Frame Gallery</title>
+  <title>Scrypture - Interactive Frame Browser</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
@@ -29,7 +29,7 @@
     .page {
       min-height: 100%;
       display: grid;
-      grid-template-rows: auto 1fr auto;
+      grid-template-rows: auto auto 1fr auto;
     }
 
     header {
@@ -66,42 +66,106 @@
       border: 2px solid #39362a;
     }
 
-    /* Removed range inputs; keep accent for radios */
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      background: #1a1812;
+      padding: 8px;
+      border: 2px solid #39362a;
+    }
+
+    .control-group label {
+      font-size: 9px;
+      color: #b6a432;
+    }
+
+    .slider-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 120px;
+    }
+
+    .slider {
+      flex: 1;
+      height: 4px;
+      background: #39362a;
+      border-radius: 2px;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 12px;
+      height: 12px;
+      background: #b6a432;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    .slider::-moz-range-thumb {
+      width: 12px;
+      height: 12px;
+      background: #b6a432;
+      border-radius: 50%;
+      cursor: pointer;
+      border: none;
+    }
+
+    .slider-value {
+      min-width: 30px;
+      text-align: right;
+      font-size: 9px;
+      color: #fff9d6;
+    }
+
     input[type="radio"] {
       accent-color: #b6a432;
     }
 
-    main {
-      padding: 20px;
+    select {
+      background: #1a1812;
+      color: #e8e5d2;
+      border: 1px solid #39362a;
+      padding: 4px 8px;
+      font-family: inherit;
+      font-size: 10px;
     }
 
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr; /* one frame per line */
-      gap: var(--gap);
-      align-items: start;
+    .frame-controls {
+      padding: 16px;
+      background: #2d2b22;
+      border-bottom: 2px solid #39362a;
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      flex-wrap: wrap;
     }
 
-    .cell {
+    .frame-display {
+      padding: 40px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 6px;
-      user-select: none;
+      gap: 20px;
+      background: #1a1812;
     }
 
-    /* 9-slice style using border-image; corners fixed by --corner, edges repeat */
     .frame {
       width: var(--w);
       height: var(--h);
       position: relative;
-      border-style: solid;
-      border-width: calc(var(--corner) * var(--scale));
-      /* Note: border-image props set inline per frame to inject the correct image */
-      image-rendering: pixelated; /* may not affect border-image but kept for consistency */
+      border: 2px solid #666;
+      background: #1a1812;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      image-rendering: pixelated;
     }
 
-    .inner {
+    .frame-content {
       position: absolute;
       inset: 0;
       display: grid;
@@ -125,10 +189,45 @@
       image-rendering: crisp-edges;
     }
 
-    .label {
-      font-size: var(--label-size);
+    .frame-info {
+      font-size: 9px;
       color: #b6a432;
       text-align: center;
+      background: #1a1812;
+      padding: 8px;
+      border: 1px solid #39362a;
+      min-width: 200px;
+    }
+
+    .atlas-viewer {
+      background: #2d2b22;
+      border-top: 2px solid #39362a;
+      padding: 16px;
+      overflow: auto;
+      max-height: 300px;
+    }
+
+    .atlas-container {
+      position: relative;
+      display: inline-block;
+    }
+
+    .atlas-image {
+      image-rendering: pixelated;
+      border: 1px solid #666;
+      cursor: crosshair;
+    }
+
+    .frame-highlight {
+      position: absolute;
+      border: 2px solid #00ff00;
+      background: rgba(0, 255, 0, 0.1);
+      pointer-events: none;
+    }
+
+    .frame-highlight.active {
+      border-color: #ffff00;
+      background: rgba(255, 255, 0, 0.2);
     }
 
     footer {
@@ -150,160 +249,23 @@
       flex-wrap: wrap;
     }
 
-    .kbd { border: 1px solid #b6a432; padding: 2px 4px; font-size: 10px; }
+    .kbd { 
+      border: 1px solid #b6a432; 
+      padding: 2px 4px; 
+      font-size: 10px; 
+    }
+
+    .row-info {
+      font-size: 9px;
+      color: #666;
+      margin-top: 4px;
+    }
   </style>
-  <script>
-    /* Frame definitions and simple generator */
-    // Use absolute "/assets" when served, and "public/assets" when opened via file://
-    const ASSETS_PREFIX = (location.protocol === 'file:') ? 'public' : '';
-
-    const frames = [
-      { name: 'DIY',       file: `${ASSETS_PREFIX}/assets/Frames/diy.png`,      borderSlice: 16 },
-      { name: 'Galactic',  file: `${ASSETS_PREFIX}/assets/Frames/Galactic.png`, borderSlice: 16 },
-      { name: 'Goo',       file: `${ASSETS_PREFIX}/assets/Frames/Goo.png`,      borderSlice: 16 },
-      { name: 'Ice',       file: `${ASSETS_PREFIX}/assets/Frames/Ice.png`,      borderSlice: 16 },
-      { name: 'Leafy',     file: `${ASSETS_PREFIX}/assets/Frames/Leafy.png`,    borderSlice: 16 },
-      { name: 'Scroll',    file: `${ASSETS_PREFIX}/assets/Frames/Scroll.png`,   borderSlice: 16 },
-      { name: 'Skull',     file: `${ASSETS_PREFIX}/assets/Frames/Skull.png`,    borderSlice: 16 },
-      { name: 'Wood',      file: `${ASSETS_PREFIX}/assets/Frames/Wood.png`,     borderSlice: 16 },
-    ];
-
-    const BEAVER_ICON = `${ASSETS_PREFIX}/assets/Icons/beaver_32.png`;
-
-    function $(sel, root=document) { return root.querySelector(sel); }
-    function $$(sel, root=document) { return Array.from(root.querySelectorAll(sel)); }
-
-    function renderGrid({ text, showText, showIcon }) {
-      const grid = $('.grid');
-      grid.innerHTML = '';
-      for (const f of frames) {
-        const cell = document.createElement('div');
-        cell.className = 'cell';
-
-        const frame = document.createElement('div');
-        frame.className = 'frame';
-        // Set border-image to simulate a 9-slice (4x4 grid using halves → corners fixed, edges repeat)
-        const slice = f.borderSlice || 16; // source slice in px
-        frame.style.borderImageSource = `url('${f.file}')`;
-        frame.style.borderImageSlice = `${slice}`;
-        frame.style.borderImageWidth = 'calc(var(--corner) * var(--scale))';
-        frame.style.borderImageRepeat = 'repeat'; // repeat on both axes so width extends same as height
-        frame.style.borderImageOutset = '0';
-        frame.style.borderImage = `url('${f.file}') ${slice} fill / calc(var(--corner) * var(--scale)) / 0 repeat`;
-        frame.style.borderWidth = 'calc(var(--corner) * var(--scale))';
-
-        const inner = document.createElement('div');
-        inner.className = 'inner';
-
-        if (showText) {
-          const t = document.createElement('div');
-          t.className = 'sample-text';
-          t.textContent = text;
-          inner.appendChild(t);
-        }
-
-        if (showIcon) {
-          const img = document.createElement('img');
-          img.className = 'beaver';
-          img.src = BEAVER_ICON;
-          img.alt = 'Bóber';
-          inner.appendChild(img);
-        }
-
-        frame.appendChild(inner);
-        cell.appendChild(frame);
-
-        const label = document.createElement('div');
-        label.className = 'label';
-        label.textContent = `${f.name} (${f.file.split('/').pop()})`;
-        cell.appendChild(label);
-
-        grid.appendChild(cell);
-      }
-    }
-
-    function setScale(scale) {
-      document.documentElement.style.setProperty('--scale', String(scale));
-    }
-
-    function init() {
-      const scaleRadios = $$('input[name="scale"]');
-      const textInput = $('#text');
-      const showText = $('#showText');
-      const showIcon = $('#showIcon');
-      const widthInput = $('#width');
-      const heightInput = $('#height');
-
-      function update() {
-        renderGrid({
-          text: textInput.value,
-          showText: showText.checked,
-          showIcon: showIcon.checked,
-        });
-      }
-
-      // Initialize values
-      setScale(1);
-      document.documentElement.style.setProperty('--w', widthInput.value + 'px');
-      document.documentElement.style.setProperty('--h', heightInput.value + 'px');
-      update();
-
-      // Bind events
-      scaleRadios.forEach(r => r.addEventListener('change', (e) => {
-        const value = Number(e.target.value);
-        setScale(value);
-        update();
-      }));
-      widthInput.addEventListener('input', (e) => {
-        const val = e.target.value;
-        document.documentElement.style.setProperty('--w', val + 'px');
-        update();
-      });
-      heightInput.addEventListener('input', (e) => {
-        const val = e.target.value;
-        document.documentElement.style.setProperty('--h', val + 'px');
-        update();
-      });
-      textInput.addEventListener('input', update);
-      showText.addEventListener('change', update);
-      showIcon.addEventListener('change', update);
-
-      // Re-render when inputs change to keep content
-      scaleRadios.forEach(r => r.addEventListener('change', update));
-      widthInput.addEventListener('input', update);
-      heightInput.addEventListener('input', update);
-
-      // Keyboard shortcuts for quick scaling among 1x, 2x, 4x
-      document.addEventListener('keydown', (ev) => {
-        const allowed = [1, 2, 4];
-        const current = Number(getComputedStyle(document.documentElement).getPropertyValue('--scale')) || 1;
-        const idx = allowed.indexOf(current);
-        if (ev.key === '+' || ev.key === '=') {
-          const next = allowed[Math.min(allowed.length - 1, idx + 1)] || 4;
-          setScale(next);
-          const radio = document.querySelector(`input[name="scale"][value="${next}"]`);
-          if (radio) { radio.checked = true; }
-          update();
-          ev.preventDefault();
-        }
-        if (ev.key === '-' || ev.key === '_') {
-          const prev = allowed[Math.max(0, idx - 1)] || 1;
-          setScale(prev);
-          const radio = document.querySelector(`input[name="scale"][value="${prev}"]`);
-          if (radio) { radio.checked = true; }
-          update();
-          ev.preventDefault();
-        }
-      });
-    }
-
-    window.addEventListener('DOMContentLoaded', init);
-  </script>
 </head>
 <body>
   <div class="page">
     <header>
-      <h1>🖼️ Frame Gallery</h1>
+      <h1>🖼️ Interactive Frame Browser</h1>
       <div class="controls">
         <fieldset class="control" style="border:2px solid #39362a">
           <legend>Scale</legend>
@@ -328,20 +290,511 @@
       </div>
     </header>
 
-    <main>
-      <div class="grid" aria-live="polite"></div>
-    </main>
+    <div class="frame-controls">
+      <div class="control-group">
+        <label>Style Category</label>
+        <select id="styleCategory">
+          <option value="row1">Row 1 - Complex Frames (3x5)</option>
+          <option value="row2">Row 2 - 9-Slice Frames</option>
+          <option value="row3">Row 3 - 9-Slice Frames</option>
+          <option value="row4">Row 4 - 9-Slice Frames</option>
+        </select>
+      </div>
 
-    <footer>
+      <div class="control-group">
+        <label>Color Theme</label>
+        <select id="colorTheme">
+          <option value="green">Green</option>
+          <option value="dark-green">Dark Green</option>
+          <option value="blue-stone">Blue Stone</option>
+          <option value="red">Red</option>
+          <option value="purple">Purple</option>
+          <option value="orange">Orange</option>
+          <option value="yellow">Yellow</option>
+          <option value="cyan">Cyan</option>
+          <option value="forest-green">Forest Green</option>
+          <option value="burnt-red">Burnt Red</option>
+          <option value="silver">Silver</option>
+          <option value="gold">Gold</option>
+          <option value="pale-blue">Pale Blue</option>
+          <option value="green-ornate">Green Ornate</option>
+          <option value="grey-brown">Grey Brown</option>
+          <option value="blue-ornate">Blue Ornate</option>
+          <option value="thick-gold">Thick Gold</option>
+          <option value="skinny-gold">Skinny Gold</option>
+          <option value="turquoise">Turquoise</option>
+          <option value="bronze">Bronze</option>
+          <option value="gunmetal">Gunmetal</option>
+          <option value="royal-blue">Royal Blue</option>
+        </select>
+      </div>
+
       <div class="toggles">
         <label><input id="showText" type="checkbox" checked> Show text</label>
         <label><input id="showIcon" type="checkbox" checked> Show Bóber icon</label>
       </div>
+    </div>
+
+    <div class="frame-display">
+      <div class="frame" id="framePreview">
+        <div class="frame-content">
+          <div class="sample-text" id="sampleText">Scrypture</div>
+          <img class="beaver" src="public/assets/Icons/beaver_32.png" alt="Bóber" id="beaverIcon">
+        </div>
+      </div>
+      <div class="frame-info" id="frameInfo">
+        Frame: Green<br>
+        Size: 192x192px<br>
+        Type: Complex Frame (3x5) + 7 other elements<br>
+        Sprites: 28
+      </div>
+    </div>
+
+    <div class="atlas-viewer">
+      <div class="atlas-container">
+        <img id="atlasImage" class="atlas-image" src="public/assets/Frames/Atlas.png" alt="Atlas" />
+        <div id="frameHighlight" class="frame-highlight"></div>
+      </div>
+    </div>
+
+    <footer>
       <div>
         Sizes: 1x, 2x, 4x. Shortcuts: <span class="kbd">+</span>/<span class="kbd">-</span> to cycle scale.
+        <div class="row-info">
+          Row 1: Complex frames (3x5 = 15 sprites) + 7 other elements (28 total) | Row 2-4: 9-slice frames (3x3 from 4x4 atlas)
+        </div>
       </div>
     </footer>
   </div>
+
+  <script src="asset-test.js"></script>
+  <script>
+    // Frame browser functionality
+    let currentStyleCategory = 'row1';
+    let currentColorTheme = 'green';
+    let atlasImage = null;
+    let frameHighlight = null;
+
+    // Row configurations based on atlas mapping
+    const rowConfigs = {
+      row1: { yOffset: 0, spriteCount: 28, type: 'Complex Frame (3x5) + 7 other elements', layout: '4x7', rowType: 'main' },
+      row2: { yOffset: 112, spriteCount: 16, type: '9-Slice Frame', layout: '4x4', rowType: 'frame' },
+      row3: { yOffset: 176, spriteCount: 16, type: '9-Slice Frame', layout: '4x4', rowType: 'frame' },
+      row4: { yOffset: 240, spriteCount: 16, type: '9-Slice Frame', layout: '4x4', rowType: 'frame' }
+    };
+
+    // Get sprites for a specific theme and category
+    function getSpritesForTheme(colorTheme, category = 'frame') {
+      const sprites = window.ATLAS_MAPPING.sprites.filter(sprite => 
+        sprite.color === colorTheme && sprite.category === category
+      );
+      console.log(`Found ${sprites.length} sprites for theme "${colorTheme}" category "${category}":`, sprites);
+      return sprites;
+    }
+
+    // Get theme configuration
+    function getThemeConfig(colorTheme) {
+      const config = window.THEME_CONFIGS.find(theme => theme.color === colorTheme);
+      console.log(`Theme config for "${colorTheme}":`, config);
+      return config;
+    }
+
+    function $(sel, root=document) { return root.querySelector(sel); }
+    function $$(sel, root=document) { return root.querySelectorAll(sel); }
+
+    function createSprite(x, y, width, height, repeatX = false, repeatY = false) {
+      const sprite = document.createElement('div');
+      const scale = Number(getComputedStyle(document.documentElement).getPropertyValue('--scale')) || 1;
+      
+      sprite.style.backgroundImage = `url('public/assets/Frames/Atlas.png')`;
+      sprite.style.backgroundPosition = `-${x * scale}px -${y * scale}px`;
+      sprite.style.backgroundSize = `${512 * scale}px ${512 * scale}px`;
+      sprite.style.backgroundRepeat = repeatX || repeatY ? 'repeat' : 'no-repeat';
+      sprite.style.imageRendering = 'pixelated';
+      
+      // For repeating sprites, let them fill their grid cell completely
+      if (repeatX) {
+        sprite.style.width = '100%';
+        sprite.style.minWidth = '100%';
+      } else {
+        sprite.style.width = width + 'px';
+        sprite.style.minWidth = width + 'px';
+      }
+      
+      if (repeatY) {
+        sprite.style.height = '100%';
+        sprite.style.minHeight = '100%';
+      } else {
+        sprite.style.height = height + 'px';
+        sprite.style.minHeight = height + 'px';
+      }
+      
+      return sprite;
+    }
+
+    function createComplexFrame(frame, colorTheme) {
+      // Create 3x5 grid for complex frame using atlas mapping data
+      const grid = document.createElement('div');
+      grid.style.display = 'grid';
+      grid.style.gridTemplateColumns = '16px 1fr 16px';
+      grid.style.gridTemplateRows = '16px 1fr 16px 1fr 16px';
+      grid.style.width = '100%';
+      grid.style.height = '100%';
+      grid.style.position = 'absolute';
+      grid.style.inset = '0';
+      grid.style.gap = '0';
+      grid.style.overflow = 'hidden';
+      grid.style.boxSizing = 'border-box';
+      
+      // Get frame sprites for this theme
+      const frameSprites = getSpritesForTheme(colorTheme, 'frame');
+      
+      // Debug: log available sprites
+      console.log('Available frame sprites for theme:', colorTheme, frameSprites);
+      
+      // Find specific sprites by their ID patterns
+      const topLeft = frameSprites.find(s => s.id.includes('corner-top-left'));
+      const topRight = frameSprites.find(s => s.id.includes('corner-top-right'));
+      const bottomLeft = frameSprites.find(s => s.id.includes('corner-bottom-left'));
+      const bottomRight = frameSprites.find(s => s.id.includes('corner-bottom-right'));
+      
+      const topEdge = frameSprites.find(s => s.id.includes('edge-top'));
+      const bottomEdge = frameSprites.find(s => s.id.includes('edge-bottom'));
+      const leftEdge = frameSprites.find(s => s.id.includes('edge-left'));
+      const rightEdge = frameSprites.find(s => s.id.includes('edge-right'));
+      
+      const background = frameSprites.find(s => s.id.includes('background'));
+      const partitionMiddle = frameSprites.find(s => s.id.includes('partition-middle'));
+      
+      // Debug: log found sprites
+      console.log('Found sprites:', {
+        topLeft, topRight, bottomLeft, bottomRight,
+        topEdge, bottomEdge, leftEdge, rightEdge,
+        background, partitionMiddle
+      });
+      
+      // Check if we have all required sprites
+      if (!topLeft || !topRight || !bottomLeft || !bottomRight || 
+          !topEdge || !bottomEdge || !leftEdge || !rightEdge || !background) {
+        console.error('Missing required sprites for theme:', colorTheme);
+        // Create a fallback frame
+        const fallback = document.createElement('div');
+        fallback.style.width = '100%';
+        fallback.style.height = '100%';
+        fallback.style.border = '2px solid red';
+        fallback.style.backgroundColor = '#333';
+        fallback.style.display = 'flex';
+        fallback.style.alignItems = 'center';
+        fallback.style.justifyContent = 'center';
+        fallback.style.color = 'red';
+        fallback.textContent = `Missing sprites for ${colorTheme}`;
+        frame.appendChild(fallback);
+        return;
+      }
+      
+      // Create sprites with proper repeating patterns:
+      // X = No repeat (corners)
+      // RH = Horizontal repeat (top/bottom edges)
+      // RV = Vertical repeat (left/right edges)
+      // RH RV = Both horizontal and vertical repeat (background)
+      const sprites = [
+        createSprite(topLeft.x, topLeft.y, 16, 16, false, false),                    // TL X (no repeat)
+        createSprite(topEdge.x, topEdge.y, 16, 16, true, false),                     // TE RH (horizontal repeat)
+        createSprite(topRight.x, topRight.y, 16, 16, false, false),                  // TR X (no repeat)
+        
+        createSprite(leftEdge.x, leftEdge.y, 16, 16, false, true),                   // LE RV (vertical repeat)
+        createSprite(background.x, background.y, 16, 16, true, true),                // BG RH RV (both repeat)
+        createSprite(rightEdge.x, rightEdge.y, 16, 16, false, true),                 // RE RV (vertical repeat)
+        
+        createSprite(leftEdge.x, leftEdge.y, 16, 16, false, true),                   // LE RV (vertical repeat)
+        createSprite(partitionMiddle ? partitionMiddle.x : background.x, 
+                    partitionMiddle ? partitionMiddle.y : background.y, 
+                    16, 16, true, true),                                             // PM RH RV (both repeat)
+        createSprite(rightEdge.x, rightEdge.y, 16, 16, false, true),                 // RE RV (vertical repeat)
+        
+        createSprite(leftEdge.x, leftEdge.y, 16, 16, false, true),                   // LE RV (vertical repeat)
+        createSprite(background.x, background.y, 16, 16, true, true),                // BG RH RV (both repeat)
+        createSprite(rightEdge.x, rightEdge.y, 16, 16, false, true),                 // RE RV (vertical repeat)
+        
+        createSprite(bottomLeft.x, bottomLeft.y, 16, 16, false, false),              // BL X (no repeat)
+        createSprite(bottomEdge.x, bottomEdge.y, 16, 16, true, false),               // BE RH (horizontal repeat)
+        createSprite(bottomRight.x, bottomRight.y, 16, 16, false, false)             // BR X (no repeat)
+      ];
+      
+      sprites.forEach(sprite => grid.appendChild(sprite));
+      frame.appendChild(grid);
+    }
+
+    function createStandardNineSlice(frame, colorTheme) {
+      // Create proper 9-slice frame using atlas mapping data
+      const grid = document.createElement('div');
+      grid.style.display = 'grid';
+      grid.style.gridTemplateColumns = '16px 1fr 16px';
+      grid.style.gridTemplateRows = '16px 1fr 16px';
+      grid.style.width = '100%';
+      grid.style.height = '100%';
+      grid.style.position = 'absolute';
+      grid.style.inset = '0';
+      grid.style.gap = '0';
+      grid.style.overflow = 'hidden';
+      grid.style.boxSizing = 'border-box';
+      
+      // Get frame sprites for this theme
+      const frameSprites = getSpritesForTheme(colorTheme, 'frame');
+      
+      // Find specific sprites by their ID patterns
+      const topLeft = frameSprites.find(s => s.id.includes('corner-top-left'));
+      const topRight = frameSprites.find(s => s.id.includes('corner-top-right'));
+      const bottomLeft = frameSprites.find(s => s.id.includes('corner-bottom-left'));
+      const bottomRight = frameSprites.find(s => s.id.includes('corner-bottom-right'));
+      
+      const topEdge = frameSprites.find(s => s.id.includes('edge-top'));
+      const bottomEdge = frameSprites.find(s => s.id.includes('edge-bottom'));
+      const leftEdge = frameSprites.find(s => s.id.includes('edge-left'));
+      const rightEdge = frameSprites.find(s => s.id.includes('edge-right'));
+      
+      const background = frameSprites.find(s => s.id.includes('background'));
+      
+      // Check if we have all required sprites
+      if (!topLeft || !topRight || !bottomLeft || !bottomRight || 
+          !topEdge || !bottomEdge || !leftEdge || !rightEdge || !background) {
+        console.error('Missing required sprites for theme:', colorTheme);
+        // Create a fallback frame
+        const fallback = document.createElement('div');
+        fallback.style.width = '100%';
+        fallback.style.height = '100%';
+        fallback.style.border = '2px solid red';
+        fallback.style.backgroundColor = '#333';
+        fallback.style.display = 'flex';
+        fallback.style.alignItems = 'center';
+        fallback.style.justifyContent = 'center';
+        fallback.style.color = 'red';
+        fallback.textContent = `Missing sprites for ${colorTheme}`;
+        frame.appendChild(fallback);
+        return;
+      }
+      
+      // Create sprites with proper repeating patterns for 3x3 grid:
+      // X = No repeat (corners)
+      // RH = Horizontal repeat (top/bottom edges)
+      // RV = Vertical repeat (left/right edges)
+      // RH RV = Both horizontal and vertical repeat (background)
+      const sprites = [
+        createSprite(topLeft.x, topLeft.y, 16, 16, false, false),                    // TL X (no repeat)
+        createSprite(topEdge.x, topEdge.y, 16, 16, true, false),                     // TE RH (horizontal repeat)
+        createSprite(topRight.x, topRight.y, 16, 16, false, false),                  // TR X (no repeat)
+        
+        createSprite(leftEdge.x, leftEdge.y, 16, 16, false, true),                   // LE RV (vertical repeat)
+        createSprite(background.x, background.y, 16, 16, true, true),                // BG RH RV (both repeat)
+        createSprite(rightEdge.x, rightEdge.y, 16, 16, false, true),                 // RE RV (vertical repeat)
+        
+        createSprite(bottomLeft.x, bottomLeft.y, 16, 16, false, false),              // BL X (no repeat)
+        createSprite(bottomEdge.x, bottomEdge.y, 16, 16, true, false),               // BE RH (horizontal repeat)
+        createSprite(bottomRight.x, bottomRight.y, 16, 16, false, false)             // BR X (no repeat)
+      ];
+      
+      sprites.forEach(sprite => grid.appendChild(sprite));
+      frame.appendChild(grid);
+    }
+
+    function createNineSliceFrame(frame, colorTheme, isComplex = false) {
+      // Clear existing content
+      frame.innerHTML = '';
+      
+      if (isComplex) {
+        // Row 1: Complex frame with partition in middle
+        createComplexFrame(frame, colorTheme);
+      } else {
+        // Rows 2-4: Standard 9-slice frame
+        createStandardNineSlice(frame, colorTheme);
+      }
+      
+      // Add content overlay
+      const contentOverlay = document.createElement('div');
+      contentOverlay.style.position = 'absolute';
+      contentOverlay.style.inset = '16px';
+      contentOverlay.style.display = 'grid';
+      contentOverlay.style.placeItems = 'center';
+      contentOverlay.style.textAlign = 'center';
+      contentOverlay.style.pointerEvents = 'none';
+      contentOverlay.style.zIndex = '10';
+      
+      const showText = $('#showText').checked;
+      const showIcon = $('#showIcon').checked;
+      const text = $('#text').value;
+      
+      if (showText) {
+        const sampleText = document.createElement('div');
+        sampleText.className = 'sample-text';
+        sampleText.textContent = text;
+        contentOverlay.appendChild(sampleText);
+      }
+      
+      if (showIcon) {
+        const beaverIcon = document.createElement('img');
+        beaverIcon.className = 'beaver';
+        beaverIcon.src = 'public/assets/Icons/beaver_32.png';
+        beaverIcon.alt = 'Bóber';
+        contentOverlay.appendChild(beaverIcon);
+      }
+      
+      frame.appendChild(contentOverlay);
+    }
+
+    function updateFramePreview() {
+      const frame = $('#framePreview');
+      const frameInfo = $('#frameInfo');
+      const rowConfig = rowConfigs[currentStyleCategory];
+      
+      // Create the appropriate frame type using atlas mapping data
+      const isComplex = currentStyleCategory === 'row1';
+      createNineSliceFrame(frame, currentColorTheme, isComplex);
+      
+      // Update frame info
+      frameInfo.innerHTML = `
+        Frame: ${currentColorTheme}<br>
+        Size: ${$('#width').value}x${$('#height').value}px<br>
+        Type: ${rowConfig.type}<br>
+        Layout: ${rowConfig.layout}<br>
+        Sprites: ${rowConfig.spriteCount}
+      `;
+      
+      // Update highlight on atlas
+      updateAtlasHighlight();
+    }
+
+    function updateAtlasHighlight() {
+      if (!frameHighlight || !atlasImage) return;
+      
+      const rowConfig = rowConfigs[currentStyleCategory];
+      
+      // Get the first sprite for this theme to determine position
+      const frameSprites = getSpritesForTheme(currentColorTheme, 'frame');
+      if (frameSprites.length === 0) return;
+      
+      const firstSprite = frameSprites[0];
+      const atlasX = firstSprite.x;
+      const atlasY = firstSprite.y;
+      
+      // Position highlight over the selected frame area
+      frameHighlight.style.left = `${atlasX}px`;
+      frameHighlight.style.top = `${atlasY}px`;
+      
+      // Set highlight size based on row layout
+      if (currentStyleCategory === 'row1') {
+        // Row 1: 3x5 layout (48px wide, 80px tall)
+        frameHighlight.style.width = '48px';
+        frameHighlight.style.height = '80px';
+      } else {
+        // Rows 2-4: 4x4 layout (64px wide, 64px tall)
+        frameHighlight.style.width = '64px';
+        frameHighlight.style.height = '64px';
+      }
+      
+      frameHighlight.classList.add('active');
+    }
+
+    function setScale(scale) {
+      document.documentElement.style.setProperty('--scale', String(scale));
+      
+      // Update frame preview to reflect new scale
+      updateFramePreview();
+    }
+
+    function updateContent() {
+      updateFramePreview();
+    }
+
+    function init() {
+      atlasImage = $('#atlasImage');
+      frameHighlight = $('#frameHighlight');
+      
+      // Debug: Check if atlas mapping is loaded
+      console.log('ATLAS_MAPPING available:', !!window.ATLAS_MAPPING);
+      if (window.ATLAS_MAPPING) {
+        console.log('Total sprites in atlas:', window.ATLAS_MAPPING.sprites.length);
+        console.log('Available themes:', [...new Set(window.ATLAS_MAPPING.sprites.map(s => s.color))]);
+      }
+      
+      // Initialize controls
+      const scaleRadios = $$('input[name="scale"]');
+      const textInput = $('#text');
+      const showText = $('#showText');
+      const showIcon = $('#showIcon');
+      const widthInput = $('#width');
+      const heightInput = $('#height');
+      const styleCategory = $('#styleCategory');
+      const colorTheme = $('#colorTheme');
+
+      // Initialize values
+      setScale(1);
+      updateContent();
+
+      // Bind events
+      scaleRadios.forEach(r => r.addEventListener('change', (e) => {
+        const value = Number(e.target.value);
+        setScale(value);
+      }));
+      
+      widthInput.addEventListener('input', (e) => {
+        const val = e.target.value;
+        document.documentElement.style.setProperty('--w', val + 'px');
+        console.log('Width updated to:', val + 'px');
+        updateContent();
+      });
+      
+      heightInput.addEventListener('input', (e) => {
+        const val = e.target.value;
+        document.documentElement.style.setProperty('--h', val + 'px');
+        console.log('Height updated to:', val + 'px');
+        updateContent();
+      });
+      
+      textInput.addEventListener('input', updateContent);
+      showText.addEventListener('change', updateContent);
+      showIcon.addEventListener('change', updateContent);
+
+      // Style category change
+      styleCategory.addEventListener('change', (e) => {
+        currentStyleCategory = e.target.value;
+        updateFramePreview();
+      });
+
+      // Color theme change
+      colorTheme.addEventListener('change', (e) => {
+        currentColorTheme = e.target.value;
+        updateFramePreview();
+      });
+
+      // Keyboard shortcuts
+      document.addEventListener('keydown', (ev) => {
+        const allowed = [1, 2, 4];
+        const current = Number(getComputedStyle(document.documentElement).getPropertyValue('--scale')) || 1;
+        const idx = allowed.indexOf(current);
+        
+        if (ev.key === '+' || ev.key === '=') {
+          const next = allowed[Math.min(allowed.length - 1, idx + 1)] || 4;
+          setScale(next);
+          const radio = document.querySelector(`input[name="scale"][value="${next}"]`);
+          if (radio) { radio.checked = true; }
+          ev.preventDefault();
+        }
+        
+        if (ev.key === '-' || ev.key === '_') {
+          const prev = allowed[Math.max(0, idx - 1)] || 1;
+          setScale(prev);
+          const radio = document.querySelector(`input[name="scale"][value="${prev}"]`);
+          if (radio) { radio.checked = true; }
+          ev.preventDefault();
+        }
+      });
+
+      // Initial frame preview
+      updateFramePreview();
+    }
+
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
 </body>
 </html>
 

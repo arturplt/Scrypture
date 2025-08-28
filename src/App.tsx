@@ -28,6 +28,7 @@ import Pixelite from './components/Pixelite';
 import { Synthesizer } from './components/Synthesizer';
 import { CombinationLockModal } from './components/CombinationLockModal';
 import SanctuaryModalDemo from './components/SanctuaryModalDemo';
+import { UIBuilder } from './components/UIBuilder';
 
 import { Task, Achievement } from './types';
 import styles from './App.module.css';
@@ -263,6 +264,7 @@ function AppContent() {
   const [showPixelite, setShowPixelite] = useState(false);
   const [showSynthesizer, setShowSynthesizer] = useState(false);
   const [showSanctuaryDemo, setShowSanctuaryDemo] = useState(false);
+  const [showUIBuilder, setShowUIBuilder] = useState(false);
   const [showCombinationLock, setShowCombinationLock] = useState(false);
   const [isSecretMenuUnlocked, setIsSecretMenuUnlocked] = useState(false);
   const [isClosingLock, setIsClosingLock] = useState(false);
@@ -597,6 +599,13 @@ function AppContent() {
                 </button>
                 <button 
                   className={styles.secretMenuButton}
+                  onClick={() => setShowUIBuilder(true)}
+                  title="Interactive UI Frame Builder"
+                >
+                  🎛️ UI Builder
+                </button>
+                <button 
+                  className={styles.secretMenuButton}
                   onClick={() => setShowSanctuaryDemo(true)}
                   title="Isometric Sanctuary Builder"
                 >
@@ -626,6 +635,12 @@ function AppContent() {
       <Synthesizer
         isOpen={showSynthesizer}
         onClose={() => setShowSynthesizer(false)}
+      />
+
+      {/* UI Builder Modal */}
+      <UIBuilder
+        isOpen={showUIBuilder}
+        onClose={() => setShowUIBuilder(false)}
       />
 
       {/* Sanctuary Demo Modal */}

@@ -17,6 +17,7 @@ interface UIElement {
   usage?: string;
   cssClass?: string;
   borderSlice?: { top: number; right: number; bottom: number; left: number };
+  description?: string;
 }
 
 // Convert AtlasSprite to UIElement format
@@ -29,13 +30,13 @@ function convertSpriteToUIElement(sprite: AtlasSprite): UIElement {
     width: sprite.width,
     height: sprite.height,
     category: sprite.category,
-    subcategory: sprite.subcategory,
     theme: sprite.theme,
     state: sprite.state,
     color: sprite.color,
     variant: 'basic',
     usage: sprite.category === 'button' ? 'general' : 'container',
     cssClass: sprite.id.replace(/-/g, '-'),
+    description: sprite.description,
     ...(sprite.category === 'frame' && {
       borderSlice: { top: 16, right: 16, bottom: 16, left: 16 }
     })
