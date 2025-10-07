@@ -206,11 +206,20 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: var(--spacing-sm);
   flex-shrink: 0;
   margin-left: auto;
   align-self: flex-start;
   margin-top: 0;
+  padding: var(--spacing-sm);
+  margin-right: var(--spacing-sm);
+}
+
+/* Ensure grid items can shrink to fit viewport */
+.cardWrapper {
+  width: 100%;
+  min-width: 0; /* critical for CSS grid to allow shrinking */
+  box-sizing: border-box;
 }
 
 .checkboxContainer {
@@ -295,37 +304,106 @@
 .actions {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--spacing-xs);
   align-items: center;
-  order: 2;
+  flex-shrink: 0;
+}
+
+.habitCheckbox {
+  width: 48px;
+  height: 48px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transform: scale(1.2);
+  
+  /* Pixel-art theme styling with blue shades */
+  appearance: none;
+  border: 3px solid #2C5A8A;
+  border-radius: 0px; /* Sharp, pixelated corners */
+  background-color: #1A3A5A;
+  position: relative;
+  transition: none; /* No smooth transitions for pixel art */
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+.habitCheckbox:hover {
+  border-color: #4A90E2;
+  background-color: #2C5A8A;
+}
+
+.habitCheckbox:checked {
+  background: linear-gradient(90deg, #4A90E2 0%, #5AA5F0 100%);
+  border-color: #4A90E2;
+}
+
+.habitCheckbox:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #1A3A5A;
+  font-size: 32px;
+  font-weight: 900;
+  line-height: 1;
+  font-family: 'Arial Black', 'Courier New', monospace; /* Bolder, blockier font */
+  text-shadow: 2px 2px 0px #000, -1px -1px 0px #000;
+  -webkit-text-stroke: 1px #000;
+}
+
+.habitCheckbox:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+  border-color: #1A3A5A;
+  background-color: #0F2A4A;
+}
+
+.habitCheckbox:disabled:hover {
+  border-color: #1A3A5A;
+  background-color: #0F2A4A;
 }
 
 .editButton {
-  background: var(--color-bg-primary);
+  background: transparent;
   color: var(--color-text-primary);
   border: none;
-  padding: 8px;
-  font-size: var(--font-size-md);
+  padding: 0;
   cursor: pointer;
-  border-radius: var(--border-radius-sm);
   transition: all var(--transition-normal);
-  box-shadow: var(--shadow-button);
-  width: 32px;
-  height: 32px;
+  width: 32px; /* match sprite canvas */
+  height: 32px; /* match sprite canvas */
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .editButton:hover {
-  background: var(--color-bg-secondary);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-active);
+  transform: scale(1.1);
+  filter: brightness(1.2);
 }
 
 .editButton:active {
-  transform: translateY(0);
-  box-shadow: var(--shadow-button);
+  transform: scale(0.95);
+}
+
+/* Pin edit bottom-left and checkbox bottom-right */
+.cardContent {
+  position: relative;
+}
+
+.editCorner {
+  position: absolute;
+  left: var(--spacing-sm);
+  bottom: var(--spacing-sm);
+}
+
+.rightSection {
+  position: absolute;
+  right: var(--spacing-sm);
+  bottom: var(--spacing-sm);
 }
 
 /* Responsive design */

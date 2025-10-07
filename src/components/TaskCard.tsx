@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Task } from '../types';
 import { useTasks } from '../hooks/useTasks';
 import { TaskEditForm } from './TaskEditForm';
 import { AutoSaveIndicator } from './AutoSaveIndicator';
 import { formatRelativeTime } from '../utils/dateUtils';
 import { Card } from './ui';
+import { getSpriteById } from '../data/atlasMapping';
 import styles from './TaskCard.module.css';
 
 interface TaskCardProps {
@@ -30,6 +31,81 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   const [isTransitioningToEdit, setIsTransitioningToEdit] = useState(false);
   const [isExitingEdit, setIsExitingEdit] = useState(false);
   const [isReentering, setIsReentering] = useState(false);
+  const [containerDimensions, setContainerDimensions] = useState<{width: number, height: number}>({width: 400, height: 250});
+  const containerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  // ResizeObserver to track container dimensions changes
+  const updateContainerDimensions = useCallback(() => {
+    if (containerRef.current && contentRef.current) {
+      const containerWidth = containerRef.current.clientWidth;
+      const contentHeight = contentRef.current.scrollHeight;
+      
+      // Calculate base minimum height based on state
+      let minHeight = 215; // Reduced default collapsed height
+      if (isEditing) {
+        minHeight = 650; // Edit form height
+      } else if (showDetails) {
+        // For details, use actual content height with minimal padding
+        minHeight = Math.max(contentHeight + 16, 300); // Reduced minimum for details
+      }
+      
+      setContainerDimensions({
+        width: containerWidth,
+        height: Math.max(contentHeight + 16, minHeight) // Reduced padding for more dynamic sizing
+      });
+    }
+  }, [isEditing, showDetails]);
+
+  useEffect(() => {
+    const resizeObserver = new ResizeObserver(updateContainerDimensions);
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+    if (contentRef.current) {
+      resizeObserver.observe(contentRef.current);
+    }
+    
+    // Initial measurement
+    updateContainerDimensions();
+    
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [updateContainerDimensions]);
+
+  // Update dimensions when content changes
+  useEffect(() => {
+    const timer = setTimeout(updateContainerDimensions, 100);
+    return () => clearTimeout(timer);
+  }, [showDetails, isEditing, task.description, task.title, updateContainerDimensions]);
+
+  // Additional dimension update specifically for details expansion
+  useEffect(() => {
+    if (showDetails) {
+      // Wait for the animation to start, then update dimensions
+      const timer1 = setTimeout(updateContainerDimensions, 50);
+      const timer2 = setTimeout(updateContainerDimensions, 200);
+      const timer3 = setTimeout(updateContainerDimensions, 450); // After slideDown animation completes (400ms) + buffer
+      
+      return () => {
+        clearTimeout(timer1);
+        clearTimeout(timer2);
+        clearTimeout(timer3);
+      };
+    } else {
+      // When details are hidden, wait for slideUp animation to complete
+      const timer = setTimeout(updateContainerDimensions, 350); // Wait for slideUp animation (300ms) + buffer
+      return () => clearTimeout(timer);
+    }
+  }, [showDetails, updateContainerDimensions]);
+
+  // Also respond to window resizes explicitly
+  useEffect(() => {
+    const onResize = () => updateContainerDimensions();
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, [updateContainerDimensions]);
 
   // Handle triggerEdit prop - automatically start edit transition
   useEffect(() => {
@@ -45,7 +121,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
     }
   }, [triggerEdit, isEditing, isTransitioningToEdit]);
 
-  const handleToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleToggle = (e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
 
     if (!task.completed && !isCompleting) {
@@ -113,9 +189,13 @@ export const TaskCard: React.FC<TaskCardProps> = ({
       setTimeout(() => {
         setShowDetails(false);
         setIsClosing(false);
-      }, 300); // Match animation duration
+        // Wait for internal animation to complete before shrinking frame
+        setTimeout(updateContainerDimensions, 350); // Wait for slideUp animation (300ms) + buffer
+      }, 300); // Match slideUp animation duration
     } else {
       setShowDetails(true);
+      // Force dimension update after showing details
+      setTimeout(updateContainerDimensions, 50);
     }
   };
 
@@ -150,6 +230,56 @@ export const TaskCard: React.FC<TaskCardProps> = ({
     return styles.difficultyExtreme; // Fallback for any higher values
   };
 
+  // Sprite renderer component for edit icon
+  const EditIconSprite = () => {
+    const [atlasImage, setAtlasImage] = useState<HTMLImageElement | null>(null);
+    const editSprite = getSpriteById('icon-edit');
+
+    useEffect(() => {
+      const img = new Image();
+      img.onload = () => setAtlasImage(img);
+      img.src = '/assets/Frames/Atlas.png';
+    }, []);
+
+    if (!editSprite || !atlasImage) {
+      return <span>🖍</span>; // Fallback to emoji
+    }
+
+    return (
+      <canvas
+        width={32}
+        height={32}
+        style={{
+          width: '32px',
+          height: '32px',
+          imageRendering: 'pixelated',
+        } as React.CSSProperties}
+        ref={(canvas) => {
+          if (canvas && atlasImage) {
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+              // Disable image smoothing for crisp pixels
+              ctx.imageSmoothingEnabled = false;
+              ctx.drawImage(
+                atlasImage,
+                editSprite.x,
+                editSprite.y,
+                editSprite.width,
+                editSprite.height,
+                0,
+                0,
+                32,
+                32
+              );
+            }
+          }
+        }}
+      />
+    );
+  };
+
+
+
   // Determine the appropriate CSS class for the card
   const getCardClassName = () => {
     const baseClasses = [styles.card];
@@ -175,28 +305,28 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   }
 
   return (
-    <Card
-      theme="turquoise"
-      variant="standard"
-      customWidth={isEditing ? 600 : 400}
-      customHeight={isEditing ? 650 : 250}
-      className={getCardClassName()}
-      onClick={isEditing ? undefined : handleCardClick}
-      hoverable={!isEditing}
+    <div ref={containerRef} className={styles.cardWrapper} style={{ width: '100%' }}>
+      <Card
+        theme="gunmetal"
+        variant="standard"
+        customWidth={containerDimensions.width}
+        customHeight={containerDimensions.height}
+        className={getCardClassName()}
+        onClick={undefined}
+        hoverable={false}
       style={
         {
-          // Stretch to fill container but with minimum dimensions
-          width: '100%',
+          // Force full width expansion
+          width: '100% !important',
           height: 'auto',
-          minWidth: isEditing ? '600px' : '400px',
-          minHeight: isEditing ? '650px' : '250px',
+          minWidth: '100%',
+          minHeight: 'auto',
+          maxWidth: 'none !important',
           maxHeight: 'none',
-          // Disable hover effects when editing
-          ...(isEditing ? {
-            transform: 'none !important',
-            filter: 'none !important',
-            cursor: 'default',
-          } : {}),
+          // Always disable hover effects on the container
+          transform: 'none !important',
+          filter: 'none !important',
+          cursor: 'default',
           // Ensure frame renders properly
           isolation: 'isolate',
           // Set XP strip variables dynamically
@@ -262,22 +392,26 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 
       {isEditing ? (
         // Show TaskEditForm inside the card
-        <div className={styles.editFormContainer} style={{ 
-          width: '100%', 
-          height: 'auto',
-          minHeight: '580px',
-          padding: '16px',
-          paddingBottom: '32px',
-          overflow: 'visible',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '12px'
-        }}>
+        <div 
+          ref={contentRef}
+          className={styles.editFormContainer} 
+          style={{ 
+            width: '100%', 
+            height: 'auto',
+            minHeight: '580px',
+            padding: '16px',
+            paddingBottom: '32px',
+            overflow: 'visible',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '12px'
+          }}
+        >
           <TaskEditForm task={task} onCancel={handleCancelEdit} />
         </div>
       ) : (
-        // Show normal card content
-        <>
+        // Show normal card content with clickable content area
+        <div ref={contentRef} className={styles.cardContent} onClick={handleCardClick}>
           <div className={styles.header}>
             <div className={styles.content}>
               <div className={styles.titleSection}>
@@ -354,26 +488,15 @@ export const TaskCard: React.FC<TaskCardProps> = ({
               className={styles.rightSection}
               onClick={(e) => e.stopPropagation()}
             >
-              <div
-                className={styles.checkboxContainer}
-                onClick={(e) => e.stopPropagation()}
-              >
+              <div className={styles.actions} onClick={(e) => e.stopPropagation()}>
                 <input
                   type="checkbox"
                   checked={task.completed}
                   onChange={handleToggle}
-                  className={styles.checkbox}
+                  disabled={isCompleting}
+                  className={styles.taskCheckbox}
+                  aria-label={`Mark task "${task.title}" as ${task.completed ? 'incomplete' : 'complete'}`}
                 />
-              </div>
-
-              <div className={styles.actions} onClick={(e) => e.stopPropagation()}>
-                <button
-                  onClick={handleEdit}
-                  className={styles.editButton}
-                  aria-label="Edit task"
-                >
-                  🖍
-                </button>
               </div>
             </div>
           </div>
@@ -422,8 +545,21 @@ export const TaskCard: React.FC<TaskCardProps> = ({
               )}
             </div>
           )}
-        </>
+          {/* Edit button fixed to bottom-left */}
+          <div className={styles.editCorner} onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={handleEdit}
+              className={styles.editButton}
+              aria-label="Edit task"
+            >
+              <EditIconSprite />
+            </button>
+          </div>
+        </div>
       )}
-    </Card>
+      </Card>
+      
+
+    </div>
   );
 };

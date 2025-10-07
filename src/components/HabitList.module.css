@@ -145,7 +145,7 @@
 .habitGrid {
   display: grid;
   gap: 16px;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr); /* allow children to shrink */
   padding: 4px;
 }
 

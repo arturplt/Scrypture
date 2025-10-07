@@ -194,6 +194,16 @@ THEME_CONFIGS.forEach(config => {
 
 // Add additional sprites that aren't part of the theme system
 const additionalSprites: AtlasSprite[] = [
+  // Horizontal Bar sprites (for slide-to-complete component)
+  { id: 'bar-horizontal-left', name: 'Horizontal Bar Left', x: 0, y: 80, width: 16, height: 16, category: 'bar', theme: 'horizontal', color: 'default', description: 'Left part of horizontal bar - does not scale horizontally' },
+  { id: 'bar-horizontal-center', name: 'Horizontal Bar Center (Repeatable)', x: 16, y: 80, width: 16, height: 16, category: 'bar', theme: 'horizontal', color: 'default', description: 'Center part of horizontal bar - horizontally repeatable for scaling' },
+  { id: 'bar-horizontal-right', name: 'Horizontal Bar Right', x: 32, y: 80, width: 16, height: 16, category: 'bar', theme: 'horizontal', color: 'default', description: 'Right part of horizontal bar - does not scale horizontally' },
+  
+  // Progress Bar sprites (for slide-to-complete component)
+  { id: 'bar-progress-left', name: 'Progress Bar Left', x: 0, y: 96, width: 16, height: 16, category: 'bar', theme: 'progress', color: 'default', description: 'Left part of progress bar - does not scale horizontally' },
+  { id: 'bar-progress-center', name: 'Progress Bar Center (Repeatable)', x: 16, y: 96, width: 16, height: 16, category: 'bar', theme: 'progress', color: 'default', description: 'Center part of progress bar - horizontally repeatable for scaling' },
+  { id: 'bar-progress-right', name: 'Progress Bar Right', x: 32, y: 96, width: 16, height: 16, category: 'bar', theme: 'progress', color: 'default', description: 'Right part of progress bar - does not scale horizontally' },
+  
   // Text elements
   { id: 'text-sanctuary', name: 'Text: Sanctuary', x: 0, y: 304, width: 80, height: 32, category: 'text', theme: 'title', color: 'default', description: 'Large title text for Sanctuary' },
   { id: 'text-bober', name: 'Text: Bober', x: 0, y: 336, width: 64, height: 32, category: 'text', theme: 'subtitle', color: 'default', description: 'Medium text for Bober' },

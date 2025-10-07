@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Habit } from '../types';
 import { useHabits } from '../hooks/useHabits';
 import { useUser } from '../hooks/useUser';
@@ -7,6 +7,7 @@ import { AutoSaveIndicator } from './AutoSaveIndicator';
 import { habitService } from '../services/habitService';
 import { formatRelativeTime } from '../utils/dateUtils';
 import { Card } from './ui';
+import { getSpriteById } from '../data/atlasMapping';
 import styles from './HabitCard.module.css';
 
 interface HabitCardProps {
@@ -31,6 +32,11 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit }) => {
   const [isExitingEdit, setIsExitingEdit] = useState(false);
   const [isReentering, setIsReentering] = useState(false);
 
+  // Container sizing for full-width rendering (match TaskCard behavior)
+  const [containerDimensions, setContainerDimensions] = useState<{ width: number; height: number }>({ width: 400, height: 250 });
+  const containerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+
   const updateStreakData = useCallback(() => {
     setStreakData({
       current: habit.streak,
@@ -42,6 +48,63 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit }) => {
   useEffect(() => {
     updateStreakData();
   }, [updateStreakData]);
+
+  // ResizeObserver to keep card width synced to available space
+  const updateContainerDimensions = useCallback(() => {
+    if (containerRef.current && contentRef.current) {
+      const containerWidth = containerRef.current.clientWidth;
+      const contentHeight = contentRef.current.scrollHeight;
+
+      let minHeight = 250;
+      if (isEditing) {
+        minHeight = 650;
+      }
+
+      setContainerDimensions({
+        width: containerWidth,
+        height: Math.max(contentHeight + 16, minHeight),
+      });
+    }
+  }, [isEditing]);
+
+  useEffect(() => {
+    const resizeObserver = new ResizeObserver(updateContainerDimensions);
+    if (containerRef.current) resizeObserver.observe(containerRef.current);
+    if (contentRef.current) resizeObserver.observe(contentRef.current);
+
+    // Initial measure
+    updateContainerDimensions();
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [updateContainerDimensions]);
+
+  // Also respond to window resizes as a fallback (some grid parents may not trigger RO reliably)
+  useEffect(() => {
+    const onResize = () => updateContainerDimensions();
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, [updateContainerDimensions]);
+
+  // Recalculate when content changes or details toggle
+  useEffect(() => {
+    const timer = setTimeout(updateContainerDimensions, 100);
+    return () => clearTimeout(timer);
+  }, [showDetails, isEditing, habit.description, habit.name, updateContainerDimensions]);
+
+  // Additional updates around the details animation timing
+  useEffect(() => {
+    if (showDetails) {
+      const t1 = setTimeout(updateContainerDimensions, 50);
+      const t2 = setTimeout(updateContainerDimensions, 200);
+      const t3 = setTimeout(updateContainerDimensions, 450);
+      return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+    } else {
+      const t = setTimeout(updateContainerDimensions, 350);
+      return () => clearTimeout(t);
+    }
+  }, [showDetails, updateContainerDimensions]);
 
   const handleComplete = useCallback(async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -150,6 +213,54 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit }) => {
     return stats;
   };
 
+  // Sprite renderer component for edit icon
+  const EditIconSprite = () => {
+    const [atlasImage, setAtlasImage] = useState<HTMLImageElement | null>(null);
+    const editSprite = getSpriteById('icon-edit');
+
+    useEffect(() => {
+      const img = new Image();
+      img.onload = () => setAtlasImage(img);
+      img.src = '/assets/Frames/Atlas.png';
+    }, []);
+
+    if (!editSprite || !atlasImage) {
+      return <span>🖍</span>; // Fallback to emoji
+    }
+
+    return (
+      <canvas
+        width={32}
+        height={32}
+        style={{
+          width: '32px',
+          height: '32px',
+          imageRendering: 'pixelated',
+        } as React.CSSProperties}
+        ref={(canvas) => {
+          if (canvas && atlasImage) {
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+              // Disable image smoothing for crisp pixels
+              ctx.imageSmoothingEnabled = false;
+              ctx.drawImage(
+                atlasImage,
+                editSprite.x,
+                editSprite.y,
+                editSprite.width,
+                editSprite.height,
+                0,
+                0,
+                32,
+                32
+              );
+            }
+          }
+        }}
+      />
+    );
+  };
+
   // Don't render anything during transition to edit
   if (isTransitioningToEdit) {
     return (
@@ -160,21 +271,23 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit }) => {
   }
 
   return (
+    <div ref={containerRef} className={styles.cardWrapper} style={{ width: '100%' }}>
     <Card
       theme="royal-blue"
       variant="standard"
-      customWidth={isEditing ? 600 : 400}
-      customHeight={isEditing ? 650 : 250}
+      customWidth={containerDimensions.width}
+      customHeight={containerDimensions.height}
       className={getCardClassName()}
       onClick={isEditing ? undefined : handleCardClick}
       hoverable={!isEditing && !streakData.isCompletedToday}
       style={
         {
-          // Stretch to fill container but with minimum dimensions
-          width: '100%',
+          // Force full width expansion
+          width: '100% !important',
           height: 'auto',
-          minWidth: isEditing ? '600px' : '400px',
-          minHeight: isEditing ? '650px' : '250px',
+          minWidth: '100%',
+          minHeight: 'auto',
+          maxWidth: 'none !important',
           maxHeight: 'none',
           // Disable hover effects when editing
           ...(isEditing ? {
@@ -207,7 +320,7 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit }) => {
         </div>
       ) : (
         // Show normal card content
-        <>
+        <div ref={contentRef} className={styles.cardContent}>
           <div className={styles.header}>
             <div className={styles.content}>
               <div className={styles.titleSection}>
@@ -282,29 +395,23 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit }) => {
             </div>
 
             <div className={styles.rightSection} onClick={(e) => e.stopPropagation()}>
-              <div className={styles.completeButtonContainer} onClick={(e) => e.stopPropagation()}>
-                <button
-                  onClick={handleComplete}
-                  disabled={streakData.isCompletedToday || isCompleting}
-                  className={`${styles.completeButton} ${streakData.isCompletedToday ? styles.completed : ''}`}
-                  aria-label={streakData.isCompletedToday ? "Completed today" : "Complete habit"}
-                >
-                  {streakData.isCompletedToday ? '✓' : '○'}
-                </button>
-              </div>
-
               <div className={styles.actions} onClick={(e) => e.stopPropagation()}>
-                <button
-                  onClick={handleEdit}
-                  className={styles.editButton}
-                  aria-label="Edit habit"
-                >
-                  🖍
-                </button>
+                <input
+                  type="checkbox"
+                  checked={streakData.isCompletedToday}
+                  onChange={(e) => {
+                    e.stopPropagation();
+                    if (!streakData.isCompletedToday && !isCompleting) {
+                      handleComplete(e as any);
+                    }
+                  }}
+                  disabled={streakData.isCompletedToday || isCompleting}
+                  className={styles.habitCheckbox}
+                  aria-label={streakData.isCompletedToday ? "Completed today" : "Complete habit"}
+                />
               </div>
             </div>
           </div>
-
           {/* Integrated Habit Details */}
           {showDetails && (
             <div className={`${styles.habitDetails} ${styles.habitDetailsOpen} ${isClosing ? styles.closing : ''}`}>
@@ -351,8 +458,19 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit }) => {
               )}
             </div>
           )}
-        </>
+          {/* Edit button fixed to bottom-left */}
+          <div className={styles.editCorner} onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={handleEdit}
+              className={styles.editButton}
+              aria-label="Edit habit"
+            >
+              <EditIconSprite />
+            </button>
+          </div>
+        </div>
       )}
     </Card>
+    </div>
   );
 }; 

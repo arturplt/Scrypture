@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
 import { Achievement, AchievementProgress, AchievementContextType, Task, Habit, User } from '../types';
 import { achievementService } from '../services/achievementService';
 import { userService } from '../services/userService';
@@ -16,6 +16,22 @@ const debounce = <T extends (...args: any[]) => any>(
   return (...args: Parameters<T>) => {
     clearTimeout(timeoutId);
     timeoutId = setTimeout(() => func(...args), delay);
+  };
+};
+
+// Simple throttle utility to prevent excessive function calls
+const throttle = <T extends (...args: any[]) => any>(
+  func: T,
+  delay: number
+): ((...args: Parameters<T>) => ReturnType<T> | undefined) => {
+  let lastCall = 0;
+  return (...args: Parameters<T>) => {
+    const now = Date.now();
+    if (now - lastCall >= delay) {
+      lastCall = now;
+      return func(...args);
+    }
+    return undefined;
   };
 };
 
@@ -66,11 +82,11 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
     }
   }, []);
 
-  // Auto-refresh achievements every 30 seconds to sync with storage
+  // Auto-refresh achievements every 5 minutes to sync with storage (reduced from 30 seconds to prevent flickering)
   useEffect(() => {
     const interval = setInterval(() => {
       refreshAchievements();
-    }, 30000); // 30 seconds
+    }, 300000); // 5 minutes (300 seconds)
 
     return () => clearInterval(interval);
   }, [refreshAchievements]);
@@ -103,6 +119,20 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
     }, 500), // 500ms debounce
     [saveWithFeedback]
   );
+
+  // Helper function to compare achievement progress arrays efficiently
+  const areProgressArraysEqual = useCallback((a: AchievementProgress[], b: AchievementProgress[]) => {
+    if (a.length !== b.length) return false;
+    
+    for (let i = 0; i < a.length; i++) {
+      if (a[i].achievementId !== b[i].achievementId || 
+          a[i].progress !== b[i].progress || 
+          a[i].lastUpdated !== b[i].lastUpdated) {
+        return false;
+      }
+    }
+    return true;
+  }, []);
 
   // Check achievements and update state
   const checkAchievements = useCallback((user: User, tasks: Task[], habits: Habit[]): Achievement[] => {
@@ -144,9 +174,13 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
         // Trigger debounced auto-save
         debouncedSave();
       } else {
-        // Update progress even if no new achievements unlocked
+        // Update progress only if there are actual changes to prevent unnecessary re-renders
         const updatedProgress = achievementService.getAllProgress();
-        setAchievementProgress(updatedProgress);
+        const hasProgressChanged = !areProgressArraysEqual(updatedProgress, achievementProgress);
+        
+        if (hasProgressChanged) {
+          setAchievementProgress(updatedProgress);
+        }
       }
 
       return newlyUnlocked;
@@ -154,7 +188,13 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
       console.error('Failed to check achievements:', error);
       return [];
     }
-  }, [debouncedSave, applyAchievementRewards]);
+  }, [debouncedSave, applyAchievementRewards, areProgressArraysEqual, achievementProgress]);
+
+  // Throttled version of checkAchievements to prevent excessive calls (max once per 2 seconds)
+  const throttledCheckAchievements = useMemo(
+    () => throttle(checkAchievements, 2000),
+    [checkAchievements]
+  );
 
   // Get achievement progress for a specific achievement
   const getAchievementProgress = useCallback((achievementId: string): AchievementProgress | null => {
@@ -175,7 +215,7 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
   const contextValue: AchievementContextType = {
     achievements,
     achievementProgress,
-    checkAchievements,
+    checkAchievements: throttledCheckAchievements,
     getAchievementProgress,
     refreshAchievements,
     isSaving,

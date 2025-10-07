@@ -288,14 +288,18 @@ function AppContent() {
 
 
 
-  // Check for achievement unlocks when user data, tasks, or habits change
+  // Check for achievement unlocks when user data, tasks, or habits change (debounced to prevent flickering)
   useEffect(() => {
     if (user && tasks && habits) {
-      const newlyUnlocked = checkAchievements(user, tasks, habits);
-      if (newlyUnlocked.length > 0) {
-        // Add newly unlocked achievements to notifications
-        setAchievementNotifications(prev => [...prev, ...newlyUnlocked]);
-      }
+      const timeoutId = setTimeout(() => {
+        const newlyUnlocked = checkAchievements(user, tasks, habits);
+        if (newlyUnlocked.length > 0) {
+          // Add newly unlocked achievements to notifications
+          setAchievementNotifications(prev => [...prev, ...newlyUnlocked]);
+        }
+      }, 1000); // 1 second debounce
+
+      return () => clearTimeout(timeoutId);
     }
   }, [user, tasks, habits, checkAchievements]);
 

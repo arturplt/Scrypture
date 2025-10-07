@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Achievement, AchievementProgress } from '../types';
 import { Card } from './ui';
 import styles from './AchievementCard.module.css';
@@ -18,6 +18,28 @@ export const AchievementCard: React.FC<AchievementCardProps> = ({
 }) => {
   const isUnlocked = achievement.unlocked;
   const progressPercent = progress?.progress ? Math.round(progress.progress * 100) : 0;
+
+  // Responsive sizing similar to TaskCard so all content is visible
+  const containerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [dimensions, setDimensions] = useState<{ width: number; height: number }>({ width: 320, height: 200 });
+
+  const updateDimensions = useCallback(() => {
+    if (!containerRef.current || !contentRef.current) return;
+    const width = containerRef.current.clientWidth;
+    const contentHeight = contentRef.current.scrollHeight;
+    // Ensure minimum reasonable frame height, and leave a little extra for frame internals
+    const minHeight = 180;
+    setDimensions({ width, height: Math.max(contentHeight + 16, minHeight) });
+  }, []);
+
+  useEffect(() => {
+    const ro = new ResizeObserver(updateDimensions);
+    if (containerRef.current) ro.observe(containerRef.current);
+    if (contentRef.current) ro.observe(contentRef.current);
+    updateDimensions();
+    return () => ro.disconnect();
+  }, [updateDimensions]);
 
   const getRarityClass = (rarity: string) => {
     switch (rarity) {
@@ -95,17 +117,17 @@ export const AchievementCard: React.FC<AchievementCardProps> = ({
   };
 
   return (
-    <div className={styles.achievementCard}>
+    <div ref={containerRef} className={styles.achievementCard}>
       <Card
         status={getCardStatus()}
         onClick={handleClick}
         className={`${styles.achievementCard} ${achievement.unlocked ? styles.unlocked : styles.locked}`}
         hoverable={true}
         theme="thick-gold"
-        width={4}
-        height={3}
+        customWidth={dimensions.width}
+        customHeight={dimensions.height}
       >
-        <div className={styles.cardContent}>
+        <div ref={contentRef} className={styles.cardContent}>
           {/* Header */}
           <div className={styles.header}>
             <div className={styles.iconSection}>

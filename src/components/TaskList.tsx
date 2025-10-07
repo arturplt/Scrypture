@@ -331,6 +331,7 @@ export const TaskList = forwardRef<TaskListRef, TaskListProps>((props, ref) => {
                           <div
                             key={task.id}
                             ref={el => taskRefs.current[task.id] = el}
+                            style={{ width: '100%', maxWidth: 'none' }}
                           >
                             <TaskCard
                               task={task}
