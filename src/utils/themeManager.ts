@@ -431,4 +431,3 @@ class ThemeManager {
 }
 
 export const themeManager = new ThemeManager();
-export type { ThemeConfig, ThemePreferences, ThemeManagerState };

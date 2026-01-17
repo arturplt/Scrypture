@@ -1065,4 +1065,3 @@ export const getBorderSliceForElement = (id: string): { top: number; right: numb
   return element?.borderSlice;
 };
 
-export type { UIElement, UIElementMapping };

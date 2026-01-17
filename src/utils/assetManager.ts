@@ -453,5 +453,3 @@ class AssetManager {
 // Export singleton instance
 export const assetManager = new AssetManager();
 
-// Export types for external use
-export type { AssetConfig, ButtonConfig, FrameConfig, AssetManagerState };

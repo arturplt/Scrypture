@@ -191,10 +191,12 @@ export const AchievementProvider: React.FC<AchievementProviderProps> = ({ childr
   }, [debouncedSave, applyAchievementRewards, areProgressArraysEqual, achievementProgress]);
 
   // Throttled version of checkAchievements to prevent excessive calls (max once per 2 seconds)
-  const throttledCheckAchievements = useMemo(
-    () => throttle(checkAchievements, 2000),
-    [checkAchievements]
-  );
+  const throttledCheckAchievements = useMemo(() => {
+    const throttled = throttle(checkAchievements, 2000);
+    return (user: User, tasks: Task[], habits: Habit[]): Achievement[] => {
+      return throttled(user, tasks, habits) ?? [];
+    };
+  }, [checkAchievements]);
 
   // Get achievement progress for a specific achievement
   const getAchievementProgress = useCallback((achievementId: string): AchievementProgress | null => {

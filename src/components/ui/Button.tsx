@@ -2,16 +2,17 @@ import React, { useRef, useEffect, useState } from 'react';
 import { getSpriteById } from '../../data/atlasMapping';
 import styles from './Button.module.css';
 
-export interface ButtonProps {
-  children: React.ReactNode;
-  onClick?: () => void;
-  disabled?: boolean;
+export type ButtonSize = 'small' | 'medium' | 'large' | 'wide' | 'themed';
+export type ButtonTheme = 'body' | 'mind' | 'soul';
+
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  children?: React.ReactNode;
   variant?: 'primary' | 'secondary' | 'danger' | 'success';
-  size?: 'small' | 'medium' | 'large';
+  size?: ButtonSize;
   theme?: string;
-  type?: 'button' | 'submit' | 'reset';
-  className?: string;
   loading?: boolean;
+  icon?: React.ReactNode;
+  buttonId?: string;
 }
 
 const BUTTON_THEMES = {
@@ -27,16 +28,31 @@ const BUTTON_SIZES = {
   large: { scale: 3, padding: 16 }
 };
 
+const SIZE_CLASS_MAP: Record<ButtonSize, 'small' | 'medium' | 'large'> = {
+  small: 'small',
+  medium: 'medium',
+  large: 'large',
+  wide: 'large',
+  themed: 'small'
+};
+
 export const Button: React.FC<ButtonProps> = ({
   children,
   onClick,
+  onMouseEnter,
+  onMouseLeave,
+  onMouseDown,
+  onMouseUp,
   disabled = false,
   variant = 'primary',
   size = 'medium',
   theme,
   type = 'button',
   className = '',
-  loading = false
+  loading = false,
+  icon,
+  buttonId,
+  ...rest
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [atlasImage, setAtlasImage] = useState<HTMLImageElement | null>(null);
@@ -52,7 +68,8 @@ export const Button: React.FC<ButtonProps> = ({
 
   // Get button configuration
   const selectedTheme = theme || BUTTON_THEMES[variant];
-  const sizeConfig = BUTTON_SIZES[size];
+  const sizeClass = SIZE_CLASS_MAP[size];
+  const sizeConfig = BUTTON_SIZES[sizeClass];
   
   // Draw button frame
   useEffect(() => {
@@ -112,10 +129,31 @@ export const Button: React.FC<ButtonProps> = ({
     }
   };
 
+  const handleMouseEnter = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setIsHovered(true);
+    onMouseEnter?.(event);
+  };
+
+  const handleMouseLeave = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setIsHovered(false);
+    setIsPressed(false);
+    onMouseLeave?.(event);
+  };
+
+  const handleMouseDown = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setIsPressed(true);
+    onMouseDown?.(event);
+  };
+
+  const handleMouseUp = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setIsPressed(false);
+    onMouseUp?.(event);
+  };
+
   const buttonClasses = [
     styles.button,
     styles[`button-${variant}`],
-    styles[`button-${size}`],
+    styles[`button-${sizeClass}`],
     disabled && styles.disabled,
     loading && styles.loading,
     isHovered && styles.hovered,
@@ -129,13 +167,12 @@ export const Button: React.FC<ButtonProps> = ({
       className={buttonClasses}
       onClick={handleClick}
       disabled={disabled || loading}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => {
-        setIsHovered(false);
-        setIsPressed(false);
-      }}
-      onMouseDown={() => setIsPressed(true)}
-      onMouseUp={() => setIsPressed(false)}
+      data-button-id={buttonId}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
+      {...rest}
     >
       <canvas 
         ref={canvasRef}
@@ -157,11 +194,38 @@ export const Button: React.FC<ButtonProps> = ({
             Loading...
           </>
         ) : (
-          children
+          <>
+            {icon && <span>{icon}</span>}
+            {children}
+          </>
         )}
       </span>
     </button>
   );
 };
+
+export const SmallButton: React.FC<ButtonProps> = (props) => (
+  <Button {...props} size="small" />
+);
+
+export const WideButton: React.FC<ButtonProps> = (props) => (
+  <Button {...props} size="wide" />
+);
+
+export const ThemedButton: React.FC<ButtonProps & { theme: ButtonTheme }> = (props) => (
+  <Button {...props} size="themed" />
+);
+
+export const BodyButton: React.FC<ButtonProps> = (props) => (
+  <Button {...props} size="themed" theme="body" />
+);
+
+export const MindButton: React.FC<ButtonProps> = (props) => (
+  <Button {...props} size="themed" theme="mind" />
+);
+
+export const SoulButton: React.FC<ButtonProps> = (props) => (
+  <Button {...props} size="themed" theme="soul" />
+);
 
 export default Button;

@@ -6,6 +6,7 @@ declare global {
       DEV: boolean;
       PROD: boolean;
       BASE_URL: string;
+      VITE_DEBUG_LOGS?: string;
     };
   }
   interface Window {

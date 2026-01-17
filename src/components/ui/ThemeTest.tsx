@@ -62,7 +62,7 @@ export const ThemeTest: React.FC<ThemeTestProps> = ({ className }) => {
         <div className={styles.stats}>
           <span>Frame Themes: {frameThemes.length}</span>
           <span>Button Themes: {buttonThemes.length}</span>
-          <span>Assets Loaded: {assetState.loadedAssets.length}</span>
+          <span>Assets Loaded: {Object.keys(assetState.cache).length}</span>
         </div>
       </div>
 

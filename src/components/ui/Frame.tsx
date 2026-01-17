@@ -1,19 +1,31 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { getSpriteById } from '../../data/atlasMapping';
+import { themeManager } from '../../utils/themeManager';
 import styles from './Frame.module.css';
 
-export interface FrameProps {
+export const FRAME_THEMES = {
+  diy: 'frame-diy',
+  galactic: 'frame-galactic',
+  goo: 'frame-goo',
+  ice: 'frame-ice',
+  leafy: 'frame-leafy',
+  scroll: 'frame-scroll',
+  skull: 'frame-skull',
+  wood: 'frame-wood'
+} as const;
+
+export interface FrameProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
+  frameId?: string;
   theme?: string;
   variant?: 'standard' | 'compound';
-  width?: number;
-  height?: number;
+  width?: number | string;
+  height?: number | string;
   customWidth?: number;
   customHeight?: number;
   upperHeight?: number;
   lowerHeight?: number;
   scale?: number;
-  className?: string;
   padding?: number;
 }
 
@@ -25,6 +37,7 @@ const DEFAULT_THEMES = {
 
 export const Frame: React.FC<FrameProps> = ({
   children,
+  frameId,
   theme = 'green-frame',
   variant = 'standard',
   width = 3,
@@ -35,7 +48,9 @@ export const Frame: React.FC<FrameProps> = ({
   lowerHeight = 2,
   scale = 2,
   className = '',
-  padding = 16
+  padding = 16,
+  style,
+  ...rest
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [atlasImage, setAtlasImage] = useState<HTMLImageElement | null>(null);
@@ -47,24 +62,42 @@ export const Frame: React.FC<FrameProps> = ({
     img.src = '/assets/Frames/Atlas.png';
   }, []);
 
+  const resolvedTheme = theme === 'current' ? themeManager.getState().currentFrameTheme : theme;
+  const themeFromId = frameId?.startsWith('frame-') ? frameId.replace('frame-', '') : frameId;
+  const activeTheme = themeFromId || resolvedTheme;
+
   // Calculate frame dimensions
   const getFrameDimensions = () => {
     if (customWidth && customHeight) {
       return { width: customWidth, height: customHeight };
     }
-    
+
     const spriteSize = 16 * scale;
-    if (variant === 'compound') {
-      const totalHeight = upperHeight + 1 + lowerHeight; // upper + partition + lower
-      return { 
-        width: width * spriteSize, 
-        height: totalHeight * spriteSize 
+    const numericWidth = typeof width === 'number' ? width : undefined;
+    const numericHeight = typeof height === 'number' ? height : undefined;
+    const pixelWidth = numericWidth && numericWidth > 20 ? numericWidth : undefined;
+    const pixelHeight = numericHeight && numericHeight > 20 ? numericHeight : undefined;
+    const gridWidth = numericWidth && numericWidth <= 20 ? numericWidth : 3;
+    const gridHeight = numericHeight && numericHeight <= 20 ? numericHeight : 3;
+
+    if (pixelWidth || pixelHeight) {
+      return {
+        width: pixelWidth ?? gridWidth * spriteSize,
+        height: pixelHeight ?? gridHeight * spriteSize
       };
     }
-    
-    return { 
-      width: width * spriteSize, 
-      height: height * spriteSize 
+
+    if (variant === 'compound') {
+      const totalHeight = upperHeight + 1 + lowerHeight; // upper + partition + lower
+      return {
+        width: gridWidth * spriteSize,
+        height: totalHeight * spriteSize
+      };
+    }
+
+    return {
+      width: gridWidth * spriteSize,
+      height: gridHeight * spriteSize
     };
   };
 
@@ -75,15 +108,15 @@ export const Frame: React.FC<FrameProps> = ({
 
     // Get frame sprites
     const sprites = {
-      topLeft: getSpriteById(`frame-corner-top-left-${theme}`),
-      topRight: getSpriteById(`frame-corner-top-right-${theme}`),
-      bottomLeft: getSpriteById(`frame-corner-bottom-left-${theme}`),
-      bottomRight: getSpriteById(`frame-corner-bottom-right-${theme}`),
-      topEdge: getSpriteById(`frame-edge-top-${theme}`),
-      bottomEdge: getSpriteById(`frame-edge-bottom-${theme}`),
-      leftEdge: getSpriteById(`frame-edge-left-${theme}`),
-      rightEdge: getSpriteById(`frame-edge-right-${theme}`),
-      background: getSpriteById(`frame-background-${theme}`)
+      topLeft: getSpriteById(`frame-corner-top-left-${activeTheme}`),
+      topRight: getSpriteById(`frame-corner-top-right-${activeTheme}`),
+      bottomLeft: getSpriteById(`frame-corner-bottom-left-${activeTheme}`),
+      bottomRight: getSpriteById(`frame-corner-bottom-right-${activeTheme}`),
+      topEdge: getSpriteById(`frame-edge-top-${activeTheme}`),
+      bottomEdge: getSpriteById(`frame-edge-bottom-${activeTheme}`),
+      leftEdge: getSpriteById(`frame-edge-left-${activeTheme}`),
+      rightEdge: getSpriteById(`frame-edge-right-${activeTheme}`),
+      background: getSpriteById(`frame-background-${activeTheme}`)
     };
 
     if (!Object.values(sprites).every(sprite => sprite)) return;
@@ -156,27 +189,27 @@ export const Frame: React.FC<FrameProps> = ({
   };
 
   // Draw compound frame
-  const drawCompoundFrame = (ctx: CanvasRenderingContext2D, frameWidth: number, frameHeight: number) => {
+  const drawCompoundFrame = (ctx: CanvasRenderingContext2D) => {
     const spriteSize = 16 * scale;
     const totalHeight = upperHeight + 1 + lowerHeight;
     const partitionRow = upperHeight;
 
     // Get all sprites including partition and lower edges
     const sprites = {
-      topLeft: getSpriteById(`frame-corner-top-left-${theme}`),
-      topRight: getSpriteById(`frame-corner-top-right-${theme}`),
-      bottomLeft: getSpriteById(`frame-corner-bottom-left-${theme}`),
-      bottomRight: getSpriteById(`frame-corner-bottom-right-${theme}`),
-      topEdge: getSpriteById(`frame-edge-top-${theme}`),
-      bottomEdge: getSpriteById(`frame-edge-bottom-${theme}`),
-      leftEdge: getSpriteById(`frame-edge-left-${theme}`),
-      rightEdge: getSpriteById(`frame-edge-right-${theme}`),
-      background: getSpriteById(`frame-background-${theme}`),
-      partitionLeft: getSpriteById(`partition-left-${theme}`),
-      partitionMiddle: getSpriteById(`partition-middle-${theme}`),
-      partitionRight: getSpriteById(`partition-right-${theme}`),
-      bottomLeftFrame: getSpriteById(`frame-bottom-left-frame-${theme}`),
-      bottomRightFrame: getSpriteById(`frame-bottom-right-frame-${theme}`)
+      topLeft: getSpriteById(`frame-corner-top-left-${activeTheme}`),
+      topRight: getSpriteById(`frame-corner-top-right-${activeTheme}`),
+      bottomLeft: getSpriteById(`frame-corner-bottom-left-${activeTheme}`),
+      bottomRight: getSpriteById(`frame-corner-bottom-right-${activeTheme}`),
+      topEdge: getSpriteById(`frame-edge-top-${activeTheme}`),
+      bottomEdge: getSpriteById(`frame-edge-bottom-${activeTheme}`),
+      leftEdge: getSpriteById(`frame-edge-left-${activeTheme}`),
+      rightEdge: getSpriteById(`frame-edge-right-${activeTheme}`),
+      background: getSpriteById(`frame-background-${activeTheme}`),
+      partitionLeft: getSpriteById(`partition-left-${activeTheme}`),
+      partitionMiddle: getSpriteById(`partition-middle-${activeTheme}`),
+      partitionRight: getSpriteById(`partition-right-${activeTheme}`),
+      bottomLeftFrame: getSpriteById(`frame-bottom-left-frame-${activeTheme}`),
+      bottomRightFrame: getSpriteById(`frame-bottom-right-frame-${activeTheme}`)
     };
 
     if (!Object.values(sprites).every(sprite => sprite)) return;
@@ -239,22 +272,24 @@ export const Frame: React.FC<FrameProps> = ({
     ctx.imageSmoothingEnabled = false;
 
     if (variant === 'compound') {
-      drawCompoundFrame(ctx, frameWidth, frameHeight);
+      drawCompoundFrame(ctx);
     } else {
       drawStandardFrame(ctx, frameWidth, frameHeight);
     }
-  }, [atlasImage, theme, variant, width, height, customWidth, customHeight, upperHeight, lowerHeight, scale]);
+  }, [atlasImage, activeTheme, variant, width, height, customWidth, customHeight, upperHeight, lowerHeight, scale]);
 
   const { width: frameWidth, height: frameHeight } = getFrameDimensions();
 
   return (
-    <div 
+    <div
       className={`${styles.frame} ${className}`}
       style={{
-        width: frameWidth,
-        height: frameHeight,
-        padding: padding
+        width: typeof width === 'string' ? width : frameWidth,
+        height: typeof height === 'string' ? height : frameHeight,
+        padding: padding,
+        ...style
       }}
+      {...rest}
     >
       <canvas 
         ref={canvasRef}
