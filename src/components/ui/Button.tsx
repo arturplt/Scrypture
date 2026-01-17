@@ -123,9 +123,9 @@ export const Button: React.FC<ButtonProps> = ({
     }
   }, [atlasImage, selectedTheme, sizeConfig.scale, isHovered, isPressed]);
 
-  const handleClick = () => {
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     if (!disabled && !loading && onClick) {
-      onClick();
+      onClick(event);
     }
   };
 

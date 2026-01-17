@@ -65,6 +65,11 @@ export const Frame: React.FC<FrameProps> = ({
   const resolvedTheme = theme === 'current' ? themeManager.getState().currentFrameTheme : theme;
   const themeFromId = frameId?.startsWith('frame-') ? frameId.replace('frame-', '') : frameId;
   const activeTheme = themeFromId || resolvedTheme;
+  const numericWidth = typeof width === 'number' ? width : undefined;
+  const numericHeight = typeof height === 'number' ? height : undefined;
+  const gridWidth = numericWidth && numericWidth <= 20 ? numericWidth : 3;
+  const gridHeight = numericHeight && numericHeight <= 20 ? numericHeight : 3;
+  const usePixelSize = (numericWidth && numericWidth > 20) || (numericHeight && numericHeight > 20);
 
   // Calculate frame dimensions
   const getFrameDimensions = () => {
@@ -73,12 +78,8 @@ export const Frame: React.FC<FrameProps> = ({
     }
 
     const spriteSize = 16 * scale;
-    const numericWidth = typeof width === 'number' ? width : undefined;
-    const numericHeight = typeof height === 'number' ? height : undefined;
     const pixelWidth = numericWidth && numericWidth > 20 ? numericWidth : undefined;
     const pixelHeight = numericHeight && numericHeight > 20 ? numericHeight : undefined;
-    const gridWidth = numericWidth && numericWidth <= 20 ? numericWidth : 3;
-    const gridHeight = numericHeight && numericHeight <= 20 ? numericHeight : 3;
 
     if (pixelWidth || pixelHeight) {
       return {
@@ -104,7 +105,7 @@ export const Frame: React.FC<FrameProps> = ({
   // Draw standard frame
   const drawStandardFrame = (ctx: CanvasRenderingContext2D, frameWidth: number, frameHeight: number) => {
     const spriteSize = 16 * scale;
-    const useCustomSize = customWidth && customHeight;
+    const useCustomSize = Boolean(customWidth && customHeight) || Boolean(usePixelSize);
 
     // Get frame sprites
     const sprites = {
@@ -163,18 +164,18 @@ export const Frame: React.FC<FrameProps> = ({
       }
     } else {
       // Grid-based drawing
-      for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
+      for (let y = 0; y < gridHeight; y++) {
+        for (let x = 0; x < gridWidth; x++) {
           let sprite = sprites.background;
           
           if (y === 0 && x === 0) sprite = sprites.topLeft;
-          else if (y === 0 && x === width - 1) sprite = sprites.topRight;
-          else if (y === height - 1 && x === 0) sprite = sprites.bottomLeft;
-          else if (y === height - 1 && x === width - 1) sprite = sprites.bottomRight;
+          else if (y === 0 && x === gridWidth - 1) sprite = sprites.topRight;
+          else if (y === gridHeight - 1 && x === 0) sprite = sprites.bottomLeft;
+          else if (y === gridHeight - 1 && x === gridWidth - 1) sprite = sprites.bottomRight;
           else if (y === 0) sprite = sprites.topEdge;
-          else if (y === height - 1) sprite = sprites.bottomEdge;
+          else if (y === gridHeight - 1) sprite = sprites.bottomEdge;
           else if (x === 0) sprite = sprites.leftEdge;
-          else if (x === width - 1) sprite = sprites.rightEdge;
+          else if (x === gridWidth - 1) sprite = sprites.rightEdge;
 
           if (sprite) {
             ctx.drawImage(
@@ -215,29 +216,29 @@ export const Frame: React.FC<FrameProps> = ({
     if (!Object.values(sprites).every(sprite => sprite)) return;
 
     for (let y = 0; y < totalHeight; y++) {
-      for (let x = 0; x < width; x++) {
+      for (let x = 0; x < gridWidth; x++) {
         let sprite = sprites.background;
 
         if (y === partitionRow) {
           // Partition row
           if (x === 0) sprite = sprites.partitionLeft;
-          else if (x === width - 1) sprite = sprites.partitionRight;
+          else if (x === gridWidth - 1) sprite = sprites.partitionRight;
           else sprite = sprites.partitionMiddle;
         } else if (y === 0) {
           // Top row
           if (x === 0) sprite = sprites.topLeft;
-          else if (x === width - 1) sprite = sprites.topRight;
+          else if (x === gridWidth - 1) sprite = sprites.topRight;
           else sprite = sprites.topEdge;
         } else if (y === totalHeight - 1) {
           // Bottom row
           if (x === 0) sprite = sprites.bottomLeft;
-          else if (x === width - 1) sprite = sprites.bottomRight;
+          else if (x === gridWidth - 1) sprite = sprites.bottomRight;
           else sprite = sprites.bottomEdge;
         } else {
           // Middle rows - different sprites for upper vs lower sections
           if (x === 0) {
             sprite = y < partitionRow ? sprites.leftEdge : sprites.bottomLeftFrame;
-          } else if (x === width - 1) {
+          } else if (x === gridWidth - 1) {
             sprite = y < partitionRow ? sprites.rightEdge : sprites.bottomRightFrame;
           } else {
             sprite = sprites.background;
