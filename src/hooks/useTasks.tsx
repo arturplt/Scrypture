@@ -3,6 +3,7 @@ import { Task, TaskContextType } from '../types';
 import { taskService } from '../services/taskService';
 import { tutorialService } from '../services/tutorialService';
 import { useUser } from './useUser';
+import { logger } from '../utils/logger';
 
 interface ExtendedTaskContextType extends TaskContextType {
   isSaving: boolean;
@@ -36,9 +37,9 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
   useEffect(() => {
     // Load tasks from local storage on mount
     const savedTasks = taskService.getTasks();
-    console.log('📋 Loaded tasks:', savedTasks);
-    console.log('📋 Tasks with stat rewards:', savedTasks.filter(t => t.statRewards));
-    console.log('📋 Tasks without stat rewards:', savedTasks.filter(t => !t.statRewards));
+    logger.info('📋 Loaded tasks:', savedTasks);
+    logger.info('📋 Tasks with stat rewards:', savedTasks.filter(t => t.statRewards));
+    logger.info('📋 Tasks without stat rewards:', savedTasks.filter(t => !t.statRewards));
     setTasks(savedTasks);
   }, []);
 
@@ -48,12 +49,12 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
       const success = taskService.saveTasks(updatedTasks);
       if (success) {
         setLastSaved(new Date());
-        console.log('Tasks auto-saved successfully');
+        logger.info('Tasks auto-saved successfully');
       } else {
-        console.error('Failed to auto-save tasks');
+        logger.error('Failed to auto-save tasks');
       }
     } catch (error) {
-      console.error('Auto-save error:', error);
+      logger.error('Auto-save error:', error);
     } finally {
       setIsSaving(false);
     }
@@ -114,21 +115,21 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
 
     // Award experience and stat rewards when completing a task
     if (isCompleting) {
-      console.log('🎯 Task completion triggered for task:', task);
-      console.log('🎯 Task statRewards:', task.statRewards);
+      logger.info('🎯 Task completion triggered for task:', task);
+      logger.info('🎯 Task statRewards:', task.statRewards);
       
       // Use the task we already have in state - no need to fetch from storage
       if (task && task.statRewards) {
-        console.log('🎯 Applying stat rewards:', task.statRewards);
+        logger.info('🎯 Applying stat rewards:', task.statRewards);
         
         // Use addExperienceWithBobr to handle XP + Bóbr evolution
         const xpAmount = task.statRewards.xp || 10;
-        console.log('🎯 Adding XP:', xpAmount);
+        logger.info('🎯 Adding XP:', xpAmount);
         addExperienceWithBobr(xpAmount);
         
         // Add the specific stat rewards (body, mind, soul)
         if (task.statRewards.body || task.statRewards.mind || task.statRewards.soul) {
-          console.log('🎯 Adding stat rewards:', {
+          logger.info('🎯 Adding stat rewards:', {
             body: task.statRewards.body,
             mind: task.statRewards.mind,
             soul: task.statRewards.soul,
@@ -140,14 +141,14 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
           });
         }
       } else {
-        console.log('⚠️  No stat rewards found, applying default XP');
+        logger.warn('⚠️  No stat rewards found, applying default XP');
         // Fallback to base XP if no stat rewards
         addExperienceWithBobr(10);
       }
 
       // Check if this is the first task completion for tutorial
       if (tutorialService.shouldShowStep('taskCompletion')) {
-        console.log('First task completed! Marking tutorial step complete.');
+        logger.info('First task completed! Marking tutorial step complete.');
         tutorialService.markStepComplete('taskCompletion');
         // Also mark hatchling evolution step as complete
         tutorialService.markStepComplete('hatchlingEvolution');

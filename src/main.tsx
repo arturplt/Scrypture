@@ -3,11 +3,12 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import './styles/globals.css';
 import { initializeGlobalData, logGlobalDataState } from './utils/htmlDataBridge';
+import { logger } from './utils/logger';
 
 // Add build timestamp for cache busting
-console.log('🚀 Scrypture App Starting...');
-console.log('📅 Build timestamp:', new Date().toISOString());
-console.log('🔧 Environment:', import.meta.env?.MODE || 'unknown');
+logger.info('🚀 Scrypture App Starting...');
+logger.info('📅 Build timestamp:', new Date().toISOString());
+logger.info('🔧 Environment:', import.meta.env?.MODE || 'unknown');
 
 // Initialize global data from HTML
 initializeGlobalData();
@@ -27,10 +28,10 @@ class ErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('React Error Boundary caught an error:', error, errorInfo);
+    logger.error('React Error Boundary caught an error:', error, errorInfo);
     
     // Log additional mobile-specific debugging info
-    console.log('Mobile Debug Info:', {
+    logger.info('Mobile Debug Info:', {
       userAgent: navigator.userAgent,
       viewport: {
         width: window.innerWidth,
@@ -105,6 +106,22 @@ class ErrorBoundary extends React.Component<
 
 // Service worker management functions
 let registration: ServiceWorkerRegistration | null = null;
+let reloadOnUpdate = false;
+
+const promptForServiceWorkerUpdate = () => {
+  if (reloadOnUpdate) return;
+
+  const shouldReload = window.confirm(
+    'A new version is available. Reload now to update?'
+  );
+
+  if (shouldReload) {
+    reloadOnUpdate = true;
+    if (registration?.waiting) {
+      registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+    }
+  }
+};
 
 // Function to clear all caches
 const clearAllCaches = async (): Promise<boolean> => {
@@ -113,7 +130,7 @@ const clearAllCaches = async (): Promise<boolean> => {
     if ('caches' in window) {
       const cacheNames = await caches.keys();
       await Promise.all(cacheNames.map(name => caches.delete(name)));
-      console.log('🧹 All caches cleared');
+      logger.info('🧹 All caches cleared');
     }
     
     // Send message to service worker to clear its caches too
@@ -130,7 +147,7 @@ const clearAllCaches = async (): Promise<boolean> => {
     
     return true;
   } catch (error) {
-    console.error('❌ Failed to clear caches:', error);
+    logger.error('❌ Failed to clear caches:', error);
     return false;
   }
 };
@@ -147,46 +164,46 @@ const forceServiceWorkerUpdate = async (): Promise<void> => {
 
 // Make functions globally available for debugging
 (window as any).clearScryptureCache = async () => {
-  console.log('🧹 Clearing all caches...');
+  logger.info('🧹 Clearing all caches...');
   
   try {
     // Unregister all service workers
     if ('serviceWorker' in navigator) {
       const registrations = await navigator.serviceWorker.getRegistrations();
-      console.log(`📋 Found ${registrations.length} service worker(s)`);
+      logger.info(`📋 Found ${registrations.length} service worker(s)`);
       
       for (const registration of registrations) {
         await registration.unregister();
-        console.log(`🔧 Unregistered service worker: ${registration.scope}`);
+        logger.info(`🔧 Unregistered service worker: ${registration.scope}`);
       }
     }
     
     // Clear all caches
     if ('caches' in window) {
       const cacheNames = await caches.keys();
-      console.log(`📦 Found ${cacheNames.length} cache(s): ${cacheNames.join(', ')}`);
+      logger.info(`📦 Found ${cacheNames.length} cache(s): ${cacheNames.join(', ')}`);
       
       for (const cacheName of cacheNames) {
         await caches.delete(cacheName);
-        console.log(`🗑️ Deleted cache: ${cacheName}`);
+        logger.info(`🗑️ Deleted cache: ${cacheName}`);
       }
     }
     
     // Clear storage
-    console.log('💾 Clearing localStorage...');
+    logger.info('💾 Clearing localStorage...');
     localStorage.clear();
-    console.log('💾 Clearing sessionStorage...');
+    logger.info('💾 Clearing sessionStorage...');
     sessionStorage.clear();
     
-    console.log('✅ All caches cleared successfully!');
-    console.log('🔄 Reloading page in 2 seconds...');
+    logger.info('✅ All caches cleared successfully!');
+    logger.info('🔄 Reloading page in 2 seconds...');
     
     setTimeout(() => {
       window.location.reload();
     }, 2000);
     
   } catch (error) {
-    console.error('❌ Error clearing caches:', error);
+    logger.error('❌ Error clearing caches:', error);
   }
 };
 
@@ -194,26 +211,26 @@ const forceServiceWorkerUpdate = async (): Promise<void> => {
 
 // Add a simple cache status checker
 (window as any).checkCacheStatus = async () => {
-  console.log('🔍 Checking cache status...');
+  logger.info('🔍 Checking cache status...');
   
   if ('serviceWorker' in navigator) {
     const registrations = await navigator.serviceWorker.getRegistrations();
-    console.log(`📋 Service Workers: ${registrations.length}`);
+    logger.info(`📋 Service Workers: ${registrations.length}`);
     registrations.forEach((reg, i) => {
-      console.log(`  ${i + 1}. Scope: ${reg.scope}, Active: ${!!reg.active}, Waiting: ${!!reg.waiting}`);
+      logger.info(`  ${i + 1}. Scope: ${reg.scope}, Active: ${!!reg.active}, Waiting: ${!!reg.waiting}`);
     });
   }
   
   if ('caches' in window) {
     const cacheNames = await caches.keys();
-    console.log(`📦 Caches: ${cacheNames.length}`);
+    logger.info(`📦 Caches: ${cacheNames.length}`);
     cacheNames.forEach((name, i) => {
-      console.log(`  ${i + 1}. ${name}`);
+      logger.info(`  ${i + 1}. ${name}`);
     });
   }
   
-  console.log(`💾 localStorage items: ${Object.keys(localStorage).length}`);
-  console.log(`💾 sessionStorage items: ${Object.keys(sessionStorage).length}`);
+  logger.info(`💾 localStorage items: ${Object.keys(localStorage).length}`);
+  logger.info(`💾 sessionStorage items: ${Object.keys(sessionStorage).length}`);
 };
 
 // Register service worker for PWA functionality with better update handling
@@ -227,7 +244,7 @@ if ('serviceWorker' in navigator) {
       window.location.port === '5173' ||
       window.location.port === '3000';
     
-    console.log('🔧 Environment check:', {
+    logger.info('🔧 Environment check:', {
       hostname: window.location.hostname,
       port: window.location.port,
       href: window.location.href,
@@ -235,12 +252,12 @@ if ('serviceWorker' in navigator) {
     });
     
     if (isDevelopment) {
-      console.log('🔧 Development mode detected - skipping service worker registration');
+      logger.info('🔧 Development mode detected - skipping service worker registration');
       
       // In development, unregister any existing service workers
       navigator.serviceWorker.getRegistrations().then((registrations) => {
         registrations.forEach((registration) => {
-          console.log('🔧 Unregistering service worker in dev mode:', registration.scope);
+          logger.info('🔧 Unregistering service worker in dev mode:', registration.scope);
           registration.unregister();
         });
       });
@@ -248,12 +265,12 @@ if ('serviceWorker' in navigator) {
       return;
     }
     
-    console.log('🔧 Production mode detected - registering service worker');
+    logger.info('🔧 Production mode detected - registering service worker');
     
     navigator.serviceWorker.register('/sw.js')
       .then((reg) => {
         registration = reg;
-        console.log('SW registered: ', reg);
+        logger.info('SW registered: ', reg);
         
         // Check for updates every 30 seconds initially, then every 5 minutes
         let updateInterval = 30000; // Start with 30 seconds
@@ -276,9 +293,8 @@ if ('serviceWorker' in navigator) {
           if (newWorker) {
             newWorker.addEventListener('statechange', () => {
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                console.log('SW: New version available!');
-                // Force the new service worker to take control
-                newWorker.postMessage({ type: 'SKIP_WAITING' });
+                logger.info('SW: New version available!');
+                promptForServiceWorkerUpdate();
               }
             });
           }
@@ -287,20 +303,25 @@ if ('serviceWorker' in navigator) {
         // Listen for messages from service worker
         navigator.serviceWorker.addEventListener('message', (event) => {
           if (event.data.type === 'SW_UPDATED') {
-            console.log('SW: Service worker updated, reloading page...');
-            // Give a brief moment for any pending operations
-            setTimeout(() => window.location.reload(), 100);
+            logger.info('SW: Service worker updated');
+            if (reloadOnUpdate) {
+              logger.info('SW: Reloading page after update approval...');
+              setTimeout(() => window.location.reload(), 100);
+            }
           }
         });
         
         // Handle controller change (when new SW takes control)
         navigator.serviceWorker.addEventListener('controllerchange', () => {
-          console.log('SW: Controller changed, reloading page...');
-          window.location.reload();
+          logger.info('SW: Controller changed');
+          if (reloadOnUpdate) {
+            logger.info('SW: Reloading page after update approval...');
+            window.location.reload();
+          }
         });
       })
       .catch((registrationError) => {
-        console.log('SW registration failed: ', registrationError);
+        logger.error('SW registration failed: ', registrationError);
       });
   });
 }
@@ -320,7 +341,7 @@ try {
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
   
-  console.log('Mobile Debug - Initialization:', {
+  logger.info('Mobile Debug - Initialization:', {
     isMobile,
     isIOS,
     viewport: {
@@ -366,10 +387,10 @@ try {
     </React.StrictMode>
   );
   
-  console.log('React app initialized successfully');
+  logger.info('React app initialized successfully');
   
 } catch (error) {
-  console.error('Failed to initialize React app:', error);
+  logger.error('Failed to initialize React app:', error);
   
   // Show a more detailed error screen
   const rootElement = document.getElementById('root');

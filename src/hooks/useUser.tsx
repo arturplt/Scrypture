@@ -3,6 +3,7 @@ import { User, UserContextType } from '../types';
 import { userService } from '../services/userService';
 import { taskService } from '../services/taskService';
 import { Achievement } from '../types';
+import { logger } from '../utils/logger';
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
@@ -33,12 +34,12 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     try {
       const success = userService.saveUser(updatedUser);
       if (success) {
-        console.log('User data auto-saved successfully');
+        logger.info('User data auto-saved successfully');
       } else {
-        console.error('Failed to auto-save user data');
+        logger.error('Failed to auto-save user data');
       }
     } catch (error) {
-      console.error('Auto-save error:', error);
+      logger.error('Auto-save error:', error);
     } finally {
       setIsSaving(false);
     }
@@ -80,8 +81,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   } => {
     if (!user) return { success: false, evolved: false, damProgressChanged: false };
 
-    console.log('⭐ Adding experience with Bóbr:', amount);
-    console.log('👤 Current user XP before:', user.experience);
+    logger.info('⭐ Adding experience with Bóbr:', amount);
+    logger.info('👤 Current user XP before:', user.experience);
 
     // Get completed tasks count
     const completedTasks = taskService.getTasks().filter(task => task.completed);
@@ -92,12 +93,12 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     if (result.success) {
       const updatedUser = userService.getUser();
       if (updatedUser) {
-        console.log('👤 User XP after update:', updatedUser.experience);
+        logger.info('👤 User XP after update:', updatedUser.experience);
         setUser(updatedUser);
         saveUserWithFeedback(updatedUser);
       }
     } else {
-      console.error('❌ Failed to add experience');
+      logger.error('❌ Failed to add experience');
     }
 
     return result;
@@ -109,8 +110,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     soul?: number;
     xp?: number;
   }) => {
-    console.log('💪 Adding stat rewards to user:', rewards);
-    console.log('👤 Current user stats before:', { body: user?.body, mind: user?.mind, soul: user?.soul });
+    logger.info('💪 Adding stat rewards to user:', rewards);
+    logger.info('👤 Current user stats before:', { body: user?.body, mind: user?.mind, soul: user?.soul });
     
     const success = userService.addStatRewards(rewards);
 
@@ -122,11 +123,11 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         soul: user.soul + (rewards.soul || 0),
         updatedAt: new Date(),
       };
-      console.log('👤 User stats after update:', { body: updatedUser.body, mind: updatedUser.mind, soul: updatedUser.soul });
+      logger.info('👤 User stats after update:', { body: updatedUser.body, mind: updatedUser.mind, soul: updatedUser.soul });
       setUser(updatedUser);
       saveUserWithFeedback(updatedUser);
     } else {
-      console.error('❌ Failed to add stat rewards');
+      logger.error('❌ Failed to add stat rewards');
     }
   };
 
@@ -241,7 +242,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       };
     }
 
-    console.log('🏆 UserContext: Applying achievement rewards for:', achievements.map(a => a.name));
+    logger.info('🏆 UserContext: Applying achievement rewards for:', achievements.map(a => a.name));
     
     const result = userService.applyAchievementRewards(achievements, completedTasksCount);
     
@@ -249,7 +250,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       // Force refresh the user state from storage to reflect the changes
       const updatedUser = userService.getUser();
       if (updatedUser) {
-        console.log('🏆 UserContext: Refreshing user state after achievement rewards');
+        logger.info('🏆 UserContext: Refreshing user state after achievement rewards');
         setUser(updatedUser);
         saveUserWithFeedback(updatedUser);
       }

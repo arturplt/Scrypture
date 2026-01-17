@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Habit, HabitContextType } from '../types';
 import { habitService } from '../services/habitService';
 import { useUser } from './useUser';
+import { logger } from '../utils/logger';
 
 const HabitContext = createContext<HabitContextType | undefined>(undefined);
 
@@ -33,37 +34,37 @@ export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
     try {
       const success = habitService.saveHabits(updatedHabits);
       if (success) {
-        console.log('Habits auto-saved successfully');
+        logger.info('Habits auto-saved successfully');
       } else {
-        console.error('Failed to auto-save habits');
+        logger.error('Failed to auto-save habits');
       }
     } catch (error) {
-      console.error('Auto-save error:', error);
+      logger.error('Auto-save error:', error);
     } finally {
       setIsSaving(false);
     }
   };
 
   const addHabit = (habitData: Omit<Habit, 'id' | 'createdAt' | 'streak' | 'bestStreak'>) => {
-    console.log('🔄 useHabits.addHabit called with:', habitData);
+    logger.info('🔄 useHabits.addHabit called with:', habitData);
     try {
       const newHabit = habitService.addHabit(habitData);
-      console.log('📦 habitService.addHabit returned:', newHabit);
+      logger.info('📦 habitService.addHabit returned:', newHabit);
       if (newHabit) {
         setHabits((prev) => {
           const updated = [...prev, newHabit];
-          console.log('✅ Updating habits state, new count:', updated.length);
+          logger.info('✅ Updating habits state, new count:', updated.length);
           saveHabitsWithFeedback(updated);
           return updated;
         });
-        console.log('Habit created and auto-saved');
+        logger.info('Habit created and auto-saved');
         return newHabit; // Return the habit for success confirmation
       } else {
-        console.error('❌ Failed to create habit - service returned null');
+        logger.error('❌ Failed to create habit - service returned null');
         return null;
       }
     } catch (error) {
-      console.error('❌ Error in addHabit:', error);
+      logger.error('❌ Error in addHabit:', error);
       return null;
     }
   };
@@ -78,7 +79,7 @@ export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
         saveHabitsWithFeedback(updated);
         return updated;
       });
-      console.log('Habit updated and auto-saved');
+      logger.info('Habit updated and auto-saved');
     }
   };
 
@@ -90,7 +91,7 @@ export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
         saveHabitsWithFeedback(updated);
         return updated;
       });
-      console.log('Habit deleted and auto-saved');
+      logger.info('Habit deleted and auto-saved');
     }
   };
 
@@ -104,23 +105,23 @@ export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
       const updatedHabits = habitService.getHabits();
       setHabits(updatedHabits);
       saveHabitsWithFeedback(updatedHabits);
-      console.log('Habit completed and auto-saved');
+      logger.info('Habit completed and auto-saved');
 
       // Award experience and stat rewards when completing a habit
-      console.log('🎯 Habit completion triggered for habit:', habit);
-      console.log('🎯 Habit statRewards:', habit.statRewards);
+      logger.info('🎯 Habit completion triggered for habit:', habit);
+      logger.info('🎯 Habit statRewards:', habit.statRewards);
       
       if (habit.statRewards) {
-        console.log('🎯 Applying stat rewards:', habit.statRewards);
+        logger.info('🎯 Applying stat rewards:', habit.statRewards);
         
         // Use addExperienceWithBobr to handle XP + Bóbr evolution
         const xpAmount = habit.statRewards.xp || 10;
-        console.log('🎯 Adding XP:', xpAmount);
+        logger.info('🎯 Adding XP:', xpAmount);
         addExperienceWithBobr(xpAmount);
         
         // Add the specific stat rewards (body, mind, soul)
         if (habit.statRewards.body || habit.statRewards.mind || habit.statRewards.soul) {
-          console.log('🎯 Adding stat rewards:', {
+          logger.info('🎯 Adding stat rewards:', {
             body: habit.statRewards.body,
             mind: habit.statRewards.mind,
             soul: habit.statRewards.soul,
@@ -132,7 +133,7 @@ export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
           });
         }
       } else {
-        console.log('⚠️  No stat rewards found, applying default XP');
+        logger.warn('⚠️  No stat rewards found, applying default XP');
         // Fallback to base XP if no stat rewards
         addExperienceWithBobr(10);
       }

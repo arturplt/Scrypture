@@ -15,230 +15,21 @@ import { DataManager } from './components/DataManager';
 import { StartHereSection } from './components/StartHereSection';
 import { AutoSaveIndicator } from './components/AutoSaveIndicator';
 import { InstallPrompt } from './components/InstallPrompt';
-import { UserCreation } from './components/UserCreation';
 import { AchievementGrid } from './components/AchievementGrid';
 import { AchievementNotification } from './components/AchievementNotification';
 import BobrPen from './components/BobrPen';
-import BobrIntroduction from './components/BobrIntroduction';
-import { FirstTaskWizard } from './components/FirstTaskWizard';
 import { TutorialCompletionCelebration } from './components/TutorialCompletionCelebration';
-import WelcomeScreen from './components/WelcomeScreen';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
-import Pixelite from './components/Pixelite';
-import { Synthesizer } from './components/Synthesizer';
-import { CombinationLockModal } from './components/CombinationLockModal';
-import SanctuaryModalDemo from './components/SanctuaryModalDemo';
-import { CardDemo } from './components/CardDemo';
-import { UIBuilder } from './components/UIBuilder';
 
 import { Task, Achievement } from './types';
 import styles from './App.module.css';
 import { Modal } from './components/Modal';
 import { TaskEditForm } from './components/TaskEditForm';
+import { LevelUpModal } from './components/app/LevelUpModal';
+import { SpinnerOverlay } from './components/app/SpinnerOverlay';
+import { OnboardingRouter } from './components/app/OnboardingRouter';
+import { SecretTools } from './components/app/SecretTools';
 
-
-function LevelUpModal({
-  level,
-  onClose,
-}: {
-  level: number;
-  onClose: () => void;
-}) {
-  // Scroll to top when level up modal appears
-  useEffect(() => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
-  }, []);
-
-  return (
-    <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        width: '100vw',
-        height: 'calc(var(--vh, 1vh) * 100)',
-        background: 'rgba(0,0,0,0.7)',
-        zIndex: 9999,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexDirection: 'column',
-        color: 'var(--color-accent-gold)',
-        fontFamily: 'Press Start 2P, monospace',
-        fontSize: 32,
-        textAlign: 'center',
-        animation: 'fadeIn 0.5s',
-        padding: 'var(--spacing-md)',
-      }}
-    >
-      <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: scale(0.9); }
-          to { opacity: 1; transform: scale(1); }
-        }
-      `}</style>
-      <div
-        style={{
-          background: 'var(--color-bg-primary)',
-          border: '4px solid var(--color-accent-gold)',
-          padding: 32,
-          borderRadius: 0,
-          animation: 'fadeIn 0.5s ease-out',
-        }}
-      >
-        <div style={{ fontSize: 48, marginBottom: 16 }}>🎉</div>
-        <div>Level Up!</div>
-        <div style={{ fontSize: 40, margin: '16px 0' }}>Level {level}</div>
-        <button
-          style={{
-            marginTop: 24,
-            fontSize: 18,
-            padding: '8px 24px',
-            background: 'var(--color-accent-gold)',
-            color: 'var(--color-bg-primary)',
-            border: 'none',
-            fontFamily: 'Press Start 2P, monospace',
-            cursor: 'pointer',
-          }}
-          onClick={onClose}
-        >
-          Close
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function SpinnerOverlay() {
-  return (
-    <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100vw',
-        height: 'calc(var(--vh, 1vh) * 100)',
-        background: 'var(--color-bg-primary)',
-        zIndex: 10000,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexDirection: 'column',
-        fontFamily: 'Press Start 2P, monospace',
-        color: 'var(--color-text-primary)',
-      }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: 'var(--spacing-lg)',
-          padding: 'var(--spacing-xl)',
-          background: 'var(--color-bg-secondary)',
-          border: '4px solid var(--color-accent-gold)',
-          borderRadius: '0px',
-          boxShadow: '0 0 20px rgba(182, 164, 50, 0.6)',
-          animation: 'fadeIn 0.5s ease-out',
-        }}
-      >
-        <div
-          style={{
-            width: 64,
-            height: 64,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: 'var(--color-accent-gold)',
-            border: '2px solid var(--color-accent-gold)',
-            borderRadius: '0px',
-            animation: 'beaverBounce 2s ease-in-out infinite',
-          }}
-        >
-          <img 
-            src="/assets/Icons/beaver_32.png" 
-            alt="Bóbr" 
-            style={{
-              width: '32px',
-              height: '32px',
-              filter: 'brightness(0) saturate(100%) invert(1)',
-            }}
-          />
-        </div>
-        
-        <div style={{ fontSize: 'var(--font-size-md)', textAlign: 'center' }}>
-          Loading...
-        </div>
-        
-        <div
-          style={{
-            width: 120,
-            height: 4,
-            background: 'var(--color-bg-tertiary)',
-            borderRadius: '0px',
-            overflow: 'hidden',
-            position: 'relative',
-          }}
-        >
-          <div
-            style={{
-              height: '100%',
-              background: 'var(--color-accent-gold)',
-              borderRadius: '0px',
-              animation: 'loadingProgress 2s ease-in-out infinite',
-            }}
-          />
-        </div>
-      </div>
-      
-      <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: scale(0.9); }
-          to { opacity: 1; transform: scale(1); }
-        }
-        
-        @keyframes beaverBounce {
-          0%, 100% {
-            transform: scale(1) rotate(0deg);
-            box-shadow: 0 0 8px rgba(182, 164, 50, 0.5);
-          }
-          25% {
-            transform: scale(1.1) rotate(-5deg);
-            box-shadow: 0 0 16px rgba(182, 164, 50, 0.8);
-          }
-          50% {
-            transform: scale(1.15) rotate(0deg);
-            box-shadow: 0 0 20px rgba(182, 164, 50, 1);
-          }
-          75% {
-            transform: scale(1.1) rotate(5deg);
-            box-shadow: 0 0 16px rgba(182, 164, 50, 0.8);
-          }
-        }
-        
-        @keyframes loadingProgress {
-          0% {
-            width: 0%;
-            opacity: 0.5;
-          }
-          50% {
-            width: 70%;
-            opacity: 1;
-          }
-          100% {
-            width: 100%;
-            opacity: 0.5;
-          }
-        }
-      `}</style>
-    </div>
-  );
-}
 
 function AppContent() {
   const { tasks, isSaving, lastSaved, refreshTasks } = useTasks();
@@ -250,9 +41,7 @@ function AppContent() {
     markStepComplete,
     startTutorial,
     skipTutorial,
-    resetTutorial,
     isTutorialCompleted,
-    getCurrentStep,
   } = useTutorial();
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [showTutorialCompletion, setShowTutorialCompletion] = useState(false);
@@ -405,84 +194,28 @@ function AppContent() {
 
 
 
-  // Show user creation if no user exists
-  if (!user) {
-    return <UserCreation onUserCreated={() => {
-      console.log('✅ User created, starting tutorial');
-      startTutorial();
-    }} />;
-  }
+  const handleTutorialSkipReset = () => {
+    setHasSeenTutorialCompletion(false);
+    localStorage.removeItem('hasSeenTutorialCompletion');
+  };
 
-  // Show welcome screen for new users
-  if (shouldShowStep('welcome')) {
-    return (
-      <WelcomeScreen
-        onContinue={() => {
-          markStepComplete('welcome');
-        }}
-        onSkip={() => {
-          console.log('⏭️ Skipping entire tutorial from welcome screen');
-          skipTutorial();
-          setHasSeenTutorialCompletion(false); // Reset so completion modal can show again
-          localStorage.removeItem('hasSeenTutorialCompletion'); // Clear localStorage
-        }}
-      />
-    );
-  }
+  const shouldBlockForOnboarding =
+    !user ||
+    shouldShowStep('welcome') ||
+    shouldShowStep('bobrIntroduction') ||
+    shouldShowStep('firstTask');
 
-  // Show onboarding flow for new users
-  if (shouldShowStep('bobrIntroduction')) {
+  if (shouldBlockForOnboarding) {
     return (
-      <BobrIntroduction
+      <OnboardingRouter
         user={user}
-        onContinue={() => {
-          markStepComplete('bobrIntroduction');
-          // Mark dam metaphor as complete since it's covered in the intro
-          markStepComplete('damMetaphor');
-        }}
-        onSkip={() => {
-          console.log('Skipping entire tutorial from Bóbr introduction');
-          skipTutorial();
-          setHasSeenTutorialCompletion(false); // Reset so completion modal can show again
-          localStorage.removeItem('hasSeenTutorialCompletion'); // Clear localStorage
-        }}
+        shouldShowStep={shouldShowStep}
+        markStepComplete={markStepComplete}
+        startTutorial={startTutorial}
+        skipTutorial={skipTutorial}
+        onTutorialSkipReset={handleTutorialSkipReset}
       />
     );
-  }
-
-  // Show first task wizard
-  if (shouldShowStep('firstTask')) {
-    return (
-      <FirstTaskWizard
-        onComplete={() => {
-          console.log('First task wizard completed');
-          // The wizard handles marking the step complete internally
-        }}
-        onSkip={() => {
-          console.log('Skipping entire tutorial from task wizard');
-          skipTutorial();
-          setHasSeenTutorialCompletion(false); // Reset so completion modal can show again
-          localStorage.removeItem('hasSeenTutorialCompletion'); // Clear localStorage
-        }}
-      />
-    );
-  }
-
-  // Show task completion step (this happens automatically when first task is completed)
-  if (shouldShowStep('taskCompletion')) {
-    // This step is handled automatically in the task completion logic
-    // We'll mark it complete and move to next step
-    markStepComplete('taskCompletion');
-    markStepComplete('hatchlingEvolution');
-    markStepComplete('completion');
-  }
-
-  // Show hatchling evolution step (this happens automatically when Bóbr evolves)
-  if (shouldShowStep('hatchlingEvolution')) {
-    // This step is handled automatically in the Bóbr evolution logic
-    // We'll mark it complete and move to next step
-    markStepComplete('hatchlingEvolution');
-    markStepComplete('completion');
   }
 
   return (
@@ -506,6 +239,15 @@ function AppContent() {
           }}
         />
       )}
+      <OnboardingRouter
+        user={user}
+        shouldShowStep={shouldShowStep}
+        markStepComplete={markStepComplete}
+        startTutorial={startTutorial}
+        skipTutorial={skipTutorial}
+        onTutorialSkipReset={handleTutorialSkipReset}
+      />
+
       <header className={styles.header}>
         <h1 className={styles.title}>Scrypture</h1>
         <p className={styles.subtitle}>Grimorium Vivendi</p>
@@ -574,60 +316,24 @@ function AppContent() {
         <HabitList />
         <DataManager onDataChange={refreshTasks} />
         
-        {/* Secret Menu Section */}
-        <div className={styles.secretMenuSection}>
-          <h3 className={styles.secretMenuTitle}>🔐 Secret Menu</h3>
-          <div className={styles.secretMenuButtons}>
-
-            {!isSecretMenuUnlocked ? (
-              <button 
-                className={styles.secretMenuButton}
-                onClick={() => setShowCombinationLock(true)}
-                title="Enter combination to unlock"
-              >
-                🔒 LOCKED
-              </button>
-            ) : (
-              <>
-                <button 
-                  className={styles.secretMenuButton}
-                  onClick={() => setShowPixelite(true)}
-                  title="Advanced Pixel Grid Converter"
-                >
-                  🎨 Pixelite
-                </button>
-                <button 
-                  className={styles.secretMenuButton}
-                  onClick={() => setShowSynthesizer(true)}
-                  title="8-Bit Synthesizer"
-                >
-                  🎵 Synthesizer
-                </button>
-                <button 
-                  className={styles.secretMenuButton}
-                  onClick={() => setShowUIBuilder(true)}
-                  title="Interactive UI Frame Builder"
-                >
-                  🎛️ UI Builder
-                </button>
-                <button 
-                  className={styles.secretMenuButton}
-                  onClick={() => setShowCardDemo(true)}
-                  title="Modern Card Components Demo"
-                >
-                  🎮 Card Demo
-                </button>
-                <button 
-                  className={styles.secretMenuButton}
-                  onClick={() => setShowSanctuaryDemo(true)}
-                  title="Isometric Sanctuary Builder"
-                >
-                  🏛️ Sanctuary
-                </button>
-              </>
-            )}
-          </div>
-        </div>
+        <SecretTools
+          isSecretMenuUnlocked={isSecretMenuUnlocked}
+          setIsSecretMenuUnlocked={setIsSecretMenuUnlocked}
+          showCombinationLock={showCombinationLock}
+          setShowCombinationLock={setShowCombinationLock}
+          isClosingLock={isClosingLock}
+          setIsClosingLock={setIsClosingLock}
+          showPixelite={showPixelite}
+          setShowPixelite={setShowPixelite}
+          showSynthesizer={showSynthesizer}
+          setShowSynthesizer={setShowSynthesizer}
+          showUIBuilder={showUIBuilder}
+          setShowUIBuilder={setShowUIBuilder}
+          showCardDemo={showCardDemo}
+          setShowCardDemo={setShowCardDemo}
+          showSanctuaryDemo={showSanctuaryDemo}
+          setShowSanctuaryDemo={setShowSanctuaryDemo}
+        />
 
 
       </main>
@@ -637,109 +343,6 @@ function AppContent() {
         isOpen={showAnalytics}
         onClose={() => setShowAnalytics(false)}
       />
-
-      {/* Pixelite Modal */}
-      <Pixelite
-        isOpen={showPixelite}
-        onClose={() => setShowPixelite(false)}
-      />
-
-      {/* Synthesizer Modal */}
-      <Synthesizer
-        isOpen={showSynthesizer}
-        onClose={() => setShowSynthesizer(false)}
-      />
-
-      {/* UI Builder Modal */}
-      <UIBuilder
-        isOpen={showUIBuilder}
-        onClose={() => setShowUIBuilder(false)}
-      />
-
-      {/* Card Demo Modal */}
-      {showCardDemo && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100vw',
-          height: '100vh',
-          background: 'rgba(0, 0, 0, 0.8)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 2000
-        }}>
-          <div style={{ position: 'relative' }}>
-            <button
-              onClick={() => setShowCardDemo(false)}
-              style={{
-                position: 'absolute',
-                top: '10px',
-                right: '10px',
-                background: 'var(--color-danger)',
-                color: 'white',
-                border: 'none',
-                padding: '8px 12px',
-                cursor: 'pointer',
-                fontFamily: 'Press Start 2P',
-                fontSize: '12px',
-                zIndex: 2001
-              }}
-            >
-              ✕
-            </button>
-            <CardDemo />
-          </div>
-        </div>
-      )}
-
-      {/* Sanctuary Demo Modal */}
-      <SanctuaryModalDemo 
-        isOpen={showSanctuaryDemo}
-        onClose={() => setShowSanctuaryDemo(false)}
-      />
-
-      {/* Combination Lock - Expanding from Secret Menu */}
-      {showCombinationLock && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.8)',
-          zIndex: 1000,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          animation: isClosingLock ? 'fadeOut 0.3s ease-in' : 'fadeIn 0.3s ease-out'
-        }}>
-          <div style={{
-            animation: isClosingLock ? 'shrinkToCenter 0.3s ease-in' : 'expandFromCenter 0.4s ease-out',
-            transformOrigin: 'center'
-          }}>
-            <CombinationLockModal
-              isOpen={showCombinationLock}
-              onClose={() => {
-                setIsClosingLock(true);
-                setTimeout(() => {
-                  setShowCombinationLock(false);
-                  setIsClosingLock(false);
-                }, 300);
-              }}
-              onUnlock={() => {
-                setIsSecretMenuUnlocked(true);
-                setIsClosingLock(true);
-                setTimeout(() => {
-                  setShowCombinationLock(false);
-                  setIsClosingLock(false);
-                }, 300);
-              }}
-            />
-          </div>
-        </div>
-      )}
 
 
 

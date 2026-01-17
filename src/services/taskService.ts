@@ -1,8 +1,17 @@
 import { Task } from '../types';
 import { storageService } from './storageService';
 
+type TaskWithLegacyCategory = Partial<Task> & { category?: string };
+
+const deriveDefaultStatRewards = (categories: string[]) => ({
+  body: categories.includes('body') ? 1 : 0,
+  mind: categories.includes('mind') ? 1 : 0,
+  soul: categories.includes('soul') ? 1 : 0,
+  xp: 10
+});
+
 // Migration function to handle old tasks with single category
-const migrateTaskCategories = (task: Partial<Task> & { category?: string }): Task => {
+const migrateTaskCategories = (task: TaskWithLegacyCategory): Task => {
   // If task has the old category field but no categories field, migrate it
   if (task.category && !task.categories) {
     return {
@@ -36,12 +45,7 @@ export const taskService = {
         console.log('🔧 Adding default stat rewards to task:', task.title);
         return {
           ...task,
-          statRewards: {
-            body: task.categories.includes('body') ? 1 : 0,
-            mind: task.categories.includes('mind') ? 1 : 0,
-            soul: task.categories.includes('soul') ? 1 : 0,
-            xp: 10
-          }
+          statRewards: deriveDefaultStatRewards(task.categories)
         };
       }
       return task;
@@ -66,15 +70,18 @@ export const taskService = {
   },
 
   createTask(taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>): Task {
+    const normalizedCategories = taskData.categories || ['body'];
+    const statRewards = taskData.statRewards ?? deriveDefaultStatRewards(normalizedCategories);
+
     const newTask: Task = {
       ...taskData,
       id: this.generateId(),
       createdAt: new Date(),
       updatedAt: new Date(),
       // Ensure categories is always an array
-      categories: taskData.categories || ['body'],
-      // statRewards should be provided explicitly in taskData, or default to undefined
-      statRewards: taskData.statRewards,
+      categories: normalizedCategories,
+      // Always provide statRewards to avoid missing rewards on immediate completion
+      statRewards,
     };
 
     const tasks = this.getTasks();

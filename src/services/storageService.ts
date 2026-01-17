@@ -1,4 +1,5 @@
 import { Task, Habit, User } from '../types';
+import { z } from 'zod';
 
 // Storage keys for different data types
 export const STORAGE_KEYS = {
@@ -10,52 +11,128 @@ export const STORAGE_KEYS = {
   BACKUP: 'scrypture_backup',
 } as const;
 
-// Data validation schemas
-const validateTask = (task: unknown): task is Task => {
-  return (
-    typeof task === 'object' &&
-    task !== null &&
-    typeof (task as Task).id === 'string' &&
-    typeof (task as Task).title === 'string' &&
-    typeof (task as Task).completed === 'boolean' &&
-    (task as Task).createdAt instanceof Date &&
-    (task as Task).updatedAt instanceof Date &&
-    ['low', 'medium', 'high'].includes((task as Task).priority)
-  );
+// Schema-based validation
+const dateSchema = z.preprocess((value) => {
+  if (value instanceof Date) return value;
+  if (typeof value === 'string' || typeof value === 'number') {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? value : parsed;
+  }
+  return value;
+}, z.date());
+
+const statRewardsSchema = z
+  .object({
+    body: z.number().optional(),
+    mind: z.number().optional(),
+    soul: z.number().optional(),
+    xp: z.number().optional(),
+  })
+  .optional();
+
+const taskSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  description: z.string().optional(),
+  completed: z.boolean(),
+  createdAt: dateSchema,
+  updatedAt: dateSchema,
+  completedAt: dateSchema.optional(),
+  priority: z.enum(['low', 'medium', 'high']),
+  categories: z.array(z.string()),
+  statRewards: statRewardsSchema,
+  difficulty: z.number().optional(),
+});
+
+const habitSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string().optional(),
+  streak: z.number(),
+  bestStreak: z.number().optional(),
+  lastCompleted: dateSchema.optional(),
+  createdAt: dateSchema,
+  targetFrequency: z.enum(['daily', 'weekly', 'monthly']),
+  categories: z.array(z.string()),
+  statRewards: statRewardsSchema,
+});
+
+const achievementConditionSchema = z.object({
+  type: z.enum([
+    'level_reach',
+    'task_complete',
+    'habit_streak',
+    'stat_reach',
+    'total_experience',
+    'category_tasks',
+    'daily_tasks',
+    'perfect_week',
+    'difficulty_master',
+    'speed_demon',
+    'consistency',
+    'explorer',
+    'first_task',
+    'first_habit',
+    'multi_category',
+    'streak_master',
+  ]),
+  value: z.number(),
+  category: z.string().optional(),
+  timeframe: z.enum(['daily', 'weekly', 'monthly']).optional(),
+  stat: z.enum(['body', 'mind', 'soul']).optional(),
+  difficulty: z.number().optional(),
+});
+
+const achievementSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string(),
+  category: z.enum(['progression', 'mastery', 'consistency', 'exploration', 'special']),
+  rarity: z.enum(['common', 'uncommon', 'rare', 'epic', 'legendary']),
+  conditions: z.array(achievementConditionSchema),
+  rewards: z
+    .object({
+      xp: z.number().optional(),
+      body: z.number().optional(),
+      mind: z.number().optional(),
+      soul: z.number().optional(),
+    })
+    .optional(),
+  icon: z.string(),
+  unlockedMessage: z.string(),
+  unlocked: z.boolean(),
+  unlockedAt: dateSchema.optional(),
+  progress: z.number().optional(),
+});
+
+const userSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  level: z.number(),
+  experience: z.number(),
+  body: z.number(),
+  mind: z.number(),
+  soul: z.number(),
+  achievements: z.array(achievementSchema),
+  createdAt: dateSchema,
+  updatedAt: dateSchema,
+  bobrStage: z.enum(['hatchling', 'young', 'mature']),
+  damProgress: z.number(),
+});
+
+const parseTask = (task: unknown): Task | null => {
+  const result = taskSchema.safeParse(task);
+  return result.success ? result.data : null;
 };
 
-const validateHabit = (habit: unknown): habit is Habit => {
-  if (!habit || typeof habit !== 'object') return false;
-  
-  const h = habit as Habit;
-  return (
-    typeof h.id === 'string' &&
-    typeof h.name === 'string' &&
-    typeof h.streak === 'number' &&
-    (h.bestStreak === undefined || typeof h.bestStreak === 'number') &&
-    h.createdAt instanceof Date &&
-    ['daily', 'weekly', 'monthly'].includes(h.targetFrequency) &&
-    Array.isArray(h.categories)
-  );
+const parseHabit = (habit: unknown): Habit | null => {
+  const result = habitSchema.safeParse(habit);
+  return result.success ? result.data : null;
 };
 
-const validateUser = (user: unknown): user is User => {
-  return (
-    typeof user === 'object' &&
-    user !== null &&
-    typeof (user as User).id === 'string' &&
-    typeof (user as User).name === 'string' &&
-    typeof (user as User).level === 'number' &&
-    typeof (user as User).experience === 'number' &&
-    typeof (user as User).body === 'number' &&
-    typeof (user as User).mind === 'number' &&
-    typeof (user as User).soul === 'number' &&
-    Array.isArray((user as User).achievements) &&
-    (user as User).createdAt instanceof Date &&
-    (user as User).updatedAt instanceof Date &&
-    ['hatchling', 'young', 'mature'].includes((user as User).bobrStage) &&
-    typeof (user as User).damProgress === 'number'
-  );
+const parseUser = (user: unknown): User | null => {
+  const result = userSchema.safeParse(user);
+  return result.success ? result.data : null;
 };
 
 export class StorageService {
@@ -143,8 +220,12 @@ export class StorageService {
         ...(task as Record<string, unknown>),
         createdAt: new Date((task as Record<string, unknown>).createdAt as string),
         updatedAt: new Date((task as Record<string, unknown>).updatedAt as string),
+        completedAt: (task as Record<string, unknown>).completedAt
+          ? new Date((task as Record<string, unknown>).completedAt as string)
+          : undefined,
       }))
-      .filter(validateTask);
+      .map(parseTask)
+      .filter((task): task is Task => task !== null);
   }
 
   saveTasks(tasks: Task[]): boolean {
@@ -167,7 +248,8 @@ export class StorageService {
             : undefined,
         } as Habit;
       })
-      .filter(validateHabit);
+      .map(parseHabit)
+      .filter((habit): habit is Habit => habit !== null);
   }
 
   saveHabits(habits: Habit[]): boolean {
@@ -197,10 +279,10 @@ export class StorageService {
     } as User;
 
     // If validation fails, try to migrate the user data
-    if (!validateUser(processedUser)) {
+    if (!parseUser(processedUser)) {
       console.warn('User validation failed, attempting migration...');
       const migratedUser = this.migrateUserData(userRecord);
-      if (migratedUser && validateUser(migratedUser)) {
+      if (migratedUser && parseUser(migratedUser)) {
         // Save the migrated user
         this.saveUser(migratedUser);
         return migratedUser;
